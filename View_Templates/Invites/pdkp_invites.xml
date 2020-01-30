@@ -1,0 +1,129 @@
+<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.blizzard.com/wow/ui/">
+    <Script file="pdkp_invites.lua" />
+
+    <Frame name="pdkp_invites_window" parent="UIParent" movable="true" enableMouse="true" frameStrata="HIGH" resizable="true" hidden="true">
+        <Size><AbsDimension x="600" y="700"/></Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+            <Offset><AbsDimension x="600" y="700"/></Offset>
+        </Anchors>
+        <Backdrop name="$parentBackdrop" bgFile="Interface\TutorialFrame\TutorialFrameBackground"
+                  edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="64"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+        </Backdrop>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <FontString name="$parentTitle" inherits="GameFontNormal" text="PDKP Invites" justifyH="CENTER" justifyV="TOP">
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-10"/>
+                            </Offset>
+                        </Anchor>
+                        <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+                            <Offset>
+                                <AbsDimension x="-10" y="-30"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <!-- headline -->
+            <Button name="$parentCloseButton" inherits="pdkp_miniButton" Text="|TInterface\Buttons\UI-StopButton:0|t">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-6" y="-6"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                            getglobal('pdkp_invites_window'):Hide();
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <!-- Roll Tracker -->
+
+            <Frame name="pdkp_shrouding_frame" hidden="false" >
+                <Anchors>
+                    <Anchor point="TOPLEFT" >
+                        <Offset>
+                            <AbsDimension x="8" y="-30"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="BOTTOMRIGHT" >
+                        <Offset>
+                            <AbsDimension x="-8" y="8"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+
+
+                <Frames>
+
+                    <EditBox name="$parentEditBox" letters="1500" autoFocus="false" multiLine="true">
+                        <Size x="500" y="700" />
+                        <Anchors>
+                            <Anchor point="CENTER">
+                                <Offset x="0" y="0" />
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+
+                                    self:SetBackdrop({
+                                        bgFile = [[Interface\Buttons\WHITE8x8]],
+                                        edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+                                        edgeSize = 14,
+                                        insets = {left = 3, right = 3, top = 3, bottom = 3},
+                                    })
+                                    self:SetBackdropColor(0, 0, 0)
+                                    self:SetBackdropBorderColor(0.3, 0.3, 0.3)
+                                    self:SetMultiLine(true)
+                                    self:SetSize(500, 700)
+                                    self:SetPoint("TOP", 0, 0)
+                                    self:SetPoint("BOTTOM", 0, 0);
+                                    self:SetAutoFocus(false)
+                                    self:SetCursorPosition(0)
+                                    self:SetFont("Fonts\\FRIZQT__.TTF", 7)
+                                    self:SetJustifyH("LEFT")
+                                    self:SetJustifyV("CENTER")
+                            </OnLoad>
+                            <OnEnterPressed>
+                                print(self:GetText());
+                            </OnEnterPressed>
+                            <OnEscapePressed>
+                                self:ClearFocus();
+                            </OnEscapePressed>
+                        </Scripts>
+                        <FontString inherits="ChatFontNormal" />
+
+                    </EditBox>
+
+
+                </Frames>
+            </Frame>
+
+
+        </Frames>
+        <Scripts>
+            <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>
+            <OnDragStart>self:StartMoving()</OnDragStart>
+            <OnDragStop>self:StopMovingOrSizing()</OnDragStop>
+        </Scripts>
+    </Frame>
+</Ui>

@@ -1,0 +1,56 @@
+Modulaize the saved data:
+	- Guild data
+	- Recent Raid Data
+	- Character data
+	- DKP history data
+	- item history data
+	- edit history data
+- Display data (table data)
+
+Actions:
+	- Start raid (Starts logging guild sign-in / party-join events)
+	    - Save who started the event
+	    - Only officers who can edit the MOTD can start / end events.
+
+Table Filters:
+	- Show Raid
+	- Show Guild
+	- Show Pugs
+	- Classes
+	- Show online / offline
+	- Search filter
+
+- Options
+	- On time bonus DKP: 10 (int or %)
+	- Signup bonus DKP: 10(int or %)
+	- Boss kill DKP 10(int or %)
+	- Benched DKP: (int or %)
+
+- Decay
+	- Item Win: 10% (int or %)
+	- Shroud: 50% (int or %)
+	- No call / No show: 20% (int or %)
+	- Absence (Excuse): 15%
+
+- PDKP values tables should initially be as shallow as possible.
+    - Loot History (Record the user's UID, Item ID, DKP cost amount, URaidID)
+    - Raid History (Record DKP awarded to user, RaidID, UID)
+    - DKP History (Record DKP amount, Reference RaidID's)
+
+
+
+Useful Functions:
+    - https://wowwiki.fandom.com/wiki/API_GuildControlGetRankFlags
+    - "GUILD_ROSTER_UPDATE"
+    - PLAYER_GUILD_UPDATE"
+
+- Only log recently updated data for merge purposes.
+
+- Data updates
+    - Partial update
+    - Full database replacement
+    - Request data (event)
+    - Request data (received)
+
+- Comms name registrar
+    - pdkp_serverName_guildName

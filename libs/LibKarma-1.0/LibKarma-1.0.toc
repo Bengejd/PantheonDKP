@@ -1,0 +1,10 @@
+## Interface: 11302
+## Title: LibKarma
+## Author: Celess
+## Version: 2.8.4
+## Notes: Simple light-weight framework, utilites and libraries for addon development.
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## X-License: All Rights Reserved
+## X-Min-Interface: 11302
+lib.xml
