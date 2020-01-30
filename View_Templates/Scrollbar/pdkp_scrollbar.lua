@@ -78,29 +78,31 @@ function pdkp_dkp_scrollbar_Update()
         if lineplusoffset <= #tableData then charObj = tableData[lineplusoffset] end
 
         local cols = {'name', 'class', 'dkpTotal' }
+        local entry = getglobal('pdkp_dkp_entry' .. line);
 
-        getglobal("pdkp_dkp_entry" .. line).char = charObj
+        entry.char = charObj
 
         if GUI.selected[charObj.name] then
-            getglobal("pdkp_dkp_entry" .. line).customTexture:Show();
+            entry.customTexture:Show();
         elseif GUI.GetSelectedCount() > 0 then
-            getglobal("pdkp_dkp_entry" .. line).customTexture:Hide();
+            entry.customTexture:Hide();
         end
 
         for col=1, #cols do
             local name =  entry_name .. line .. "_col" .. col
             local textVal = charObj[cols[col]]
+            local entryCol = getglobal(name);
 
             if lineplusoffset <= #tableData then
                 if col == 2 then
                     local textColor = charObj["class_color"].hex
-                    getglobal(name):SetText(Util:FormatFontTextColor(textColor, textVal))
+                    entryCol:SetText(Util:FormatFontTextColor(textColor, textVal))
                 else
-                    getglobal(name):SetText(textVal)
+                    entryCol:SetText(textVal)
                 end
-                getglobal(name):Show();
+                entryCol:Show();
             else
-                getglobal(name):Hide();
+                entryCol:Hide();
             end
         end
     end
@@ -109,6 +111,7 @@ end
 
 function GUI:GetTableDisplayData()
     tableData = PDKP:GetAllTableData();
+    return tableData;
 end
 
 function GUI:GetDisplayDataCount()

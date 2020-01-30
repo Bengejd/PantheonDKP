@@ -19,6 +19,7 @@ GUI.sortBy = nil;
 GUI.sortDir = 'ASC';
 GUI.pdkp_frame = nil;
 GUI.lastEntryClicked = nil;
+GUI.lastEntryNameClicked = nil;
 GUI.sliderVal = 1;
 GUI.hasTimer = false;
 GUI.adjustDropdowns = nil;
@@ -293,10 +294,11 @@ end
 -- Handles control click of an entry
 function GUI:EntryControlClicked(charObj, clickType, bName)
     GUI.lastEntryClicked = bName;
+    GUI.lastEntryNameClicked = charObj['name']
     charObj.bName = bName;  -- we'll need this later to remove the custom textures if selected filter is checked.
     if GUI.selected[charObj.name] then
-        GUI:RemoveFromSelected(charObj, getglobal(bName));
-    else GUI:AddToSelected(charObj, getglobal(bName));
+        GUI:RemoveFromSelected(charObj);
+    else GUI:AddToSelected(charObj);
     end
 end
 
@@ -304,8 +306,9 @@ end
 function GUI:EntryClicked(charObj, clickType, bName)
     GUI:ClearSelected() -- clear all previous selections
     GUI.lastEntryClicked = bName;
+    GUI.lastEntryNameClicked = charObj['name']
     charObj.bName = bName;  -- we'll need this later to remove the custom textures if selected filter is checked.
-    GUI:AddToSelected(charObj, getglobal(bName));
+    GUI:AddToSelected(charObj);
 end
 
 -- Handles the shift click of an entry
@@ -326,18 +329,36 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     if prevNum < currNum then startIndex = prevNum else startIndex = currNum end
     if currNum > prevNum then endIndex = currNum else endIndex = prevNum end
 
+    local startIndex; -- the entry we're starting at.
+    local endIndex; -- the entry we're ending at.
+
+    -- Selection Bug Fix below.
+
+    local displayData = GUI:GetTableDisplayData();
+
+    local charObjStop = getglobal("pdkp_dkp_entry" .. currNum)
+    charObjStop = charObjStop.char;
+
+    local dataIndex={}
+    for k,v in pairs(displayData) do dataIndex[v['name']]=k end
+
+    local charStop = dataIndex[charObjStop['name']]
+    local charStart = dataIndex[GUI.lastEntryNameClicked]
+
+    if charStart < charStop then startIndex = charStart else startIndex = charStop end
+    if charStop > charStart then endIndex = charStop else endIndex = charStart end
+
     for i=startIndex, endIndex do
-        local entryTemplateName = "pdkp_dkp_entry" .. i;
-        local entryButton = getglobal(entryTemplateName)
-
-        local charObj = entryButton.char;
-        charObj.bName = entryTemplateName;
-
-        if clickType == 'LeftButton' then GUI:AddToSelected(charObj, entryButton)
-        elseif clickType == 'RightButton' then GUI:RemoveFromSelected(charObj, entryButton);
-        end
+        local charObj = displayData[i]
+        GUI:AddToSelected(charObj);
     end
+
     GUI.lastEntryClicked = bName;
+    GUI.lastEntryNameClicked = charObj['name'];
+end
+
+function GUI:EntryShiftClickedFix(currNum)
+
 end
 
 ---------------------------
@@ -373,18 +394,19 @@ function GUI:IsNotSelected(name)
 end
 
 -- Adds an entry to the selected array.
-function GUI:AddToSelected(charObj, entryButton)
+function GUI:AddToSelected(charObj)
     -- Don't add selections that are already in the list.
     if GUI:IsNotSelected(charObj.name) == false then return end;
 
     table.insert(GUI.selected, charObj.name)
     GUI.selected[charObj.name] = charObj;
-    entryButton.customTexture:Show();
+--    entryButton.customTexture:Show();
+    pdkp_dkp_scrollbar_Update()
     GUI:SelectedEntriesUpdated()
 end
 
 -- Removes the entry from the selected array.
-function GUI:RemoveFromSelected(charObj, entryButton)
+function GUI:RemoveFromSelected(charObj)
     entryButton.customTexture:Hide();
     GUI.selected[charObj.name] = nil;
 
@@ -397,11 +419,12 @@ end
 function GUI:ClearSelected()
     for key, charObj in pairs(GUI.selected) do
         if charObj.name then
-            getglobal(charObj.bName).customTexture:Hide();
+--            getglobal(charObj.bName).customTexture:Hide();
             GUI.selected[charObj.name] = nil;
         end
     end
     GUI.selected = {};
+    pdkp_dkp_scrollbar_Update()
 end
 
 -- Disalbes / Enables the shrouding & roll buttons if more than 1 person is selected.

@@ -16,10 +16,6 @@ local Comms = core.Comms;
 
 --[[
     KNOWN BUGS:
-        - Updating DKP for a selected entry will sometimes visually update
-            incorrectly at first if you've scrolled.
-        - You can't scroll & select entries that aren't visually on the screen...
-        - It incorrectly updates the lastSelected to the button number, not the object.
 ]]
 
 --[[
