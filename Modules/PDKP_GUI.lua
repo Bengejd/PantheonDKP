@@ -357,10 +357,6 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     GUI.lastEntryNameClicked = charObj['name'];
 end
 
-function GUI:EntryShiftClickedFix(currNum)
-
-end
-
 ---------------------------
 --  Selected Functions   --
 ---------------------------
