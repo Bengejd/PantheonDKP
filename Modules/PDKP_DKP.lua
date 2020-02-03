@@ -18,6 +18,10 @@ local dkpDB;
 --           [memberName] -- String / Object
 --              dkpTotal -- int
 --      {history} - Array of the history
+--          [all] -- Array
+--              [historyID] - Identifier of latest history item
+--                  [entry1] - History changes.
+--
 --          [memberName] -- String / Array
 --              [date] -- Array - UTC string of the date the entry was made.
 --                  {entry1} -
@@ -29,7 +33,9 @@ local dkpDB;
 local dkpDBDefaults = {
     char = {
         members = {},
-        history = {},
+        history = {
+            all = {}
+        },
     }
 }
 
@@ -37,6 +43,7 @@ function DKP:InitDKPDB()
     Util:Debug('DKPDB init');
     core.DKP.db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", dkpDBDefaults)
     dkpDB = core.DKP.db.char
+    DKP.dkpDB = dkpDB;
 end
 
 function DKP:UpdateEntry()
@@ -53,6 +60,8 @@ function DKP:UpdateEntry()
             -- Now update the visual text
             local dkpText = _G[charObj.bName .. '_col3'];
             dkpText:SetText(charObj.dkpTotal);
+
+            DKP:UpdateHistory(charObj.name, dkpChange);
         end
     end
 
@@ -64,12 +73,83 @@ function DKP:UpdateEntry()
     pdkp_dkp_table_filter()
 end
 
-function DKP:UpdateHistory(name, dkp, operationType)
+function DKP:UpdateHistory(name, dkpChange)
+    local amountBox = getglobal('pdkp_dkp_amount_box');
+    local itemLink = getglobal('pdkp_item_link');
+
+    local reasonDrop = GUI.reasonDropdown
+    local dropdowns = GUI.adjustDropdowns
+
+    local reason = reasonDrop.text:GetText()
+    local raid;
+    local boss;
+    local historyText;
+    local dkpChangeText;
+    local dDate = date("%m/%d%y");
+    local tTime = date('%r');
+    local datetime = time()
+
+    local success = '22bb33'
+    local warning = 'E71D36'
+
+    local reasonVal = reasonDrop:GetValue();
+
+    if reasonVal >= 1 and reasonVal <= 5 then
+       raid = dropdowns[2].text:GetText();
+        if reasonVal >= 1 and reasonVal <= 3 or reasonVal == 5 then -- Ontime, Signup, Benched, Unexcused Absence
+           historyText = raid .. ' - ' .. reason;
+        end
+
+        if reasonVal == 4 then
+           boss = dropdowns[3].text:GetText();
+            historyText = raid .. ' - ' .. boss;
+        end
+    end
+
+    if reasonVal == 6 then -- item win
+        historyText = 'Item Win -';
+    end
+
+    if reasonVal == 7 then -- Other selected
+        local otherBox = getglobal('pdkp_other_entry_box')
+        historyText = 'Other - ' .. otherBox:GetText();
+    end
+
+    if dkpChange > 0 then
+        dkpChangeText = Util:FormatFontTextColor(success, dkpChange .. ' DKP')
+        historyText = Util:FormatFontTextColor(success, historyText)
+    elseif dkpChange < 0 then
+        dkpChangeText = Util:FormatFontTextColor(warning, dkpChange .. ' DKP')
+        historyText = Util:FormatFontTextColor(warning, historyText)
+    end
+
+    if reasonVal == 6 then -- item win
+        local buttonText = getglobal('pdkp_item_link_text')
+        historyText = historyText .. buttonText:GetText()
+    end
+
+
+    local historyEntry = {
+        ['text'] = historyText,
+        ['reason'] = reason,
+        ['bossKill'] = boss,
+        ['raid'] = raid,
+        ['dkpChange'] = dkpChange,
+        ['dkpChangeText'] = dkpChangeText,
+        ['officer'] = Util:GetMyNameColored(),
+        ['item']= nil,
+        ['date']= dDate,
+        ['time']=tTime,
+        ['datetime']=datetime
+    }
 
     if not dkpDB.history[name] then
        table.insert(dkpDB.history, name);
         dkpDB.history[name] = {};
     end
+
+    table.insert(dkpDB.history[name], historyEntry);
+
 
 end
 
@@ -86,13 +166,11 @@ function DKP:SyncWithGuild()
 end
 
 function DKP:Add(name, dkp)
-    DKP:UpdateHistory(name, dkp, 'add')
     dkpDB.members[name].dkpTotal = dkpDB.members[name].dkpTotal + dkp;
     return dkpDB.members[name].dkpTotal;
 end
 
 function DKP:Subtract(name, dkp)
-    DKP:UpdateHistory(name, dkp, 'subtract')
 
     local newTotal = dkpDB.members[name].dkpTotal + dkp; -- Add the negative number.
     if newTotal < 0 then newTotal = 0 end-- It shouldn't be possible for anyone to go negative in this system.

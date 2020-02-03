@@ -473,7 +473,9 @@
 				</Layers>
 				<Scripts>
 					<OnEnterPressed>
-						<!--self:ClearFocus()-->
+						local submitButton = getglobal('pdkp_dkp_submit')
+						if not submitButton:IsEnabled() then return end;
+						print(submitButton:IsEnabled())
 
 						local amountBox = getglobal('pdkp_dkp_amount_box');
 						local amountVal = amountBox:GetText();
@@ -482,6 +484,50 @@
 
 						amountBox:SetText('');
 					</OnEnterPressed>
+					<OnEscapePressed>
+						self:ClearFocus()
+					</OnEscapePressed>
+				</Scripts>
+				<FontString inherits="ChatFontNormal" />
+			</EditBox>
+
+			<EditBox name="pdkp_other_entry_box" letters="50" autoFocus="false" hidden="true">
+				<Size x="90" y="-50" />
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="115" y="-125" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\ChatFrame\UI-ChatInputBorder-Left">
+							<Size x="75" y="32" />
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset x="-15" y="0" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.2" top="0" bottom="1.0"/>
+						</Texture>
+						<Texture file="Interface\ChatFrame\UI-ChatInputBorder-Right">
+							<Size x="75" y="32" />
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset x="10" y="0" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.7" right="1.0" top="0" bottom="1.0"/>
+						</Texture>
+
+						<FontString name="pdkp_dkp_amount_box_label" inherits="GameFontHighlightLeft" justifyH="LEFT" text="Text:" wordwrap="false">
+							<Size x="200" y="0"/>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="LEFT" x="-45" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
 					<OnEscapePressed>
 						self:ClearFocus()
 					</OnEscapePressed>
@@ -528,7 +574,7 @@
 			</Button>
 
 			<!-- Submit button-->
-			<Button name="pdkp_dkp_submit" parentKey="pdkp_botRight" inherits="UIPanelButtonTemplate" text="Submit" >
+			<Button name="pdkp_dkp_submit" parentKey="pdkp_botRight" inherits="UIPanelButtonTemplate" text="Submit">
 				<Size x="90" y="-28" />
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
@@ -536,6 +582,9 @@
 					</Anchor>
 				</Anchors>
 				<Scripts>
+					<OnShow>
+						self:SetEnabled(false);
+					</OnShow>
 					<OnClick>
 						local amountBox = getglobal('pdkp_dkp_amount_box');
 						local amountVal = amountBox:GetText();

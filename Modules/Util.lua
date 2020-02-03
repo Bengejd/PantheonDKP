@@ -31,9 +31,20 @@ function Util:GetMyName()
     return pName;
 end
 
+function Util:GetMyClass()
+    return UnitClass("PLAYER");
+end
+
 -- Returns all classes in WoW Classic.
 function Util:GetAllClasses()
     return classes;
+end
+
+function Util:GetMyNameColored()
+    local name = Util:GetMyName();
+    local class = Util:GetMyClass();
+    local class_color = Util:GetClassColor(class);
+    return Util:FormatFontTextColor(class_color, name);
 end
 
 -- Utility function that removes the server name from a characters string.

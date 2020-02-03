@@ -26,6 +26,16 @@ GUI.adjustDropdowns = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
+GUI.adjustmentReasons = {
+    "On Time Bonus",
+    "Signup Bonus",
+    "Benched",
+    "Boss Kill",
+    "Unexcused Absence",
+    "Item Win",
+    "Other"
+}
+
 ---------------------------
 --  GUI Setup Functions  --
 ---------------------------
@@ -66,24 +76,19 @@ function GUI:CreateAdjustDropdown()
 --
  ]]
 
-    local adjustmentReasons = {
-        "On Time Bonus",
-        "Signup Bonus",
-        "Benched",
-        "Boss Kill",
-        "Unexcused Absence",
-        "Item Win",
-        "Other"
-    }
-
-    reasonDropdown:SetList(adjustmentReasons)
+    reasonDropdown:SetList(GUI.adjustmentReasons)
     secondaryDropdown:SetList(core.raids);
 
     reasonDropdown:SetValue('Other')
     thirdDropdown:SetText('Other');
     reasonDropdown:SetLabel('Reason');
 
+    local otherBox = getglobal('pdkp_other_entry_box')
+
     local function DropdownValueChanged(this, event, index)
+        local submitButton = getglobal('pdkp_dkp_submit')
+        local amountBox = getglobal('pdkp_dkp_amount_box')
+
         this.value = index
         local adjustAmount;
         local bossKillBonus = 10;
@@ -92,16 +97,40 @@ function GUI:CreateAdjustDropdown()
 
         if this.name == 'first' then
             for i=2, #dropdowns do
-               local d = dropdowns[i];
+                local d = dropdowns[i];
                 d:SetValue('')
                 d.frame:Hide()
                 d:SetLabel('');
+                amountBox:SetText('');
+                submitButton:SetEnabled(false);
             end
 
             -- On time, Signup, Boss kill, Unexcused Absence.
             if index <= 5 then
                 secondaryDropdown.frame:Show()
                 secondaryDropdown:SetLabel('Raid');
+                otherBox:Hide();
+            end
+
+            if index == 6 then
+                local buttonText = getglobal('pdkp_item_link_text')
+                if Util:IsEmpty(buttonText:GetText()) then submitButton:SetEnabled(false);
+                else submitButton:SetEnabled(true);
+                end
+            end
+
+            if index == 7 then
+                otherBox:Show();
+                submitButton:SetEnabled(false);
+
+                otherBox:SetScript("OnTextChanged", function(self)
+                    local isEmpty = Util:IsEmpty(self:GetText());
+                    if isEmpty then
+                        submitButton:SetEnabled(false);
+                    else
+                        submitButton:SetEnabled(true);
+                    end
+                end)
             end
 
         -- Second Dropdown Logic
@@ -111,16 +140,17 @@ function GUI:CreateAdjustDropdown()
 
             if d1.value >= 1 and d1.value <= 5 then
                 local raid = core.raids[index];
+                if raid == core.raids[1] then adjustAmount = 5 else adjustAmount = 10 end;
 
-                if d1.value == 1 or d1.value == 2 then  -- Ontime / Signup bonus
-                    if raid == core.raids[1] then adjustAmount = 5 else adjustAmount = 10 end;
+                if d1.value >= 1 and d1.value <= 3 then  -- Ontime / Signup bonus
                     updateAmountBox = true
+
+                    if d1.value == 3 then -- benched
+                        bossKillBonus = (bossKillBonus * #core.raidBosses[raid]);
+                        adjustAmount = (bossKillBonus + (adjustAmount * 2)) / 2;
+                    end
                 end
 
-                if d1.value == 3 then -- benched
-                    bossKillBonus = bossKillBonus * #core.raidBosses[raid];
-                    updateAmountBox = true;
-                end
 
                 if d1.value == 4 then -- boss kill
                     local bosses = core.raidBosses[raid]
@@ -132,17 +162,23 @@ function GUI:CreateAdjustDropdown()
                         thirdDropdown:SetValue(bosses[1])
                         thirdDropdown:SetText(bosses[1]);
                         thirdDropdown.frame:Show()
+                        updateAmountBox = true;
+                        adjustAmount = 10;
                     end
                 end
+                submitButton:SetEnabled(true);
             end
-
 
         -- Third Dropdown Logic
 
         elseif this.name == 'third' then
-
+            submitButton:SetEnabled(true);
         end
 
+        if updateAmountBox then
+
+            amountBox:SetText(adjustAmount);
+        end
     end
 
     for i=1, #dropdowns do
@@ -159,14 +195,6 @@ function GUI:CreateAdjustDropdown()
 
     GUI.adjustDropdowns = dropdowns;
     GUI.reasonDropdown = reasonDropdown;
-
-
-
---    getglobal('pdkp_dkp_amount_box'):SetText('-' .. amount);
-end
-
-function GUI:CreateAdjustSubDropdown()
-
 end
 
 function GUI:UpdateSelectedEntriesLabel()
@@ -476,6 +504,9 @@ function GUI:UpdateShroudItemLink(itemLink)
     buttonText:SetText(itemLink);
     local button = GUI:GetItemButton();
     button:Show();
+
+
+    -- THIS SHOULD ALSO CHANGE DROPDOWN TO ITEM-WIN IF NECESSARY.
 end
 
 function GUI:GetItemButton()

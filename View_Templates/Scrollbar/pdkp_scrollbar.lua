@@ -144,12 +144,16 @@ function pdkp_setup_scrollbar_cols()
     end
 end
 
+---------------------------
+--History Frame Functions--
+---------------------------
+
 -- Creates the history frame popup for the particular item.
 function GUI:CreateEntryHistoryFrame(b)
     local historyName = b:GetName() .. '_history';
     local frame=CreateFrame("Frame",historyName,b, nil);
-    frame:SetSize(245,120)
-    frame:SetPoint("RIGHT", b, "RIGHT", 255, 0);
+    frame:SetSize(270,120)
+    frame:SetPoint("RIGHT", b, "RIGHT", 270, 0);
     frame:SetFrameStrata("HIGH");
 
     local border=frame:CreateTexture(nil,"BACKGROUND")
@@ -163,23 +167,67 @@ function GUI:CreateEntryHistoryFrame(b)
     body:SetAllPoints(frame)
 
     for i=1, 10 do
-        local history=frame:CreateFontString('test_' .. i, "ARTWORK", "GameFontNormalSmall")
-        history:SetText('Testing')
-        if i == 1 then history:SetPoint("TOPLEFT", 5, -5);
-        else history:SetPoint("TOPLEFT", 0, i*-10);
+        local font = "GameFontNormalSmall"
+        local history;
+        if i == 1 then
+            font="GameFontHighlightLarge"
+            history = frame:CreateFontString('pdkp_history_label', "ARTWORK", font);
+            history:SetText('')
+            history:SetPoint("CENTER", 0, 50);
+            frame.historyTitle = history;
+        else
+            local lineName = historyName .. '_line_' .. i -1;
+            history=frame:CreateFontString(lineName, "ARTWORK", font)
+            history:SetText('')
+            history:SetPoint("TOPLEFT", 5, i*-10);
+
+            local dkpChange = frame:CreateFontString(lineName .. '_change', "ARTWORK", font);
+            dkpChange:SetText('');
+            dkpChange:SetPoint("TOPRIGHT", -5, i*-10);
         end
     end
 
-
-    b.history = frame;
+    b.historyFrame = frame;
     frame:Hide();
     frame:SetScript("OnShow", function(self)
-        local t = getglobal('test_1')
-        local dt = GetServerTime()
-        local dtf = Util:GetFormatedDate(dt);
-        t:SetText(dtf);
+        GUI:UpdateHistoryFrame(self);
     end)
 end
+
+function GUI:UpdateHistoryFrame(historyFrame)
+    local historyName = historyFrame:GetName()
+    local buttonName = string.gsub(historyName, '_history', '');
+
+    local b = getglobal(buttonName);
+
+    local dkpHistory = DKP.dkpDB.history[b.char.name]
+
+    if #dkpHistory == 0 then -- There is no history to show, hide the frame and end function.
+        historyFrame:Hide()
+        return
+    end
+
+    local charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name);
+    local title = Util:FormatFontTextColor('FFBA49', 'Recent History for ');
+
+    historyFrame.historyTitle:SetText(title .. charName);
+
+    local lineCount = 1;
+    for i = #dkpHistory, 1, -1 do
+        local lineName = b:GetName() .. '_history_line_' .. lineCount
+
+        local line = getglobal(lineName);
+        line:SetText(dkpHistory[i]['text'])
+
+        local change = getglobal(lineName .. '_change')
+        change:SetText(dkpHistory[i]['dkpChangeText'])
+
+        lineCount = lineCount + 1;
+        if lineCount >= 9 then break end; -- Stop at 9 items in the list.
+    end
+end
+
+
 
 function GUI:SearchInputUpdated(text)
     textSearch = text;

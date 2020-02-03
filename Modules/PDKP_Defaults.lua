@@ -89,6 +89,16 @@ core.raidBosses = {
         'Golemagg the Incinerator',
         'Majordomo Executus',
         'Ragnaros',
+    },
+    ["Blackwing Lair"] = {
+        "Razorgore the Untamed",
+        "Vaelastrasz the Corrupt",
+        "Broodlord Lashlayer",
+        "Firemaw",
+        "Ebonroc",
+        "Flamegor",
+        "Chromaggus",
+        "Nefarian",
     }
 }
 
@@ -107,5 +117,15 @@ core.bossIDS = {
         [670] = 'Golemagg the Incinerator',
         [671] = 'Majordomo Executus',
         [672] = 'Ragnaros',
-    }
+    },
+    ["Blackwing Lair"] = {
+        [610] = "Razorgore the Untamed",
+        [611] = "Vaelastrasz the Corrupt",
+        [612] = "Broodlord Lashlayer",
+        [613] = "Firemaw",
+        [614] = "Ebonroc",
+        [615] = "Flamegor",
+        [616] =  "Chromaggus",
+        [617] = "Nefarian",
+    },
 }

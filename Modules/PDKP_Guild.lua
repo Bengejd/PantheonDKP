@@ -72,6 +72,7 @@ function Guild:GetGuildData()
         });
 
         if name == Util:GetMyName() then
+            print(name);
             core.canEdit = rankIndex <= 4;
             Util:Debug("Can Edit: " .. tostring(core.canEdit));
         end
@@ -97,6 +98,11 @@ function Guild:GetOnlineMembers()
     end
     Util:Debug("Online Members Total: " .. #onlineMembers)
     return onlineMembers;
+end
+
+function Guild:GetBankIndex()
+    GuildRoster()
+    GetGuildRosterShowOffline()
 end
 
 function Guild:IsMember(name)
