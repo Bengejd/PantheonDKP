@@ -20,9 +20,10 @@ GUI.sortDir = 'ASC';
 GUI.pdkp_frame = nil;
 GUI.lastEntryClicked = nil;
 GUI.lastEntryNameClicked = nil;
-GUI.sliderVal = 1;
+GUI.sliderVal = 0;
 GUI.hasTimer = false;
 GUI.adjustDropdowns = nil;
+GUI.raidDropdown = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -49,6 +50,7 @@ function GUI:CreateMainFrame()
         GUI:SetupDKPFilterSlider()
         GUI:CreateAdjustDropdown()
         GUI:SelectedEntriesUpdated()
+        GUI:CreateRaidDkpDropdown()
 
 
     else -- We have initialized the frame already.
@@ -197,6 +199,31 @@ function GUI:CreateAdjustDropdown()
     GUI.reasonDropdown = reasonDropdown;
 end
 
+function GUI:CreateRaidDkpDropdown()
+    local currentRaid = DKP.dkpDB.currentDB;
+
+    local rd = AceGUI:Create("Dropdown")
+    rd:ClearAllPoints();
+    rd:SetList(core.raids);
+    rd:SetValue(currentRaid);
+    rd:SetLabel('Raid DKP');
+    rd:SetText(currentRaid);
+
+    rd:SetParent(GUI.pdkp_frame);
+    rd.frame:SetFrameStrata('HIGH');
+    rd:SetWidth(120);
+    rd:SetPoint("TOPRIGHT", GUI.pdkp_frame, "TOPRIGHT", 200, -25);
+
+    rd.label:SetHeight(22)
+
+    rd:SetCallback("OnValueChanged", function(this, event, index)
+        DKP:ChangeDKPSheets(core.raids[index])
+    end)
+
+    GUI.raidDropdown = rd;
+    table.insert(GUI.adjustDropdowns, rd);
+end
+
 function GUI:UpdateSelectedEntriesLabel()
     local label = getglobal('pdkp_selected_entries_label');
 
@@ -268,7 +295,7 @@ end
 
 function GUI:SetupDKPFilterSlider()
     local name = "pdkp_filter_dkp_slider"
-    local slider = CreateFrame("Slider", "pdkp_filter_dkp_slider", pdkpCoreFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", name, pdkpCoreFrame, "OptionsSliderTemplate")
     slider:SetWidth(300)
     slider:SetHeight(25)
     slider:SetOrientation('HORIZONTAL')
@@ -332,11 +359,20 @@ end
 
 -- Handles regular click of an entry
 function GUI:EntryClicked(charObj, clickType, bName)
+    if GUI:IsNotSelected(charObj.name) == false then
+        _G[bName].customTexture:Hide();
+       return GUI:ClearSelected();
+    end
+
     GUI:ClearSelected() -- clear all previous selections
     GUI.lastEntryClicked = bName;
     GUI.lastEntryNameClicked = charObj['name']
     charObj.bName = bName;  -- we'll need this later to remove the custom textures if selected filter is checked.
     GUI:AddToSelected(charObj);
+
+    GameTooltip:Hide();
+
+    if clickType == 'RightButton' then GUI:ToggleHistory(bName); end
 end
 
 -- Handles the shift click of an entry
@@ -401,13 +437,6 @@ function GUI:pdkp_toggle_selected()
     pdkp_dkp_table_filter()
 end
 
--- Update personal DKP text at the top
-function GUI:UpdateEasyStats()
-    local charName = PDKP:GetCharName();
-    local char_dkp = DKP:GetPlayerDKP(charName);
-    getglobal("pdkp_charInfo"):SetText(charName .. " | " .. char_dkp .. " DKP");
-end
-
 -- Returns the "Selected" filter checkbox status.
 function GUI:GetSelectedFilterStatus()
     return getglobal('pdkp_selected_checkbox'):GetChecked();
@@ -431,7 +460,7 @@ end
 
 -- Removes the entry from the selected array.
 function GUI:RemoveFromSelected(charObj)
-    entryButton.customTexture:Hide();
+    _G[charObj.bName].customTexture:Hide();
     GUI.selected[charObj.name] = nil;
 
     table.remove(GUI.selected, Util:FindTableIndex(GUI.selected, charObj.name));
@@ -443,12 +472,30 @@ end
 function GUI:ClearSelected()
     for key, charObj in pairs(GUI.selected) do
         if charObj.name then
---            getglobal(charObj.bName).customTexture:Hide();
             GUI.selected[charObj.name] = nil;
+        end
+        if charObj.bName then
+           _G[charObj.bName].historyOpen = false;
+            _G[charObj.bName].historyFrame:Hide();
         end
     end
     GUI.selected = {};
+    GUI.lastEntryClicked = nil;
+    GUI.lastEntryNameClicked = nil;
     pdkp_dkp_scrollbar_Update()
+
+    if not GUI.lastEntryClicked then return end;
+--    _G[GUI.lastEntryClicked].historyOpen = false;
+    _G[GUI.lastEntryClicked].historyFrame:Hide();
+end
+
+function GUI:ToggleHistory(bName)
+    bName = bName or GUI.lastEntryClicked;
+    if not bName then return end;
+    local b = _G[bName];
+
+    b.historyOpen = b.historyOpen ~= true;
+    if b.historyOpen then b.historyFrame:Show() else b.historyFrame:Hide() end;
 end
 
 -- Disalbes / Enables the shrouding & roll buttons if more than 1 person is selected.
@@ -466,6 +513,20 @@ function GUI:SelectedEntriesUpdated()
     GUI:UpdateSelectedEntriesLabel()
 end
 
+function GUI:HideElements()
+    for i=1, #Defaults.classes do
+        local cbName = "pdkp_" .. Defaults.classes[i] .. "_checkbox";
+    end
+end
+
+function GUI:ToggleSubmitButton()
+
+end
+
+---------------------------
+--   MISC GUI Functions  --
+---------------------------
+
 -- Type can be 'shroud' or 'roll'
 function GUI:QuickCalculate(type)
     local charObj = GUI.selected[GUI.selected[1]]; -- Ugly way of doing this...
@@ -475,6 +536,13 @@ function GUI:QuickCalculate(type)
 
     amount = math.ceil(charObj.dkpTotal * percent);
     getglobal('pdkp_dkp_amount_box'):SetText('-' .. amount);
+end
+
+-- Update personal DKP text at the top
+function GUI:UpdateEasyStats()
+    local charName = PDKP:GetCharName();
+    local char_dkp = DKP:GetPlayerDKP(charName);
+    getglobal("pdkp_charInfo"):SetText(charName .. " | " .. char_dkp .. " DKP");
 end
 
 ---------------------------
@@ -505,12 +573,26 @@ function GUI:UpdateShroudItemLink(itemLink)
     local button = GUI:GetItemButton();
     button:Show();
 
+    print(itemLink);
+
 
     -- THIS SHOULD ALSO CHANGE DROPDOWN TO ITEM-WIN IF NECESSARY.
 end
 
 function GUI:GetItemButton()
     return getglobal('pdkp_item_link');
+end
+
+---------------------------
+-- GUI Settings Functions--
+---------------------------
+
+function GUI:GetGUISettings()
+    local name = "pdkp_filter_dkp_slider"
+end
+
+function GUI:SetGUISettings()
+
 end
 
 ---------------------------
@@ -585,16 +667,6 @@ function GUI:CancelTimer()
         GUI.statusbar = nil;
     end
 end
-
-
---[[
---
---      DROPDOWN MENU SHIT GOES HERE
---
- ]]
-
-
-
 
 local dkp_reason_menu = {
     { text = "Select an Option", isTitle = true},

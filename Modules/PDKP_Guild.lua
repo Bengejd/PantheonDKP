@@ -11,7 +11,6 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 
 local GuildDB;
-local DKPDB = core.dkpDB;
 
 local Player = nil;
 
@@ -32,9 +31,7 @@ function Guild:InitGuildDB()
 end
 
 -- Sets the guildDB's data.
-function Guild:GetGuildData()
-    -- Guild:ResetGuildData(); -- Reset the guild data on a fresh start.
-
+function Guild:GetGuildData(onlineOnly)
     --	name—Name of the member (string)
     --	rank—Name of the member’s rank (string)
     --	rankIndex—Numeric rank of the member (0 = guild leader; higher numbers
@@ -54,50 +51,40 @@ function Guild:GetGuildData()
 
     GuildRoster()
     GetGuildRosterShowOffline()
-
     local gMemberCount = GetNumGuildMembers();
     if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount; end
+
+    local onlineMembers = {};
 
     for i=1, GuildDB.numOfMembers do
         local name, rank, rankIndex, lvl, class, __, __, __, online, __, __ = GetGuildRosterInfo(i)
         name = Util:RemoveServerName(name)
-        table.insert(GuildDB.members, {
-            ["name"]=name,
-            ['rank']=rank,
-            ['rankIndex']=rankIndex,
-            ["class"]=class,
-            ['online']=online,
-            ['lvl']=lvl,
-            ["class_color"]=core.defaults.class_colors[class], -- so we can display the class later.
-        });
 
-        if name == Util:GetMyName() then
-            print(name);
-            core.canEdit = rankIndex <= 4;
-            Util:Debug("Can Edit: " .. tostring(core.canEdit));
-        end
-    end
-    Util:Debug("Total Guild Members: " .. GuildDB.numOfMembers)
-end
-
-function Guild:GetOnlineMembers()
-    GuildRoster()
-    GetGuildRosterShowOffline()
-
-    local onlineMembers = {};
-    for i=1, GuildDB.numOfMembers do
-        local name, _, _, _, _, __, __, __, online, __, __ = GetGuildRosterInfo(i)
-        name = Util:RemoveServerName(name)
-
-        if online then
+        if onlineOnly then
             table.insert(onlineMembers, {
                 ["name"]=name,
                 ['online']=online,
             });
+        else
+            table.insert(GuildDB.members, {
+                ["name"]=name,
+                ['rank']=rank,
+                ['rankIndex']=rankIndex,
+                ["class"]=class,
+                ['online']=online,
+                ['lvl']=lvl,
+                ["class_color"]=core.defaults.class_colors[class], -- so we can display the class later.
+            });
+        end
+
+        if name == Util:GetMyName() then
+            core.canEdit = rankIndex <= 4;
+            Util:Debug("Can Edit: " .. tostring(core.canEdit));
         end
     end
-    Util:Debug("Online Members Total: " .. #onlineMembers)
-    return onlineMembers;
+
+    if onlineOnly then Util:Debug("Online Members Total: " .. #onlineMembers) end
+    return onlineMembers; -- Always return, even if it's empty.
 end
 
 function Guild:GetBankIndex()

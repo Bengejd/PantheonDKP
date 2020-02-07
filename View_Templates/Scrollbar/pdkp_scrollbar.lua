@@ -153,13 +153,13 @@ function GUI:CreateEntryHistoryFrame(b)
     local historyName = b:GetName() .. '_history';
     local frame=CreateFrame("Frame",historyName,b, nil);
     frame:SetSize(270,120)
-    frame:SetPoint("RIGHT", b, "RIGHT", 270, 0);
+    frame:SetPoint("RIGHT", b, "RIGHT", 285, 0);
     frame:SetFrameStrata("HIGH");
 
     local border=frame:CreateTexture(nil,"BACKGROUND")
     border:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
-    border:SetPoint("TOPLEFT",-5,5)
-    border:SetPoint("BOTTOMRIGHT",5,-5)
+    border:SetPoint("TOPLEFT",-2,2)
+    border:SetPoint("BOTTOMRIGHT",2,-2)
     border:SetVertexColor(0.85, 0.85, 0.85, .5) -- half-alpha light grey
 
     local body=frame:CreateTexture(nil,"ARTWORK")
@@ -202,7 +202,7 @@ function GUI:UpdateHistoryFrame(historyFrame)
 
     local dkpHistory = DKP.dkpDB.history[b.char.name]
 
-    if #dkpHistory == 0 then -- There is no history to show, hide the frame and end function.
+    if dkpHistory == nil or #dkpHistory == 0 then -- There is no history to show, hide the frame and end function.
         historyFrame:Hide()
         return
     end
@@ -216,6 +216,9 @@ function GUI:UpdateHistoryFrame(historyFrame)
     for i = #dkpHistory, 1, -1 do
         local lineName = b:GetName() .. '_history_line_' .. lineCount
 
+        local raid = dkpHistory[i]['raid'];
+        if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end-- Set the default since MC & Ony are combined.
+
         local line = getglobal(lineName);
         line:SetText(dkpHistory[i]['text'])
 
@@ -223,8 +226,16 @@ function GUI:UpdateHistoryFrame(historyFrame)
         change:SetText(dkpHistory[i]['dkpChangeText'])
 
         lineCount = lineCount + 1;
+
+        if raid and raid ~= DKP.dkpDB.currentDB then -- Don't show history from other raids.
+            if lineCount > 1 then lineCount = lineCount -1; end
+            line:SetText('');
+            change:SetText('');
+        end
         if lineCount >= 9 then break end; -- Stop at 9 items in the list.
     end
+
+    if lineCount == 1 then historyFrame:Hide() end; -- A catch if there isn't history in the frame.
 end
 
 
@@ -246,7 +257,7 @@ end
 function GUI:UpdateOnlineStatus(status)
     core.filterOffline = status
 
-    local onlineMembers = Guild:GetOnlineMembers()
+    local onlineMembers = Guild:GetGuildData(true)
 
     if #onlineMembers == 0 then return end; -- Just incase something weird happens.
 

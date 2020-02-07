@@ -33,13 +33,17 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnClick>
-					print(getglobal('pdkp_item_link_text'):GetText());
-			</OnClick>
 			<OnShow>
-					local linkText = getglobal('pdkp_item_link_text'):GetText()
-					if linkText == nil or linkText == '' then self:Hide() end
+					if self.tiptext == nil or self.tiptext == '' then getglobal('pdkp_item_link_text'):SetText('None') end
 			</OnShow>
+			<OnEnter>
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					self.tiptext = getglobal('pdkp_item_link_text'):GetText()
+					GameTooltip:SetHyperlink(self.tiptext);
+			</OnEnter>
+			<OnLeave>
+					GameTooltip:Hide()
+			</OnLeave>
 		</Scripts>
 	</Button>
 
@@ -334,7 +338,7 @@
 			<CheckButton name="pdkp_selected_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
 				<Size x="25" y="25" />
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-115" y="-250" />
+					<Anchor point="TOPRIGHT" x="-175" y="-250" />
 				</Anchors>
 				<Scripts>
 					<OnShow>
@@ -350,7 +354,7 @@
 			<CheckButton name="pdkp_online_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
 				<Size x="25" y="25" />
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="25" y="-250" />
+					<Anchor point="TOPRIGHT" x="-45" y="-250" />
 				</Anchors>
 				<Scripts>
 					<OnShow>
@@ -358,6 +362,22 @@
 					</OnShow>
 					<OnClick>
 							pdkp_template_function_call("pdkp_toggle_online", self:GetChecked());
+							pdkp_template_function_call("pdkp_dkp_table_filter")
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="pdkp_in_raid_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
+				<Size x="25" y="25" />
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="85" y="-250" />
+				</Anchors>
+				<Scripts>
+					<OnShow>
+							getglobal(self:GetName() .. "Text"):SetText('In Raid')
+					</OnShow>
+					<OnClick>
+							pdkp_template_function_call("pdkp_in_raid_checkbox", self:GetChecked());
 							pdkp_template_function_call("pdkp_dkp_table_filter")
 					</OnClick>
 				</Scripts>
@@ -491,6 +511,7 @@
 				<FontString inherits="ChatFontNormal" />
 			</EditBox>
 
+			<!--DKP ADJUSTMENT OTHER TEXT BOX -->
 			<EditBox name="pdkp_other_entry_box" letters="50" autoFocus="false" hidden="true">
 				<Size x="90" y="-50" />
 				<Anchors>

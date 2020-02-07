@@ -12,6 +12,9 @@ local Defaults = core.defaults;
 
 local dkpDB;
 
+local success = '22bb33'
+local warning = 'E71D36'
+
 --[[
 --  RAID DB LAYOUT
 --      {members} -- Array
@@ -32,6 +35,7 @@ local dkpDB;
 
 local dkpDBDefaults = {
     char = {
+        currentDB = 'Molten Core',
         members = {},
         history = {
             all = {}
@@ -44,6 +48,8 @@ function DKP:InitDKPDB()
     core.DKP.db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", dkpDBDefaults)
     dkpDB = core.DKP.db.char
     DKP.dkpDB = dkpDB;
+
+    print('Current raid DKP shown: ', dkpDB.currentDB);
 end
 
 function DKP:UpdateEntry()
@@ -58,8 +64,11 @@ function DKP:UpdateEntry()
             elseif dkpChange < 0 then charObj.dkpTotal = DKP:Subtract(charObj.name, dkpChange);
             end
             -- Now update the visual text
-            local dkpText = _G[charObj.bName .. '_col3'];
-            dkpText:SetText(charObj.dkpTotal);
+
+            if charObj.bName then
+                local dkpText = _G[charObj.bName .. '_col3'];
+                dkpText:SetText(charObj.dkpTotal);
+            end
 
             DKP:UpdateHistory(charObj.name, dkpChange);
         end
@@ -88,9 +97,6 @@ function DKP:UpdateHistory(name, dkpChange)
     local dDate = date("%m/%d%y");
     local tTime = date('%r');
     local datetime = time()
-
-    local success = '22bb33'
-    local warning = 'E71D36'
 
     local reasonVal = reasonDrop:GetValue();
 
@@ -128,7 +134,6 @@ function DKP:UpdateHistory(name, dkpChange)
         historyText = historyText .. buttonText:GetText()
     end
 
-
     local historyEntry = {
         ['text'] = historyText,
         ['reason'] = reason,
@@ -150,7 +155,34 @@ function DKP:UpdateHistory(name, dkpChange)
 
     table.insert(dkpDB.history[name], historyEntry);
 
+    DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange);
+end
 
+function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
+    if dkpChange == 0 or Util:IsEmpty(name) then return end;
+    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end
+    if raid == nil then raid = dkpDB.currentDB; end
+
+    local entry = dkpDB.members[name];
+    entry[raid] = entry[raid] or 0;
+
+    entry[raid] = entry[raid] + dkpChange;
+    if entry[raid] < 0 then entry[raid] = 0 end
+end
+
+function DKP:ChangeDKPSheets(raid)
+    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
+
+    for key, name in ipairs(DKP:GetMembers()) do
+        dkpDB.members[name].dkpTotal = dkpDB.members[name][raid];
+    end
+    dkpDB.currentDB = raid;
+
+    PDKP:BuildAllData()
+    GUI:GetTableDisplayData()
+    pdkp_dkp_scrollbar_Update()
+
+    print('Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP');
 end
 
 function DKP:SyncWithGuild()
@@ -171,7 +203,6 @@ function DKP:Add(name, dkp)
 end
 
 function DKP:Subtract(name, dkp)
-
     local newTotal = dkpDB.members[name].dkpTotal + dkp; -- Add the negative number.
     if newTotal < 0 then newTotal = 0 end-- It shouldn't be possible for anyone to go negative in this system.
     dkpDB.members[name].dkpTotal = newTotal;
@@ -190,6 +221,8 @@ function DKP:NewEntry(name)
         table.insert(dkpDB.members, name)
         dkpDB.members[name] = {
             dkpTotal = 0;
+            ['Molten Core'] = 0,
+            ['Blackwing Lair'] = 0,
         }
     end
 end

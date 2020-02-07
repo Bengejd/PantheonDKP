@@ -65,7 +65,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     elseif event == "ZONE_CHANGED_NEW_AREA" then return
     elseif event == "BOSS_KILL" then
         PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
-        Raid:BossKill(663, 'Lucifron');
+        Raid:BossKill(event, arg1);
         return
     end
 end
@@ -91,7 +91,7 @@ function PDKP:OnInitialize(event, name)
     --  Initialize Addon Data  --
     -----------------------------
 
-    Guild:GetGuildData();
+    Guild:GetGuildData(false);
     DKP:SyncWithGuild();
 
     PDKP:BuildAllData();
@@ -118,7 +118,6 @@ function PDKP:HandleShroudCommands(item)
 
         -- Check to see if the GUI is open or not.
         if not GUI.shown then PDKP:Show() end
-
         GUI:UpdateShroudItemLink(Item:GetItemByName(item));
     end
 end
@@ -141,6 +140,8 @@ function PDKP:HandleSlashCommands(msg, item)
     elseif msg == 'hide' then
         return GUI:Hide()
     end
+
+
 
     if msg == 'shroud' then
         return Shroud:ShroudingSent('shroud', Util:GetMyName());
@@ -177,13 +178,25 @@ function PDKP:HandleSlashCommands(msg, item)
        return pdkp_comm_sent_test()
     end
 
-    print(msg);
+    if msg == 'change_raid' then
+        if DKP.dkpDB.currentDB == 'Molten Core' then
+            return DKP:ChangeDKPSheets('Blackwing Lair')
+        elseif DKP.dkpDB.currentDB == 'Blackwing Lair' then
+            return DKP:ChangeDKPSheets('Molten Core')
+        end
+    end
+
+    if msg == 'pdkp_reset_all_db' and core.defaults.debug then
+        DKP:ResetDB()
+    end
 end
 
 function PDKP:BuildAllData()
     -- Pug Data -- Need to think of clever solution for this!
     local dkpEntries = DKP:GetMembers();
     local gMembers = Guild:GetMembers();
+
+    PDKP.data = {};
 
     for i=1, Guild:GetMemberCount() do
         local gMember = gMembers[i];
@@ -235,6 +248,7 @@ function PDKP:Show()
     GUI.shown = true;
 
     if GUI.reasonDropdown then GUI.reasonDropdown.frame:Show() end;
+    if GUI.raidDropdown then GUI.raidDropdown.frame:Show() end;
 end
 
 -----------------------------
