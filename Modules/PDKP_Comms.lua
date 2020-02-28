@@ -17,28 +17,66 @@ local Comms = core.Comms;
 --
  ]]
 
+local SAFE_COMMS = {
+    ['pdkpTestingCom']=true,
+    ['pdkpLastEditQry']=true,
+    ['pdkpLastEditPost']=true,
+};
+
+function Comms:RegisterCommCommands()
+    PDKP:RegisterComm('pdkpTestingCom', OnCommReceived)
+    PDKP:RegisterComm('pdkpLastEditQry', OnCommReceived)
+    PDKP:RegisterComm('pdkpLastEditPost', OnCommReceived)
+end
+
+function OnCommReceived(prefix, message, distribution, sender)
+    if not Guild:CanMemberEdit(sender) or not SAFE_COMMS[prefix] then -- Sender doesn't have the rights to edit data.
+        local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
+        errMsg = errMsg .. ' an Officer.'
+        return Util:ThrowError(errMsg)
+    end
+
+    local data = Comms:Deserialize(message)
+
+    if prefix == 'pdkpLastEditQry' then
+--        PDKP:SendCommMessage('pdkpLastEditPost', PDKP:Serialize(DKP:GetLastEdit()), 'WHISPER', sender) end;
+    end
+    if prefix == 'pdkpLastEditPost' then
+        local lastEdit = DKP:GetLastEdit()
+    end
+
+    print('Prefix', prefix, ' message', Comms:Deserialize(message), ' distro', distribution, 'sender', sender)
+end
+
 function Comms:SendShroud()
     local commMethod;
 --    PDKP:SendCommMessage('pdkp_shrouding', Util:GetMyName(), 'WHISPER', )
 end
 
-
-function pdkp_comm_sent_test()
-    PDKP:SendCommMessage('pdkp_testing_com', pdkp_serialize(), 'WHISPER', 'PantheonBank', 'BULK');
+function Comms:pdkp_send_comm(data)
+    local msg = data or {love=true} -- Testing purposes.
+    PDKP:SendCommMessage('pdkpTestingCom', PDKP:Serialize(msg), 'WHISPER', 'PantheonBank', 'BULK');
 end
 
-function pdkp_serialize()
-    return PDKP:Serialize(core.DKP.db.char.members);
+function Comms:EnteringWorld()
+    PDKP:SendCommMessage('pdkpTestingCom', PDKP:Serialize(msg), 'WHISPER', 'PantheonBank', 'BULK');
 end
 
-function pdkp_deserialize(string)
+function pdkp_serialize(data)
+    return PDKP:Serialize(data);
+end
+
+function Comms:Serialize(data)
+    return PDKP:Serialize(data);
+end
+
+function Comms:Deserialize(string)
     local success, data = PDKP:Deserialize(string)
-    data['Neekio'].dkpTotal = 1000;
-    core.DKP.db.char.members = data;
-    print(success);
+
+    if success == false or success == nil then
+        Util:ThrowError('Deserialization of data...');
+        return nil;
+    end
+    return data;
 end
 
-function pdkp_comm_received_test(prefix, text, distrbution, target)
-    PDKP:Print("Comms received!!!!!!!");
-    pdkp_deserialize(text);
-end

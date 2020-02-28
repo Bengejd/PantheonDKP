@@ -40,6 +40,17 @@ function Util:GetAllClasses()
     return classes;
 end
 
+function Util:ThrowError(msg, debug)
+    local warning = 'E71D36'
+    local errorMsg = Util:FormatFontTextColor(warning, 'Error encountered during ' .. msg)
+
+    if debug then Util:Debug(errorMsg) else PDKP:Print(errorMsg) end
+end
+
+function Util:GetClassColor(class)
+    return class_colors[class]
+end
+
 function Util:GetMyNameColored()
     local name = Util:GetMyName();
     local class = Util:GetMyClass();
@@ -55,6 +66,14 @@ function Util:RemoveServerName(name)
     for w in name:gmatch("([^-]+)") do -- I'm sure there is a better way to remove the server name *shrug*
         return w;
     end
+end
+
+function Util:GetDateTimes()
+    local dDate = date("%m/%d/%y");
+    local tTime = date('%r');
+    local server_time = GetServerTime()
+    local datetime = time()
+    return dDate, tTime, server_time, datetime
 end
 
 -- Utility function to help determine if the string is empty or not.

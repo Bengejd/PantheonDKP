@@ -6,6 +6,7 @@ local DKP = core.DKP;
 local GUI = core.GUI;
 local Util = core.Util;
 local PDKP = core.PDKP;
+local Raid = core.Raid;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
@@ -14,6 +15,7 @@ local dkpDB;
 
 local success = '22bb33'
 local warning = 'E71D36'
+local pdkp_boss_kill_dkp = 10
 
 --[[
 --  RAID DB LAYOUT
@@ -34,9 +36,10 @@ local warning = 'E71D36'
 ]]
 
 local dkpDBDefaults = {
-    char = {
+    profile = {
         currentDB = 'Molten Core',
         members = {},
+        lastEdit = {},
         history = {
             all = {}
         },
@@ -45,16 +48,70 @@ local dkpDBDefaults = {
 
 function DKP:InitDKPDB()
     Util:Debug('DKPDB init');
-    core.DKP.db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", dkpDBDefaults)
-    dkpDB = core.DKP.db.char
+    core.DKP.db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", dkpDBDefaults, true)
+    dkpDB = core.DKP.db.profile
     DKP.dkpDB = dkpDB;
 
     print('Current raid DKP shown: ', dkpDB.currentDB);
 end
 
+-- cheaty way to update dkp via the boss kill event.
+function DKP:BossKill(charObj)
+
+    local name = charObj.name
+
+    if Guild:IsMember(name) == false then return end;
+
+    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
+    local boss = Raid.bossIDS[Raid.recentBossKillID];
+    local raid = Raid:GetCurrentRaid()
+
+    local dkpChangeText = Util:FormatFontTextColor(success, 10 .. ' DKP')
+    local historyText = raid .. ' - ' .. boss;
+    historyText = Util:FormatFontTextColor(success, historyText)
+
+    local historyEntry = {
+        ['text'] = historyText,
+        ['reason'] = 'Boss Kill',
+        ['bossKill'] = boss,
+        ['raid'] = raid,
+        ['dkpChange'] = pdkp_boss_kill_dkp,
+        ['dkpChangeText'] = dkpChangeText,
+        ['officer'] = Util:GetMyNameColored(),
+        ['item']= nil,
+        ['date']= dDate,
+        ['time']=tTime,
+        ['serverTime']=server_time,
+        ['datetime']=datetime
+    }
+
+    if not dkpDB.history[name] then
+        table.insert(dkpDB.history, name);
+        dkpDB.history[name] = {};
+    end
+
+    table.insert(dkpDB.history[name], historyEntry);
+
+    DKP:Add(name, pdkp_boss_kill_dkp);
+
+    GUI:UpdateEasyStats()
+    -- Update the slider max (if needed)
+    GUI:UpdateDKPSliderMax();
+    -- Re-run the table filters.
+
+    DKP:UpdateEntryRaidDkpTotal(raid, name, pdkp_boss_kill_dkp);
+
+    if charObj.bName then
+        local dkpText = _G[charObj.bName .. '_col3'];
+        dkpText:SetText(charObj.dkpTotal);
+    end
+end
+
 function DKP:UpdateEntry()
     local dkpChange = getglobal('pdkp_dkp_amount_box'):GetNumber();
     if dkpChange == 0 then return end; -- Don't need to change anything.
+
+    local _, _, server_time, _ = Util:GetDateTimes()
 
     -- itterate through all of the selected entries and do the operations.
     for key, charObj in pairs(GUI.selected) do
@@ -70,7 +127,7 @@ function DKP:UpdateEntry()
                 dkpText:SetText(charObj.dkpTotal);
             end
 
-            DKP:UpdateHistory(charObj.name, dkpChange);
+            DKP:UpdateHistory(charObj.name, dkpChange, server_time);
         end
     end
 
@@ -82,7 +139,7 @@ function DKP:UpdateEntry()
     pdkp_dkp_table_filter()
 end
 
-function DKP:UpdateHistory(name, dkpChange)
+function DKP:UpdateHistory(name, dkpChange, global_server_time)
     local amountBox = getglobal('pdkp_dkp_amount_box');
     local itemLink = getglobal('pdkp_item_link');
 
@@ -94,9 +151,7 @@ function DKP:UpdateHistory(name, dkpChange)
     local boss;
     local historyText;
     local dkpChangeText;
-    local dDate = date("%m/%d%y");
-    local tTime = date('%r');
-    local datetime = time()
+    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
 
     local reasonVal = reasonDrop:GetValue();
 
@@ -145,6 +200,7 @@ function DKP:UpdateHistory(name, dkpChange)
         ['item']= nil,
         ['date']= dDate,
         ['time']=tTime,
+        ['serverTime']=server_time,
         ['datetime']=datetime
     }
 
@@ -154,8 +210,20 @@ function DKP:UpdateHistory(name, dkpChange)
     end
 
     table.insert(dkpDB.history[name], historyEntry);
+    dkpDB.lastEdit = {
+        ['reason'] = reason,
+        ['raid'] = raid,
+        ['dkpChange'] = dkpChange,
+        ['dkpChangeText'] = dkpChangeText,
+        ['officer'] = Util:GetMyNameColored(),
+        ['serverTime']= global_server_time,
+    }
 
     DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange);
+end
+
+function DKP:GetLastEdit()
+    return dkpDB.lastEdit
 end
 
 function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
@@ -259,5 +327,9 @@ function DKP:GetHighestDKP()
 
     if maxDKP == 0 and Defaults.debug then return 50 end;
     return maxDKP;
+end
+
+function DKP:GetCommsData()
+
 end
 

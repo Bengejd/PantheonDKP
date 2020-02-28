@@ -9,6 +9,7 @@ local L = core.L;
 
 local DKP = core.DKP;
 local GUI = core.GUI;
+local Raid = core.Raid;
 local Util = core.Util;
 local PDKP = core.PDKP;
 local Guild = core.Guild;
@@ -95,7 +96,7 @@ function pdkp_dkp_scrollbar_Update()
 
             if lineplusoffset <= #tableData then
                 if col == 2 then
-                    local textColor = charObj["class_color"].hex
+                    local textColor = Util:GetClassColor(charObj['class']);
                     entryCol:SetText(Util:FormatFontTextColor(textColor, textVal))
                 else
                     entryCol:SetText(textVal)
@@ -109,7 +110,8 @@ function pdkp_dkp_scrollbar_Update()
     GUI:UpdateSelectedEntriesLabel()
 end
 
-function GUI:GetTableDisplayData()
+function GUI:GetTableDisplayData(noQuery)
+    if noQuery then return tableData; end
     tableData = PDKP:GetAllTableData();
     return tableData;
 end
@@ -238,8 +240,6 @@ function GUI:UpdateHistoryFrame(historyFrame)
     if lineCount == 1 then historyFrame:Hide() end; -- A catch if there isn't history in the frame.
 end
 
-
-
 function GUI:SearchInputUpdated(text)
     textSearch = text;
     pdkp_dkp_table_filter()
@@ -254,9 +254,31 @@ function GUI:SearchOnAttributes(char)
     end
 end
 
+function GUI:ToggleInRaid(status)
+    print('updateInRaidStatus');
+    core.filterInRaid = status;
+
+    local raidMembers = Raid:GetRaidInfo()
+
+    for i=1, PDKP:GetDataCount() do
+        local char = PDKP.data[i];
+
+        for j=1, #raidMembers do
+            local raidMember = raidMembers[j];
+
+            if raidMember['name'] == char['name'] then
+                char['inRaid'] = true;
+                break;
+            end
+            char['inRaid'] = false;
+        end
+    end
+
+    pdkp_dkp_table_filter()
+end
+
 function GUI:UpdateOnlineStatus(status)
     core.filterOffline = status
-
     local onlineMembers = Guild:GetGuildData(true)
 
     if #onlineMembers == 0 then return end; -- Just incase something weird happens.
@@ -268,7 +290,7 @@ function GUI:UpdateOnlineStatus(status)
             local onlineChar = onlineMembers[j];
 
             if onlineChar['name'] == char['name'] then
-                char['online'] = true;
+                char['online'] = onlineChar['online'];
                 break;
             end
             char['online'] = false;
@@ -291,6 +313,13 @@ function pdkp_dkp_table_filter()
         local isSelected = false;
         local searchFound = false;
 
+        local showingInRaid = core.filterInRaid == true;
+        local inRaidStatusMatch = true; -- set this as the default.
+
+        if Raid:IsInRaid() and showingInRaid then
+           inRaidStatusMatch = showingInRaid == char['inRaid'];
+        end
+
         if selectedFilterChecked and GUI.selected[char.name] then isSelected = true; end
         if hasSearch then searchFound = GUI:SearchOnAttributes(char) end
 
@@ -302,7 +331,8 @@ function pdkp_dkp_table_filter()
         if (showingOffline or onlineStatusMatch) -- If online selected, the status matches.
                 and (selectStatusMatch) -- If selections, the entry is in the array.
                 and (searchStatusMatch) -- If search, the entry matches the search
-                and (sliderValsMatch) and -- If slider, the entry's dkp is > sliderVal
+                and (sliderValsMatch)  -- If slider, the entry's dkp is > sliderVal
+                and (inRaidStatusMatch) and -- In raid status matches.
                 not filter_classes[char['class']] then -- Entries class isn't deselected.
             table.insert(newTableData, char)
         end

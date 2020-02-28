@@ -36,3 +36,23 @@ end
 function item:ClearLinked()
     core.Item.linkedItem = nil;
 end
+
+function item:GetPriority(itemName)
+
+end
+
+--    { prio = false },
+--
+--    {   prio: true,
+--        1 = ['']
+--        2 = ['']
+--        3 = ['']
+--        4 = ['']
+--        5 = ['']
+--    }
+
+item.priority = {
+    ['Crimson Shocker'] = { prio = false },
+    ['Flamewaker Legplates'] = { prio = false },
+    ['Heavy Dark Iron Ring'] =  {},
+}

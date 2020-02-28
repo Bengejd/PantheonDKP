@@ -27,6 +27,10 @@ GUI.raidDropdown = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
+local pdkp_dropdown_enables_submit = false;
+local pdkp_dkp_amount_box;
+local pdkp_submit_button;
+
 GUI.adjustmentReasons = {
     "On Time Bonus",
     "Signup Bonus",
@@ -52,12 +56,19 @@ function GUI:CreateMainFrame()
         GUI:SelectedEntriesUpdated()
         GUI:CreateRaidDkpDropdown()
 
+        pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
+        pdkp_submit_button =  _G['pdkp_dkp_submit'];
+
 
     else -- We have initialized the frame already.
         -- Grab the global pdkpCoreFrame object that was previously created
         GUI.pdkp_frame = getglobal("pdkpCoreFrame");
 
     end
+end
+
+function GUI:CreatePushButton()
+
 end
 
 function GUI:CreateAdjustDropdown()
@@ -88,7 +99,7 @@ function GUI:CreateAdjustDropdown()
     local otherBox = getglobal('pdkp_other_entry_box')
 
     local function DropdownValueChanged(this, event, index)
-        local submitButton = getglobal('pdkp_dkp_submit')
+        local submitButton = pdkp_submit_button
         local amountBox = getglobal('pdkp_dkp_amount_box')
 
         this.value = index
@@ -99,12 +110,14 @@ function GUI:CreateAdjustDropdown()
 
         if this.name == 'first' then
             for i=2, #dropdowns do
-                local d = dropdowns[i];
-                d:SetValue('')
-                d.frame:Hide()
-                d:SetLabel('');
-                amountBox:SetText('');
-                submitButton:SetEnabled(false);
+                if i ~= 4 then
+                    local d = dropdowns[i];
+                    d:SetValue('')
+                    d.frame:Hide()
+                    d:SetLabel('');
+                    amountBox:SetText('');
+                    submitButton:SetEnabled(false);
+                end
             end
 
             -- On time, Signup, Boss kill, Unexcused Absence.
@@ -117,20 +130,20 @@ function GUI:CreateAdjustDropdown()
             if index == 6 then
                 local buttonText = getglobal('pdkp_item_link_text')
                 if Util:IsEmpty(buttonText:GetText()) then submitButton:SetEnabled(false);
-                else submitButton:SetEnabled(true);
+                else pdkp_dropdown_enables_submit = true;
                 end
             end
 
             if index == 7 then
                 otherBox:Show();
-                submitButton:SetEnabled(false);
+                pdkp_dropdown_enables_submit = false;
 
                 otherBox:SetScript("OnTextChanged", function(self)
                     local isEmpty = Util:IsEmpty(self:GetText());
                     if isEmpty then
-                        submitButton:SetEnabled(false);
+                        pdkp_dropdown_enables_submit = false;
                     else
-                        submitButton:SetEnabled(true);
+                        pdkp_dropdown_enables_submit = true;
                     end
                 end)
             end
@@ -168,19 +181,21 @@ function GUI:CreateAdjustDropdown()
                         adjustAmount = 10;
                     end
                 end
-                submitButton:SetEnabled(true);
+                pdkp_dropdown_enables_submit = true;
             end
 
         -- Third Dropdown Logic
 
         elseif this.name == 'third' then
-            submitButton:SetEnabled(true);
+            pdkp_dropdown_enables_submit = true;
         end
 
         if updateAmountBox then
 
             amountBox:SetText(adjustAmount);
         end
+
+        GUI:ToggleSubmitButton()
     end
 
     for i=1, #dropdowns do
@@ -206,7 +221,7 @@ function GUI:CreateRaidDkpDropdown()
     rd:ClearAllPoints();
     rd:SetList(core.raids);
     rd:SetValue(currentRaid);
-    rd:SetLabel('Raid DKP');
+    rd:SetLabel('Raid Selection');
     rd:SetText(currentRaid);
 
     rd:SetParent(GUI.pdkp_frame);
@@ -218,6 +233,8 @@ function GUI:CreateRaidDkpDropdown()
 
     rd:SetCallback("OnValueChanged", function(this, event, index)
         DKP:ChangeDKPSheets(core.raids[index])
+        GUI:UpdateEasyStats();
+        pdkp_dkp_table_filter();
     end)
 
     GUI.raidDropdown = rd;
@@ -361,7 +378,8 @@ end
 function GUI:EntryClicked(charObj, clickType, bName)
     if GUI:IsNotSelected(charObj.name) == false then
         _G[bName].customTexture:Hide();
-       return GUI:ClearSelected();
+       GUI:ClearSelected();
+        return;
     end
 
     GUI:ClearSelected() -- clear all previous selections
@@ -396,9 +414,7 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     local startIndex; -- the entry we're starting at.
     local endIndex; -- the entry we're ending at.
 
-    -- Selection Bug Fix below.
-
-    local displayData = GUI:GetTableDisplayData();
+    local displayData = GUI:GetTableDisplayData(true);
 
     local charObjStop = getglobal("pdkp_dkp_entry" .. currNum)
     charObjStop = charObjStop.char;
@@ -483,9 +499,9 @@ function GUI:ClearSelected()
     GUI.lastEntryClicked = nil;
     GUI.lastEntryNameClicked = nil;
     pdkp_dkp_scrollbar_Update()
+    GUI:ToggleSubmitButton()
 
     if not GUI.lastEntryClicked then return end;
---    _G[GUI.lastEntryClicked].historyOpen = false;
     _G[GUI.lastEntryClicked].historyFrame:Hide();
 end
 
@@ -509,6 +525,7 @@ function GUI:SelectedEntriesUpdated()
     if selectedCount > 0 and selectedCount < 2 then enabled = true end
     shroudButton:SetEnabled(enabled);
     rollButton:SetEnabled(enabled);
+    GUI:ToggleSubmitButton()
 
     GUI:UpdateSelectedEntriesLabel()
 end
@@ -520,7 +537,17 @@ function GUI:HideElements()
 end
 
 function GUI:ToggleSubmitButton()
+    if pdkp_dkp_amount_box == nil then return end;
+    -- Someone is selected
+    -- Amount is in the box
+    -- Reason is selected (sub-sections are selected)
+    local hasSelected = GUI.GetSelectedCount() >= 1;
 
+    local isEmpty = Util:IsEmpty(pdkp_dkp_amount_box:GetText());
+    local submitButton = pdkp_submit_button
+    local isEnabled = pdkp_dropdown_enables_submit and hasSelected and not isEmpty and core.canEdit;
+
+    submitButton:SetEnabled(isEnabled);
 end
 
 ---------------------------
@@ -535,14 +562,24 @@ function GUI:QuickCalculate(type)
     if type == 'shroud' then percent = 0.5 end;
 
     amount = math.ceil(charObj.dkpTotal * percent);
-    getglobal('pdkp_dkp_amount_box'):SetText('-' .. amount);
+    pdkp_dkp_amount_box:SetText('-' .. amount);
 end
 
 -- Update personal DKP text at the top
 function GUI:UpdateEasyStats()
     local charName = PDKP:GetCharName();
     local char_dkp = DKP:GetPlayerDKP(charName);
-    getglobal("pdkp_charInfo"):SetText(charName .. " | " .. char_dkp .. " DKP");
+
+    local charInfoText = charName .. " | " .. char_dkp .. " DKP"
+    charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP"
+
+    getglobal("pdkp_charInfo"):SetText(charInfoText);
+
+    local textLen = string.len(charInfoText);
+    local borderWidths = { [21]=250,  [22]=260,  [23]=270 } -- changes based on characters being displayed.
+    local borderX = borderWidths[textLen] or 240;
+
+    _G['pdkp_easy_stats_border']:SetSize(borderX, 72);
 end
 
 ---------------------------
@@ -551,8 +588,8 @@ end
 
 function GUI:HideAdjustmentGUI(hide)
     local shroudButton = getglobal('pdkp_dkp_quick_shroud');
-    local submitButton = getglobal('pdkp_dkp_submit');
-    local amountBox = getglobal('pdkp_dkp_amount_box');
+    local submitButton = pdkp_submit_button
+    local amountBox = pdkp_dkp_amount_box
     local itemLink = getglobal('pdkp_item_link');
 
     local elements = {shroudButton, submitButton, amountBox, itemLink};
@@ -730,6 +767,7 @@ StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
     bossName = nil,
     OnAccept = function()
         pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossID);
+        StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
     end,
     OnCancel = function() end,
     timeout = 0,

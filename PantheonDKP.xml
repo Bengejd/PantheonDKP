@@ -66,8 +66,8 @@
 			</Layer>
 
 			<Layer level="BORDER">
-				<Texture parentKey="pdkp_charName_frame" file="Interface\CastingBar\UI-CastingBar-Border-Small">
-					<Size x="240" y="72" />
+				<Texture parentKey="pdkp_charName_frame" name="pdkp_easy_stats_border" file="Interface\CastingBar\UI-CastingBar-Border-Small">
+					<Size x="270" y="72" />
 					<Anchors>
 						<Anchor point="TOPLEFT" y="-25" x="65" />
 					</Anchors>
@@ -182,7 +182,7 @@
 
 				<!-- CHARACTER NAME & DKP TEXT -->
 
-				<FontString name="pdkp_charInfo" inherits="GameFontNormalLeftYellow" text="Neekio | 9999 DKP" justifyH="LEFT">
+				<FontString name="pdkp_charInfo" inherits="GameFontNormalLeftYellow" text="" justifyH="LEFT">
 					<Size x="175" y="20" />
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.pdkp_title" x="-30" y="-35" />
@@ -504,6 +504,9 @@
 
 						amountBox:SetText('');
 					</OnEnterPressed>
+					<OnTextChanged>
+						pdkp_template_function_call('toggleSubmitButton');
+					</OnTextChanged>
 					<OnEscapePressed>
 						self:ClearFocus()
 					</OnEscapePressed>

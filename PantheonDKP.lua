@@ -34,26 +34,36 @@ core.filterOffline = nil
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
+
     if event == "ADDON_LOADED" then
         Util:Debug('Addon loaded')
         PDKP:OnInitialize(event, arg1)
         UnregisterEvent(self, event)
         return
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        local arg1, arg2, arg3, arg4,arg5, _, _,_, _, _, _, _ = ...;
+        print(arg1, arg2)
+        print(event, ...)
+       -- UnregisterEvent(self, event)
+        return
     elseif event == "GUILD_ROSTER_UPDATE" then
 --        Guild:GetGuildData();
 --        DKP:SyncWithGuild();
         return;
-    elseif event == "GROUP_ROSTER_UPDATE" then return
+    elseif event == "GROUP_ROSTER_UPDATE" then
+        Raid:GetRaidInfo()
+        return
     elseif event == "ENCOUNTER_START" then return -- for testing purposes
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then return -- NPC kill event
-    elseif event == "LOOT_OPENED" then return
+    elseif event == "LOOT_OPENED" then return -- when the loot bag is opened.
+    elseif event == "OPEN_MASTER_LOOT_LIST" then return -- when the master loot list is opened.
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
         local _, name, _, _,_, _, _ _, _ ,_, _, _ = ...;
         return
     elseif event == "CHAT_MSG_RAID_LEADER" then return
     elseif event == "CHAT_MSG_WHISPER" then
---        local msg = arg1;
+        --        local msg = arg1;
         local _, _, _, arg4,_, _, _,_, _, _, _, _ = ...;
         local text = arg1;
         local name = arg4;
@@ -61,7 +71,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         Shroud:ShroudingSent(text, name);
         return
     elseif event == "CHAT_MSG_GUILD" then return
-    elseif event == "PLAYER_ENTERING_WORLD" then return
+
     elseif event == "ZONE_CHANGED_NEW_AREA" then return
     elseif event == "BOSS_KILL" then
         PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
@@ -100,7 +110,7 @@ function PDKP:OnInitialize(event, name)
     -- Register Communications --
     -----------------------------
 
-    PDKP:RegisterComm('pdkp_testing_com', pdkp_comm_received_test)
+    Comms:RegisterCommCommands()
 end
 
 -- Initializes the PDKP Databases.
@@ -141,8 +151,6 @@ function PDKP:HandleSlashCommands(msg, item)
         return GUI:Hide()
     end
 
-
-
     if msg == 'shroud' then
         return Shroud:ShroudingSent('shroud', Util:GetMyName());
     end
@@ -174,20 +182,16 @@ function PDKP:HandleSlashCommands(msg, item)
        return GUI:CreateTimer()
     end
 
-    if msg == 'comms' then
-       return pdkp_comm_sent_test()
-    end
-
-    if msg == 'change_raid' then
-        if DKP.dkpDB.currentDB == 'Molten Core' then
-            return DKP:ChangeDKPSheets('Blackwing Lair')
-        elseif DKP.dkpDB.currentDB == 'Blackwing Lair' then
-            return DKP:ChangeDKPSheets('Molten Core')
-        end
-    end
-
     if msg == 'pdkp_reset_all_db' and core.defaults.debug then
         DKP:ResetDB()
+    end
+
+    if msg == 'test_boss' then
+        Raid:GetCurrentRaid()
+    end
+
+    if msg == 'pdkp_testing_com' then
+        Comms:pdkp_send_comm()
     end
 end
 
@@ -198,18 +202,29 @@ function PDKP:BuildAllData()
 
     PDKP.data = {};
 
-    for i=1, Guild:GetMemberCount() do
-        local gMember = gMembers[i];
-        local dkpEntry = dkpEntries[gMember.name];
+    local errorText;
 
-        if gMember and dkpEntry then
-            gMember.dkpTotal = dkpEntry.dkpTotal;
-            table.insert(PDKP.data, gMember);
-        else
-            if gMember.name then
-            Util:Debug("SHIT THIS GUY WAS NOT FOUND: " .. gMember.name);
+    for i=1, #gMembers do
+        local gMember = gMembers[i];
+
+        -- Check for weird gMember bug where shit is missing?
+        if gMember.name then
+            local dkpEntry = dkpEntries[gMember.name];
+
+            if gMember and dkpEntry then
+                gMember.dkpTotal = dkpEntry.dkpTotal;
+                table.insert(PDKP.data, gMember);
+            elseif gMember.name then
+                errorText = 'BuildAllData...Member was not found' .. gMember.name;
+            else
+                errorText = 'BuildAllData Initilization... Index: ' .. i
             end
+
+        else
+            errorText = 'BuildAllData...Improperly created member ' .. i;
         end
+        if errorText then Util:ThrowError(errorText); end
+        errorText = nil;
     end
 end
 
@@ -249,6 +264,7 @@ function PDKP:Show()
 
     if GUI.reasonDropdown then GUI.reasonDropdown.frame:Show() end;
     if GUI.raidDropdown then GUI.raidDropdown.frame:Show() end;
+
 end
 
 -----------------------------
@@ -271,6 +287,7 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'pdkp_change_table_view' then return GUI:pdkp_change_view(object) end;
 
     if funcName == 'pdkp_toggle_online' then return GUI:UpdateOnlineStatus(object) end;
+    if funcName == 'pdkp_in_raid_checkbox' then return GUI:ToggleInRaid(object) end;
     if funcName == 'pdkp_dkp_table_filter' then return pdkp_dkp_table_filter() end;
 
     if funcName == 'pdkp_toggle_selected' then return GUI:pdkp_toggle_selected() end;
@@ -281,6 +298,8 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
 
     if funcName == 'pdkp_quick_shroud' then return GUI:QuickCalculate('shroud') end;
     if funcName == 'pdkp_quick_roll' then return GUI:QuickCalculate('roll') end;
+
+    if funcName == 'toggleSubmitButton' then return GUI:ToggleSubmitButton() end;
 end
 
 

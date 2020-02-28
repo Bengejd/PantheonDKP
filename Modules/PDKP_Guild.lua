@@ -15,9 +15,10 @@ local GuildDB;
 local Player = nil;
 
 local guildDBDefaults = {
-    char = {
+    profile = {
         name = nil,
         numOfMembers = nil,
+        serialized = true,
         members = {}
     }
 }
@@ -26,8 +27,8 @@ local guildDBDefaults = {
 function Guild:InitGuildDB()
     Util:Debug('GuildDB init');
 
-    core.Guild.db = LibStub("AceDB-3.0"):New("pdkp_guildDB", guildDBDefaults);
-    GuildDB = Guild:GetDB();
+    core.Guild.db = LibStub("AceDB-3.0"):New("pdkp_guildDB", guildDBDefaults, true);
+    GuildDB = core.Guild.db.profile;
 end
 
 -- Sets the guildDB's data.
@@ -57,7 +58,7 @@ function Guild:GetGuildData(onlineOnly)
     local onlineMembers = {};
 
     for i=1, GuildDB.numOfMembers do
-        local name, rank, rankIndex, lvl, class, __, __, __, online, __, __ = GetGuildRosterInfo(i)
+        local name, _, rankIndex, lvl, class, __, __, __, online, __, __ = GetGuildRosterInfo(i)
         name = Util:RemoveServerName(name)
 
         if onlineOnly then
@@ -66,15 +67,18 @@ function Guild:GetGuildData(onlineOnly)
                 ['online']=online,
             });
         else
-            table.insert(GuildDB.members, {
-                ["name"]=name,
-                ['rank']=rank,
-                ['rankIndex']=rankIndex,
-                ["class"]=class,
-                ['online']=online,
-                ['lvl']=lvl,
-                ["class_color"]=core.defaults.class_colors[class], -- so we can display the class later.
-            });
+            if lvl >= 55 or rankIndex <= 4 then
+                if not Guild:IsMember(name, rankIndex) then
+                    table.insert(GuildDB.members, {
+                        ["name"]=name,
+                        ['rankIndex']=rankIndex,
+                        ["class"]=class,
+                        ['online']=online,
+                        ['canEdit']=rankIndex <= 4,
+                    });
+                end
+
+            end
         end
 
         if name == Util:GetMyName() then
@@ -84,17 +88,33 @@ function Guild:GetGuildData(onlineOnly)
     end
 
     if onlineOnly then Util:Debug("Online Members Total: " .. #onlineMembers) end
+    Guild:VerifyGuildData()
     return onlineMembers; -- Always return, even if it's empty.
 end
 
-function Guild:GetBankIndex()
-    GuildRoster()
-    GetGuildRosterShowOffline()
+function Guild:VerifyGuildData()
+    for i=1, #GuildDB.members do
+        local member = GuildDB.members[i]
+        if member['name'] == nil then
+            table.remove(GuildDB.members, i)
+            GuildDB.numOfMembers = GuildDB.numOfMembers - 1;
+        end
+    end
 end
 
-function Guild:IsMember(name)
+function Guild:GetMyGuildInfo()
+    if IsInGuild() then
+        local guildName, guildRankName, guildRankIndex, realmName = GetGuildInfo("player");
+        return guildName, guildRankName, guildRankIndex, realmName;
+    end
+end
+
+function Guild:IsMember(name, rankIndex)
     for _,v in pairs(GuildDB.members) do
-        if v['name'] == name then return true; end
+        if v['name'] == name then
+            if rankIndex and v['name'] then v['rankIndex'] = rankIndex; end
+            return true;
+        end
     end
     return false;
 end
@@ -103,22 +123,23 @@ function Guild:CanEdit()
     return core.canEdit;
 end
 
+function Guild:CanMemberEdit(name)
+    for _, v in pairs(GuildDB.members) do
+        if v['name'] == name then
+            return v['canEdit'];
+        end
+    end
+    return false; -- Member was not found in the Guild Roster.
+end
+
 function Guild:GetClassBreakdown()
     local classes={
-        ['Druid']= 0,
-        ['Hunter']=0,
-        ['Mage']=0,
-        ['Paladin']=0,
-        ['Priest']=0,
-        ['Rogue']=0,
-        ['Warlock']=0,
-        ['Warrior']=0,
-    };
-    for key, charObj in pairs(GuildDB.members) do
-        if charObj.name then
-            if charObj.lvl >= 60 then
-               classes[charObj.class] = classes[charObj.class] + 1;
-            end
+        ['Druid']= 0, ['Hunter']=0, ['Mage']=0, ['Paladin']=0,
+        ['Priest']=0, ['Rogue']=0, ['Warlock']=0, ['Warrior']=0,
+    }
+    for _, charObj in pairs(GuildDB.members) do
+        if charObj.name and charObj.lvl >= 60 then
+            classes[charObj.class] = classes[charObj.class] + 1;
         end
     end
 
@@ -133,7 +154,7 @@ end
 
 -- Simple method to return the guild's database for methods outside this file.
 function Guild:GetDB()
-    return core.Guild.db.char;
+    return core.Guild.db.profile;
 end
 
 -- Returns the total members count from the database.
