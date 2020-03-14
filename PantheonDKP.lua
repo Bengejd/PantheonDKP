@@ -14,6 +14,8 @@ local Invites = core.Invites;
 local Raid = core.Raid;
 local Comms = core.Comms;
 
+local PlaySound = PlaySound
+
 --[[
     KNOWN BUGS:
 ]]
@@ -248,6 +250,8 @@ end
 function PDKP:Show()
     if GUI.shown then return end -- Don't open more than one instance of PDKP
 
+    PlaySound(826)
+
     --    print('PDKP_UID: ', core.defaults.pdkp_is_in_guild)
 
     GUI:CreateMainFrame()
@@ -261,6 +265,7 @@ function PDKP:Show()
 
     GUI.pdkp_frame:Show()
     GUI.shown = true;
+    GUI.HistoryCheck.frame:Show()
 
     if GUI.reasonDropdown then GUI.reasonDropdown.frame:Show() end;
     if GUI.raidDropdown then GUI.raidDropdown.frame:Show() end;

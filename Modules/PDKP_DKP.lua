@@ -203,6 +203,11 @@ function DKP:UpdateHistory(name, dkpChange, global_server_time)
         historyText = historyText .. buttonText:GetText()
     end
 
+    if raid == nil then
+        raid = DKP.dkpDB.currentDB
+        print('No raid found, setting raid to '.. raid)
+    end
+
     local historyEntry = {
         ['text'] = historyText,
         ['reason'] = reason,

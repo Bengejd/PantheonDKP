@@ -27,9 +27,13 @@ GUI.raidDropdown = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
+local PlaySound = PlaySound
+
 local pdkp_dropdown_enables_submit = false;
 local pdkp_dkp_amount_box;
 local pdkp_submit_button;
+
+GUI.HistoryTItle = Util:FormatFontTextColor('FFBA49', 'Recent History')
 
 GUI.adjustmentReasons = {
     "On Time Bonus",
@@ -236,6 +240,10 @@ function GUI:CreateRaidDkpDropdown()
         DKP:ChangeDKPSheets(core.raids[index])
         GUI:UpdateEasyStats();
         pdkp_dkp_table_filter();
+
+        if GUI.HistoryObj ~= nil then
+            GUI:ShowSelectedHistory(GUI.HistoryObj)
+        end
     end)
 
     GUI.raidDropdown = rd;
@@ -259,14 +267,24 @@ function GUI:CreateHistoryFrame()
     check:SetParent(pdkpCoreFrame)
     check.frame:SetFrameStrata('HIGH');
     check:SetImage('Interface\\Buttons\\UI-GuildButton-OfficerNote-Up.blp')
-    check:SetPoint("TOP", pdkpCoreFrame, "TOP", -30, -42)
-    check.checkbg:SetAlpha(0.0);
-    check.highlight:SetAlpha(0.0);
+    check:SetPoint("TOP", pdkpCoreFrame, "TOP", -32, -43)
+    check.checkbg:SetAlpha(0.0)
+    check.highlight:SetAlpha(0.0)
+    check.check:SetAlpha(0.0)
     check:SetWidth(50)
     check:SetHeight(50)
     check.frame:Show()
+
+    GUI.HistoryCheck = check
+
+    local function showHistoryFrame(checked, buttonCall)
+        if checked then GUI.HistoryFrame:Show() else GUI.HistoryFrame:Hide() end
+        -- Workaround for check button not firing when using the easyStats to toggle.
+        if not buttonCall and checked then PlaySound(856) elseif not buttonCall then PlaySound(857) end
+    end
+
     check:SetCallback("OnValueChanged", function(self, _, checked)
-        SetDesaturation(self.check, false)
+        showHistoryFrame(checked, true)
     end)
 
     local b = CreateFrame("Button", "pdkpHistoryButton", pdkpCoreFrame, 'UIPanelButtonTemplate')
@@ -275,13 +293,8 @@ function GUI:CreateHistoryFrame()
     b:SetWidth(210);
     b:SetAlpha(0);
     b:SetScript("OnClick", function()
-        if GUI.HistoryFrame.isShown then
-            GUI.HistoryFrame:Hide()
-            GUI.HistoryFrame.isShown = false
-        else
-            GUI.HistoryFrame:Show()
-            GUI.HistoryFrame.isShown = true
-        end
+        check:ToggleChecked()
+        showHistoryFrame(check:GetValue(), false)
     end)
     GUI.historyButton = b
 
@@ -297,11 +310,8 @@ function GUI:CreateHistoryFrame()
         backdropColor = { r=0.7, g=1, b=0.7, a=1 },
     });
     hf:EnableMouse(true)
---    hf:SetMovable(true)
     hf:SetFrameStrata('FULLSCREEN');
     hf:RegisterForDrag("LeftButton")
---    hf:SetScript("OnDragStart", hf.StartMoving)
---    hf:SetScript("OnDragStop", hf.StopMovingOrSizing)
 
     local scrollcontainer = AceGUI:Create("InlineGroup")
     scrollcontainer:SetFullWidth(false)
@@ -338,18 +348,21 @@ function GUI:CreateHistoryFrame()
     hf:Hide()
     scrollcontainer.frame:Hide()
     GUI.HistoryFrame = hf
-    GUI.HistoryFrame.isShown = false
+
+    GUI.HistoryFrame.historyTitle:SetText(GUI.HistoryTItle)
 end
 
 -- Hides the PDKP UI
 function GUI:Hide()
     if not GUI.shown then return end -- Don't open more than one instance of PDKP
 
+    PlaySound(851)
+
     PDKP:Print("Hiding PDKP")
 
     GUI.pdkp_frame:Hide()
     GUI.shown = false;
-    GUI.HistoryFrame.isShown = false
+    GUI.HistoryCheck.frame:Hide()
 
     GUI.HistoryFrame:Hide()
 
@@ -482,8 +495,6 @@ function GUI:EntryClicked(charObj, clickType, bName)
     GUI:AddToSelected(charObj);
 
     GameTooltip:Hide();
-
-    if clickType == 'RightButton' then GUI:ToggleHistory(bName); end
 end
 
 -- Handles the shift click of an entry
@@ -584,17 +595,16 @@ function GUI:ShowSelectedHistory(charObj)
     local b = _G[charObj['bName']]
     local dkpHistory = DKP.dkpDB.history[charObj['name']]
 
-    if dkpHistory == nil or #dkpHistory == 0 then -- there is no dkp history to show, hide the frame and end function.
-        -- Hide the frame todo
-        return
-    end
-
-    GUI.HistoryFrame.scroll:ReleaseChildren()
-
     local charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
     local title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
 
-    GUI.HistoryFrame.historyTitle:SetText(title)
+    GUI.HistoryFrame.historyTitle:SetText(title) -- Set the title.
+    GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
+
+    if dkpHistory == nil or #dkpHistory == 0 then -- there is no dkp history to show, hide the frame and end function.
+        return
+    end
+
 
     local font = "GameFontNormalLarge"
 
@@ -605,52 +615,52 @@ function GUI:ShowSelectedHistory(charObj)
         local dkpChangeText = dkpHistory[i]['dkpChangeText']
         local lineText = dkpHistory[i]['text']
 
-        if raid and raid ~= DKP.dkpDB.currentDB then -- Don't show history from other raids.
-           -- TODO
+        if raid and raid == DKP.dkpDB.currentDB then -- Only show history relevent to this raid.
+            local scroll = GUI.HistoryFrame.scroll
+
+            local dkpChangeLabel = AceGUI:Create("Label")
+            local dkpTextLabel = AceGUI:Create("Label")
+
+            dkpTextLabel:SetText(lineText)
+            dkpChangeLabel:SetText(dkpChangeText)
+
+            dkpTextLabel:SetFullWidth(false)
+            dkpChangeLabel:SetFullWidth(false)
+
+            local ig = AceGUI:Create("InlineGroup")
+
+            local formattedDate = Util:Format12HrDateTime(dkpHistory[i]['datetime'])
+            local title = formattedDate
+
+            if dkpHistory[i]['raid'] then
+                title = dkpHistory[i]['raid'] .. ' | ' .. formattedDate
+            end
+
+            ig:SetTitle(title)
+            ig:SetLayout("Flow")
+
+            local sg1 = AceGUI:Create("SimpleGroup")
+            local sg2 = AceGUI:Create("SimpleGroup")
+
+            ig:SetFullWidth(true)
+
+            sg1:SetFullWidth(false)
+            sg2:SetFullWidth(false)
+
+            sg1:AddChild(dkpTextLabel)
+            sg2:AddChild(dkpChangeLabel)
+
+            sg1:SetWidth(238)
+            sg2:SetWidth(50)
+
+            ig:AddChild(sg1)
+            ig:AddChild(sg2)
+
+            scroll:AddChild(ig)
         end
-
-        local scroll = GUI.HistoryFrame.scroll
-
-        local dkpChangeLabel = AceGUI:Create("Label")
-        local dkpTextLabel = AceGUI:Create("Label")
-
-        dkpTextLabel:SetText(lineText)
-        dkpChangeLabel:SetText(dkpChangeText)
-
-        dkpTextLabel:SetFullWidth(false)
-        dkpChangeLabel:SetFullWidth(false)
-
-        local ig = AceGUI:Create("InlineGroup")
-
-        local formattedDate = Util:Format12HrDateTime(dkpHistory[i]['datetime'])
-        local title = formattedDate
-
-        if dkpHistory[i]['raid'] then
-        title = dkpHistory[i]['raid'] .. ' | ' .. formattedDate
-        end
-
-        ig:SetTitle(title)
-        ig:SetLayout("Flow")
-
-        local sg1 = AceGUI:Create("SimpleGroup")
-        local sg2 = AceGUI:Create("SimpleGroup")
-
-        ig:SetFullWidth(true)
-
-        sg1:SetFullWidth(false)
-        sg2:SetFullWidth(false)
-
-        sg1:AddChild(dkpTextLabel)
-        sg2:AddChild(dkpChangeLabel)
-
-        sg1:SetWidth(238)
-        sg2:SetWidth(50)
-
-        ig:AddChild(sg1)
-        ig:AddChild(sg2)
-
-        scroll:AddChild(ig)
     end
+
+    GUI.HistoryObj = charObj
 end
 
 -- Hides the custom textures for entries in the selected table, and then empties the table completely.
@@ -659,10 +669,6 @@ function GUI:ClearSelected()
         if charObj.name then
             GUI.selected[charObj.name] = nil;
         end
-        if charObj.bName then
-           _G[charObj.bName].historyOpen = false;
-            _G[charObj.bName].historyFrame:Hide();
-        end
     end
     GUI.selected = {};
     GUI.lastEntryClicked = nil;
@@ -670,17 +676,8 @@ function GUI:ClearSelected()
     pdkp_dkp_scrollbar_Update()
     GUI:ToggleSubmitButton()
 
+    GUI.HistoryFrame.historyTitle:SetText(GUI.HistoryTItle)
     if not GUI.lastEntryClicked then return end;
-    _G[GUI.lastEntryClicked].historyFrame:Hide();
-end
-
-function GUI:ToggleHistory(bName)
-    bName = bName or GUI.lastEntryClicked;
-    if not bName then return end;
-    local b = _G[bName];
-
-    b.historyOpen = b.historyOpen ~= true;
-    if b.historyOpen then b.historyFrame:Show() else b.historyFrame:Hide() end;
 end
 
 -- Disalbes / Enables the shrouding & roll buttons if more than 1 person is selected.

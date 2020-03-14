@@ -2,9 +2,16 @@ OOP:
     - Entries should be singular objects.
     - Members should be an object with associated functions attached as well.
 
-
-Actions:
-	- Start raid (Starts logging guild sign-in / party-join events)
+TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
+TODO: Start Raid (Starts Logging, Guild invites, party-join events)
+TODO: Enable PUGS
+TODO: Options table for changing Raid DKP amounts.
+TODO: Decay (No call / no-show: 20%)
+TODO: Excused absence: 15%
+TODO: Partial Update
+TODO: Full database replacement
+TODO: Request Data (Event)
+TODO: Request Data (received)
 
 Table Filters:
 	- Show Pugs
@@ -34,12 +41,6 @@ Useful Functions:
     - PLAYER_GUILD_UPDATE"
 
 - Only log recently updated data for merge purposes.
-
-- Data updates
-    - Partial update
-    - Full database replacement
-    - Request data (event)
-    - Request data (received)
 
 - Comms name registrar
     - pdkp_serverName_guildName
