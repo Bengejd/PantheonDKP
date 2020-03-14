@@ -1,24 +1,13 @@
-Modulaize the saved data:
-	- Guild data
-	- Recent Raid Data
-	- Character data
-	- DKP history data
-	- item history data
-	- edit history data
-- Display data (table data)
+OOP:
+    - Entries should be singular objects.
+    - Members should be an object with associated functions attached as well.
+
 
 Actions:
 	- Start raid (Starts logging guild sign-in / party-join events)
-	    - Save who started the event
-	    - Only officers who can edit the MOTD can start / end events.
 
 Table Filters:
-	- Show Raid
-	- Show Guild
 	- Show Pugs
-	- Classes
-	- Show online / offline
-	- Search filter
 
 - Options
 	- On time bonus DKP: 10 (int or %)

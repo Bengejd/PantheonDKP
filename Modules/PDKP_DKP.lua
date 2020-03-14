@@ -55,6 +55,20 @@ function DKP:InitDKPDB()
     print('Current raid DKP shown: ', dkpDB.currentDB);
 end
 
+--[[
+--
+--     HISTORY IDEA:
+--  Keep a generalized History object in the database, which houses all of the DKP history changes.
+--  Give that DKP object a Unique ID, whatever members are being edited using that object, add the object ID to their
+--  Personal "History" table.
+--
+--  HistoryDB -> History -> Array of Object details: [UID] -> Details
+--  Members -> Members -> History -> Array of UUID's -> ID1, ID2, ID67
+--  This would make it a lot easier to merge the tables because you would be able to tell if an edit was missing from
+--  one or the other! Also, keep a list of "Deleted" entries, so that if list 1 is more up to date, and deletes an entry
+--  than list 2 still has that entry, list 2 knows to delete that entry as well.
+ ]]
+
 -- cheaty way to update dkp via the boss kill event.
 function DKP:BossKill(charObj)
 

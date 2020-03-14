@@ -55,6 +55,7 @@ function GUI:CreateMainFrame()
         GUI:CreateAdjustDropdown()
         GUI:SelectedEntriesUpdated()
         GUI:CreateRaidDkpDropdown()
+        GUI:CreateHistoryFrame()
 
         pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
         pdkp_submit_button =  _G['pdkp_dkp_submit'];
@@ -251,6 +252,95 @@ function GUI:UpdateSelectedEntriesLabel()
 
 end
 
+function GUI:CreateHistoryFrame()
+
+    local check = AceGUI:Create("CheckBox")
+    check:SetValue(false)
+    check:SetParent(pdkpCoreFrame)
+    check.frame:SetFrameStrata('HIGH');
+    check:SetImage('Interface\\Buttons\\UI-GuildButton-OfficerNote-Up.blp')
+    check:SetPoint("TOP", pdkpCoreFrame, "TOP", -30, -42)
+    check.checkbg:SetAlpha(0.0);
+    check.highlight:SetAlpha(0.0);
+    check:SetWidth(50)
+    check:SetHeight(50)
+    check.frame:Show()
+    check:SetCallback("OnValueChanged", function(self, _, checked)
+        SetDesaturation(self.check, false)
+    end)
+
+    local b = CreateFrame("Button", "pdkpHistoryButton", pdkpCoreFrame, 'UIPanelButtonTemplate')
+    b:SetPoint("TOPLEFT", 95, -50)
+    b:SetHeight(25);
+    b:SetWidth(210);
+    b:SetAlpha(0);
+    b:SetScript("OnClick", function()
+        if GUI.HistoryFrame.isShown then
+            GUI.HistoryFrame:Hide()
+            GUI.HistoryFrame.isShown = false
+        else
+            GUI.HistoryFrame:Show()
+            GUI.HistoryFrame.isShown = true
+        end
+    end)
+    GUI.historyButton = b
+
+    local hf = CreateFrame("Frame", "pdkpHistoryFrame", pdkpCoreFrame, nil)
+    hf:SetPoint("TOPRIGHT", 235,-75)
+    hf:SetHeight(575);
+    hf:SetWidth(450);
+    hf:SetBackdrop( {
+        bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\PDKPFrame-Middle",
+        edgeFile = nil, tile = false, tileEdge = true, tileSize = 0, edgeSize = 32,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        backdropBorderColor = { r=0.7, g=1, b=0.7, a=1 },
+        backdropColor = { r=0.7, g=1, b=0.7, a=1 },
+    });
+    hf:EnableMouse(true)
+--    hf:SetMovable(true)
+    hf:SetFrameStrata('FULLSCREEN');
+    hf:RegisterForDrag("LeftButton")
+--    hf:SetScript("OnDragStart", hf.StartMoving)
+--    hf:SetScript("OnDragStop", hf.StopMovingOrSizing)
+
+    local scrollcontainer = AceGUI:Create("InlineGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(475)
+    scrollcontainer:SetWidth(350)
+    scrollcontainer:SetLayout("Fill")
+
+    local font="GameFontHighlightLarge"
+    local title = hf:CreateFontString('pdkp_history_label', "ARTWORK", font);
+    title:SetText('')
+    title:SetPoint("TOP", 20, -20);
+    hf.historyTitle = title;
+
+    scrollcontainer:SetParent(hf)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", hf, "CENTER", 25, -15);
+
+    hf:SetScript("OnShow", function()
+        scrollcontainer.frame:Show()
+        GUI.reasonDropdown.frame:Hide()
+    end)
+    hf:SetScript("OnHide", function()
+        scrollcontainer.frame:Hide()
+        GUI.reasonDropdown.frame:Show()
+    end)
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    hf.scroll = scroll
+
+    hf:Hide()
+    scrollcontainer.frame:Hide()
+    GUI.HistoryFrame = hf
+    GUI.HistoryFrame.isShown = false
+end
+
 -- Hides the PDKP UI
 function GUI:Hide()
     if not GUI.shown then return end -- Don't open more than one instance of PDKP
@@ -259,6 +349,9 @@ function GUI:Hide()
 
     GUI.pdkp_frame:Hide()
     GUI.shown = false;
+    GUI.HistoryFrame.isShown = false
+
+    GUI.HistoryFrame:Hide()
 
     -- Hide the item link as well.
     local itemLinkButton = GUI:GetItemButton();
@@ -472,6 +565,8 @@ function GUI:AddToSelected(charObj)
 --    entryButton.customTexture:Show();
     pdkp_dkp_scrollbar_Update()
     GUI:SelectedEntriesUpdated()
+
+    GUI:ShowSelectedHistory(charObj)
 end
 
 -- Removes the entry from the selected array.
@@ -482,6 +577,80 @@ function GUI:RemoveFromSelected(charObj)
     table.remove(GUI.selected, Util:FindTableIndex(GUI.selected, charObj.name));
 
     GUI:SelectedEntriesUpdated()
+end
+
+function GUI:ShowSelectedHistory(charObj)
+
+    local b = _G[charObj['bName']]
+    local dkpHistory = DKP.dkpDB.history[charObj['name']]
+
+    if dkpHistory == nil or #dkpHistory == 0 then -- there is no dkp history to show, hide the frame and end function.
+        -- Hide the frame todo
+        return
+    end
+
+    GUI.HistoryFrame.scroll:ReleaseChildren()
+
+    local charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
+    local title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
+
+    GUI.HistoryFrame.historyTitle:SetText(title)
+
+    local font = "GameFontNormalLarge"
+
+    for i = #dkpHistory, 1, -1 do
+        local raid = dkpHistory[i]['raid'];
+        if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end -- Set the default since MC & Ony are combined.
+
+        local dkpChangeText = dkpHistory[i]['dkpChangeText']
+        local lineText = dkpHistory[i]['text']
+
+        if raid and raid ~= DKP.dkpDB.currentDB then -- Don't show history from other raids.
+           -- TODO
+        end
+
+        local scroll = GUI.HistoryFrame.scroll
+
+        local dkpChangeLabel = AceGUI:Create("Label")
+        local dkpTextLabel = AceGUI:Create("Label")
+
+        dkpTextLabel:SetText(lineText)
+        dkpChangeLabel:SetText(dkpChangeText)
+
+        dkpTextLabel:SetFullWidth(false)
+        dkpChangeLabel:SetFullWidth(false)
+
+        local ig = AceGUI:Create("InlineGroup")
+
+        local formattedDate = Util:Format12HrDateTime(dkpHistory[i]['datetime'])
+        local title = formattedDate
+
+        if dkpHistory[i]['raid'] then
+        title = dkpHistory[i]['raid'] .. ' | ' .. formattedDate
+        end
+
+        ig:SetTitle(title)
+        ig:SetLayout("Flow")
+
+        local sg1 = AceGUI:Create("SimpleGroup")
+        local sg2 = AceGUI:Create("SimpleGroup")
+
+        ig:SetFullWidth(true)
+
+        sg1:SetFullWidth(false)
+        sg2:SetFullWidth(false)
+
+        sg1:AddChild(dkpTextLabel)
+        sg2:AddChild(dkpChangeLabel)
+
+        sg1:SetWidth(238)
+        sg2:SetWidth(50)
+
+        ig:AddChild(sg1)
+        ig:AddChild(sg2)
+
+        scroll:AddChild(ig)
+    end
 end
 
 -- Hides the custom textures for entries in the selected table, and then empties the table completely.
@@ -571,7 +740,8 @@ function GUI:UpdateEasyStats()
     local char_dkp = DKP:GetPlayerDKP(charName);
 
     local charInfoText = charName .. " | " .. char_dkp .. " DKP"
-    charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP"
+
+    if(core.defaults) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
 
     getglobal("pdkp_charInfo"):SetText(charInfoText);
 
@@ -717,7 +887,7 @@ local dkp_reason_menu = {
 }
 
 function GUI:ReasonDropdown()
-    local dkp_reason_menu_frame = CreateFrame("Frame", "pdkp_ExampleMenuFrame", UIParent, "UIDropDownMenuTemplate")
+    local dkp_reason_menu_frame = CreateFrame("Frame", "pdkp_reason_menu_dropdown", UIParent, "UIDropDownMenuTemplate")
 
     -- Make the menu appear at the cursor:
     EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, "cursor", 0 , 0, "MENU");

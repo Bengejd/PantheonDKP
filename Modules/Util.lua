@@ -102,6 +102,11 @@ function Util:FormatDateTime(dateTime)
     return date("%m/%d/%y %H:%M:%S", dateTime)
 end
 
+-- Thur, Jan 4 - 12:32 PM
+function Util:Format12HrDateTime(dateTime)
+    return date("%a, %b %d | %I:%M %p", dateTime)
+end
+
 -- Utility function to format the date.
 function Util:GetFormatedDate(dateTime)
     return date('%m/%d/%Y', dateTime);

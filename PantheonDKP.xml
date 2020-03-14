@@ -242,7 +242,6 @@
 		</Layers>
 
 		<Frames>
-
 			<Button name="pdkp_guildFrameColumnHeader" inherits="PDKPScrollColumnNameTemplate" text="Name" parentKey="pdkp_topLeft">
 				<Size>
 					<AbsDimension x="170" y="24"/>
