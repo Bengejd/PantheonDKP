@@ -37,7 +37,7 @@ GUI.HistoryTItle = Util:FormatFontTextColor('FFBA49', 'Recent History')
 
 GUI.adjustmentReasons = {
     "On Time Bonus",
-    "Signup Bonus",
+    "Completion Bonus",
     "Benched",
     "Boss Kill",
     "Unexcused Absence",

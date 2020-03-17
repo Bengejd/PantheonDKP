@@ -455,6 +455,10 @@ function DKP:GetLastEdit()
     return dkpDB.lastEdit
 end
 
+function DKP:GetCurrentDB()
+    return dkpDB.currentDB
+end
+
 function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
     if dkpChange == 0 or Util:IsEmpty(name) then return end;
     if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end
