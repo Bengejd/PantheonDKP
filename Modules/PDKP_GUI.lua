@@ -272,7 +272,7 @@ function GUI:CreateHistoryFrame()
     check.highlight:SetAlpha(0.0)
     check.check:SetAlpha(0.0)
     check:SetWidth(50)
-    check:SetHeight(50)
+    check:SetHeight(20)
     check.frame:Show()
 
     GUI.HistoryCheck = check
@@ -602,9 +602,14 @@ function GUI:ShowSelectedHistory(charObj)
     GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
 
     if dkpHistory == nil or #dkpHistory == 0 then -- there is no dkp history to show, hide the frame and end function.
+        local scroll = GUI.HistoryFrame.scroll
+        local empty = 'No historical data found'
+        empty = Util:FormatFontTextColor('E71D36', empty)
+        local label = AceGUI:Create("Label")
+        label:SetText(empty)
+        scroll:AddChild(label)
         return
     end
-
 
     local font = "GameFontNormalLarge"
 

@@ -69,10 +69,10 @@ function Util:RemoveServerName(name)
 end
 
 function Util:GetDateTimes()
-    local dDate = date("%m/%d/%y");
-    local tTime = date('%r');
-    local server_time = GetServerTime()
-    local datetime = time()
+    local dDate = date("%m/%d/%y"); -- LUA implementation of date.
+    local tTime = date('%r'); -- LUA implementation of time.
+    local server_time = GetServerTime() -- WoW API of the server time.
+    local datetime = time() -- LUA implementation of local machine time.
     return dDate, tTime, server_time, datetime
 end
 

@@ -54,6 +54,7 @@ function GUI:pdkp_dkp_table_sort(sortBy)
     end
 
     local function compare(a,b)
+        if a == 0 and b == 0 then return end
         if core.sortDir == 'ASC' then
             return a[sortBy] > b[sortBy]
         else

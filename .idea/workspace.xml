@@ -5,8 +5,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/Modules/PDKP_DKP.lua" afterPath="$PROJECT_DIR$/Modules/PDKP_DKP.lua" />
       <change beforePath="$PROJECT_DIR$/Modules/PDKP_GUI.lua" afterPath="$PROJECT_DIR$/Modules/PDKP_GUI.lua" />
+      <change beforePath="$PROJECT_DIR$/Modules/PDKP_Guild.lua" afterPath="$PROJECT_DIR$/Modules/PDKP_Guild.lua" />
+      <change beforePath="$PROJECT_DIR$/Modules/Util.lua" afterPath="$PROJECT_DIR$/Modules/Util.lua" />
       <change beforePath="$PROJECT_DIR$/PantheonDKP.lua" afterPath="$PROJECT_DIR$/PantheonDKP.lua" />
-      <change beforePath="$PROJECT_DIR$/todo.txt" afterPath="$PROJECT_DIR$/todo.txt" />
+      <change beforePath="$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua" afterPath="$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,15 +37,17 @@
       <file leaf-file-name="PDKP_GUI.lua" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Modules/PDKP_GUI.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="358" column="18" lean-forward="true" selection-start-line="358" selection-start-column="18" selection-end-line="358" selection-end-column="18" />
+            <state relative-caret-position="265">
+              <caret line="603" column="73" lean-forward="false" selection-start-line="603" selection-start-column="73" selection-end-line="603" selection-end-column="73" />
               <folding>
                 <element signature="e#826#955#1" expanded="false" />
                 <element signature="n#GUI:CreateMainFrame#0" expanded="false" />
                 <element signature="n#GUI:CreatePushButton#0" expanded="false" />
                 <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
                 <element signature="e#2336#2506#0" expanded="false" />
+                <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
                 <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+                <element signature="n#GUI:Hide#0" expanded="false" />
                 <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
                 <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
                 <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -59,7 +63,6 @@
                 <element signature="n#GUI:IsNotSelected#0" expanded="false" />
                 <element signature="n#GUI:AddToSelected#0" expanded="false" />
                 <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-                <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
                 <element signature="n#GUI:ClearSelected#0" expanded="false" />
                 <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
                 <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -74,26 +77,43 @@
                 <element signature="n#GUI:CreateTimer#0" expanded="false" />
                 <element signature="n#GUI:UpdateTimer#0" expanded="false" />
                 <element signature="n#GUI:CancelTimer#0" expanded="false" />
-                <element signature="e#27106#27498#1" expanded="false" />
-                <element signature="e#27968#28051#0" expanded="false" />
-                <element signature="e#28100#28572#1" expanded="false" />
-                <element signature="e#28615#28937#1" expanded="false" />
-                <element signature="e#28983#29527#1" expanded="false" />
+                <element signature="e#27364#27756#1" expanded="false" />
+                <element signature="e#28226#28309#0" expanded="false" />
+                <element signature="e#28358#28830#1" expanded="false" />
+                <element signature="e#28873#29195#1" expanded="false" />
+                <element signature="e#29241#29785#1" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PantheonDKP.lua" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PantheonDKP.lua">
+      <file leaf-file-name="PDKP_DKP.lua" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Modules/PDKP_DKP.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="252" column="17" lean-forward="false" selection-start-line="252" selection-start-column="17" selection-end-line="252" selection-end-column="17" />
+            <state relative-caret-position="181">
+              <caret line="544" column="3" lean-forward="true" selection-start-line="544" selection-start-column="3" selection-end-line="544" selection-end-column="3" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="pdkp_scrollbar.lua" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="332">
+              <caret line="45" column="40" lean-forward="false" selection-start-line="45" selection-start-column="40" selection-end-line="45" selection-end-column="40" />
               <folding>
-                <element signature="n#PDKP:HandleShroudCommands#0" expanded="false" />
-                <element signature="n#PDKP:GetAllTableData#0" expanded="false" />
-                <element signature="n#PDKP:GetDataCount#0" expanded="false" />
-                <element signature="n#PDKP:GetCharName#0" expanded="false" />
+                <element signature="n#GUI:pdkp_dkp_table_sort#0" expanded="false" />
+                <element signature="n#pdkp_dkp_scrollbar_Update#0" expanded="false" />
+                <element signature="n#GUI:GetTableDisplayData#0" expanded="false" />
+                <element signature="n#pdkp_init_scrollbar#0" expanded="false" />
+                <element signature="n#pdkp_setup_scrollbar_cols#0" expanded="false" />
+                <element signature="n#GUI:SearchInputUpdated#0" expanded="false" />
+                <element signature="n#GUI:SearchOnAttributes#0" expanded="false" />
+                <element signature="n#GUI:ToggleInRaid#0" expanded="false" />
+                <element signature="n#GUI:UpdateOnlineStatus#0" expanded="false" />
+                <element signature="n#pdkp_dkp_table_filter#0" expanded="false" />
+                <element signature="n#getItemHeight#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -102,8 +122,8 @@
       <file leaf-file-name="PDKP_Raid.lua" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Modules/PDKP_Raid.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="249">
-              <caret line="51" column="0" lean-forward="false" selection-start-line="51" selection-start-column="0" selection-end-line="64" selection-end-column="75" />
+            <state relative-caret-position="232">
+              <caret line="50" column="8" lean-forward="false" selection-start-line="50" selection-start-column="3" selection-end-line="50" selection-end-column="8" />
               <folding>
                 <element signature="n#Raid:GetRaidInfo#0" expanded="false" />
               </folding>
@@ -115,11 +135,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Guild:GetBankIndex</find>
-      <find>Guild:GetTargetGuildInfo</find>
-      <find>IsMember</find>
-      <find>pdkp_testing_com</find>
-      <find>Guild:CanMemberEdit</find>
       <find>DKP:GetMemberCount()</find>
       <find>Pample</find>
       <find>SetScript</find>
@@ -145,6 +160,11 @@
       <find>Hide</find>
       <find>GUI:Show</find>
       <find>GUI:Hide</find>
+      <find>GetTimes</find>
+      <find>GetDateTimes</find>
+      <find>len</find>
+      <find>DKP:Add</find>
+      <find>UpdateEntryRaidDkpTotal</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -169,15 +189,15 @@
         <option value="$PROJECT_DIR$/Modules/PDKP_Defaults.lua" />
         <option value="$PROJECT_DIR$/Modules/PDKP_Item.lua" />
         <option value="$PROJECT_DIR$/Modules/PDKP_Raid.lua" />
-        <option value="$PROJECT_DIR$/Modules/PDKP_Guild.lua" />
         <option value="$PROJECT_DIR$/Modules/PDKP_Comms.lua" />
         <option value="$PROJECT_DIR$/PantheonDKP.xml" />
-        <option value="$PROJECT_DIR$/Modules/Util.lua" />
         <option value="$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.xml" />
-        <option value="$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua" />
         <option value="$PROJECT_DIR$/todo.txt" />
-        <option value="$PROJECT_DIR$/Modules/PDKP_DKP.lua" />
+        <option value="$PROJECT_DIR$/Modules/Util.lua" />
         <option value="$PROJECT_DIR$/PantheonDKP.lua" />
+        <option value="$PROJECT_DIR$/Modules/PDKP_Guild.lua" />
+        <option value="$PROJECT_DIR$/Modules/PDKP_DKP.lua" />
+        <option value="$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua" />
         <option value="$PROJECT_DIR$/Modules/PDKP_GUI.lua" />
       </list>
     </option>
@@ -363,12 +383,12 @@
       <workItem from="1582152952900" duration="18815000" />
       <workItem from="1582314967150" duration="21592000" />
       <workItem from="1582672832665" duration="6310000" />
-      <workItem from="1584120384552" duration="25171000" />
+      <workItem from="1584120384552" duration="34132000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="219835000" />
+    <option name="totallyTimeSpent" value="228796000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1928" y="-8" width="1936" height="1056" extended-state="6" />
@@ -464,7 +484,7 @@
           <caret line="305" column="0" lean-forward="false" selection-start-line="305" selection-start-column="0" selection-end-line="307" selection-end-column="3" />
           <folding>
             <element signature="e#353#914#0" expanded="false" />
-            <element signature="e#938#1095#1" expanded="false" />
+            <element signature="e#8907#9064#1" expanded="false" />
             <element signature="n#DKP:InitDKPDB#0" expanded="false" />
             <element signature="n#DKP:BossKill#0" expanded="false" />
             <element signature="n#DKP:UpdateEntry#0" expanded="false" />
@@ -473,7 +493,6 @@
             <element signature="n#DKP:UpdateEntryRaidDkpTotal#0" expanded="false" />
             <element signature="n#DKP:ChangeDKPSheets#0" expanded="false" />
             <element signature="n#DKP:SyncWithGuild#0" expanded="false" />
-            <element signature="n#DKP:Add#0" expanded="false" />
             <element signature="n#DKP:Subtract#0" expanded="false" />
             <element signature="n#DKP:NewEntry#0" expanded="false" />
           </folding>
@@ -490,7 +509,9 @@
             <element signature="n#GUI:CreatePushButton#0" expanded="false" />
             <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
             <element signature="e#2336#2506#0" expanded="false" />
+            <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
             <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+            <element signature="n#GUI:Hide#0" expanded="false" />
             <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
             <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
             <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -506,7 +527,6 @@
             <element signature="n#GUI:IsNotSelected#0" expanded="false" />
             <element signature="n#GUI:AddToSelected#0" expanded="false" />
             <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-            <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
             <element signature="n#GUI:ClearSelected#0" expanded="false" />
             <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
             <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -521,11 +541,11 @@
             <element signature="n#GUI:CreateTimer#0" expanded="false" />
             <element signature="n#GUI:UpdateTimer#0" expanded="false" />
             <element signature="n#GUI:CancelTimer#0" expanded="false" />
-            <element signature="e#27106#27498#1" expanded="false" />
-            <element signature="e#27968#28051#0" expanded="false" />
-            <element signature="e#28100#28572#1" expanded="false" />
-            <element signature="e#28615#28937#1" expanded="false" />
-            <element signature="e#28983#29527#1" expanded="false" />
+            <element signature="e#27364#27756#1" expanded="false" />
+            <element signature="e#28226#28309#0" expanded="false" />
+            <element signature="e#28358#28830#1" expanded="false" />
+            <element signature="e#28873#29195#1" expanded="false" />
+            <element signature="e#29241#29785#1" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -703,7 +723,7 @@
           <caret line="91" column="0" lean-forward="false" selection-start-line="91" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
           <folding>
             <element signature="e#353#914#0" expanded="false" />
-            <element signature="e#938#1095#1" expanded="false" />
+            <element signature="e#8907#9064#1" expanded="false" />
             <element signature="n#DKP:InitDKPDB#0" expanded="false" />
             <element signature="n#DKP:BossKill#0" expanded="false" />
             <element signature="n#DKP:UpdateEntry#0" expanded="false" />
@@ -712,7 +732,6 @@
             <element signature="n#DKP:UpdateEntryRaidDkpTotal#0" expanded="false" />
             <element signature="n#DKP:ChangeDKPSheets#0" expanded="false" />
             <element signature="n#DKP:SyncWithGuild#0" expanded="false" />
-            <element signature="n#DKP:Add#0" expanded="false" />
             <element signature="n#DKP:Subtract#0" expanded="false" />
             <element signature="n#DKP:NewEntry#0" expanded="false" />
           </folding>
@@ -729,7 +748,9 @@
             <element signature="n#GUI:CreatePushButton#0" expanded="false" />
             <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
             <element signature="e#2336#2506#0" expanded="false" />
+            <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
             <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+            <element signature="n#GUI:Hide#0" expanded="false" />
             <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
             <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
             <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -745,7 +766,6 @@
             <element signature="n#GUI:IsNotSelected#0" expanded="false" />
             <element signature="n#GUI:AddToSelected#0" expanded="false" />
             <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-            <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
             <element signature="n#GUI:ClearSelected#0" expanded="false" />
             <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
             <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -760,11 +780,11 @@
             <element signature="n#GUI:CreateTimer#0" expanded="false" />
             <element signature="n#GUI:UpdateTimer#0" expanded="false" />
             <element signature="n#GUI:CancelTimer#0" expanded="false" />
-            <element signature="e#27106#27498#1" expanded="false" />
-            <element signature="e#27968#28051#0" expanded="false" />
-            <element signature="e#28100#28572#1" expanded="false" />
-            <element signature="e#28615#28937#1" expanded="false" />
-            <element signature="e#28983#29527#1" expanded="false" />
+            <element signature="e#27364#27756#1" expanded="false" />
+            <element signature="e#28226#28309#0" expanded="false" />
+            <element signature="e#28358#28830#1" expanded="false" />
+            <element signature="e#28873#29195#1" expanded="false" />
+            <element signature="e#29241#29785#1" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -800,7 +820,7 @@
           <caret line="74" column="7" lean-forward="false" selection-start-line="74" selection-start-column="7" selection-end-line="74" selection-end-column="7" />
           <folding>
             <element signature="e#353#914#0" expanded="false" />
-            <element signature="e#938#1095#1" expanded="false" />
+            <element signature="e#8907#9064#1" expanded="false" />
             <element signature="n#DKP:InitDKPDB#0" expanded="false" />
             <element signature="n#DKP:BossKill#0" expanded="false" />
             <element signature="n#DKP:UpdateEntry#0" expanded="false" />
@@ -809,7 +829,6 @@
             <element signature="n#DKP:UpdateEntryRaidDkpTotal#0" expanded="false" />
             <element signature="n#DKP:ChangeDKPSheets#0" expanded="false" />
             <element signature="n#DKP:SyncWithGuild#0" expanded="false" />
-            <element signature="n#DKP:Add#0" expanded="false" />
             <element signature="n#DKP:Subtract#0" expanded="false" />
             <element signature="n#DKP:NewEntry#0" expanded="false" />
           </folding>
@@ -847,7 +866,9 @@
             <element signature="n#GUI:CreatePushButton#0" expanded="false" />
             <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
             <element signature="e#2336#2506#0" expanded="false" />
+            <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
             <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+            <element signature="n#GUI:Hide#0" expanded="false" />
             <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
             <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
             <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -863,7 +884,6 @@
             <element signature="n#GUI:IsNotSelected#0" expanded="false" />
             <element signature="n#GUI:AddToSelected#0" expanded="false" />
             <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-            <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
             <element signature="n#GUI:ClearSelected#0" expanded="false" />
             <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
             <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -878,11 +898,11 @@
             <element signature="n#GUI:CreateTimer#0" expanded="false" />
             <element signature="n#GUI:UpdateTimer#0" expanded="false" />
             <element signature="n#GUI:CancelTimer#0" expanded="false" />
-            <element signature="e#27106#27498#1" expanded="false" />
-            <element signature="e#27968#28051#0" expanded="false" />
-            <element signature="e#28100#28572#1" expanded="false" />
-            <element signature="e#28615#28937#1" expanded="false" />
-            <element signature="e#28983#29527#1" expanded="false" />
+            <element signature="e#27364#27756#1" expanded="false" />
+            <element signature="e#28226#28309#0" expanded="false" />
+            <element signature="e#28358#28830#1" expanded="false" />
+            <element signature="e#28873#29195#1" expanded="false" />
+            <element signature="e#29241#29785#1" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -929,7 +949,7 @@
           <caret line="132" column="3" lean-forward="true" selection-start-line="132" selection-start-column="3" selection-end-line="132" selection-end-column="3" />
           <folding>
             <element signature="e#353#914#0" expanded="false" />
-            <element signature="e#938#1095#1" expanded="false" />
+            <element signature="e#8907#9064#1" expanded="false" />
             <element signature="n#DKP:InitDKPDB#0" expanded="false" />
             <element signature="n#DKP:BossKill#0" expanded="false" />
             <element signature="n#DKP:UpdateEntry#0" expanded="false" />
@@ -938,7 +958,6 @@
             <element signature="n#DKP:UpdateEntryRaidDkpTotal#0" expanded="false" />
             <element signature="n#DKP:ChangeDKPSheets#0" expanded="false" />
             <element signature="n#DKP:SyncWithGuild#0" expanded="false" />
-            <element signature="n#DKP:Add#0" expanded="false" />
             <element signature="n#DKP:Subtract#0" expanded="false" />
             <element signature="n#DKP:NewEntry#0" expanded="false" />
           </folding>
@@ -955,7 +974,9 @@
             <element signature="n#GUI:CreatePushButton#0" expanded="false" />
             <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
             <element signature="e#2336#2506#0" expanded="false" />
+            <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
             <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+            <element signature="n#GUI:Hide#0" expanded="false" />
             <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
             <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
             <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -971,7 +992,6 @@
             <element signature="n#GUI:IsNotSelected#0" expanded="false" />
             <element signature="n#GUI:AddToSelected#0" expanded="false" />
             <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-            <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
             <element signature="n#GUI:ClearSelected#0" expanded="false" />
             <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
             <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -986,11 +1006,11 @@
             <element signature="n#GUI:CreateTimer#0" expanded="false" />
             <element signature="n#GUI:UpdateTimer#0" expanded="false" />
             <element signature="n#GUI:CancelTimer#0" expanded="false" />
-            <element signature="e#27106#27498#1" expanded="false" />
-            <element signature="e#27968#28051#0" expanded="false" />
-            <element signature="e#28100#28572#1" expanded="false" />
-            <element signature="e#28615#28937#1" expanded="false" />
-            <element signature="e#28983#29527#1" expanded="false" />
+            <element signature="e#27364#27756#1" expanded="false" />
+            <element signature="e#28226#28309#0" expanded="false" />
+            <element signature="e#28358#28830#1" expanded="false" />
+            <element signature="e#28873#29195#1" expanded="false" />
+            <element signature="e#29241#29785#1" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1205,21 +1225,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/PDKP_Guild.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="131" column="62" lean-forward="false" selection-start-line="131" selection-start-column="62" selection-end-line="131" selection-end-column="62" />
-          <folding>
-            <element signature="n#Guild:GetGuildData#0" expanded="false" />
-            <element signature="n#Guild:VerifyGuildData#0" expanded="false" />
-            <element signature="n#Guild:GetMyGuildInfo#0" expanded="false" />
-            <element signature="n#Guild:CanEdit#0" expanded="false" />
-            <element signature="n#Guild:GetClassBreakdown#0" expanded="false" />
-            <element signature="n#Guild:ResetGuildDataData#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/init.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="374">
@@ -1246,26 +1251,6 @@
             <element signature="n#Comms:pdkp_send_comm#0" expanded="false" />
             <element signature="n#Comms:Serialize#0" expanded="false" />
             <element signature="n#Comms:Deserialize#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/Util.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="487">
-          <caret line="106" column="28" lean-forward="false" selection-start-line="106" selection-start-column="28" selection-end-line="106" selection-end-column="28" />
-          <folding>
-            <element signature="e#250#335#1" expanded="false" />
-            <element signature="e#359#577#1" expanded="false" />
-            <element signature="n#Util:RemoveServerName#0" expanded="false" />
-            <element signature="n#Util:IsEmpty#0" expanded="false" />
-            <element signature="n#Util:StringsMatch#0" expanded="false" />
-            <element signature="n#Util:StringsMatchInOrder#0" expanded="false" />
-            <element signature="n#Util:Capitalize#0" expanded="false" />
-            <element signature="n#Util:RemoveNonNumerics#0" expanded="false" />
-            <element signature="n#Util:FormatFontTextColor#0" expanded="false" />
-            <element signature="n#Util:FindTableIndex#0" expanded="false" />
-            <element signature="n#Util:PrintTable#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1371,30 +1356,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/PDKP_DKP.lua">
+    <entry file="file://$PROJECT_DIR$/Modules/PDKP_Raid.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="171" column="0" lean-forward="false" selection-start-line="171" selection-start-column="0" selection-end-line="181" selection-end-column="7" />
+        <state relative-caret-position="232">
+          <caret line="50" column="8" lean-forward="false" selection-start-line="50" selection-start-column="3" selection-end-line="50" selection-end-column="8" />
           <folding>
-            <element signature="e#353#914#0" expanded="false" />
-            <element signature="n#DKP:BossKill#0" expanded="false" />
-            <element signature="n#DKP:GetLastEdit#0" expanded="false" />
-            <element signature="n#DKP:UpdateEntryRaidDkpTotal#0" expanded="false" />
-            <element signature="n#DKP:ChangeDKPSheets#0" expanded="false" />
-            <element signature="n#DKP:SyncWithGuild#0" expanded="false" />
-            <element signature="n#DKP:Add#0" expanded="false" />
-            <element signature="n#DKP:Subtract#0" expanded="false" />
-            <element signature="n#DKP:NewEntry#0" expanded="false" />
+            <element signature="n#Raid:GetRaidInfo#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/PDKP_Guild.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="71" column="48" lean-forward="false" selection-start-line="71" selection-start-column="33" selection-end-line="71" selection-end-column="48" />
+          <folding>
+            <element signature="n#Guild:GetMyGuildInfo#0" expanded="false" />
+            <element signature="n#Guild:CanEdit#0" expanded="false" />
+            <element signature="n#Guild:GetClassBreakdown#0" expanded="false" />
+            <element signature="n#Guild:ResetGuildDataData#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/View_Templates/Scrollbar/pdkp_scrollbar.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-6">
-          <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+        <state relative-caret-position="332">
+          <caret line="45" column="40" lean-forward="false" selection-start-line="45" selection-start-column="40" selection-end-line="45" selection-end-column="40" />
           <folding>
-            <element signature="n#GUI:pdkp_dkp_table_filter_class#0" expanded="false" />
             <element signature="n#GUI:pdkp_dkp_table_sort#0" expanded="false" />
             <element signature="n#pdkp_dkp_scrollbar_Update#0" expanded="false" />
             <element signature="n#GUI:GetTableDisplayData#0" expanded="false" />
@@ -1410,40 +1399,64 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/PDKP_Raid.lua">
+    <entry file="file://$PROJECT_DIR$/PantheonDKP.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="249">
-          <caret line="51" column="0" lean-forward="false" selection-start-line="51" selection-start-column="0" selection-end-line="64" selection-end-column="75" />
+        <state relative-caret-position="-255">
+          <caret line="123" column="3" lean-forward="true" selection-start-line="123" selection-start-column="3" selection-end-line="123" selection-end-column="3" />
           <folding>
-            <element signature="n#Raid:GetRaidInfo#0" expanded="false" />
+            <element signature="n#PDKP_OnEvent#0" expanded="false" />
+            <element signature="n#PDKP:HandleShroudCommands#0" expanded="false" />
+            <element signature="n#PDKP:HandleSlashCommands#0" expanded="false" />
+            <element signature="n#PDKP:BuildAllData#0" expanded="false" />
+            <element signature="n#PDKP:GetAllTableData#0" expanded="false" />
+            <element signature="n#PDKP:GetDataCount#0" expanded="false" />
+            <element signature="n#PDKP:GetCharName#0" expanded="false" />
+            <element signature="n#PDKP:Show#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PantheonDKP.lua">
+    <entry file="file://$PROJECT_DIR$/Modules/Util.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="252" column="17" lean-forward="false" selection-start-line="252" selection-start-column="17" selection-end-line="252" selection-end-column="17" />
+        <state relative-caret-position="289">
+          <caret line="43" column="20" lean-forward="true" selection-start-line="43" selection-start-column="20" selection-end-line="43" selection-end-column="28" />
           <folding>
-            <element signature="n#PDKP:HandleShroudCommands#0" expanded="false" />
-            <element signature="n#PDKP:GetAllTableData#0" expanded="false" />
-            <element signature="n#PDKP:GetDataCount#0" expanded="false" />
-            <element signature="n#PDKP:GetCharName#0" expanded="false" />
+            <element signature="e#250#335#1" expanded="false" />
+            <element signature="e#359#577#1" expanded="false" />
+            <element signature="n#Util:RemoveServerName#0" expanded="false" />
+            <element signature="n#Util:IsEmpty#0" expanded="false" />
+            <element signature="n#Util:StringsMatch#0" expanded="false" />
+            <element signature="n#Util:StringsMatchInOrder#0" expanded="false" />
+            <element signature="n#Util:Capitalize#0" expanded="false" />
+            <element signature="n#Util:RemoveNonNumerics#0" expanded="false" />
+            <element signature="n#Util:FormatFontTextColor#0" expanded="false" />
+            <element signature="n#Util:FindTableIndex#0" expanded="false" />
+            <element signature="n#Util:PrintTable#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/PDKP_DKP.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="181">
+          <caret line="544" column="3" lean-forward="true" selection-start-line="544" selection-start-column="3" selection-end-line="544" selection-end-column="3" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Modules/PDKP_GUI.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="358" column="18" lean-forward="true" selection-start-line="358" selection-start-column="18" selection-end-line="358" selection-end-column="18" />
+        <state relative-caret-position="265">
+          <caret line="603" column="73" lean-forward="false" selection-start-line="603" selection-start-column="73" selection-end-line="603" selection-end-column="73" />
           <folding>
             <element signature="e#826#955#1" expanded="false" />
             <element signature="n#GUI:CreateMainFrame#0" expanded="false" />
             <element signature="n#GUI:CreatePushButton#0" expanded="false" />
             <element signature="n#GUI:CreateAdjustDropdown#0" expanded="false" />
             <element signature="e#2336#2506#0" expanded="false" />
+            <element signature="n#GUI:CreateRaidDkpDropdown#0" expanded="false" />
             <element signature="n#GUI:UpdateSelectedEntriesLabel#0" expanded="false" />
+            <element signature="n#GUI:Hide#0" expanded="false" />
             <element signature="n#GUI:setupClassCheckboxes#0" expanded="false" />
             <element signature="n#GUI:dkpSliderValueChanged#0" expanded="false" />
             <element signature="n#GUI:SetupDKPFilterSlider#0" expanded="false" />
@@ -1459,7 +1472,6 @@
             <element signature="n#GUI:IsNotSelected#0" expanded="false" />
             <element signature="n#GUI:AddToSelected#0" expanded="false" />
             <element signature="n#GUI:RemoveFromSelected#0" expanded="false" />
-            <element signature="n#GUI:ShowSelectedHistory#0" expanded="false" />
             <element signature="n#GUI:ClearSelected#0" expanded="false" />
             <element signature="n#GUI:SelectedEntriesUpdated#0" expanded="false" />
             <element signature="n#GUI:HideElements#0" expanded="false" />
@@ -1474,11 +1486,11 @@
             <element signature="n#GUI:CreateTimer#0" expanded="false" />
             <element signature="n#GUI:UpdateTimer#0" expanded="false" />
             <element signature="n#GUI:CancelTimer#0" expanded="false" />
-            <element signature="e#27106#27498#1" expanded="false" />
-            <element signature="e#27968#28051#0" expanded="false" />
-            <element signature="e#28100#28572#1" expanded="false" />
-            <element signature="e#28615#28937#1" expanded="false" />
-            <element signature="e#28983#29527#1" expanded="false" />
+            <element signature="e#27364#27756#1" expanded="false" />
+            <element signature="e#28226#28309#0" expanded="false" />
+            <element signature="e#28358#28830#1" expanded="false" />
+            <element signature="e#28873#29195#1" expanded="false" />
+            <element signature="e#29241#29785#1" expanded="false" />
           </folding>
         </state>
       </provider>

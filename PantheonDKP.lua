@@ -119,6 +119,8 @@ end
 function PDKP:InitializeDatabases()
     Guild:InitGuildDB()
     DKP:InitDKPDB()
+
+--    DKP:ImportMonolithData()
 end
 
 function PDKP:HandleShroudCommands(item)
@@ -194,6 +196,14 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'pdkp_testing_com' then
         Comms:pdkp_send_comm()
+    end
+
+    if msg == 'pdkp_getTime' then
+        print(Util:Format12HrDateTime(GetServerTime()))
+    end
+
+    if msg == 'importDKP' then
+        DKP:ImportMonolithData()
     end
 end
 

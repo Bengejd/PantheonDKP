@@ -18,7 +18,7 @@ local guildDBDefaults = {
     profile = {
         name = nil,
         numOfMembers = nil,
-        serialized = true,
+        serialized = false,
         members = {}
     }
 }
