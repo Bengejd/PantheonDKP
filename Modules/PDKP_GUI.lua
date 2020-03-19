@@ -77,6 +77,52 @@ function GUI:CreatePushButton()
 end
 
 function GUI:CreateAdjustDropdown()
+
+    local favoriteNumber = 42 -- A user-configurable setting
+
+    local reasons = {
+        [1] = {'On Time Bonus'},
+        [2] = {
+            'Onyxia\s Lair', 'Molten Core', 'Black Wing lair'
+        }
+    }
+
+    -- Create the dropdown, and configure its appearance
+    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", pdkpCoreFrame, "UIDropDownMenuTemplate")
+    dropDown:SetPoint("CENTER")
+    UIDropDownMenu_SetWidth(dropDown, 100)
+    UIDropDownMenu_SetText(dropDown, favoriteNumber)
+
+    -- Create and bind the initialization function to the dropdown menu
+    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
+        local info = UIDropDownMenu_CreateInfo()
+        if (level or 1) == 1 then
+            -- Display the 0-9, 10-19, ... groups
+            for i=1, #reasons do
+               info.text, info.checked = reasons[i][1], false
+                info.menuList, info.hasArrow = reasons[i], i == 2
+                UIDropDownMenu_AddButton(info)
+            end
+        else
+--            -- Display a nested group of 10 favorite number options
+--            info.func = self.SetValue
+--            for i=menuList*10, menuList*10+9 do
+--                info.text, info.arg1, info.checked = i, i, i == favoriteNumber
+--                UIDropDownMenu_AddButton(info, level)
+--            end
+        end
+    end)
+
+    -- Implement the function to change the favoriteNumber
+    function dropDown:SetValue(newValue)
+        favoriteNumber = newValue
+        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
+        UIDropDownMenu_SetText(dropDown, favoriteNumber)
+        -- Because this is called from a sub-menu, only that menu level is closed by default.
+        -- Close the entire menu with this next call
+        CloseDropDownMenus()
+    end
+
     local reasonDropdown = AceGUI:Create("Dropdown")
     local secondaryDropdown = AceGUI:Create("Dropdown")
     local thirdDropdown = AceGUI:Create("Dropdown")

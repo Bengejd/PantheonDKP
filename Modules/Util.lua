@@ -40,6 +40,11 @@ function Util:GetAllClasses()
     return classes;
 end
 
+function Util:Wait(seconds)
+    local start = tonumber(date('%S'))
+    repeat until tonumber(date('%S')) > start + seconds
+end
+
 function Util:ThrowError(msg, debug)
     local warning = 'E71D36'
     local errorMsg = Util:FormatFontTextColor(warning, 'Error encountered during ' .. msg)

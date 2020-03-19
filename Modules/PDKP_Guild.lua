@@ -17,7 +17,7 @@ local Player = nil;
 local guildDBDefaults = {
     profile = {
         name = nil,
-        numOfMembers = nil,
+        numOfMembers = 0,
         serialized = false,
         members = {}
     }
@@ -51,11 +51,9 @@ function Guild:GetGuildData(onlineOnly)
     --		(string)
 
     GuildRoster()
-    GetGuildRosterShowOffline()
-    local gMemberCount = GetNumGuildMembers();
-    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount; end
-
-    local onlineMembers = {};
+    local gMemberCount, _, _ = GetNumGuildMembers();
+    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else ReloadUI() end
+    local onlineMembers = {}
 
     for i=1, GuildDB.numOfMembers do
         local name, _, rankIndex, lvl, class, __, __, __, online, __, __ = GetGuildRosterInfo(i)

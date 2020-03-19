@@ -529,7 +529,9 @@ function DKP:NewEntry(name)
 end
 
 function DKP:GetPlayerDKP(name)
-    return dkpDB.members[name].dkpTotal;
+    local player = dkpDB.members[name]
+    if player ~= nil then return player.dkpTotal end
+    return 0
 end
 
 function DKP:ResetDB()
