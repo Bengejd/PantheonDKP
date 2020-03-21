@@ -28,6 +28,7 @@ Modules\PDKP_Edit.lua
 Modules\PDKP_Guild.lua
 Modules\PDKP_Item.lua
 Modules\PDKP_Raid.lua
+Modules\PDKP_Import.lua
 
 
 View_Templates\Shrouding\pdkp_shrouding.xml

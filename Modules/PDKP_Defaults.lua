@@ -10,6 +10,8 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
+local Import = core.import;
+
 
 local englishFaction, _ = UnitFactionGroup("PLAYER");
 

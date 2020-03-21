@@ -10,6 +10,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
+local Import = core.import;
 
 GUI.countdownTimer = nil;
 GUI.statusbar = nil;
@@ -45,10 +46,11 @@ GUI.adjustmentReasons = {
     "Other"
 }
 
----------------------------
---  GUI Setup Functions  --
----------------------------
+GUI.adjustDropdowns = {}
 
+---------------------------
+-- GUI Setup Functions  --
+---------------------------
 function GUI:CreateMainFrame()
     if GUI.pdkp_frame == nil then -- We haven't initialized the frame yet.
         -- Create frame args: frameType, frameName, parentFrame, inheritsFrame
@@ -56,89 +58,122 @@ function GUI:CreateMainFrame()
         GUI.pdkp_frame:SetPoint("TOPLEFT", 0, 0)
         GUI:setupClassCheckboxes()
         GUI:SetupDKPFilterSlider()
+--        GUI:CreateTestMenuDropdown()
         GUI:CreateAdjustDropdown()
         GUI:SelectedEntriesUpdated()
         GUI:CreateRaidDkpDropdown()
         GUI:CreateHistoryFrame()
 
         pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
-        pdkp_submit_button =  _G['pdkp_dkp_submit'];
+        pdkp_submit_button = _G['pdkp_dkp_submit'];
 
 
     else -- We have initialized the frame already.
         -- Grab the global pdkpCoreFrame object that was previously created
         GUI.pdkp_frame = getglobal("pdkpCoreFrame");
-
     end
 end
 
 function GUI:CreatePushButton()
+end
 
+function GUI:CreateTestMenuDropdown()
+    -- Create the dropdown, and configure its appearance
+    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", pdkpCoreFrame, "UIDropDownMenuTemplate")
+    dropDown:SetPoint("BOTTOM", 230, -160)
+    UIDropDownMenu_SetWidth(dropDown, 150)
+    UIDropDownMenu_SetText(dropDown, 'Reason for change')
+    UIDROPDOWNMENU_SHOW_TIME = 2;
+
+    local bossKillMenu = {
+        text="Boss Kill",
+        sub=true,
+        isTitle=true,
+        menuList={},
+        keepShownOnClick=true
+    }
+
+    for raidName, bosses in pairs(core.raidBosses) do
+       local subMenu = {};
+        subMenu.text, subMenu.sub, subMenu.isTitle, subMenu.menuList, subMenu.notCheckable = raidName, true, true, {}, true
+        for i=1, #bosses do
+            local b = bosses[i]
+           local subItem = {};
+            subItem.text, subItem.sub, subItem.isTitle, subItem.menuList = b, false, false, nil
+            table.insert(subMenu.menuList, subItem)
+        end
+        table.insert(bossKillMenu.menuList, subMenu)
+    end
+
+    local menus = {
+        bossKillMenu,
+        {text="On Time Bonus", sub=false},
+        {text="Completion Bonus", sub=false},
+        {text="Benched", sub=false},
+        {text="Unexcused Absence", sub=false},
+        {text="Item Win", sub=false},
+        {text="Other", sub=false},
+    }
+
+    -- Implement the function to change the favoriteNumber
+    function dropDown:SetValue(newValue)
+        -- validation
+        local badValues = {'Boss Kill', 'Onyxia\'s Lair', 'Molten Core', 'Blackwing Lair' }
+        for i=1, #badValues do
+           if newValue == badValues[i] then return end
+        end
+
+        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
+        UIDropDownMenu_SetText(dropDown, newValue)
+        -- Because this is called from a sub-menu, only that menu level is closed by default.
+        -- Close the entire menu with this next call
+        CloseDropDownMenus()
+
+    end
+
+    -- Create and bind the initialization function to the dropdown menu
+    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
+        local function setupMenu(list)
+            for i=1, #list do
+                local info = UIDropDownMenu_CreateInfo()
+                local m = list[i]
+                info.text, info.hasArrow, info.value, info.menuList, info.func = m.text, m.sub, m.text, m.menuList, function(self) dropDown:SetValue(self.value) end
+                info.notCheckable = m.menuList ~= nil
+                UIDropDownMenu_AddButton(info, level)
+            end
+        end
+
+        if (level or 1) == 1 then
+            setupMenu(menus)
+        elseif level == 2 and menuList ~= nil then
+            setupMenu(menuList)
+        elseif level == 3 and menuList ~= nil then
+            setupMenu(menuList)
+        end
+    end)
+
+    GUI.reasonDropdown = dropDown
 end
 
 function GUI:CreateAdjustDropdown()
 
-    local favoriteNumber = 42 -- A user-configurable setting
-
-    local reasons = {
-        [1] = {'On Time Bonus'},
-        [2] = {
-            'Onyxia\s Lair', 'Molten Core', 'Black Wing lair'
-        }
-    }
-
-    -- Create the dropdown, and configure its appearance
-    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", pdkpCoreFrame, "UIDropDownMenuTemplate")
-    dropDown:SetPoint("CENTER")
-    UIDropDownMenu_SetWidth(dropDown, 100)
-    UIDropDownMenu_SetText(dropDown, favoriteNumber)
-
-    -- Create and bind the initialization function to the dropdown menu
-    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
-        local info = UIDropDownMenu_CreateInfo()
-        if (level or 1) == 1 then
-            -- Display the 0-9, 10-19, ... groups
-            for i=1, #reasons do
-               info.text, info.checked = reasons[i][1], false
-                info.menuList, info.hasArrow = reasons[i], i == 2
-                UIDropDownMenu_AddButton(info)
-            end
-        else
---            -- Display a nested group of 10 favorite number options
---            info.func = self.SetValue
---            for i=menuList*10, menuList*10+9 do
---                info.text, info.arg1, info.checked = i, i, i == favoriteNumber
---                UIDropDownMenu_AddButton(info, level)
---            end
-        end
-    end)
-
-    -- Implement the function to change the favoriteNumber
-    function dropDown:SetValue(newValue)
-        favoriteNumber = newValue
-        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
-        UIDropDownMenu_SetText(dropDown, favoriteNumber)
-        -- Because this is called from a sub-menu, only that menu level is closed by default.
-        -- Close the entire menu with this next call
-        CloseDropDownMenus()
-    end
-
     local reasonDropdown = AceGUI:Create("Dropdown")
     local secondaryDropdown = AceGUI:Create("Dropdown")
     local thirdDropdown = AceGUI:Create("Dropdown")
+    local t = AceGUI:Create("Dropdown-Item-Menu")
 
-    local dropdowns = {reasonDropdown, secondaryDropdown, thirdDropdown }
-    local dropdownWidths = {150, 120, 100};
-    local dropdownX = {-25, 100, 200 }
-    local dropdownNames = {'first', 'second', 'third'}
+    local dropdowns = { reasonDropdown, secondaryDropdown, thirdDropdown }
+    local dropdownWidths = { 150, 120, 100 };
+    local dropdownX = { -25, 100, 200 }
+    local dropdownNames = { 'first', 'second', 'third' }
 
---[[
---  On Time Bonus -> Raid (Ony, MC, BWL)
---  Signup Bonus -> Raid (Ony, MC, BWL)
---  Boss Kill -> Boss Name (Recently killed bosses)
---  Item Win -> Item Name
---
- ]]
+    --[[
+    --  On Time Bonus -> Raid (Ony, MC, BWL)
+    --  Signup Bonus -> Raid (Ony, MC, BWL)
+    --  Boss Kill -> Boss Name (Recently killed bosses)
+    --  Item Win -> Item Name
+    --
+     ]]
 
     reasonDropdown:SetList(GUI.adjustmentReasons)
     secondaryDropdown:SetList(core.raids);
@@ -160,7 +195,7 @@ function GUI:CreateAdjustDropdown()
         -- First Dropdown Logic
 
         if this.name == 'first' then
-            for i=2, #dropdowns do
+            for i = 2, #dropdowns do
                 if i ~= 4 then
                     local d = dropdowns[i];
                     d:SetValue('')
@@ -199,7 +234,7 @@ function GUI:CreateAdjustDropdown()
                 end)
             end
 
-        -- Second Dropdown Logic
+            -- Second Dropdown Logic
         elseif this.name == 'second' then
             thirdDropdown.frame:Hide() -- Hide it by default
             local d1 = dropdowns[1];
@@ -208,7 +243,7 @@ function GUI:CreateAdjustDropdown()
                 local raid = core.raids[index];
                 if raid == core.raids[1] then adjustAmount = 5 else adjustAmount = 10 end;
 
-                if d1.value >= 1 and d1.value <= 3 then  -- Ontime / Signup bonus
+                if d1.value >= 1 and d1.value <= 3 then -- Ontime / Signup bonus
                     updateAmountBox = true
 
                     if d1.value == 3 then -- benched
@@ -235,7 +270,7 @@ function GUI:CreateAdjustDropdown()
                 pdkp_dropdown_enables_submit = true;
             end
 
-        -- Third Dropdown Logic
+            -- Third Dropdown Logic
 
         elseif this.name == 'third' then
             pdkp_dropdown_enables_submit = true;
@@ -249,7 +284,7 @@ function GUI:CreateAdjustDropdown()
         GUI:ToggleSubmitButton()
     end
 
-    for i=1, #dropdowns do
+    for i = 1, #dropdowns do
         local d = dropdowns[i]
         d:ClearAllPoints();
         d:SetParent(GUI.pdkp_frame);
@@ -303,7 +338,6 @@ function GUI:UpdateSelectedEntriesLabel()
     local selectCount = #GUI.selected;
 
     label:SetText(displayCount .. " Entries Shown | " .. selectCount .. " Selected");
-
 end
 
 function GUI:CreateHistoryFrame()
@@ -345,15 +379,19 @@ function GUI:CreateHistoryFrame()
     GUI.historyButton = b
 
     local hf = CreateFrame("Frame", "pdkpHistoryFrame", pdkpCoreFrame, nil)
-    hf:SetPoint("TOPRIGHT", 235,-75)
+    hf:SetPoint("TOPRIGHT", 235, -75)
     hf:SetHeight(575);
     hf:SetWidth(450);
-    hf:SetBackdrop( {
+    hf:SetBackdrop({
         bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\PDKPFrame-Middle",
-        edgeFile = nil, tile = false, tileEdge = true, tileSize = 0, edgeSize = 32,
+        edgeFile = nil,
+        tile = false,
+        tileEdge = true,
+        tileSize = 0,
+        edgeSize = 32,
         insets = { left = 0, right = 0, top = 0, bottom = 0 },
-        backdropBorderColor = { r=0.7, g=1, b=0.7, a=1 },
-        backdropColor = { r=0.7, g=1, b=0.7, a=1 },
+        backdropBorderColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
+        backdropColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
     });
     hf:EnableMouse(true)
     hf:SetFrameStrata('FULLSCREEN');
@@ -366,7 +404,7 @@ function GUI:CreateHistoryFrame()
     scrollcontainer:SetWidth(350)
     scrollcontainer:SetLayout("Fill")
 
-    local font="GameFontHighlightLarge"
+    local font = "GameFontHighlightLarge"
     local title = hf:CreateFontString('pdkp_history_label', "ARTWORK", font);
     title:SetText('')
     title:SetPoint("TOP", 20, -20);
@@ -418,17 +456,17 @@ function GUI:Hide()
     Item:ClearLinked()
 
     if GUI.adjustDropdowns then
-       for i=1, #GUI.adjustDropdowns do
-           GUI.adjustDropdowns[i].frame:Hide();
-           if i == 1 then GUI.adjustDropdowns[i]:SetValue(''); end
-       end
+        for i = 1, #GUI.adjustDropdowns do
+            GUI.adjustDropdowns[i].frame:Hide();
+            if i == 1 then GUI.adjustDropdowns[i]:SetValue(''); end
+        end
     end
 end
 
 -- Creates the class filter checkboxes progmatically, saving XML space.
 function GUI:setupClassCheckboxes()
     local templateName = "pdkp_class_checkboxTemplate"
-    for i=1, #Defaults.classes do
+    for i = 1, #Defaults.classes do
         local cbName = "pdkp_" .. Defaults.classes[i] .. "_checkbox";
 
         local cb = CreateFrame("CheckButton", cbName, pdkpCoreFrame, templateName);
@@ -442,13 +480,13 @@ function GUI:setupClassCheckboxes()
         local relativePoint = "TOPRIGHT"
 
         if i > 1 then
-            relativeTo = getglobal("pdkp_" .. Defaults.classes[i-1] .. "_checkbox");
+            relativeTo = getglobal("pdkp_" .. Defaults.classes[i - 1] .. "_checkbox");
             point = 'RIGHT';
             relativePoint = 'RIGHT'
             relPointX = 80;
             relPointY = 0;
             if i > 4 then
-                relativeTo = getglobal("pdkp_" .. Defaults.classes[i-4] .. "_checkbox");
+                relativeTo = getglobal("pdkp_" .. Defaults.classes[i - 4] .. "_checkbox");
                 relPointX = 0;
                 relPointY = -35;
             end
@@ -471,9 +509,9 @@ function GUI:SetupDKPFilterSlider()
     slider.tooltipText = 'This is the Tooltip hint' --Creates a tooltip on mouseover.
     slider:SetPoint("BOTTOMLEFT", pdkpCoreFrame, "BOTTOMLEFT", 500, 15);
 
-    slider.textLow = _G[name.."Low"]
-    slider.textHigh = _G[name.."High"]
-    slider.text = _G[name.."Text"]
+    slider.textLow = _G[name .. "Low"]
+    slider.textHigh = _G[name .. "High"]
+    slider.text = _G[name .. "Text"]
     slider:SetMinMaxValues(0.0, DKP:GetHighestDKP())
     slider.minValue, slider.maxValue = slider:GetMinMaxValues()
     slider.textLow:SetText(slider.minValue)
@@ -483,7 +521,7 @@ function GUI:SetupDKPFilterSlider()
     slider:SetStepsPerPage(5);
     slider.textBase = 'Hide DKP < '
     slider.text:SetText(slider.textBase .. slider:GetValue());
-    slider:SetScript("OnValueChanged", function(self,event,arg1)
+    slider:SetScript("OnValueChanged", function(self, event, arg1)
         if event == nil then return end;
         local val = event + 0.5 - (event + 0.5) % 1;
         self.text:SetText(self.textBase .. tostring(val));
@@ -499,16 +537,14 @@ function GUI:UpdateDKPSliderMax()
 end
 
 ---------------------------
---    View Functions     --
+-- View Functions     --
 ---------------------------
-
 function GUI:pdkp_change_view(view)
     GUI.selected = {};
     PDKP:Print("View changed to", view);
 end
 
 function GUI:ShowBossKillPopup()
-
 end
 
 ---------------------------
@@ -519,7 +555,7 @@ end
 function GUI:EntryControlClicked(charObj, clickType, bName)
     GUI.lastEntryClicked = bName;
     GUI.lastEntryNameClicked = charObj['name']
-    charObj.bName = bName;  -- we'll need this later to remove the custom textures if selected filter is checked.
+    charObj.bName = bName; -- we'll need this later to remove the custom textures if selected filter is checked.
     if GUI.selected[charObj.name] then
         GUI:RemoveFromSelected(charObj);
     else GUI:AddToSelected(charObj);
@@ -530,14 +566,14 @@ end
 function GUI:EntryClicked(charObj, clickType, bName)
     if GUI:IsNotSelected(charObj.name) == false then
         _G[bName].customTexture:Hide();
-       GUI:ClearSelected();
+        GUI:ClearSelected();
         return;
     end
 
     GUI:ClearSelected() -- clear all previous selections
     GUI.lastEntryClicked = bName;
     GUI.lastEntryNameClicked = charObj['name']
-    charObj.bName = bName;  -- we'll need this later to remove the custom textures if selected filter is checked.
+    charObj.bName = bName; -- we'll need this later to remove the custom textures if selected filter is checked.
     GUI:AddToSelected(charObj);
 
     GameTooltip:Hide();
@@ -569,8 +605,8 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     local charObjStop = getglobal("pdkp_dkp_entry" .. currNum)
     charObjStop = charObjStop.char;
 
-    local dataIndex={}
-    for k,v in pairs(displayData) do dataIndex[v['name']]=k end
+    local dataIndex = {}
+    for k, v in pairs(displayData) do dataIndex[v['name']] = k end
 
     local charStop = dataIndex[charObjStop['name']]
     local charStart = dataIndex[GUI.lastEntryNameClicked]
@@ -578,7 +614,7 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     if charStart < charStop then startIndex = charStart else startIndex = charStop end
     if charStop > charStart then endIndex = charStop else endIndex = charStart end
 
-    for i=startIndex, endIndex do
+    for i = startIndex, endIndex do
         local charObj = displayData[i]
         GUI:AddToSelected(charObj);
     end
@@ -588,7 +624,7 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
 end
 
 ---------------------------
---  Selected Functions   --
+-- Selected Functions   --
 ---------------------------
 
 -- Returns the selected entries count.
@@ -619,11 +655,11 @@ function GUI:AddToSelected(charObj)
 
     table.insert(GUI.selected, charObj.name)
     GUI.selected[charObj.name] = charObj;
---    entryButton.customTexture:Show();
+    --    entryButton.customTexture:Show();
     pdkp_dkp_scrollbar_Update()
     GUI:SelectedEntriesUpdated()
 
-    GUI:ShowSelectedHistory(charObj)
+    if GUI:GetSelectedCount() == 1 then GUI:ShowSelectedHistory(charObj) end
 end
 
 -- Removes the entry from the selected array.
@@ -748,7 +784,7 @@ function GUI:SelectedEntriesUpdated()
 end
 
 function GUI:HideElements()
-    for i=1, #Defaults.classes do
+    for i = 1, #Defaults.classes do
         local cbName = "pdkp_" .. Defaults.classes[i] .. "_checkbox";
     end
 end
@@ -768,7 +804,7 @@ function GUI:ToggleSubmitButton()
 end
 
 ---------------------------
---   MISC GUI Functions  --
+-- MISC GUI Functions  --
 ---------------------------
 
 -- Type can be 'shroud' or 'roll'
@@ -789,38 +825,36 @@ function GUI:UpdateEasyStats()
 
     local charInfoText = charName .. " | " .. char_dkp .. " DKP"
 
-    if(core.defaults) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
+    if (core.defaults) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
 
     getglobal("pdkp_charInfo"):SetText(charInfoText);
 
     local textLen = string.len(charInfoText);
-    local borderWidths = { [21]=250,  [22]=260,  [23]=270 } -- changes based on characters being displayed.
+    local borderWidths = { [21] = 250, [22] = 260, [23] = 270 } -- changes based on characters being displayed.
     local borderX = borderWidths[textLen] or 240;
 
     _G['pdkp_easy_stats_border']:SetSize(borderX, 72);
 end
 
 ---------------------------
---   Hide GUI Functions  --
+-- Hide GUI Functions  --
 ---------------------------
-
 function GUI:HideAdjustmentGUI(hide)
     local shroudButton = getglobal('pdkp_dkp_quick_shroud');
     local submitButton = pdkp_submit_button
     local amountBox = pdkp_dkp_amount_box
     local itemLink = getglobal('pdkp_item_link');
 
-    local elements = {shroudButton, submitButton, amountBox, itemLink};
+    local elements = { shroudButton, submitButton, amountBox, itemLink };
 
     for k, element in pairs(elements) do
-       if hide then element:Hide(); else element:Show(); end
+        if hide then element:Hide(); else element:Show(); end
     end
 end
 
 ---------------------------
 -- LINKED ITEM Functions --
 ---------------------------
-
 function GUI:UpdateShroudItemLink(itemLink)
     Item:UpdateLinked(itemLink);
     local buttonText = getglobal('pdkp_item_link_text')
@@ -841,19 +875,16 @@ end
 ---------------------------
 -- GUI Settings Functions--
 ---------------------------
-
 function GUI:GetGUISettings()
     local name = "pdkp_filter_dkp_slider"
 end
 
 function GUI:SetGUISettings()
-
 end
 
 ---------------------------
---    TIMER Functions    --
+-- TIMER Functions    --
 ---------------------------
-
 function GUI:CreateTimer(timerCount)
 
     if timerCount == nil then timerCount = 20 end -- Default timer count.
@@ -924,10 +955,12 @@ function GUI:CancelTimer()
 end
 
 local dkp_reason_menu = {
-    { text = "Select an Option", isTitle = true},
+    { text = "Select an Option", isTitle = true },
     { text = "Option 1", func = function() print("You've chosen option 1"); end },
     { text = "Option 2", func = function() print("You've chosen option 2"); end },
-    { text = "More Options", hasArrow = true,
+    {
+        text = "More Options",
+        hasArrow = true,
         menuList = {
             { text = "Option 3", func = function() print("You've chosen option 3"); end }
         }
@@ -938,14 +971,14 @@ function GUI:ReasonDropdown()
     local dkp_reason_menu_frame = CreateFrame("Frame", "pdkp_reason_menu_dropdown", UIParent, "UIDropDownMenuTemplate")
 
     -- Make the menu appear at the cursor:
-    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, "cursor", 0 , 0, "MENU");
+    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, "cursor", 0, 0, "MENU");
     -- Or make the menu appear at the frame:
     menuFrame:SetPoint("Center", UIParent, "Center")
-    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, dkp_reason_menu_frame, 0 , 0, "MENU");
+    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, dkp_reason_menu_frame, 0, 0, "MENU");
 end
 
 ---------------------------
---    GLOBAL POP UPS     --
+-- GLOBAL POP UPS     --
 ---------------------------
 
 StaticPopupDialogs["PDKP_CHANGE_VIEW_POPUP"] = {
@@ -961,7 +994,7 @@ StaticPopupDialogs["PDKP_CHANGE_VIEW_POPUP"] = {
     timeout = 0,
     whileDead = true,
     hideOnEscape = true,
-    preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 }
 
 StaticPopupDialogs["PDKP_Placeholder"] = {
@@ -974,7 +1007,7 @@ StaticPopupDialogs["PDKP_Placeholder"] = {
     timeout = 0,
     whileDead = true,
     hideOnEscape = true,
-    preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 }
 
 StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
@@ -991,5 +1024,5 @@ StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
     timeout = 0,
     whileDead = true,
     hideOnEscape = false,
-    preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 }

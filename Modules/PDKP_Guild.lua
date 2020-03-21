@@ -14,6 +14,8 @@ local GuildDB;
 
 local Player = nil;
 
+Guild.bankIndex = 0;
+
 local guildDBDefaults = {
     profile = {
         name = nil,
@@ -56,7 +58,7 @@ function Guild:GetGuildData(onlineOnly)
     local onlineMembers = {}
 
     for i=1, GuildDB.numOfMembers do
-        local name, _, rankIndex, lvl, class, __, __, __, online, __, __ = GetGuildRosterInfo(i)
+        local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
         name = Util:RemoveServerName(name)
 
         if onlineOnly then
@@ -75,8 +77,12 @@ function Guild:GetGuildData(onlineOnly)
                         ['canEdit']=rankIndex <= 4,
                     });
                 end
-
             end
+        end
+
+        if name == 'Pantheonbank' then
+            Guild.bankIndex = i
+            DKP.bankID = officerNote
         end
 
         if name == Util:GetMyName() then
@@ -168,4 +174,8 @@ end
 -- returns the members table from the database.
 function Guild:GetMembers()
     return GuildDB.members;
+end
+
+function Guild:UpdateBankNote(id)
+    GuildRosterSetOfficerNote(Guild.bankIndex, id)
 end
