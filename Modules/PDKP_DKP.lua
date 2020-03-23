@@ -373,6 +373,54 @@ function DKP:ConfirmChange()
     StaticPopup_Show('PDKP_CONFIRM_DKP_CHANGE')
 end
 
+function DKP:DeleteEntry(entry)
+    local entryKey = entry['id']
+    local changeAmount = entry['dkpChange']
+    local raid = entry['raid']
+
+    -- We have to inverse the amount (make negatives positives, and positives negatives).
+
+    changeAmount = changeAmount * -1;
+
+    local members = dkpDB.members
+
+    for key, obj in pairs(members) do
+        local entries = obj['entries']
+        local entryIndex;
+        if entries then -- Everyone that has history.
+           for i=1, #entries do -- check to see if they have the entry.
+               local memberEntryKey = entries[i]
+               if memberEntryKey == entryKey then -- We found a match!
+                   entryIndex = i
+                   DKP:UpdateEntryRaidDkpTotal(raid, key, changeAmount);
+               end
+           end
+        end
+        if entryIndex ~= nil then entries[entryIndex] = nil end
+    end
+
+    dkpDB.history['all'][entryKey] = nil;
+    DKP:ChangeDKPSheets(raid, true)
+    GUI:UpdateEasyStats();
+
+    if entryKey == dkpDB.lastEdit then
+        local newLastEdit;
+        for key, _ in pairs(dkpDB.history['all']) do
+            newLastEdit = key;
+            break;
+        end
+        dkpDB.lastEdit = newLastEdit
+    end
+
+    -- Update the slider max (if needed)
+    GUI:UpdateDKPSliderMax();
+    -- Re-run the table filters.
+    pdkp_dkp_table_filter()
+
+--    Guild:UpdateBankNote(dkpDB.lastEdit)
+    DKP.bankID = dkpDB.lastEdit
+end
+
 function DKP:UpdateEntries()
     local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
     if dkpChange == 0 then return end; -- Don't need to change anything.
@@ -499,7 +547,7 @@ function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
     if entry[raid] < 0 then entry[raid] = 0 end
 end
 
-function DKP:ChangeDKPSheets(raid)
+function DKP:ChangeDKPSheets(raid, noUpdate)
     if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
 
     for key, name in ipairs(DKP:GetMembers()) do
@@ -511,13 +559,15 @@ function DKP:ChangeDKPSheets(raid)
     GUI:GetTableDisplayData()
     pdkp_dkp_scrollbar_Update()
 
-    if GUI:GetSelectedCount() > 0 then
-        GUI:ShowSelectedHistory(GUI.selected[1])
+    if noUpdate == nil then
+        if GUI:GetSelectedCount() > 0 then
+            GUI:ShowSelectedHistory(GUI.selected[1])
+        else
+            GUI:ShowSelectedHistory(nil)
+        end
     else
         GUI:ShowSelectedHistory(nil)
     end
-
---    GUI:ShowSelectedHistory(charObj)
 
     print('Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP');
 end

@@ -12,6 +12,7 @@ local Defaults = core.defaults;
 
 local GuildDB;
 
+
 local Player = nil;
 
 Guild.bankIndex = 0;
@@ -31,6 +32,7 @@ function Guild:InitGuildDB()
 
     core.Guild.db = LibStub("AceDB-3.0"):New("pdkp_guildDB", guildDBDefaults, true);
     GuildDB = core.Guild.db.profile;
+    Guild.db = GuildDB;
 end
 
 -- Sets the guildDB's data.

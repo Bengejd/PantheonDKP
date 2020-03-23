@@ -69,7 +69,7 @@ function Setup:AdjustmentDropdowns()
 
     local dropdowns = { reasonDropdown, secondaryDropdown, thirdDropdown }
     local dropdownWidths = { 150, 120, 100 };
-    local dropdownX = { -25, 100, 100 };
+    local dropdownX = { -25, 100, 200 };
     local dropdownNames = { 'first', 'second', 'third' }
 
     --[[
@@ -312,11 +312,7 @@ function Setup:HistoryFrame()
         scrollcontainer.frame:Show()
         GUI.HistoryShown = true
         GUI:HideAdjustmentReasons()
-        if(GUI:GetSelectedCount() > 0) then
-            GUI:ShowSelectedHistory(GUI.selected[1])
-        else
-            GUI:ShowSelectedHistory(nil)
-        end
+        GUI:ShowSelectedHistory(nil)
     end)
     hf:SetScript("OnHide", function()
         scrollcontainer.frame:Hide()

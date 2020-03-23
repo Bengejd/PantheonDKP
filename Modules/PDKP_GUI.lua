@@ -287,9 +287,9 @@ function GUI:ShowSelectedHistory(charObj)
         return keys;
     end
 
-    if charObj then -- We actually have a character we're checking out.
+    if charObj ~= nil then -- We actually have a character we're checking out.
         b = _G[charObj['bName']]
-        Util:Debug('Showing history for '.. charObj['name'])
+--        Util:Debug('Showing history for '.. charObj['name'])
         member = DKP.dkpDB.members[charObj['name']]
         historyKeys = getDkpHistoryKeys(member['entries'], false)
         charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
@@ -330,15 +330,30 @@ function GUI:ShowSelectedHistory(charObj)
             local dkpChangeLabel = AceGUI:Create("Label")
             dkpChangeLabel:SetWidth(50)
 
-            local dkpTextLabel = AceGUI:Create("Label")
-            dkpTextLabel:SetWidth(250)
+            local reasonLabel = AceGUI:Create("InteractiveLabel")
+            reasonLabel:SetWidth(250)
             local officerLabel = AceGUI:Create("Label")
 
             officerLabel:SetText('Officer: ' ..entry['officer'])
-            dkpTextLabel:SetText('Reason: '..string.trim(lineText))
+            reasonLabel:SetText('Reason: '..lineText)
             dkpChangeLabel:SetText(string.trim(dkpChangeText))
 
-            dkpTextLabel:SetFullWidth(false)
+            local labels = {officerLabel, reasonLabel, dkpChangeLabel }
+
+            local function labelCallback(self, _, buttonType)
+                if buttonType == 'RightButton' and Guild:CanEdit() then
+                    StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry = self.entry;
+                    StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_POPUP')
+                end
+            end
+
+            for i=1, #labels do
+                local label = labels[i];
+                label.entry = entry;
+                label:SetCallback("OnClick", labelCallback)
+            end
+
+            reasonLabel:SetFullWidth(false)
             dkpChangeLabel:SetFullWidth(false)
 
             local ig = AceGUI:Create("InlineGroup")
@@ -363,7 +378,7 @@ function GUI:ShowSelectedHistory(charObj)
             dkpGroup:SetFullWidth(false)
 
             officerGroup:AddChild(officerLabel)
-            textGroup:AddChild(dkpTextLabel)
+            textGroup:AddChild(reasonLabel)
             dkpGroup:AddChild(dkpChangeLabel)
 
             textGroup:SetWidth(275)
@@ -621,6 +636,44 @@ StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'] = {
     end,
     OnCancel = function()
         StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+}
+
+StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'] = {
+    text = "What would you like to do to this entry?",
+    button1 = "Edit",
+    button3 = 'Cancel',
+    button2 = "Delete",
+    OnAccept = function(self) -- Edit
+        end,
+    OnCancel = function() -- Delete
+        StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].text = 'Are you sure you want to DELETE this entry?'
+        local entry = StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry
+        StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry = entry;
+        StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_CONFIRM')
+    end,
+    OnAlt = function() -- Cancel
+        print('Cancel clicked')
+    end,
+timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+}
+
+StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'] = {
+    text = "Are you sure you want to",
+    button1 = "Confirm",
+    button2 = "Cancel",
+    OnAccept = function(self) -- Confirm
+        local entry = StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry
+        DKP:DeleteEntry(entry)
+    end,
+    OnCancel = function() -- Cancel
     end,
     timeout = 0,
     whileDead = true,
