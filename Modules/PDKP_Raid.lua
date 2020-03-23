@@ -93,10 +93,6 @@ function Raid:IsInRaid()
     return IsInRaid()
 end
 
-function Raid:GetML()
-
-end
-
 function Raid:GetRaidInfo()
     local raidInfo = {}
     for i = 1, 40 do

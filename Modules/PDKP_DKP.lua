@@ -336,74 +336,70 @@ function DKP:BossKill(charObj)
     end
 end
 
-function DKP:UpdateEntry()
-    local dkpChange = getglobal('pdkp_dkp_amount_box'):GetNumber();
+function DKP:ConfirmChange()
+    local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
     if dkpChange == 0 then return end; -- Don't need to change anything.
 
-    local _, _, server_time, _ = Util:GetDateTimes()
+    if dkpChange > 0 then
+        dkpChange = Util:FormatFontTextColor(Util.success, dkpChange)
+    else
+        dkpChange = Util:FormatFontTextColor(Util.warning, dkpChange)
+    end
 
-    -- itterate through all of the selected entries and do the operations.
-    for key, charObj in pairs(GUI.selected) do
+    local text = ''
+    local chars = {};
+
+    for _, charObj in pairs(GUI.selected) do
         if charObj.name then
-            -- Determine if we're adding or subtracting
-            if dkpChange > 0 then charObj.dkpTotal = DKP:Add(charObj.name, dkpChange);
-            elseif dkpChange < 0 then charObj.dkpTotal = DKP:Subtract(charObj.name, dkpChange);
-            end
-            -- Now update the visual text
-
-            if charObj.bName then
-                local dkpText = _G[charObj.bName .. '_col3'];
-                dkpText:SetText(charObj.dkpTotal);
-            end
-
-            DKP:UpdateHistory(charObj.name, dkpChange, server_time);
+           table.insert(chars, charObj)
         end
     end
 
-    GUI:UpdateEasyStats()
+    local function compare(a,b) return a.class < b.class end
 
-    -- Update the slider max (if needed)
-    GUI:UpdateDKPSliderMax();
-    -- Re-run the table filters.
-    pdkp_dkp_table_filter()
+    table.sort(chars, compare)
 
-    Guild:UpdateBankNote(server_time)
-    DKP.bankID = server_time
+    for i=1, #chars do
+        local char = chars[i];
+        text = text..char['formattedName'];
+        if i < #chars then text = text.. ', ' end
+    end
+
+    local titleText = 'Are you sure you\'d like to give '..dkpChange..' DKP to the following players: \n \n'..text
+
+    StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = titleText
+    StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data = chars;
+    StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames = text
+    StaticPopup_Show('PDKP_CONFIRM_DKP_CHANGE')
 end
 
-function DKP:UpdateHistory(name, dkpChange, global_server_time)
-    local amountBox = getglobal('pdkp_dkp_amount_box');
-    local itemLink = getglobal('pdkp_item_link');
+function DKP:UpdateEntries()
+    local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
+    if dkpChange == 0 then return end; -- Don't need to change anything.
+
+    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
 
     local reasonDrop = GUI.reasonDropdown
     local dropdowns = GUI.adjustDropdowns
 
     local reason = reasonDrop.text:GetText()
-    local raid;
-    local boss;
-    local historyText;
-    local dkpChangeText;
-    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
+    local raid, boss, historyText, dkpChangeText;
 
     local reasonVal = reasonDrop:GetValue();
 
     if reasonVal >= 1 and reasonVal <= 5 then
-       raid = dropdowns[2].text:GetText();
+        raid = dropdowns[2].text:GetText();
         if reasonVal >= 1 and reasonVal <= 3 or reasonVal == 5 then -- Ontime, Signup, Benched, Unexcused Absence
-           historyText = raid .. ' - ' .. reason;
+            historyText = raid .. ' - ' .. reason;
         end
 
         if reasonVal == 4 then
-           boss = dropdowns[3].text:GetText();
+            boss = dropdowns[3].text:GetText();
             historyText = raid .. ' - ' .. boss;
         end
-    end
-
-    if reasonVal == 6 then -- item win
+    elseif reasonVal == 6 then -- item Win
         historyText = 'Item Win -';
-    end
-
-    if reasonVal == 7 then -- Other selected
+    elseif reasonVal == 7 then -- Other selected
         local otherBox = getglobal('pdkp_other_entry_box')
         historyText = 'Other - ' .. otherBox:GetText();
     end
@@ -417,7 +413,7 @@ function DKP:UpdateHistory(name, dkpChange, global_server_time)
     end
 
     if reasonVal == 6 then -- item win
-        local buttonText = getglobal('pdkp_item_link_text')
+        local buttonText = _G['pdkp_item_link_text']
         historyText = historyText .. buttonText:GetText()
     end
 
@@ -426,8 +422,11 @@ function DKP:UpdateHistory(name, dkpChange, global_server_time)
         print('No raid found, setting raid to '.. raid)
     end
 
+    local charObjs = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data -- Grab the data from our popup.
+    local charNames = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames -- The char name string.
+
     local historyEntry = {
-        ['id']=global_server_time,
+        ['id']=server_time,
         ['text'] = historyText,
         ['reason'] = reason,
         ['bossKill'] = boss,
@@ -439,27 +438,45 @@ function DKP:UpdateHistory(name, dkpChange, global_server_time)
         ['date']= dDate,
         ['time']=tTime,
         ['serverTime']=server_time,
-        ['datetime']=datetime
+        ['datetime']=datetime,
+        ['names']=charNames
     }
 
-    if not dkpDB.history[name] then
-       table.insert(dkpDB.history, name);
-        dkpDB.history[name] = {};
+    for i=1, #charObjs do
+        local char = charObjs[i]
+        local name = char['name'];
+        local member = dkpDB.members[name]
+        if member.entries == nil then member.entries = {} end
+        table.insert(member.entries, server_time)
+
+        -- Determine if we're adding or subtracting
+        if dkpChange > 0 then char.dkpTotal = DKP:Add(char.name, dkpChange);
+        elseif dkpChange < 0 then char.dkpTotal = DKP:Subtract(char.name, dkpChange);
+        end
+
+        -- Now update the visual text
+        if char.bName then
+            local dkpText = _G[char.bName .. '_col3'];
+            dkpText:SetText(char.dkpTotal);
+        end
+
+        DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange);
     end
 
-    table.insert(dkpDB.history[name], historyEntry);
-    dkpDB.lastEdit = {
-        ['id']=global_server_time,
-        ['reason'] = reason,
-        ['raid'] = raid,
-        ['dkpChange'] = dkpChange,
-        ['dkpChangeText'] = dkpChangeText,
-        ['officer'] = Util:GetMyNameColored(),
-        ['serverTime']= global_server_time,
-        ['name']=name,
-    }
+    dkpDB.history['all'][server_time] = historyEntry;
+    dkpDB.lastEdit = server_time
 
-    DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange);
+    GUI:UpdateEasyStats()
+
+    -- Update the slider max (if needed)
+    GUI:UpdateDKPSliderMax();
+    -- Re-run the table filters.
+    pdkp_dkp_table_filter()
+
+    Guild:UpdateBankNote(server_time)
+    DKP.bankID = server_time
+
+    GUI.pdkp_dkp_amount_box:SetText('');
 end
 
 function DKP:GetLastEdit()

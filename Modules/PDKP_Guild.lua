@@ -60,6 +60,8 @@ function Guild:GetGuildData(onlineOnly)
     for i=1, GuildDB.numOfMembers do
         local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
         name = Util:RemoveServerName(name)
+        local formattedName;
+        if name then formattedName = Util:GetClassColoredName(name, class) end
 
         if onlineOnly then
             table.insert(onlineMembers, {
@@ -75,6 +77,7 @@ function Guild:GetGuildData(onlineOnly)
                         ["class"]=class,
                         ['online']=online,
                         ['canEdit']=rankIndex <= 4,
+                        ['formattedName']=formattedName,
                     });
                 end
             end

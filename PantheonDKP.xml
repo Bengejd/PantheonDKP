@@ -485,8 +485,6 @@
 						local amountVal = amountBox:GetText();
 						if amountVal == nil or amountVal == 0 or amountVal == '' then return end;
 						pdkp_template_function_call('pdkp_dkp_update');
-
-						amountBox:SetText('');
 					</OnEnterPressed>
 					<OnTextChanged>
 						pdkp_template_function_call('toggleSubmitButton');
@@ -599,7 +597,7 @@
 						if amountVal == nil or amountVal == 0 or amountVal == '' then return end;
 						pdkp_template_function_call('pdkp_dkp_update');
 
-						amountBox:SetText('');
+--						amountBox:SetText('');
 					</OnClick>
 				</Scripts>
 			</Button>

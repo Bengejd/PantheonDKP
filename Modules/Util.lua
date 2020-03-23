@@ -25,6 +25,9 @@ local class_colors = {
     ["Warrior"] = "C79C6E"
 }
 
+Util.warning = 'E71D36'
+Util.success = '22bb33'
+
 -- Returns the current player's name.
 function Util:GetMyName()
     local pName, _ = UnitName("PLAYER")
@@ -54,6 +57,11 @@ end
 
 function Util:GetClassColor(class)
     return class_colors[class]
+end
+
+function Util:GetClassColoredName(name, class)
+    local classColor = Util:GetClassColor(class)
+    return Util:FormatFontTextColor(classColor, name)
 end
 
 function Util:GetMyNameColored()

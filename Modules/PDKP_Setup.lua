@@ -310,11 +310,18 @@ function Setup:HistoryFrame()
 
     hf:SetScript("OnShow", function()
         scrollcontainer.frame:Show()
+        GUI.HistoryShown = true
         GUI:HideAdjustmentReasons()
+        if(GUI:GetSelectedCount() > 0) then
+            GUI:ShowSelectedHistory(GUI.selected[1])
+        else
+            GUI:ShowSelectedHistory(nil)
+        end
     end)
     hf:SetScript("OnHide", function()
         scrollcontainer.frame:Hide()
         GUI.reasonDropdown.frame:Show()
+        GUI.HistoryShown = false
     end)
 
     local scroll = AceGUI:Create("ScrollFrame")

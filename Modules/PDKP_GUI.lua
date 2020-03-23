@@ -36,6 +36,7 @@ GUI.pdkp_dkp_amount_box = nil
 GUI.pdkp_submit_button = nil
 
 GUI.HistoryTItle = Util:FormatFontTextColor('FFBA49', 'Recent History')
+GUI.HistoryShown = false
 
 GUI.adjustmentReasons = {
     "On Time Bonus",
@@ -59,9 +60,9 @@ function GUI:CheckOutOfDate()
     local lastEdit = DKP.dkpDB.lastEdit
     local lastEditID;
     if DKP.bankID == nil then
---       print('no bankID')
+--       Util:Debug('no bankID')
     else
---        print(lastEdit['id'])
+--        Util:Debug(lastEdit['id'])
     end
 end
 
@@ -161,6 +162,7 @@ end
 function GUI:EntryClicked(charObj, clickType, bName)
     if GUI:IsNotSelected(charObj.name) == false then
         _G[bName].customTexture:Hide();
+        if GUI:GetSelectedCount() == 0 then GUI:ShowSelectedHistory(nil) end
         GUI:ClearSelected();
         return;
     end
@@ -170,7 +172,6 @@ function GUI:EntryClicked(charObj, clickType, bName)
     GUI.lastEntryNameClicked = charObj['name']
     charObj.bName = bName; -- we'll need this later to remove the custom textures if selected filter is checked.
     GUI:AddToSelected(charObj);
-
     GameTooltip:Hide();
 end
 
@@ -229,7 +230,7 @@ end
 
 -- changes the view to the selected entries only.
 function GUI:pdkp_toggle_selected()
-    if table.getn(GUI.selected) == 0 then print('Nothing to display!') end;
+    if table.getn(GUI.selected) == 0 then Util:Debug('Nothing to display!') end;
     GUI:GetTableDisplayData()
     pdkp_dkp_table_filter()
 end
@@ -263,22 +264,43 @@ function GUI:RemoveFromSelected(charObj)
     GUI.selected[charObj.name] = nil;
 
     table.remove(GUI.selected, Util:FindTableIndex(GUI.selected, charObj.name));
-
     GUI:SelectedEntriesUpdated()
+
+    if GUI:GetSelectedCount() == 0 then GUI:ShowSelectedHistory(nil) end
 end
 
 function GUI:ShowSelectedHistory(charObj)
+    if GUI.HistoryShown == false then return end; -- No need to do anything if history isn't being shown.
 
-    local b = _G[charObj['bName']]
-    local dkpHistory = DKP.dkpDB.history[charObj['name']]
+    local b, member, dkpHistory, charName, title, entries, historyKeys;
 
-    local charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
-    local title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
-
-    GUI.HistoryFrame.historyTitle:SetText(title) -- Set the title.
     GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
 
-    if dkpHistory == nil or #dkpHistory == 0 then -- there is no dkp history to show, hide the frame and end function.
+    local function getDkpHistoryKeys(historyObject, all)
+        local keys = {};
+        if historyObject == nil then return {}; end
+        for key, obj in pairs(historyObject) do
+            if all then table.insert(keys, key) -- For everyone.
+            else table.insert(keys, obj)
+            end
+        end
+        return keys;
+    end
+
+    if charObj then -- We actually have a character we're checking out.
+        b = _G[charObj['bName']]
+        Util:Debug('Showing history for '.. charObj['name'])
+        member = DKP.dkpDB.members[charObj['name']]
+        historyKeys = getDkpHistoryKeys(member['entries'], false)
+        charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
+        title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
+        GUI.HistoryFrame.historyTitle:SetText(title) -- Set the title.
+    else
+        Util:Debug('Showing history for everyone')
+        historyKeys = getDkpHistoryKeys(DKP.dkpDB.history['all'], true)
+    end
+
+    if historyKeys == nil or #historyKeys == 0 then -- there is no dkp history to show, hide the frame and end function.
         local scroll = GUI.HistoryFrame.scroll
         local empty = 'No historical data found'
         empty = Util:FormatFontTextColor('E71D36', empty)
@@ -288,55 +310,80 @@ function GUI:ShowSelectedHistory(charObj)
         return
     end
 
-    local font = "GameFontNormalLarge"
+    local function compare(a,b)
+        return a < b
+    end
+    table.sort(historyKeys, compare)
 
-    for i = #dkpHistory, 1, -1 do
-        local raid = dkpHistory[i]['raid'];
+    for i=1, #historyKeys do
+        local key = historyKeys[i]
+        local entry = DKP.dkpDB.history.all[key]
+        local raid = entry['raid'];
         if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end -- Set the default since MC & Ony are combined.
 
-        local dkpChangeText = dkpHistory[i]['dkpChangeText']
-        local lineText = dkpHistory[i]['text']
+        local dkpChangeText = entry['dkpChangeText']
+        local lineText = entry['text']
 
         if raid and raid == DKP.dkpDB.currentDB then -- Only show history relevent to this raid.
             local scroll = GUI.HistoryFrame.scroll
 
             local dkpChangeLabel = AceGUI:Create("Label")
-            local dkpTextLabel = AceGUI:Create("Label")
+            dkpChangeLabel:SetWidth(50)
 
-            dkpTextLabel:SetText(lineText)
-            dkpChangeLabel:SetText(dkpChangeText)
+            local dkpTextLabel = AceGUI:Create("Label")
+            dkpTextLabel:SetWidth(250)
+            local officerLabel = AceGUI:Create("Label")
+
+            officerLabel:SetText('Officer: ' ..entry['officer'])
+            dkpTextLabel:SetText('Reason: '..string.trim(lineText))
+            dkpChangeLabel:SetText(string.trim(dkpChangeText))
 
             dkpTextLabel:SetFullWidth(false)
             dkpChangeLabel:SetFullWidth(false)
 
             local ig = AceGUI:Create("InlineGroup")
 
-            local formattedDate = Util:Format12HrDateTime(dkpHistory[i]['datetime'])
+            local formattedDate = Util:Format12HrDateTime(entry['datetime'])
             local title = formattedDate
 
-            if dkpHistory[i]['raid'] then
-                title = dkpHistory[i]['raid'] .. ' | ' .. formattedDate
+            if entry['raid'] then
+                title = entry['raid'] .. ' | ' .. formattedDate
             end
 
             ig:SetTitle(title)
             ig:SetLayout("Flow")
-
-            local sg1 = AceGUI:Create("SimpleGroup")
-            local sg2 = AceGUI:Create("SimpleGroup")
-
             ig:SetFullWidth(true)
 
-            sg1:SetFullWidth(false)
-            sg2:SetFullWidth(false)
+            local officerGroup = AceGUI:Create("SimpleGroup")
+            local textGroup = AceGUI:Create("SimpleGroup")
+            local dkpGroup = AceGUI:Create("SimpleGroup")
 
-            sg1:AddChild(dkpTextLabel)
-            sg2:AddChild(dkpChangeLabel)
+            officerGroup:SetFullWidth(true)
+            textGroup:SetFullWidth(false)
+            dkpGroup:SetFullWidth(false)
 
-            sg1:SetWidth(238)
-            sg2:SetWidth(50)
+            officerGroup:AddChild(officerLabel)
+            textGroup:AddChild(dkpTextLabel)
+            dkpGroup:AddChild(dkpChangeLabel)
 
-            ig:AddChild(sg1)
-            ig:AddChild(sg2)
+            textGroup:SetWidth(275)
+            dkpGroup:SetWidth(30)
+
+            ig:AddChild(officerGroup)
+            ig:AddChild(textGroup)
+            ig:AddChild(dkpGroup)
+
+            if charObj == nil then -- List all entries, with the people affected.
+                local names = entry['names'];
+                local sg3 = AceGUI:Create("SimpleGroup")
+                local namesLabel = AceGUI:Create("Label")
+                namesLabel:SetText('Members: '..names)
+                sg3:AddChild(namesLabel)
+                sg3:SetFullWidth(true)
+                sg3:SetWidth(300)
+                namesLabel:SetWidth(325)
+                ig:AddChild(sg3)
+            end
 
             scroll:AddChild(ig)
         end
@@ -359,6 +406,7 @@ function GUI:ClearSelected()
     GUI:ToggleSubmitButton()
 
     GUI.HistoryFrame.historyTitle:SetText(GUI.HistoryTItle)
+    GUI:ShowSelectedHistory(nil)
     if not GUI.lastEntryClicked then return end;
 end
 
@@ -413,7 +461,7 @@ function GUI:UpdateEasyStats()
 
     local charInfoText = charName .. " | " .. char_dkp .. " DKP"
 
-    if (core.defaults) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
+    if (core.defaults.debug) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
 
     getglobal("pdkp_charInfo"):SetText(charInfoText);
 
@@ -448,7 +496,7 @@ function GUI:UpdateShroudItemLink(itemLink)
     local button = GUI:GetItemButton();
     button:Show();
 
-    print(itemLink);
+    Util:Debug(itemLink);
 
 
     -- THIS SHOULD ALSO CHANGE DROPDOWN TO ITEM-WIN IF NECESSARY.
@@ -530,29 +578,6 @@ function GUI:CancelTimer()
     end
 end
 
-local dkp_reason_menu = {
-    { text = "Select an Option", isTitle = true },
-    { text = "Option 1", func = function() print("You've chosen option 1"); end },
-    { text = "Option 2", func = function() print("You've chosen option 2"); end },
-    {
-        text = "More Options",
-        hasArrow = true,
-        menuList = {
-            { text = "Option 3", func = function() print("You've chosen option 3"); end }
-        }
-    }
-}
-
-function GUI:ReasonDropdown()
-    local dkp_reason_menu_frame = CreateFrame("Frame", "pdkp_reason_menu_dropdown", UIParent, "UIDropDownMenuTemplate")
-
-    -- Make the menu appear at the cursor:
-    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, "cursor", 0, 0, "MENU");
-    -- Or make the menu appear at the frame:
-    menuFrame:SetPoint("Center", UIParent, "Center")
-    EasyMenu(dkp_reason_menu, dkp_reason_menu_frame, dkp_reason_menu_frame, 0, 0, "MENU");
-end
-
 ---------------------------
 -- GLOBAL POP UPS     --
 ---------------------------
@@ -581,6 +606,22 @@ StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
         StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
     end,
     OnCancel = function() end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+}
+
+StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'] = {
+    text = "",
+    button1 = "Confirm",
+    button2 = "Cancel",
+    OnAccept = function()
+        DKP:UpdateEntries()
+    end,
+    OnCancel = function()
+        StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
+    end,
     timeout = 0,
     whileDead = true,
     hideOnEscape = false,
