@@ -311,7 +311,7 @@ function GUI:ShowSelectedHistory(charObj)
     end
 
     local function compare(a,b)
-        return a < b
+        return a > b
     end
     table.sort(historyKeys, compare)
 
