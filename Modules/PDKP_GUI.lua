@@ -353,6 +353,17 @@ function GUI:ShowSelectedHistory(charObj)
                 label:SetCallback("OnClick", labelCallback)
             end
 
+            if entry['item'] ~= nil then
+               reasonLabel:SetCallback("OnEnter", function(self)
+                    GameTooltip:SetOwner(reasonLabel.frame, "ANCHOR_RIGHT")
+                    local tiptext = entry['item']
+                    GameTooltip:SetHyperlink(tiptext);
+               end)
+                reasonLabel:SetCallback("OnLeave", function(self)
+                    GameTooltip:Hide()
+                end)
+            end
+
             reasonLabel:SetFullWidth(false)
             dkpChangeLabel:SetFullWidth(false)
 
@@ -506,7 +517,7 @@ end
 ---------------------------
 function GUI:UpdateShroudItemLink(itemLink)
     Item:UpdateLinked(itemLink);
-    local buttonText = getglobal('pdkp_item_link_text')
+    local buttonText = _G['pdkp_item_link_text']
     buttonText:SetText(itemLink);
     local button = GUI:GetItemButton();
     button:Show();
@@ -518,7 +529,7 @@ function GUI:UpdateShroudItemLink(itemLink)
 end
 
 function GUI:GetItemButton()
-    return getglobal('pdkp_item_link');
+    return _G['pdkp_item_link'];
 end
 
 ---------------------------

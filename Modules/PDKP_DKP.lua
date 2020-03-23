@@ -379,7 +379,6 @@ function DKP:DeleteEntry(entry)
     local raid = entry['raid']
 
     -- We have to inverse the amount (make negatives positives, and positives negatives).
-
     changeAmount = changeAmount * -1;
 
     local members = dkpDB.members
@@ -431,7 +430,7 @@ function DKP:UpdateEntries()
     local dropdowns = GUI.adjustDropdowns
 
     local reason = reasonDrop.text:GetText()
-    local raid, boss, historyText, dkpChangeText;
+    local raid, boss, historyText, dkpChangeText, itemText;
 
     local reasonVal = reasonDrop:GetValue();
 
@@ -446,7 +445,7 @@ function DKP:UpdateEntries()
             historyText = raid .. ' - ' .. boss;
         end
     elseif reasonVal == 6 then -- item Win
-        historyText = 'Item Win -';
+        historyText = 'Item Win - ';
     elseif reasonVal == 7 then -- Other selected
         local otherBox = getglobal('pdkp_other_entry_box')
         historyText = 'Other - ' .. otherBox:GetText();
@@ -463,6 +462,7 @@ function DKP:UpdateEntries()
     if reasonVal == 6 then -- item win
         local buttonText = _G['pdkp_item_link_text']
         historyText = historyText .. buttonText:GetText()
+        itemText = buttonText:GetText();
     end
 
     if raid == nil then
@@ -482,7 +482,7 @@ function DKP:UpdateEntries()
         ['dkpChange'] = dkpChange,
         ['dkpChangeText'] = dkpChangeText,
         ['officer'] = Util:GetMyNameColored(),
-        ['item']= nil,
+        ['item']= itemText,
         ['date']= dDate,
         ['time']=tTime,
         ['serverTime']=server_time,
