@@ -511,6 +511,14 @@ function DKP:ChangeDKPSheets(raid)
     GUI:GetTableDisplayData()
     pdkp_dkp_scrollbar_Update()
 
+    if GUI:GetSelectedCount() > 0 then
+        GUI:ShowSelectedHistory(GUI.selected[1])
+    else
+        GUI:ShowSelectedHistory(nil)
+    end
+
+--    GUI:ShowSelectedHistory(charObj)
+
     print('Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP');
 end
 
