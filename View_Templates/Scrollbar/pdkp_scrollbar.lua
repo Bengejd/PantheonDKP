@@ -32,12 +32,20 @@ local entry_name = "pdkp_dkp_entry";
 
 -- Filters the tabledata based on what checkboxes are checked.
 -- cbn (Checkbox_name)
-function GUI:pdkp_dkp_table_filter_class(cbn)
+function GUI:pdkp_dkp_table_filter_class(cbn, all)
     cbn = cbn:match("pdkp_(%a+)_checkbox") -- remove the 'pdkp_ & _checkbox from the string, for filtering purposes.
     cbn = (cbn:gsub("^%l", string.upper))  -- Make the first character uppercase (for consistency)
 
     local filterClass = filter_classes[cbn];
-    if filterClass == nil then filter_classes[cbn] = true else filter_classes[cbn] = nil end
+    if filterClass == nil then filter_classes[cbn] = true
+    else filter_classes[cbn] = nil end
+
+    if all then filter_classes[cbn] = nil end
+
+    if filter_classes[cbn] == true and all == nil then
+       _G['pdkp_all_classes']:SetChecked(false)
+    end
+
     pdkp_dkp_table_filter()
 end
 
@@ -165,25 +173,23 @@ function GUI:SearchOnAttributes(char)
 end
 
 function GUI:ToggleInRaid(status)
-    print('updateInRaidStatus');
     core.filterInRaid = status;
 
     local raidMembers = Raid:GetRaidInfo()
 
     for i=1, PDKP:GetDataCount() do
         local char = PDKP.data[i];
+        local inRaid = false
 
         for j=1, #raidMembers do
-            local raidMember = raidMembers[j];
-
+           local raidMember = raidMembers[j];
             if raidMember['name'] == char['name'] then
-                char['inRaid'] = true;
+               inRaid = true;
                 break;
             end
-            char['inRaid'] = false;
         end
+        char['inRaid'] = inRaid;
     end
-
     pdkp_dkp_table_filter()
 end
 
@@ -226,9 +232,7 @@ function pdkp_dkp_table_filter()
         local showingInRaid = core.filterInRaid == true;
         local inRaidStatusMatch = true; -- set this as the default.
 
-        if Raid:IsInRaid() and showingInRaid then
-           inRaidStatusMatch = showingInRaid == char['inRaid'];
-        end
+        if showingInRaid then inRaidStatusMatch = showingInRaid == char['inRaid']; end
 
         if selectedFilterChecked and GUI.selected[char.name] then isSelected = true; end
         if hasSearch then searchFound = GUI:SearchOnAttributes(char) end

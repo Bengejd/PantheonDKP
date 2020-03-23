@@ -162,12 +162,20 @@
 
 				<!--TITLE -->
 
-				<FontString parentKey="pdkp_title" inherits="BossEmoteNormalHuge" text="PantheonDKP">
+				<FontString name="pdkp_title" parentKey="pdkp_title" inherits="BossEmoteNormalHuge" text="PantheonDKP">
 					<Size x="314" y="25" />
 					<Anchors>
 						<Anchor point="RIGHT" x="200" />
 						<Anchor point="TOPLEFT" x="130" y="-13" />
 					</Anchors>
+				</FontString>
+
+				<FontString parentKey="pdkp_dkp_out_of_date" inherits="GameFontNormal" text="" justifyH="LEFT">
+					<Size x="150" y="14" />
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.pdkp_title" x="-20" y="0" />
+					</Anchors>
+					<Color a="0.8" r="0.46" g="0.87" b="1" />
 				</FontString>
 
 				<!-- UI VERSION NUMBER -->
@@ -199,17 +207,11 @@
 
 				<!--UI section headers-->
 
-				<FontString name="pdkp_view_header_section" inherits="GameFontHighlightHuge" text="GENERAL" justifyH="LEFT">
-					<Size x="200" y="14" />
-					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.pdkp_topRight" relativePoint="CENTER" x="50" y="25"/>
-					</Anchors>
-				</FontString>
 
 				<FontString name="pdkp_filter1_header_section" inherits="GameFontHighlightHuge" text="FILTERS" justifyH="LEFT">
 					<Size x="200" y="14" />
 					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.pdkp_topRight" relativePoint="CENTER" x="50" y="-100"/>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.pdkp_topRight" relativePoint="CENTER" x="50" y="25"/>
 					</Anchors>
 				</FontString>
 
@@ -228,12 +230,12 @@
 					</Anchors>
 				</FontString>
 
-				<FontString name="pdkp_selected_entries_label" inherits="GameFontNormalLeftYellow" text="0 Entries shown | 0 selected" justifyH="LEFT">
-					<Size x="200" y="14" />
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.pdkp_bottomLeft" relativePoint="BOTTOMLEFT" x="220" y="-235"/>
-					</Anchors>
-				</FontString>
+                <FontString name="pdkp_selected_entries_label" inherits="GameFontNormalLeftYellow" text="0 Entries shown | 0 selected" justifyH="LEFT">
+                    <Size x="200" y="14" />
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.pdkp_bottomLeft" relativePoint="BOTTOMLEFT" x="220" y="-235"/>
+                    </Anchors>
+                </FontString>
 
 
 			</Layer>
@@ -299,45 +301,12 @@
 				</Scripts>
 			</Button>
 
-			<!--General Buttons -->
-
-			<Button name="pdkp_change_table_view" inherits="UIPanelButtonTemplate" text="Change View">
-				<Size x="100" y="50" />
-				<Anchors>
-					<Anchor point="CENTER" x="200" y="50" />
-				</Anchors>
-				<Scripts>
-					<OnClick>
-							--							pdkp_template_function_call("Hide");
-							StaticPopup_Show ("PDKP_CHANGE_VIEW_POPUP")
-					</OnClick>
-					<OnShow>
-							self.tooltip = 'Toggle between the Raid and Guild table'
-					</OnShow>
-				</Scripts>
-			</Button>
-
-			<Button name="pdkp_change_table_view" inherits="UIPanelButtonTemplate" text="Update Roster">
-				<Size x="100" y="50" />
-				<Anchors>
-					<Anchor point="CENTER" x="350" y="50" />
-				</Anchors>
-				<Scripts>
-					<OnClick>
-							StaticPopup_Show ("PDKP_Placeholder")
-					</OnClick>
-					<OnShow>
-							self.tooltip = 'Toggle between the Raid and Guild table'
-					</OnShow>
-				</Scripts>
-			</Button>
-
 			<!--Filter Check buttons -->
 
 			<CheckButton name="pdkp_selected_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
 				<Size x="25" y="25" />
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-175" y="-250" />
+					<Anchor point="TOPRIGHT" x="-175" y="-125" />
 				</Anchors>
 				<Scripts>
 					<OnShow>
@@ -350,10 +319,26 @@
 				</Scripts>
 			</CheckButton>
 
+			<CheckButton name="pdkp_all_classes" inherits="InterfaceOptionsCheckButtonTemplate" checked="true">
+				<Size x="25" y="25" />
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-45" y="-170" />
+				</Anchors>
+				<Scripts>
+					<OnShow>
+							getglobal(self:GetName() .. "Text"):SetText('All Classes')
+					</OnShow>
+					<OnClick>
+							pdkp_template_function_call("pdkp_select_all_classes");
+							pdkp_template_function_call("pdkp_dkp_table_filter")
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 			<CheckButton name="pdkp_online_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
 				<Size x="25" y="25" />
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-45" y="-250" />
+					<Anchor point="TOPRIGHT" x="-45" y="-125" />
 				</Anchors>
 				<Scripts>
 					<OnShow>
@@ -361,7 +346,7 @@
 					</OnShow>
 					<OnClick>
 							pdkp_template_function_call("pdkp_toggle_online", self:GetChecked());
-							pdkp_template_function_call("pdkp_dkp_table_filter")
+							pdkp_template_function_call("pdkp_dkp_table_filter", self:GetChecked())
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -369,11 +354,11 @@
 			<CheckButton name="pdkp_in_raid_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" checked="false">
 				<Size x="25" y="25" />
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="85" y="-250" />
+					<Anchor point="TOPRIGHT" x="85" y="-125" />
 				</Anchors>
 				<Scripts>
 					<OnShow>
-							getglobal(self:GetName() .. "Text"):SetText('In Raid')
+							getglobal(self:GetName() .. "Text"):SetText('In Raid/Party')
 					</OnShow>
 					<OnClick>
 							pdkp_template_function_call("pdkp_in_raid_checkbox", self:GetChecked());

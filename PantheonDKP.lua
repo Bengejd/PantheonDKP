@@ -13,6 +13,7 @@ local Defaults = core.defaults;
 local Invites = core.Invites;
 local Raid = core.Raid;
 local Comms = core.Comms;
+local Setup = core.Setup;
 
 local PlaySound = PlaySound
 
@@ -264,7 +265,7 @@ function PDKP:Show()
 
     --    print('PDKP_UID: ', core.defaults.pdkp_is_in_guild)
 
-    GUI:CreateMainFrame()
+    Setup:MainUI()
     pdkp_init_scrollbar()
 
     -- Displays the current character's dkp at the top for accessability.
@@ -315,6 +316,8 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'pdkp_quick_roll' then return GUI:QuickCalculate('roll') end;
 
     if funcName == 'toggleSubmitButton' then return GUI:ToggleSubmitButton() end;
+
+    if funcName == 'pdkp_select_all_classes' then return GUI:ToggleAllClasses(object) end;
 end
 
 

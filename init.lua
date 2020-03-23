@@ -22,4 +22,5 @@ core.Invites = {};
 core.Raid = {};
 core.Comms = {};
 core.Import = {};
+core.Setup = {}; -- Creates the UI for us.
 core.PDKP = LibStub("AceAddon-3.0"):NewAddon("PDKP", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0"); -- set the plugin up.
