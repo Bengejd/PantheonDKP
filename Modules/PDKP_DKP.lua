@@ -256,7 +256,8 @@ local dkpDBDefaults = {
         members = {},
         lastEdit = {},
         history = {
-            all = {}
+            all = {},
+            deleted = {}
         },
     }
 }
@@ -399,16 +400,13 @@ function DKP:DeleteEntry(entry)
     end
 
     dkpDB.history['all'][entryKey] = nil;
+    table.insert(dkpDB.history['deleted'], entryKey)
     DKP:ChangeDKPSheets(raid, true)
     GUI:UpdateEasyStats();
 
     if entryKey == dkpDB.lastEdit then
-        local newLastEdit;
-        for key, _ in pairs(dkpDB.history['all']) do
-            newLastEdit = key;
-            break;
-        end
-        dkpDB.lastEdit = newLastEdit
+        local _, _, server_time, _ = Util:GetDateTimes()
+        dkpDB.lastEdit = server_time
     end
 
     -- Update the slider max (if needed)
@@ -481,6 +479,7 @@ function DKP:UpdateEntries()
         ['raid'] = raid,
         ['dkpChange'] = dkpChange,
         ['dkpChangeText'] = dkpChangeText,
+        ['dkpType']=nil,
         ['officer'] = Util:GetMyNameColored(),
         ['item']= itemText,
         ['date']= dDate,

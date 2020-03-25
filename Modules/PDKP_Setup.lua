@@ -12,6 +12,7 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.import;
 local Setup = core.Setup;
+local Comms = core.Comms;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local PlaySound = PlaySound
@@ -29,7 +30,7 @@ function Setup:MainUI()
         -----------------------------
 
         GUI.pdkp_frame = CreateFrame("Frame", "pdkpCoreFrame", UIParent, "pdkp_core_frame");
-        GUI.pdkp_frame:SetPoint("TOPLEFT", 0, 0)
+        GUI.pdkp_frame:SetPoint("TOP", 0, 0)
 
         GUI.pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
         GUI.pdkp_submit_button = _G['pdkp_dkp_submit'];
@@ -48,6 +49,7 @@ function Setup:MainUI()
 
         Setup:RaidDkpDropdown()
         Setup:HistoryFrame()
+        Setup:dkpPushButton()
 
         GUI:CheckOutOfDate()
     end
@@ -58,6 +60,81 @@ end
 -----------------------------
 
 function Setup:dkpPushButton()
+    local b = CreateFrame("Button", "pdkpPushButton", pdkpCoreFrame, 'UIPanelButtonTemplate')
+    b:SetPoint("TOPLEFT", 20, -5)
+    b:SetHeight(55);
+    b:SetWidth(55);
+    b:SetAlpha(0);
+    b:SetScript("OnClick", function()
+        PlaySound(856)
+        Comms:RequestOfficersLastEdit()
+    end)
+    GUI.pushButton = b
+
+    local pf = CreateFrame("Frame", "pdkpPushFrame", UIParent, nil)
+    pf:SetPoint("TOPLEFT", 0, -100)
+    pf:SetHeight(300);
+    pf:SetWidth(300);
+    pf:SetBackdrop({
+        edgeFile = nil,
+        tile = false,
+        tileEdge = true,
+        tileSize = 0,
+        edgeSize = 32,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        backdropBorderColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
+        backdropColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
+    });
+    pf:EnableMouse(true)
+    pf:SetFrameStrata('FULLSCREEN');
+    pf:RegisterForDrag("LeftButton")
+    pf:SetMovable(true)
+    pf:SetScript("OnDragStart", pf.StartMoving)
+    pf:SetScript("OnDragStop", pf.StopMovingOrSizing)
+
+    local cb = CreateFrame("Button", 'pdkpPushCloseButton', pf, 'UIPanelCloseButton')
+    cb:SetPoint("TOPRIGHT", pf, "TOPRIGHT", 45, 10)
+    cb:SetHeight(35);
+    cb:SetWidth(35);
+    cb:SetScript("OnClick", function()
+        pf:Hide()
+    end)
+
+    local scrollcontainer = AceGUI:Create("InlineGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(300)
+    scrollcontainer:SetWidth(300)
+    scrollcontainer:SetLayout("Fill")
+
+    local font = "AchievementPointsFont"
+    local title = pf:CreateFontString('pdkp_push_title', "ARTWORK", font);
+    title:SetText('DKP Push Request Portal')
+    title:SetPoint("TOP", 25, -30);
+    pf.pushTitle = title;
+
+    scrollcontainer:SetParent(pf)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", pf, "CENTER", 25, -15);
+
+    pf:SetScript("OnShow", function()
+        scrollcontainer.frame:Show()
+        cb:Show()
+    end)
+    pf:SetScript("OnHide", function()
+        scrollcontainer.frame:Hide()
+        cb:Hide()
+    end)
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    pf.scroll = scroll
+
+    pf:Hide()
+    scrollcontainer.frame:Hide()
+    GUI.pushFrame = pf;
 end
 
 function Setup:AdjustmentDropdowns()
@@ -235,7 +312,6 @@ function Setup:RaidDkpDropdown()
 end
 
 function Setup:HistoryFrame()
-
     local check = AceGUI:Create("CheckBox")
     check:SetValue(false)
     check:SetParent(pdkpCoreFrame)
@@ -393,7 +469,6 @@ function Setup:ClassFilterCheckboxes()
         cb:SetPoint(point, relativeTo, relativePoint, relPointX, relPointY);
     end
 end
-
 
 -- Dropdown test between ACE GUI and Custom Solutions. Results inconclusive.
 function Setup:CreateTestMenuDropdown()

@@ -14,7 +14,7 @@ local GuildDB;
 
 
 local Player = nil;
-
+Guild.officers = {};
 Guild.bankIndex = 0;
 
 local guildDBDefaults = {
@@ -58,6 +58,7 @@ function Guild:GetGuildData(onlineOnly)
     local gMemberCount, _, _ = GetNumGuildMembers();
     if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else ReloadUI() end
     local onlineMembers = {}
+    Guild.officers = {};
 
     for i=1, GuildDB.numOfMembers do
         local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
@@ -65,20 +66,22 @@ function Guild:GetGuildData(onlineOnly)
         local formattedName;
         if name then formattedName = Util:GetClassColoredName(name, class) end
 
+        local canEdit = rankIndex <= 3;
+
         if onlineOnly then
             table.insert(onlineMembers, {
                 ["name"]=name,
                 ['online']=online,
             });
         else
-            if lvl >= 55 or rankIndex <= 4 then
+            if lvl >= 55 or canEdit then
                 if not Guild:IsMember(name, rankIndex) then
                     table.insert(GuildDB.members, {
                         ["name"]=name,
                         ['rankIndex']=rankIndex,
                         ["class"]=class,
                         ['online']=online,
-                        ['canEdit']=rankIndex <= 4,
+                        ['canEdit']=canEdit,
                         ['formattedName']=formattedName,
                     });
                 end
@@ -90,8 +93,20 @@ function Guild:GetGuildData(onlineOnly)
             DKP.bankID = officerNote
         end
 
+        if canEdit then
+           table.insert(Guild.officers, {
+               ['name']=name,
+               ['rankIndex']=rankIndex,
+               ['online']=online,
+               ['canEdit']= canEdit,
+               ['formattedName']=formattedName,
+               ['lastEdit']=-1,
+           })
+        end
+
         if name == Util:GetMyName() then
-            core.canEdit = rankIndex <= 4;
+            core.canEdit = canEdit;
+
             Util:Debug("Can Edit: " .. tostring(core.canEdit));
         end
     end

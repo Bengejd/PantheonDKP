@@ -12,6 +12,7 @@ TODO: Partial Update
 TODO: Full database replacement
 TODO: Request Data (Event)
 TODO: Request Data (received)
+TODO: Fix Shrouding popup so that it doesn't pick winner if there are multiple that are tied.
 
 Table Filters:
 	- Show Pugs

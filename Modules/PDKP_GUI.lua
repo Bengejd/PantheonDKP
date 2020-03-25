@@ -49,7 +49,7 @@ GUI.adjustmentReasons = {
 }
 
 GUI.adjustDropdowns = {}
-
+GUI.pushFrame = nil
 
 -----------------------------
 --     MISC FUNCTIONS    --
@@ -267,6 +267,55 @@ function GUI:RemoveFromSelected(charObj)
     GUI:SelectedEntriesUpdated()
 
     if GUI:GetSelectedCount() == 0 then GUI:ShowSelectedHistory(nil) end
+end
+
+function GUI:UpdatePushFrame()
+    local pf = GUI.pushFrame;
+    pf:Hide()
+    local scroll = pf.scroll;
+    local myLastEdit = DKP.dkpDB.lastEdit
+
+    if core.debug then myLastEdit = myLastEdit -1 end -- Testing purposes.
+
+    scroll:ReleaseChildren() -- Clear the previous entries.
+
+    local function sortEditHistory(a,b)
+        return a['lastEdit'] > b['lastEdit']
+    end
+
+    table.sort(Guild.officers, sortEditHistory)
+
+    for i=1, #Guild.officers do
+        local officer = Guild.officers[i];
+        -- they are online to receive a request & it's good data
+        if officer['online'] then
+            --        if officer['online'] and officer['lastEdit'] > myLastEdit then
+            local ig = AceGUI:Create("InlineGroup")
+            ig:SetLayout("Flow")
+            ig:SetFullWidth(true)
+            ig.frame:EnableMouse(true)
+
+            local reqButton = AceGUI:Create("Button")
+            reqButton:SetText("Request")
+            reqButton:SetCallback("OnClick", function(self)
+                print("Requesting data from: " .. officer['formattedName'])
+            end)
+            reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
+            reqButton:SetWidth(80)
+
+
+            local l = AceGUI:Create("Label")
+            l:SetText(officer['name'])
+            l:SetFullWidth(false)
+            l:SetWidth(175)
+            ig:AddChild(l)
+
+            ig:AddChild(reqButton)
+
+            scroll:AddChild(ig)
+        end
+    end
+    pf:Show()
 end
 
 function GUI:ShowSelectedHistory(charObj)

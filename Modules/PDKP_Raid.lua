@@ -112,13 +112,14 @@ function Raid:GetRaidInfo()
         if name then -- if you're out of bounds, GetRaidRosterInfo will return a nil Object. So check one of the vals.
             table.insert(raidInfo, {
                 ['name']=name,
-                ['rank']=rank,
                 ['level']=level,
                 ['class']=class,
                 ['zone']=zone,
                 ['online']=online,
                 ['isDead']=isDead,
                 ['isML']=isML,
+                ['isAssist']=rank == 1,
+                ['isLeader']=rank == 2,
             })
             if isML then
                 Raid.MasterLooter = name;
