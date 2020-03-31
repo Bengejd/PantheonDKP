@@ -106,6 +106,7 @@ function Setup:dkpPushButton()
     b:SetWidth(55);
     b:SetAlpha(0);
     b:SetScript("OnClick", function()
+        Util:Debug("Push button clicked")
         PlaySound(856)
         Comms:RequestOfficersLastEdit()
     end)
@@ -125,7 +126,7 @@ function Setup:dkpPushButton()
         backdropBorderColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
         backdropColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
     });
-    pf:EnableMouse(true)
+    pf:EnableMouse(false)
     pf:SetFrameStrata('FULLSCREEN');
     pf:RegisterForDrag("LeftButton")
     pf:SetMovable(true)
@@ -146,6 +147,7 @@ function Setup:dkpPushButton()
     scrollcontainer:SetHeight(300)
     scrollcontainer:SetWidth(300)
     scrollcontainer:SetLayout("Fill")
+    scrollcontainer.frame:EnableMouse(false)
 
     local font = "AchievementPointsFont"
     local title = pf:CreateFontString('pdkp_push_title', "ARTWORK", font);
@@ -167,6 +169,7 @@ function Setup:dkpPushButton()
     end)
 
     local scroll = AceGUI:Create("ScrollFrame")
+    scroll.frame:EnableMouse(true)
     scroll:SetLayout("Flow") -- probably?
     scrollcontainer:AddChild(scroll)
 

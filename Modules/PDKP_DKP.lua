@@ -376,7 +376,7 @@ function DKP:ConfirmChange()
     StaticPopup_Show('PDKP_CONFIRM_DKP_CHANGE')
 end
 
-function DKP:DeleteEntry(entry)
+function DKP:DeleteEntry(entry, noBroacast)
     local entryKey = entry['id']
 
     if dkpDB.history['deleted'][entryKey] then
@@ -423,7 +423,9 @@ function DKP:DeleteEntry(entry)
     Guild:UpdateBankNote(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
 
-    PDKP:SendCommMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
+    if noBroacast == nil then
+        PDKP:SendCommMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
+    end
 end
 
 function DKP:UpdateEntries()

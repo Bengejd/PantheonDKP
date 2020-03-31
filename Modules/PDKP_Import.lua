@@ -108,9 +108,38 @@ local reqDBHistory = {
 function Import:AcceptData(requestedData)
     local reqHistory = requestedData.history
     local reqLastEdit = requestedData.lastEdit;
+    local reqDeleted = requestedData.history.deleted
+    local reqAllData = reqHistory.all
 
-    for key, obj in pairs(reqHistory) do
-        local histItem = DKP.dkpDB.history.all[key]
+    local deletedHistory = DKP.dkpDB.history.deleted;
+
+    if reqAllData == nil then reqAllData = reqHistory end
+
+    if reqDeleted ~= nil then
+        for i=1, #reqDeleted do -- Look through our deleted and see if they match their deleted.
+            local theirKey = reqDeleted[i]
+            local newDeletedKey = true
+            for j=1, #deletedHistory do
+                local myKey = deletedHistory[j];
+                if myKey == theirKey then
+                    newDeletedKey = false
+                    break; -- We don't need to update it.
+                end
+            end
+            if newDeletedKey then
+                local histItem = DKP.dkpDB.history.all[theirKey]
+                if histItem ~= nil then -- WE NEED TO DELETE THIS.
+                    print('Deleting this entry now!')
+                    DKP:DeleteEntry(histItem, true)
+                else -- We never even had the entry.
+                    table.insert(DKP.dkpDB.history.deleted, theirKey)
+                end
+            end
+        end
+    end
+
+    for key, obj in pairs(reqAllData) do -- This is bugging out for some reason?
+        local histItem = DKP.dkpDB.history.all[obj.id]
         local raid = obj['raid']
         if histItem == nil then
             local names = {};
@@ -119,7 +148,6 @@ function Import:AcceptData(requestedData)
                     name = Util:RemoveColorFromname(name)
                     table.insert(names, name)
                 end
-
                 -- The DKP change
                 DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
 
@@ -128,8 +156,16 @@ function Import:AcceptData(requestedData)
                     local member = DKP.dkpDB.members[name]
                     local dkpChange = obj['dkpChange']
                     local currentDKP = member[raid]
+                    if currentDKP == nil then
+                       currentDKP = 0
+                    end
                     local newDKP = currentDKP + dkpChange
                     member[raid] = newDKP
+
+                    if member['entries'] == nil then
+                       member['entries'] = {};
+                    end
+
                     table.insert(member['entries'], key)
 
                     if raid == DKP.dkpDB.currentDB then -- update the sheet visually.

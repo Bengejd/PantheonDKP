@@ -302,7 +302,7 @@ function GUI:UpdatePushFrame()
             StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
         end)
         reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
-        reqButton:SetWidth(100)
+        reqButton:SetWidth(80)
 
         local l = AceGUI:Create("Label")
         l:SetText('Officer DKP Push')
@@ -325,6 +325,8 @@ function GUI:UpdatePushFrame()
             ig:SetLayout("Flow")
             ig:SetFullWidth(true)
             ig.frame:EnableMouse(true)
+            ig.frame:SetFrameStrata('FULLSCREEN_DIALOG');
+
 
             local reqButton = AceGUI:Create("Button")
             reqButton:SetText("Request")
@@ -337,7 +339,7 @@ function GUI:UpdatePushFrame()
             local l = AceGUI:Create("Label")
             l:SetText(officer['name'])
             l:SetFullWidth(false)
-            l:SetWidth(175)
+            l:SetWidth(150)
             ig:AddChild(l)
 
             ig:AddChild(reqButton)

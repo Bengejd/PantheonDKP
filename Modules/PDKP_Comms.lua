@@ -127,7 +127,7 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
         PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
         Import:AcceptData(message)
     elseif prefix == 'pdkpEntryDelete' then -- When an entry is deleted
-        DKP:DeleteEntry(message)
+        DKP:DeleteEntry(message, false)
     elseif prefix == 'pdkpClearShrouds' then -- Clear the shrouding window.
         Shroud:ClearShrouders()
     elseif prefix == 'pdkpNewShrouds' then -- New shrouders have been discovered!

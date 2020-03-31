@@ -254,7 +254,7 @@ function PDKP:BuildAllData()
                 gMember.dkpTotal = dkpEntry.dkpTotal;
                 table.insert(PDKP.data, gMember);
             elseif gMember.name then
-                errorText = 'BuildAllData...Member was not found' .. gMember.name;
+                errorText = 'BuildAllData...Member was not found ' .. gMember.name;
             else
                 errorText = 'BuildAllData Initilization... Index: ' .. i
             end
