@@ -106,61 +106,55 @@ local reqDBHistory = {
 --
 
 function Import:AcceptData(requestedData)
---    guildDB = {
---        numOfMembers = nil,
---        members = nil
---    },
---    dkpDB = {
---    lastEdit=DKP.dkpDB.lastEdit,
---    history=DKP.dkpDB.history,
---    members=nil,
---    currentDB=DKP.dkpDB.currentDB
---}
---    }
---    local reqDKPdb = requestedData.dkpDB;
---    local reqGuildDB = requestedData.guildDB;
---    local reqLastEdit = reqDKPdb.lastEdit;
---    local reqHistory = reqDKPdb.history
---    local reqMembers = reqDKPdb.members
+    local reqHistory = requestedData.history
+    local reqLastEdit = requestedData.lastEdit;
 
-    for key, obj in pairs(reqDBHistory) do
+    for key, obj in pairs(reqHistory) do
         local histItem = DKP.dkpDB.history.all[key]
         local raid = obj['raid']
         if histItem == nil then
-            Util:Debug('Adding new item to DKP')
             local names = {};
-            for name in string.gmatch(obj.names, '([^,]+)') do -- Fix the names so that they don't include the color.
-                name = Util:RemoveColorFromname(name)
-                print(name, string.len(name))
-                table.insert(names, name)
-            end
+            if obj.names ~= nil then
+                for name in string.gmatch(obj.names, '([^,]+)') do -- Fix the names so that they don't include the color.
+                    name = Util:RemoveColorFromname(name)
+                    table.insert(names, name)
+                end
 
-            -- Do the update
+                -- The DKP change
+                DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
 
-            -- Raid that the update is being held for.
-            -- The DKP change
-            DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
+                for i=1, #names do -- For each person, update their DKP.
+                    local name = names[i];
+                    local member = DKP.dkpDB.members[name]
+                    local dkpChange = obj['dkpChange']
+                    local currentDKP = member[raid]
+                    local newDKP = currentDKP + dkpChange
+                    member[raid] = newDKP
+                    table.insert(member['entries'], key)
 
-            for i=1, #names do -- For each person, update their DKP.
-                local name = names[i];
-                local member = DKP.dkpDB.members[name]
-                local dkpChange = obj['dkpChange']
-                local currentDKP = member[raid]
-                local newDKP = currentDKP + dkpChange
-                member[raid] = newDKP
-
-                if raid == DKP.dkpDB.currentDB then -- update the sheet visually.
-                    member['dkpTotal'] = newDKP
+                    if raid == DKP.dkpDB.currentDB then -- update the sheet visually.
+                        member['dkpTotal'] = newDKP
+                    end
                 end
             end
 
         elseif Defaults.debug then -- Only for debugging purposes.
             Util:Debug('Setting this shit to nil for testing purposes!')
-            DKP.dkpDB.history.all[key] = nil
+--            DKP.dkpDB.history.all[key] = nil
         end
     end
-    GUI:GetTableDisplayData(true);
+
+    if reqLastEdit > DKP.dkpDB.lastEdit then
+        DKP.dkpDB.lastEdit = reqLastEdit
+    end
+
+    GUI:pdkp_dkp_table_sort('dkpTotal')
+    DKP:ChangeDKPSheets(DKP.dkpDB.currentDB, true)
+    pdkp_dkp_scrollbar_Update()
     pdkp_dkp_table_filter()
+    GUI:pdkp_dkp_table_sort('dkpTotal')
+
+    GUI.pushFrame:Hide()
 end
 
 function Import:RequestData(officer)

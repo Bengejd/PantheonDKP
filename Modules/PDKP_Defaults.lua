@@ -38,8 +38,8 @@ core.defaults = {
     -- ADDON INFO
     addon_version = '0.7.1',
     addon_name = 'PantheonDKP',
-    debug = true,
-    debug_dkp = true;
+    debug = false,
+    debug_dkp = false;
 
     -- PLAYER INFO
     playerUID = UnitGUID("PLAYER"), -- Unique Blizzard Player ID

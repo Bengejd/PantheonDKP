@@ -47,8 +47,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         return
     elseif event == "PLAYER_ENTERING_WORLD" then
         local arg1, arg2, arg3, arg4,arg5, _, _,_, _, _, _, _ = ...;
-        print(arg1, arg2)
-        print(event, ...)
+--        print(arg1, arg2)
+--        print(event, ...)
        -- UnregisterEvent(self, event)
         return
     elseif event == "GUILD_ROSTER_UPDATE" then
@@ -65,7 +65,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
         local _, name, _, _,_, _, _ _, _ ,_, _, _ = ...;
-        return
+        Shroud:ShroudingSent(msg, name);
+
     elseif event == "CHAT_MSG_RAID_LEADER" then return
     elseif event == "CHAT_MSG_WHISPER" then
         --        local msg = arg1;
@@ -79,8 +80,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
 
     elseif event == "ZONE_CHANGED_NEW_AREA" then return
     elseif event == "BOSS_KILL" then
-        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
-        Raid:BossKill(event, arg1);
+--        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
+--        Raid:BossKill(event, arg1);
         return
     end
 end

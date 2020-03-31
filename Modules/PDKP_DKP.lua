@@ -11,6 +11,8 @@ local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.import;
+local Comms = core.Comms;
+
 
 local dkpDB;
 
@@ -254,7 +256,7 @@ local dkpDBDefaults = {
     profile = {
         currentDB = 'Molten Core',
         members = {},
-        lastEdit = {},
+        lastEdit = 0,
         history = {
             all = {},
             deleted = {}
@@ -376,6 +378,12 @@ end
 
 function DKP:DeleteEntry(entry)
     local entryKey = entry['id']
+
+    if dkpDB.history['deleted'][entryKey] then
+        PDKP:Print("Already deleted entry")
+        return
+    end
+
     local changeAmount = entry['dkpChange']
     local raid = entry['raid']
 
@@ -404,18 +412,18 @@ function DKP:DeleteEntry(entry)
     DKP:ChangeDKPSheets(raid, true)
     GUI:UpdateEasyStats();
 
-    if entryKey == dkpDB.lastEdit then
-        local _, _, server_time, _ = Util:GetDateTimes()
-        dkpDB.lastEdit = server_time
-    end
+    local _, _, server_time, _ = Util:GetDateTimes()
+    dkpDB.lastEdit = server_time
 
     -- Update the slider max (if needed)
     GUI:UpdateDKPSliderMax();
     -- Re-run the table filters.
     pdkp_dkp_table_filter()
 
---    Guild:UpdateBankNote(dkpDB.lastEdit)
+    Guild:UpdateBankNote(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
+
+    PDKP:SendCommMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
 end
 
 function DKP:UpdateEntries()
@@ -524,6 +532,8 @@ function DKP:UpdateEntries()
     DKP.bankID = server_time
 
     GUI.pdkp_dkp_amount_box:SetText('');
+
+    Comms:SendGuildUpdate(historyEntry)
 end
 
 function DKP:GetLastEdit()
@@ -558,23 +568,20 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
     GUI:GetTableDisplayData()
     pdkp_dkp_scrollbar_Update()
 
-    if noUpdate == nil then
-        if GUI:GetSelectedCount() > 0 then
-            GUI:ShowSelectedHistory(GUI.selected[1])
-        else
-            GUI:ShowSelectedHistory(nil)
-        end
-    else
-        GUI:ShowSelectedHistory(nil)
-    end
+    GUI:ClearSelected()
 
-    print('Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP');
+    print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
 end
 
 function DKP:SyncWithGuild()
     Util:Debug('Syncing Guild Data...');
     local guildMembers = Guild:GetMembers();
     local dkpMembers = DKP:GetMembers();
+
+    if #guildMembers + #dkpMembers == 0 then
+        StaticPopup_Show('PDKP_RELOAD_UI')
+    end
+
     for i=1, #guildMembers do
         local gMember = guildMembers[i];
         if not dkpMembers[gMember.name] then -- Add a new entry to the database.
@@ -609,6 +616,7 @@ function DKP:NewEntry(name)
             dkpTotal = 0;
             ['Molten Core'] = 0,
             ['Blackwing Lair'] = 0,
+            ['entries']={}
         }
     end
 end

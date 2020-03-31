@@ -28,6 +28,7 @@ local SAFE_COMMS = {
 local UNSAFE_COMMS = {
     ['pdkpPushReceive']=true,
     ['pdkpBusyTryAgai']=true,
+    ['pdkpEntryDelete']=true,
 }
 
 Comms.processing = false
@@ -63,6 +64,8 @@ function OnCommReceived(prefix, message, distribution, sender)
     if Comms.processing then -- If we're processing a com, don't overload yourself.
         return PDKP:SendCommMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
     end
+
+    if sender == Util:GetMyName() then return end; -- Don't need to respond to our own messages...
 
     Comms.processing = true
 
@@ -122,17 +125,30 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
         Import:AcceptData(message)
     end
 
---    print('Prefix', prefix, ' message', Comms:Deserialize(message), ' distro', distribution, 'sender', sender)
+    if prefix == 'pdkpEntryDelete' then -- When an entry is deleted
+        DKP:DeleteEntry(message)
+    end
 
     -- We've finished processing the comms.
     Comms.processing = false
 end
 
-function Comms:pdkp_send_comm(data)
---    local msg = data or {love=true} -- Testing purposes.
---    PDKP:SendCommMessage('pdkpTestingCom', PDKP:Serialize(msg), 'WHISPER', 'PantheonBank', 'BULK');
+function Comms:SendGuildPush()
+    Util:Debug("Preparing data to push to GUILD this may take a few minutes...")
+    local data = Comms:PrepareDatabase(nil, false)
+    data = PDKP:Serialize(data)
+    PDKP:SendCommMessage('pdkpPushReceive', data, 'GUILD', nil, 'BULK')
 end
 
+function Comms:SendGuildUpdate(histEntry)
+    local data = {
+        lastEdit = DKP.dkpDB.lastEdit,
+        history = {}
+    }
+    table.insert(data.history, histEntry)
+    data = PDKP:Serialize(data)
+    PDKP:SendCommMessage('pdkpPushReceive', data, 'GUILD', nil, nil)
+end
 
 
 function Comms:PrepareDatabase(twoWeeksAgo, full)
@@ -154,16 +170,8 @@ function Comms:PrepareDatabase(twoWeeksAgo, full)
         }
     else -- Partial Merge
         database = {
-            guildDB = {
-                numOfMembers = nil,
-                members = nil
-            },
-            dkpDB = {
-                lastEdit=DKP.dkpDB.lastEdit,
-                history=DKP.dkpDB.history,
-                members=nil,
-                currentDB=DKP.dkpDB.currentDB
-            }
+            lastEdit=DKP.dkpDB.lastEdit,
+            history=DKP.dkpDB.history,
         }
     end
     return database;

@@ -12,6 +12,8 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.Import;
 local Setup = core.Setup;
+local Comms = core.Comms;
+
 
 GUI.countdownTimer = nil;
 GUI.statusbar = nil;
@@ -89,8 +91,6 @@ function GUI:Hide()
     if not GUI.shown then return end -- Don't open more than one instance of PDKP
 
     PlaySound(851)
-
-    PDKP:Print("Hiding PDKP")
 
     GUI.pdkp_frame:Hide()
     GUI.shown = false;
@@ -352,7 +352,7 @@ function GUI:ShowSelectedHistory(charObj)
     if GUI.HistoryShown == false then return end; -- No need to do anything if history isn't being shown.
 
     local b, member, dkpHistory, charName, title, entries, historyKeys;
-
+    GUI.HistoryFrame.historyTitle:SetText(GUI.HistoryTItle)
     GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
 
     local function getDkpHistoryKeys(historyObject, all)
@@ -775,7 +775,22 @@ StaticPopupDialogs['PDKP_OFFICER_PUSH_CONFIRM'] = {
     button1 = "Send Push",
     button2 = "Cancel",
     OnAccept = function(self) -- Confirm
-        print("Send the DKP PUSH")
+        Comms:SendGuildPush()
+    end,
+    OnCancel = function() -- Cancel
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+}
+
+StaticPopupDialogs['PDKP_RELOAD_UI'] = {
+    text = "You are on a fresh version of PantheonDKP. Please Reload to continue.",
+    button1 = "Reload",
+    button2 = "Cancel",
+    OnAccept = function(self) -- Confirm
+        ReloadUI()
     end,
     OnCancel = function() -- Cancel
     end,
