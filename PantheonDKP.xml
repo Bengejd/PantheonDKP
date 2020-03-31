@@ -181,7 +181,7 @@
 
 				<!-- UI VERSION NUMBER -->
 
-				<FontString parentKey="pdkp_version" inherits="GameFontNormalSmall" text="v0.7.1" justifyH="RIGHT">
+				<FontString parentKey="pdkp_version" inherits="GameFontNormalSmall" text="v0.8.0" justifyH="RIGHT">
 					<Size x="70" y="14" />
 					<Anchors>
 						<Anchor point="RIGHT" relativeKey="$parent.pdkp_title" x="10" y="0" />
