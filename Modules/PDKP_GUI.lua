@@ -616,6 +616,26 @@ end
 ---------------------------
 -- TIMER Functions    --
 ---------------------------
+
+function UpdatePushBar(arg, sent, total)
+    GUI.pushbar:Show()
+    local percentage = math.floor((sent / total) * 100)
+
+    local statusText = 'PDKP Push Progress: '
+    local statusbar = GUI.pushbar
+    local currVal = statusbar:GetValue()
+    if currVal == nil then currVal = 0 end
+    if currVal < percentage and percentage <= 100 then
+        statusbar.value:SetText(statusText .. percentage .. '%');
+        statusbar:SetValue(percentage)
+    end
+
+    if percentage >= 100 then
+        statusbar:Hide();
+        PDKP:CancelTimer(GUI.pushbar)
+    end
+end
+
 function GUI:CreateTimer(timerCount)
 
     if timerCount == nil then timerCount = 20 end -- Default timer count.

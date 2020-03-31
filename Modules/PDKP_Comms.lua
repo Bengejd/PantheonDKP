@@ -107,7 +107,7 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         local lastTwoWeeks = message
         local data = Comms:PrepareDatabase(lastTwoWeeks, false)
         data = PDKP:Serialize(data)
-        PDKP:SendCommMessage('pdkpPushReceive', data, 'WHISPER', sender, 'BULK')
+        PDKP:SendCommMessage('pdkpPushReceive', data, 'WHISPER', sender, 'BULK', UpdatePushBar)
     end
 
 --    print('Prefix', prefix, ' message', message, ' distro', distribution, 'sender', sender)
@@ -218,10 +218,6 @@ end
 ---------------------------
 --  SHROUDING FUNCTIONS  --
 ---------------------------
-
-function Comms:UpdateShrouds()
-
-end
 
 function Comms:SendShroudTable()
     if Raid:IsInRaid() then

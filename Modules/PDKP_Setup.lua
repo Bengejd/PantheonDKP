@@ -55,6 +55,8 @@ function Setup:MainUI()
         Setup:dkpPushButton()
         Setup:ShroudingWindow()
 
+        Setup:PushTimer()
+
         GUI:CheckOutOfDate()
     end
 end
@@ -62,6 +64,52 @@ end
 -----------------------------
 --     CREATE FUNCTIONS    --
 -----------------------------
+
+function Setup:PushTimer()
+    if GUI.pushbar == nil then
+        GUI.pushbar = CreateFrame("StatusBar", 'pdkp_pushbar', UIParent)
+        local statusbar = GUI.pushbar;
+
+        statusbar:RegisterForDrag("LeftButton")
+        statusbar:SetFrameStrata("HIGH")
+        statusbar:EnableMouse(true);
+        statusbar:SetMovable(true)
+
+        statusbar:SetScript("OnDragStart", statusbar.StartMoving)
+        statusbar:SetScript("OnDragStop", statusbar.StopMovingOrSizing)
+
+        statusbar:SetPoint("TOP", UIParent, "TOP", 0, -10)
+        statusbar:SetWidth(200)
+        statusbar:SetHeight(20)
+        statusbar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
+        statusbar:GetStatusBarTexture():SetHorizTile(true)
+        statusbar:GetStatusBarTexture():SetVertTile(false)
+        statusbar:SetStatusBarColor(0, 0.65, 0)
+
+        statusbar.bg = statusbar:CreateTexture(nil, "BACKGROUND")
+        statusbar.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-TargetingFrame-BarFill")
+        statusbar.bg:SetAllPoints(true)
+        statusbar.bg:SetVertexColor(0, 0.35, 0)
+
+        statusbar.value = statusbar:CreateFontString(nil, "OVERLAY")
+        statusbar.value:SetPoint("CENTER", statusbar, "CENTER", 0, 0)
+        statusbar.value:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+        statusbar.value:SetJustifyH("LEFT")
+        statusbar.value:SetShadowOffset(1, -1)
+        statusbar.value:SetTextColor(0, 1, 0)
+    end;
+    local statusbar = GUI.pushbar;
+    statusbar.value:SetText("0%")
+
+    statusbar.isLocked = false;
+
+    local timerCount = 0
+    statusbar:SetMinMaxValues(0, 100)
+
+    statusbar:Hide()
+end
+
+
 
 function Setup:ShroudingWindow()
     local sf = getglobal('pdkp_shrouding_window');
