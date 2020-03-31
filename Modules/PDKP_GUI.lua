@@ -313,7 +313,8 @@ function GUI:UpdatePushFrame()
         og:AddChild(reqButton)
 
         scroll:AddChild(og)
-
+    else
+        Util:Debug('Cannot edit this shit yo')
     end
 
     for i=1, #Guild.officers do

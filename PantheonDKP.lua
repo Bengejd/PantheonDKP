@@ -171,6 +171,17 @@ function PDKP:HandleSlashCommands(msg, item)
         return PDKP:MessageRecieved('shroud', Util:GetMyName())
     end
 
+    local splitMsg, name = strsplit(' ', msg)
+
+    if splitMsg == 'report' then
+        local dkp = DKP:GetPlayerDKP(name)
+        if dkp == 0 then
+            PDKP:Print(name .. ' has 0 dkp or was not found')
+        else
+            PDKP:Print(name .. ' has: ' .. dkp .. ' DKP')
+        end
+    end
+
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then return end;
 

@@ -390,7 +390,7 @@ function Setup:HistoryFrame()
 
     local hf = CreateFrame("Frame", "pdkpHistoryFrame", pdkpCoreFrame, nil)
     hf:SetPoint("TOPRIGHT", 235, -75)
-    hf:SetHeight(575);
+    hf:SetHeight(570);
     hf:SetWidth(450);
     hf:SetBackdrop({
         bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\PDKPFrame-Middle",

@@ -185,14 +185,22 @@ end
 function Comms:RequestOfficersLastEdit()
     Guild:GetGuildData() -- Retrieve up to date guild data.
 
+    local oneReqTriggered = false
+
     local officers = Guild.officers;
     for i=1, #officers do
         local officer = officers[i]
         officer['lastEdit'] = -1
-        if officer['online'] then
+        if officer['online'] and officer['name'] ~= Util:GetMyName() then
+            oneReqTriggered = true
             Util:Debug('sending lastEdit request to '..officer['name'])
             PDKP:SendCommMessage('pdkpLastEditReq', PDKP:Serialize(''), 'WHISPER', officer['name'], 'BULK')
         end
+    end
+
+    -- Pop up the frame if we didn't get any hits from the officers & you are an officer.
+    if oneReqTriggered == false and Guild:CanEdit() then
+        GUI:UpdatePushFrame()
     end
 end
 
