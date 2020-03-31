@@ -13,6 +13,7 @@ local Defaults = core.defaults;
 local Import = core.import;
 local Setup = core.Setup;
 local Comms = core.Comms;
+local Shroud = core.Shroud;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local PlaySound = PlaySound
@@ -50,6 +51,7 @@ function Setup:MainUI()
         Setup:RaidDkpDropdown()
         Setup:HistoryFrame()
         Setup:dkpPushButton()
+        Setup:ShroudingWindow()
 
         GUI:CheckOutOfDate()
     end
@@ -58,6 +60,44 @@ end
 -----------------------------
 --     CREATE FUNCTIONS    --
 -----------------------------
+
+function Setup:ShroudingWindow()
+    local sf = getglobal('pdkp_shrouding_window');
+    sf:SetPoint('BOTTOMLEFT', 0, 0);
+
+    sf:SetWidth(200);
+    sf:SetHeight(200);
+
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(130)
+    scrollcontainer:SetWidth(150)
+    scrollcontainer:SetLayout("Fill")
+
+    scrollcontainer:SetParent(sf)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", sf, "CENTER", 0, -10);
+
+    sf:SetScript("OnShow", function()
+        Shroud.window.open = true
+        scrollcontainer.frame:Show() end)
+    sf:SetScript("OnHide", function()
+        scrollcontainer.frame:Hide()
+        Shroud:ClearShrouders()
+        Shroud.window.open = false
+    end)
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    sf.scroll = scroll
+
+    sf:Hide()
+    scrollcontainer.frame:Hide()
+    Shroud.window = sf;
+end
 
 function Setup:dkpPushButton()
     local b = CreateFrame("Button", "pdkpPushButton", pdkpCoreFrame, 'UIPanelButtonTemplate')

@@ -102,55 +102,6 @@
 
                     </Layer>
                 </Layers>
-                <Frames>
-
-                    <ScrollFrame name="$parentScrollFrame" inherits="UIPanelScrollFrameTemplate">
-                        <Anchors>
-                            <Anchor point="TOP" />
-                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentStatusText"/>
-                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" relativeTo="$parentStatusText">
-                                <Offset>
-                                    <AbsDimension x="-20" y="5"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <ScrollChild>
-                            <Frame name="$parentScrollChild">
-                                <Size>
-                                    <AbsDimension x="30" y="30"/>
-                                </Size>
-                                <Frames>
-                                    <SimpleHTML name="pdkp_shroudingText">
-
-
-                                        <Anchors>
-                                            <Anchor point="TOPLEFT">
-                                                <Offset>
-                                                    <AbsDimension x="0" y="-2"/>
-                                                </Offset>
-                                            </Anchor>
-
-                                            <Anchor point="BOTTOMRIGHT">
-                                                <Offset>
-                                                    <AbsDimension x="0" y="2"/>
-                                                </Offset>
-                                            </Anchor>
-
-                                        </Anchors>
-
-
-                                        <FontString name="pdkp_shroudingText" inherits="ChatFontNormal" justifyH="LEFT" justifyV="TOP">
-                                            <Size>
-                                                <AbsDimension x="270" y="0"/>
-                                            </Size>
-                                            <Color r="1" g="1" b="1" a="1.0" />
-                                        </FontString>
-                                    </SimpleHTML>
-                                </Frames>
-                            </Frame>
-                        </ScrollChild>
-                    </ScrollFrame>
-                </Frames>
             </Frame>
 
 

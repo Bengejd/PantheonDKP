@@ -11,6 +11,7 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Comms = core.Comms;
 local Import = core.Import;
+local Raid = core.Raid;
 
 --[[
 --
@@ -29,6 +30,8 @@ local UNSAFE_COMMS = {
     ['pdkpPushReceive']=true,
     ['pdkpBusyTryAgai']=true,
     ['pdkpEntryDelete']=true,
+    ['pdkpClearShrouds']=true,
+    ['pdkpNewShrouds']=true,
 }
 
 Comms.processing = false
@@ -83,7 +86,7 @@ end
 function Comms:ThrowError(prefix, sender)
     local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
     errMsg = errMsg .. ' an Officer.'
-    return Util:ThrowError(errMsg)
+    return Util:ThrowError(errMsg, true)
 end
 
 ---------------------------
@@ -118,15 +121,18 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
     -- We received a communication that we shouldn't have...
     if not UNSAFE_COMMS[prefix] or not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
 
-    if prefix == 'pdkpBusyTryAgai' then PDKP:Print(sender .. ' is currently busy, please try again later') end
-
-    if prefix == 'pdkpPushReceive' then -- When a member requests a DKP push from an officer.
+    if prefix == 'pdkpBusyTryAgai' then
+        PDKP:Print(sender .. ' is currently busy, please try again later')
+    elseif prefix == 'pdkpPushReceive' then -- When a member requests a DKP push from an officer.
         PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
         Import:AcceptData(message)
-    end
-
-    if prefix == 'pdkpEntryDelete' then -- When an entry is deleted
+    elseif prefix == 'pdkpEntryDelete' then -- When an entry is deleted
         DKP:DeleteEntry(message)
+    elseif prefix == 'pdkpClearShrouds' then -- Clear the shrouding window.
+        Shroud:ClearShrouders()
+    elseif prefix == 'pdkpNewShrouds' then -- New shrouders have been discovered!
+        Shroud.shrouders = message -- assign the shrouding table that was sent.
+        Shroud:UpdateWindow() -- Update the window.
     end
 
     -- We've finished processing the comms.
@@ -149,7 +155,6 @@ function Comms:SendGuildUpdate(histEntry)
     data = PDKP:Serialize(data)
     PDKP:SendCommMessage('pdkpPushReceive', data, 'GUILD', nil, nil)
 end
-
 
 function Comms:PrepareDatabase(twoWeeksAgo, full)
 
@@ -200,4 +205,26 @@ function Comms:LastEditReceived(sender, message)
         end
     end
     GUI:UpdatePushFrame()
+end
+
+---------------------------
+--  SHROUDING FUNCTIONS  --
+---------------------------
+
+function Comms:UpdateShrouds()
+
+end
+
+function Comms:SendShroudTable()
+    if Raid:IsInRaid() then
+        PDKP:SendCommMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK')
+    elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
+        Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, nil, 'Pantheonbank')
+    else -- For the sender to update their table.
+        Shroud:UpdateWindow()
+    end
+end
+
+function Comms:ClearShrouders()
+    PDKP:SendCommMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
 end

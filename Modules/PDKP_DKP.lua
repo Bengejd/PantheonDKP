@@ -624,7 +624,7 @@ end
 function DKP:GetPlayerDKP(name)
     local player = dkpDB.members[name]
     if player ~= nil then return player.dkpTotal end
-    return 0
+    return 0 -- fallback. We disregard these anyway.
 end
 
 function DKP:ResetDB()

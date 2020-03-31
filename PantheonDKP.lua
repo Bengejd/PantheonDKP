@@ -67,16 +67,15 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
         local _, name, _, _,_, _, _ _, _ ,_, _, _ = ...;
-        Shroud:ShroudingSent(msg, name);
-
+        PDKP:MessageRecieved(msg, name)
+        return
     elseif event == "CHAT_MSG_RAID_LEADER" then return
     elseif event == "CHAT_MSG_WHISPER" then
         --        local msg = arg1;
         local _, _, _, arg4,_, _, _,_, _, _, _, _ = ...;
-        local text = arg1;
+        local msg = arg1;
         local name = arg4;
-
-        Shroud:ShroudingSent(text, name);
+        PDKP:MessageRecieved(msg, name)
         return
     elseif event == "CHAT_MSG_GUILD" then return
 
@@ -121,6 +120,13 @@ function PDKP:OnInitialize(event, name)
     Comms:RegisterCommCommands()
 end
 
+function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
+    if Shroud.shroudPhrases[string.lower(msg)] and (Raid:isMasterLooter() or Defaults.debug) then
+        -- This should send the list to everyone in the raid, so that it just automatically pops up.
+        Shroud:UpdateShrouders(name)
+    end
+end
+
 -- Initializes the PDKP Databases.
 function PDKP:InitializeDatabases()
     Guild:InitGuildDB()
@@ -162,7 +168,7 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     if msg == 'shroud' then
-        return Shroud:ShroudingSent('shroud', Util:GetMyName());
+        return PDKP:MessageRecieved('shroud', Util:GetMyName())
     end
 
     -- OFFICER ONLY COMMANDS

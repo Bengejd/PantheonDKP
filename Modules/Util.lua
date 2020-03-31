@@ -63,7 +63,7 @@ end
 
 function Util:ThrowError(msg, debug)
     local warning = 'E71D36'
-    local errorMsg = Util:FormatFontTextColor(warning, 'Error encountered during ' .. msg)
+    local errorMsg = Util:FormatFontTextColor(warning, 'Error!!! ' .. msg)
 
     if debug then Util:Debug(errorMsg) else PDKP:Print(errorMsg) end
 end
