@@ -88,11 +88,6 @@ function Guild:GetGuildData(onlineOnly)
             end
         end
 
-        if name == 'Pantheonbank' then
-            Guild.bankIndex = i
-            DKP.bankID = officerNote
-        end
-
         if canEdit then
            table.insert(Guild.officers, {
                ['name']=name,
@@ -113,7 +108,22 @@ function Guild:GetGuildData(onlineOnly)
 
     if onlineOnly then Util:Debug("Online Members Total: " .. #onlineMembers) end
     Guild:VerifyGuildData()
+    Guild:GetBankInfo()
+
     return onlineMembers; -- Always return, even if it's empty.
+end
+
+function Guild:GetBankInfo()
+    for i = 1, Guild:GetMemberCount() do
+        local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
+        name = Util:RemoveServerName(name)
+        if name == 'Pantheonbank' then
+            Guild.bankIndex = i;
+            DKP.bankID = officerNote;
+            Util:Debug('Found BankIndex '.. i .. ' officerNote: ' .. officerNote)
+            return
+        end
+    end
 end
 
 function Guild:VerifyGuildData()
@@ -197,5 +207,6 @@ function Guild:GetMembers()
 end
 
 function Guild:UpdateBankNote(id)
+    Guild:GetBankInfo()
     GuildRosterSetOfficerNote(Guild.bankIndex, id)
 end

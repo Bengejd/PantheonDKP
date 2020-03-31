@@ -38,6 +38,19 @@ function Util:GetMyClass()
     return UnitClass("PLAYER");
 end
 
+-- Removes the color from peoples names, for various purposes. Mostly data import ones.
+function Util:RemoveColorFromname(name)
+    local fixedName = name
+    for _, val in pairs(class_colors) do
+        fixedName = fixedName:gsub('|cff' .. val, '')
+    end
+    local fName = fixedName:sub(1, -3)
+    fName = fName:gsub("%s+", "")
+    fName = string.gsub(fName, "%s+", "")
+
+    return fName
+end
+
 -- Returns all classes in WoW Classic.
 function Util:GetAllClasses()
     return classes;

@@ -10,6 +10,7 @@ local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Comms = core.Comms;
+local Import = core.Import;
 
 --[[
 --
@@ -21,11 +22,12 @@ local SAFE_COMMS = {
     ['pdkpPushRequest']=true,
     ['pdkpLastEditReq']=true,
     ['pdkpLastEditRec']=true,
-    ['pdkpBusyTryAgain']=true,
+    ['pdkpBusyTryAgai']=true,
 };
 
 local UNSAFE_COMMS = {
-    ['pdkpPushReceived']=true,
+    ['pdkpPushReceive']=true,
+    ['pdkpBusyTryAgai']=true,
 }
 
 Comms.processing = false
@@ -59,7 +61,7 @@ end
 
 function OnCommReceived(prefix, message, distribution, sender)
     if Comms.processing then -- If we're processing a com, don't overload yourself.
-        return PDKP:SendCommMessage('pdkpBusyTryAgain', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
+        return PDKP:SendCommMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
     end
 
     Comms.processing = true
@@ -68,6 +70,8 @@ function OnCommReceived(prefix, message, distribution, sender)
 
     if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
+    else
+        print("Unknown Prefix " .. prefix, " found in request...")
     end
 
     Comms.processing = false
@@ -87,14 +91,17 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     -- We received a communication that we shouldn't have...
     if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
 
-    --['pdkpPushRequest']=true,
-
-    if prefix == 'pdkpBusyTryAgain' then PDKP:Print(sender .. ' is currently busy, please try again later')
+    if prefix == 'pdkpBusyTryAgai' then PDKP:Print(sender .. ' is currently busy, please try again later')
     elseif prefix == 'pdkpLastEditReq' then -- Send them back your lastEdit time
         PDKP:SendCommMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
     elseif prefix == 'pdkpLastEditRec' then -- Process their lastEdit time
         Comms:LastEditReceived(sender, message)
     elseif prefix == 'pdkpPushRequest' then -- Someone Sent you a push request
+        Util:Debug("Preparing data to push to " .. sender .. ' This may take a few minutes...')
+        local lastTwoWeeks = message
+        local data = Comms:PrepareDatabase(lastTwoWeeks, false)
+        data = PDKP:Serialize(data)
+        PDKP:SendCommMessage('pdkpPushReceive', data, 'WHISPER', sender, 'BULK')
     end
 
 --    print('Prefix', prefix, ' message', message, ' distro', distribution, 'sender', sender)
@@ -104,16 +111,18 @@ end
 --   UNSAFE FUNCTIONS    --
 ---------------------------
 function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
+
     -- We received a communication that we shouldn't have...
     if not UNSAFE_COMMS[prefix] or not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
 
-    if prefix == 'pdkpBusyTryAgain' then PDKP:Print(sender .. ' is currently busy, please try again later') end
+    if prefix == 'pdkpBusyTryAgai' then PDKP:Print(sender .. ' is currently busy, please try again later') end
 
-    if prefix == 'pdkpPushRequest' then
-        print('pdkpPushRequest received!');
+    if prefix == 'pdkpPushReceive' then -- When a member requests a DKP push from an officer.
+        PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
+        Import:AcceptData(message)
     end
 
-    print('Prefix', prefix, ' message', Comms:Deserialize(message), ' distro', distribution, 'sender', sender)
+--    print('Prefix', prefix, ' message', Comms:Deserialize(message), ' distro', distribution, 'sender', sender)
 
     -- We've finished processing the comms.
     Comms.processing = false
@@ -125,20 +134,39 @@ function Comms:pdkp_send_comm(data)
 end
 
 
-function Comms:PrepareDatabase()
-    local database = {
-        guildDB = {
-            numOfMembers = Guild.db.numOfMembers,
-            members = Guild.db.members
-        },
-        dkpDB = {
-            lastEdit=DKP.dkpDB.lastEdit,
-            history=DKP.dkpDB.history,
-            members=DKP.dkpDB.members,
-            currentDB=DKP.dkpDB.currentDB
+
+function Comms:PrepareDatabase(twoWeeksAgo, full)
+
+    local database
+
+    if full then -- Full overwrite.
+        database = {
+            guildDB = {
+                numOfMembers = Guild.db.numOfMembers,
+                members = Guild.db.members
+            },
+            dkpDB = {
+                lastEdit=DKP.dkpDB.lastEdit,
+                history=DKP.dkpDB.history,
+                members=DKP.dkpDB.members,
+                currentDB=DKP.dkpDB.currentDB
+            }
         }
-    }
-    PDKP:SendCommMessage('pdkpTestingCom', PDKP:Serialize(database), 'WHISPER', 'PantheonBank', 'BULK');
+    else -- Partial Merge
+        database = {
+            guildDB = {
+                numOfMembers = nil,
+                members = nil
+            },
+            dkpDB = {
+                lastEdit=DKP.dkpDB.lastEdit,
+                history=DKP.dkpDB.history,
+                members=nil,
+                currentDB=DKP.dkpDB.currentDB
+            }
+        }
+    end
+    return database;
 end
 
 function Comms:RequestOfficersLastEdit()

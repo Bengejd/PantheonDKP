@@ -10,7 +10,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
-local Import = core.import;
+local Import = core.Import;
 local Setup = core.Setup;
 
 GUI.countdownTimer = nil;
@@ -280,16 +280,46 @@ function GUI:UpdatePushFrame()
     scroll:ReleaseChildren() -- Clear the previous entries.
 
     local function sortEditHistory(a,b)
-        return a['lastEdit'] > b['lastEdit']
+        if a['lastEdit'] and b['lastEdit'] then
+            return a['lastEdit'] > b['lastEdit']
+        else
+            return
+        end
     end
 
     table.sort(Guild.officers, sortEditHistory)
 
+    local myName = Util:GetMyName()
+    if Guild:CanMemberEdit(myName) then
+        local og = AceGUI:Create("InlineGroup")
+        og:SetLayout("Flow")
+        og:SetFullWidth(true)
+        og.frame:EnableMouse(true)
+
+        local reqButton = AceGUI:Create("Button")
+        reqButton:SetText("Push DKP")
+        reqButton:SetCallback("OnClick", function(self)
+            StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
+        end)
+        reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
+        reqButton:SetWidth(100)
+
+        local l = AceGUI:Create("Label")
+        l:SetText('Officer DKP Push')
+        l:SetFullWidth(false)
+        l:SetWidth(155)
+        og:AddChild(l)
+
+        og:AddChild(reqButton)
+
+        scroll:AddChild(og)
+
+    end
+
     for i=1, #Guild.officers do
         local officer = Guild.officers[i];
         -- they are online to receive a request & it's good data
-        if officer['online'] then
-            --        if officer['online'] and officer['lastEdit'] > myLastEdit then
+        if (Defaults.debug and officer['online']) or (officer['online'] and (officer['lastEdit'] > myLastEdit)) then
             local ig = AceGUI:Create("InlineGroup")
             ig:SetLayout("Flow")
             ig:SetFullWidth(true)
@@ -298,11 +328,10 @@ function GUI:UpdatePushFrame()
             local reqButton = AceGUI:Create("Button")
             reqButton:SetText("Request")
             reqButton:SetCallback("OnClick", function(self)
-                print("Requesting data from: " .. officer['formattedName'])
+                core.Import:RequestData(officer)
             end)
             reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
             reqButton:SetWidth(80)
-
 
             local l = AceGUI:Create("Label")
             l:SetText(officer['name'])
@@ -315,6 +344,7 @@ function GUI:UpdatePushFrame()
             scroll:AddChild(ig)
         end
     end
+
     pf:Show()
 end
 
@@ -338,7 +368,6 @@ function GUI:ShowSelectedHistory(charObj)
 
     if charObj ~= nil then -- We actually have a character we're checking out.
         b = _G[charObj['bName']]
---        Util:Debug('Showing history for '.. charObj['name'])
         member = DKP.dkpDB.members[charObj['name']]
         historyKeys = getDkpHistoryKeys(member['entries'], false)
         charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
@@ -732,6 +761,21 @@ StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'] = {
     OnAccept = function(self) -- Confirm
         local entry = StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry
         DKP:DeleteEntry(entry)
+    end,
+    OnCancel = function() -- Cancel
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+}
+
+StaticPopupDialogs['PDKP_OFFICER_PUSH_CONFIRM'] = {
+    text = "Warning: This is permanent, are you sure?",
+    button1 = "Send Push",
+    button2 = "Cancel",
+    OnAccept = function(self) -- Confirm
+        print("Send the DKP PUSH")
     end,
     OnCancel = function() -- Cancel
     end,

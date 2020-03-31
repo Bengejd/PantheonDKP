@@ -14,6 +14,8 @@ local Invites = core.Invites;
 local Raid = core.Raid;
 local Comms = core.Comms;
 local Setup = core.Setup;
+local Import = core.Import;
+
 
 local PlaySound = PlaySound
 
@@ -205,6 +207,10 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'importDKP' then
         DKP:ImportMonolithData()
+    end
+
+    if msg == 'TestImportData' then
+       Import:AcceptData()
     end
 end
 
