@@ -35,6 +35,8 @@ function Setup:MainUI()
 
         GUI.pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
         GUI.pdkp_submit_button = _G['pdkp_dkp_submit'];
+        GUI.pdkp_version = _G['pdkp_version_label'];
+        GUI.pdkp_version:SetText(core.defaults.addon_version)
 
         -----------------------------
         --     Class Checkboxes    --

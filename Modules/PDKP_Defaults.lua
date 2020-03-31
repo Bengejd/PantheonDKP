@@ -36,7 +36,7 @@ core.GUI = {
 
 core.defaults = {
     -- ADDON INFO
-    addon_version = '0.8.0',
+    addon_version = 'V0.8.3',
     addon_name = 'PantheonDKP',
     debug = false,
     debug_dkp = false;
