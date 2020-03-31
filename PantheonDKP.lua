@@ -60,7 +60,9 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         return
     elseif event == "ENCOUNTER_START" then return -- for testing purposes
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then return -- NPC kill event
-    elseif event == "LOOT_OPENED" then return -- when the loot bag is opened.
+    elseif event == "LOOT_OPENED" then
+        Raid:AnnounceLoot()
+        return -- when the loot bag is opened.
     elseif event == "OPEN_MASTER_LOOT_LIST" then return -- when the master loot list is opened.
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
@@ -172,10 +174,10 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'invite' then
         return Invites:Show();
---        local tempInvites = {'Sparklenips', 'Annaliese'}
---        for i=1, #tempInvites do
---            InviteUnit(tempInvites[i]);
---        end
+        --        local tempInvites = {'Sparklenips', 'Annaliese'}
+        --        for i=1, #tempInvites do
+        --            InviteUnit(tempInvites[i]);
+        --        end
     end
 
     if msg == 'bossKill' then
@@ -187,7 +189,7 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     if msg == 'timer' then
-       return GUI:CreateTimer()
+        return GUI:CreateTimer()
     end
 
     if msg == 'pdkp_reset_all_db' and core.defaults.debug then
@@ -211,7 +213,7 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     if msg == 'TestImportData' then
-       Import:AcceptData()
+        Import:AcceptData()
     end
 end
 

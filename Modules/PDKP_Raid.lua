@@ -160,3 +160,26 @@ function Raid:AcceptDKPUpdate(bossID)
     pdkp_dkp_table_filter()
 end
 
+function Raid:isMasterLooter()
+    return Raid.MasterLooter == Util:GetMyName()
+end
+
+function Raid:AnnounceLoot()
+    if Raid:isMasterLooter() and Raid:IsInRaid() and Defaults.debug then -- Testing purposes rn.
+        local items = {}
+
+        for index = 1, GetNumLootItems() do
+            print('index: ', index)
+            if LootSlotHasItem(index) then
+                local itemLink = GetLootSlotLink(index)
+                table.insert(items, itemLink)
+            end
+        end
+        for i=1, #items do
+            SendChatMessage(items[i], "RAID", "Common", "Neekio");
+        end
+
+        -- Setup the item prio stuff to go here possibly?
+    end
+end
+
