@@ -109,18 +109,21 @@ function Import:AcceptData(requestedData)
     if requestedData.full then
         Import:AcceptFullDatabase(requestedData)
     else
+        local dkpData = requestedData.dkpDB
+
         local reqHistory, reqLastEdit, reqDeleted, reqAllData
 
-        local reqHistory = requestedData.history
-        local reqLastEdit = requestedData.lastEdit;
+        reqHistory = dkpData.history
+        reqLastEdit = dkpData.lastEdit;
         local deletedHistory = DKP.dkpDB.history.deleted;
 
         if reqHistory then
-            reqDeleted = requestedData.history.deleted
+            reqDeleted = dkpData.history.deleted
             reqAllData = reqHistory.all
         end
 
         local function processDeleted()
+            Util:Debug("Processing Deleted Data")
             for i=1, #reqDeleted do -- Look through our deleted and see if they match their deleted.
                 local theirKey = reqDeleted[i]
                 local newDeletedKey = true
@@ -143,6 +146,7 @@ function Import:AcceptData(requestedData)
             end
         end
         local function processAllData()
+            Util:Debug("Processing All Data")
             for key, obj in pairs(reqAllData) do -- This is bugging out for some reason?
                 local histItem = DKP.dkpDB.history.all[obj.id]
                 local raid = obj['raid']
@@ -179,13 +183,14 @@ function Import:AcceptData(requestedData)
                         end
                     end
 
-                elseif Defaults.debug then -- Only for debugging purposes.
+                elseif Defaults.debuga then -- Only for debugging purposes.
                     Util:Debug('Setting this shit to nil for testing purposes!')
                     --            DKP.dkpDB.history.all[key] = nil
                 end
             end
         end
         local function processLastEdit()
+            Util:Debug("Processing LastEdit")
             DKP.dkpDB.lastEdit = reqLastEdit
         end
 
