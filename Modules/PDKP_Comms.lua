@@ -24,6 +24,7 @@ local SAFE_COMMS = {
     ['pdkpLastEditReq']=true,
     ['pdkpLastEditRec']=true,
     ['pdkpBusyTryAgai']=true,
+    ['pdkpPushInProg']=true,
 };
 
 local UNSAFE_COMMS = {
@@ -82,7 +83,9 @@ function OnCommReceived(prefix, message, distribution, sender)
         return PDKP:SendCommMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
     end
 
-    if sender == Util:GetMyName() then return end; -- Don't need to respond to our own messages...
+    if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
+        if prefix ~= 'pdkpNewShrouds' then return end;
+    end;
 
     Comms.processing = false -- This should be true, but it's not working for some reason...
 
@@ -120,6 +123,8 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
         Comms:PrepareDatabase(false)
         PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
+    elseif prefix == 'pdkpPushInProg' then
+
     end
 end
 

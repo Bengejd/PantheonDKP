@@ -161,6 +161,7 @@ function Raid:AcceptDKPUpdate(bossID)
 end
 
 function Raid:isMasterLooter()
+    Raid:GetRaidInfo()
     return Raid.MasterLooter == Util:GetMyName()
 end
 

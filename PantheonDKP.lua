@@ -217,6 +217,10 @@ function PDKP:HandleSlashCommands(msg, item)
         Raid:GetCurrentRaid()
     end
 
+    if msg == 'test_getML' then
+        Raid:isMasterLooter()
+    end
+
     if msg == 'pdkp_testing_com' then
         Comms:pdkp_send_comm()
     end
@@ -231,6 +235,10 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'TestImportData' then
         Import:AcceptData()
+    end
+
+    if msg == 'enableDebugging' then
+        core.defaults.debug = true
     end
 end
 
