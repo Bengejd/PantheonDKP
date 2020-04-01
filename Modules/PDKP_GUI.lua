@@ -794,13 +794,17 @@ StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'] = {
 }
 
 StaticPopupDialogs['PDKP_OFFICER_PUSH_CONFIRM'] = {
-    text = "Warning: This is permanent, are you sure?",
-    button1 = "Send Push",
-    button2 = "Cancel",
-    OnAccept = function(self) -- Confirm
-        Comms:SendGuildPush()
+    text = "WARNING THIS IS GUILD WIDE \n Overwrite is permanent and cannot be reversed. Merge is a safer option.",
+    button1 = "Overwrite",
+    button3 = 'Cancel',
+    button2 = "Merge",
+    OnAccept = function(self) -- FIrst
+        Comms:SendGuildPush(true)
     end,
-    OnCancel = function() -- Cancel
+    OnCancel = function() -- Second
+        Comms:SendGuildPush(false)
+    end,
+    OnAlt = function() -- Third
     end,
     timeout = 0,
     whileDead = true,

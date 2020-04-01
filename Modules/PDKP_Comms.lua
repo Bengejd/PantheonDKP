@@ -34,6 +34,20 @@ local UNSAFE_COMMS = {
     ['pdkpNewShrouds']=true,
 }
 
+local pdkpPushDatabase = {
+    full = false,
+    guildDB = {
+        numOfMembers = nil,
+        members = {},
+    },
+    dkpDB = {
+        lastEdit=nil,
+        currentDB=nil,
+        history={},
+        members={},
+    }
+}
+
 Comms.processing = false
 
 ---------------------------
@@ -70,7 +84,7 @@ function OnCommReceived(prefix, message, distribution, sender)
 
     if sender == Util:GetMyName() then return end; -- Don't need to respond to our own messages...
 
-    Comms.processing = true
+    Comms.processing = false -- This should be true, but it's not working for some reason...
 
     local data = Comms:Deserialize(message) -- deserialize it.
 
@@ -103,14 +117,10 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     elseif prefix == 'pdkpLastEditRec' then -- Process their lastEdit time
         Comms:LastEditReceived(sender, message)
     elseif prefix == 'pdkpPushRequest' then -- Someone Sent you a push request
-        Util:Debug("Preparing data to push to " .. sender .. ' This may take a few minutes...')
-        local lastTwoWeeks = message
-        local data = Comms:PrepareDatabase(lastTwoWeeks, false)
-        data = PDKP:Serialize(data)
-        PDKP:SendCommMessage('pdkpPushReceive', data, 'WHISPER', sender, 'BULK', UpdatePushBar)
+        PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
+        Comms:PrepareDatabase(false)
+        PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
     end
-
---    print('Prefix', prefix, ' message', message, ' distro', distribution, 'sender', sender)
 end
 
 ---------------------------
@@ -139,29 +149,40 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
     Comms.processing = false
 end
 
-function Comms:SendGuildPush()
-    Util:Debug("Preparing data to push to GUILD this may take a few minutes...")
-    local data = Comms:PrepareDatabase(nil, false)
-    data = PDKP:Serialize(data)
-    PDKP:SendCommMessage('pdkpPushReceive', data, 'GUILD', nil, 'BULK')
+function Comms:SendGuildPush(full)
+    Comms:ResetDatabse()
+    PDKP:Print("Preparing data to push to GUILD this may take a few minutes...")
+    Comms:PrepareDatabase(full)
+    PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, 'BULK', UpdatePushBar)
 end
 
 function Comms:SendGuildUpdate(histEntry)
-    local data = {
-        lastEdit = DKP.dkpDB.lastEdit,
-        history = {}
-    }
-    table.insert(data.history, histEntry)
-    data = PDKP:Serialize(data)
-    PDKP:SendCommMessage('pdkpPushReceive', data, 'GUILD', nil, nil)
+    Comms:ResetDatabse()
+    pdkpPushDatabase.dkpDB.lastEdit = DKP.dkpDB.lastEdit
+    table.insert(pdkpPushDatabase.dkpDB.history, histEntry)
+    PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
 end
 
-function Comms:PrepareDatabase(twoWeeksAgo, full)
+function Comms:ResetDatabse()
+    pdkpPushDatabase = {
+        full = false,
+        guildDB = {
+            numOfMembers = nil,
+            members = nil,
+        },
+        dkpDB = {
+            lastEdit=nil,
+            history={},
+            members=nil,
+            currentDB=nil
+        }
+    }
+end
 
-    local database
-
-    if full then -- Full overwrite.
-        database = {
+function Comms:PrepareDatabase(full)
+    if full then -- full overwrite
+        pdkpPushDatabase = {
+            full = full,
             guildDB = {
                 numOfMembers = Guild.db.numOfMembers,
                 members = Guild.db.members
@@ -173,13 +194,21 @@ function Comms:PrepareDatabase(twoWeeksAgo, full)
                 currentDB=DKP.dkpDB.currentDB
             }
         }
-    else -- Partial Merge
-        database = {
-            lastEdit=DKP.dkpDB.lastEdit,
-            history=DKP.dkpDB.history,
+    else -- merge, partial.
+        pdkpPushDatabase = {
+            full = full,
+            guildDB = {
+                numOfMembers = nil,
+                members = nil
+            },
+            dkpDB = {
+                lastEdit=DKP.dkpDB.lastEdit,
+                history=DKP.dkpDB.history,
+                members=nil,
+                currentDB=nil
+            }
         }
     end
-    return database;
 end
 
 function Comms:RequestOfficersLastEdit()
@@ -198,10 +227,40 @@ function Comms:RequestOfficersLastEdit()
         end
     end
 
+    if oneReqTriggered == true then -- check for if the officer actually has the addon or not.
+        local shouldContinue = false
+        for i=1, #officers do
+            local officer = officers[i]
+            if officer['online'] and officer['name'] ~= Util:GetMyName() then
+                if officer['lastEdit'] ~= -1 then
+                    shouldContinue = true
+                    break
+                end
+            end
+        end
+        oneReqTriggered = shouldContinue
+    end
+
     -- Pop up the frame if we didn't get any hits from the officers & you are an officer.
     if oneReqTriggered == false and Guild:CanEdit() then
         GUI:UpdatePushFrame()
+    elseif oneReqTriggered == false then
+        PDKP:Print('No up to date officers are online currently. Please try again later!')
+    else
     end
+end
+
+function Comms:Wait(waitTime)
+    local timerCount = 0
+
+    local function TimerFeedback()
+        timerCount = timerCount + 1;
+        if timerCount > waitTime then
+            PDKP:CancelAllTimers()
+        end
+    end
+
+    PDKP:ScheduleRepeatingTimer(TimerFeedback, 1)
 end
 
 function Comms:LastEditReceived(sender, message)
