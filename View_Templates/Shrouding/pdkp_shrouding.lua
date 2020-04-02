@@ -9,7 +9,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
-local Comms = core.comms;
+local Comms = core.Comms;
 local Setup = core.Setup;
 local Raid = core.Raid;
 
@@ -61,6 +61,10 @@ Shroud.shroudPhrases = {
 }
 
 function Shroud:UpdateWindow()
+    if Shroud.window == nil then
+        Setup:ShroudingWindow()
+    end
+
     local scroll = Shroud.window.scroll
 
     scroll:ReleaseChildren() -- Clear the previous entries.
@@ -150,14 +154,14 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
         Util:Debug('Adding shrouder!');
         table.insert(shrouders.names, playerName)
         table.insert(shrouders.table, player);
-        print(#shrouders.names)
-        shrouders.names[playerName] = true;
     else
         for i=1, #shrouders.table do
             local shrouder = shrouders.table[i];
             if shrouder.name == playerName then shrouder.dkpTotal = DKP:GetPlayerDKP(playerName) end
         end
     end
+
+    shrouders.names[playerName] = true;
 
     core.Comms:SendShroudTable()
 end

@@ -39,7 +39,6 @@ core.filterOffline = nil
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
-
     if event == "ADDON_LOADED" then
         Util:Debug('Addon loaded')
         PDKP:OnInitialize(event, arg1)
@@ -66,12 +65,12 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     elseif event == "OPEN_MASTER_LOOT_LIST" then return -- when the master loot list is opened.
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
-        local _, name, _, _,_, _, _ _, _ ,_, _, _ = ...;
-        PDKP:MessageRecieved(msg, name)
+        local playerName, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _= ...;
+        playerName = Util:RemoveServerName(playerName)
+        PDKP:MessageRecieved(msg, playerName)
         return
     elseif event == "CHAT_MSG_RAID_LEADER" then return
     elseif event == "CHAT_MSG_WHISPER" then
-        --        local msg = arg1;
         local _, _, _, arg4,_, _, _,_, _, _, _, _ = ...;
         local msg = arg1;
         local name = arg4;
@@ -123,6 +122,7 @@ end
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
     if Shroud.shroudPhrases[string.lower(msg)] and (Raid:isMasterLooter() or Defaults.debug) then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
+        print(name)
         Shroud:UpdateShrouders(name)
     end
 end

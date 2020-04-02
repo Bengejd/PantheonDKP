@@ -109,8 +109,6 @@ function Setup:PushTimer()
     statusbar:Hide()
 end
 
-
-
 function Setup:ShroudingWindow()
     local sf = getglobal('pdkp_shrouding_window');
     sf:SetPoint('BOTTOMLEFT', 0, 0);
@@ -147,6 +145,7 @@ function Setup:ShroudingWindow()
     sf:Hide()
     scrollcontainer.frame:Hide()
     Shroud.window = sf;
+    Shroud.window.scroll = scroll;
 end
 
 function Setup:dkpPushButton()
