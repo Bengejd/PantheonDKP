@@ -112,11 +112,14 @@ function GUI:Hide()
 end
 
 function GUI:ToggleAllClasses(checked)
+    local allcb = _G['pdkp_all_classes']
+    local allChecked = allcb:GetChecked()
+
     for i=1, #Defaults.classes do
         local cb = _G['pdkp_'..Defaults.classes[i]..'_checkbox']
-        cb:SetChecked(true)
-        _G['pdkp_all_classes']:SetChecked(true)
-        GUI:pdkp_dkp_table_filter_class(cb:GetName(), true)
+        cb:SetChecked(allChecked)
+        _G['pdkp_all_classes']:SetChecked(allChecked)
+        GUI:pdkp_dkp_table_filter_class(cb:GetName(), allChecked)
     end
 end
 
