@@ -447,7 +447,7 @@ function DKP:DeleteEntry(entry, noBroacast)
     DKP.bankID = dkpDB.lastEdit
 
     if noBroacast == nil then
-        PDKP:SendCommMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
+        Comms:SendCommsMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
     end
 end
 
@@ -641,7 +641,11 @@ function DKP:NewEntry(name)
             dkpTotal = 0;
             ['Molten Core'] = 0,
             ['Blackwing Lair'] = 0,
-            ['entries']={}
+            ['entries']={},
+            ['previousValues'] = {
+                ['Molten Core'] = 0,
+                ['Blackwing Lair'] = 0,
+            }
         }
     end
 end
@@ -680,6 +684,75 @@ function DKP:GetHighestDKP()
 
     if maxDKP == 0 and Defaults.debug then return 50 end;
     return maxDKP;
+end
+
+function DKP:ValidateTables()
+    local type = type
+
+    local members = dkpDB.members;
+    local history = dkpDB.history;
+    local deleted = history.deleted;
+    local all = history.all;
+
+    local function compare(a,b)
+        if a == nil and b == nil then return false
+        elseif a == nil then return false
+        elseif b == nil then return true
+        else return a > b
+        end
+    end
+
+    local function validateEntries(entries, name) -- Ensures that the entries are unique across the board.
+        table.sort(entries, compare)
+        local nonDuplicates = {}
+        for key, value in pairs(entries) do -- remove the duplicates.
+            if value ~= nil and value >= 1500000000 and value ~= entries[key + 1] then
+                table.insert(nonDuplicates, value)
+                for _, deletedEntry in pairs(deleted) do
+                    if value == deletedEntry then
+                        Util:Debug('Removing deleted entry ' .. value .. ' from ' .. name)
+                        table.remove(nonDuplicates, key)
+                    end
+                end
+            end
+        end
+--        print(name, ' had ', #entries - #nonDuplicates, ' duplicate or corrupt entries')
+        return nonDuplicates;
+    end
+
+    local function validateDKP(name, member)
+        local validBwlDKP = 0
+        local validMcDKP = 0
+
+        local mcDKP = member['Molten Core']
+        local bwlDKP = member['Blackwing Lair']
+
+        for i=1, #member['entries'] do
+            local entryKey = member['entries'][i]
+            local histEntry = all[entryKey]
+            if histEntry ~= nil then
+                local change = histEntry['dkpChange']
+                if histEntry['raid'] == 'Blackwing Lair' then
+                    validBwlDKP = validBwlDKP + change
+                end
+            end
+        end
+        if validBwlDKP ~= bwlDKP then
+           print(name, ' validDKP: ', validBwlDKP, 'actual', bwlDKP)
+        end
+    end
+
+    for key, member in pairs(members) do
+        if type(key) == type('') then -- we have an object.
+            local entries = member['entries']
+            if entries then -- Make sure that the entries are unique.
+                entries = validateEntries(entries, key)
+                if #entries > 0 then
+                    validateDKP(key, member)
+                end
+            end
+        end
+    end
 end
 
 function DKP:ImportMonolithData()

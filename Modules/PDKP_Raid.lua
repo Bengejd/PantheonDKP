@@ -93,6 +93,22 @@ function Raid:IsInRaid()
     return IsInRaid()
 end
 
+function PDKP:GetSavedRaids()
+    local
+    name,
+    id,
+    reset,
+    difficulty,
+    locked,
+    extended,
+    instanceIDMostSig,
+    isRaid,
+    maxPlayers,
+    difficultyName,
+    numEncounters,
+    encounterProgress = GetSavedInstanceInfo(index)
+end
+
 function Raid:GetRaidInfo()
     local raidInfo = {}
     for i = 1, 40 do

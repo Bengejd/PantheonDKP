@@ -240,6 +240,10 @@ function PDKP:HandleSlashCommands(msg, item)
     if msg == 'enableDebugging' then
         core.defaults.debug = true
     end
+
+    if msg == 'validateTables' then
+        DKP:ValidateTables()
+    end
 end
 
 function PDKP:BuildAllData()

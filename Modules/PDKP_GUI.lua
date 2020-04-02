@@ -369,6 +369,7 @@ function GUI:ShowSelectedHistory(charObj)
             else table.insert(keys, obj)
             end
         end
+        table.sort(keys, function(a,b) return a<b end)
         return keys;
     end
 

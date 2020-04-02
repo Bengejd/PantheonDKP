@@ -78,9 +78,16 @@ function Comms:Deserialize(string)
     return data;
 end
 
+function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
+    if Defaults.no_broadcast then
+        print('Skipping broadcast!')
+        return end;
+    PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
+end
+
 function OnCommReceived(prefix, message, distribution, sender)
     if Comms.processing then -- If we're processing a com, don't overload yourself.
-        return PDKP:SendCommMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
+        return Comms:SendCommsMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
     end
 
     if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
@@ -116,13 +123,13 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 
     if prefix == 'pdkpBusyTryAgai' then PDKP:Print(sender .. ' is currently busy, please try again later')
     elseif prefix == 'pdkpLastEditReq' then -- Send them back your lastEdit time
-        PDKP:SendCommMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
+        Comms:SendCommsMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
     elseif prefix == 'pdkpLastEditRec' then -- Process their lastEdit time
         Comms:LastEditReceived(sender, message)
     elseif prefix == 'pdkpPushRequest' then -- Someone Sent you a push request
         PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
         Comms:PrepareDatabase(false)
-        PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
+        Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
     elseif prefix == 'pdkpPushInProg' then
 
     end
@@ -158,14 +165,15 @@ function Comms:SendGuildPush(full)
     Comms:ResetDatabse()
     PDKP:Print("Preparing data to push to GUILD this may take a few minutes...")
     Comms:PrepareDatabase(full)
-    PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, 'BULK', UpdatePushBar)
+    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, 'BULK', UpdatePushBar)
 end
 
 function Comms:SendGuildUpdate(histEntry)
     Comms:ResetDatabse()
     pdkpPushDatabase.dkpDB.lastEdit = DKP.dkpDB.lastEdit
     table.insert(pdkpPushDatabase.dkpDB.history, histEntry)
-    PDKP:SendCommMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
+
+    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
 end
 
 function Comms:ResetDatabse()
@@ -228,7 +236,7 @@ function Comms:RequestOfficersLastEdit()
         if officer['online'] and officer['name'] ~= Util:GetMyName() then
             oneReqTriggered = true
             Util:Debug('sending lastEdit request to '..officer['name'])
-            PDKP:SendCommMessage('pdkpLastEditReq', PDKP:Serialize(''), 'WHISPER', officer['name'], 'BULK')
+            Comms:SendCommsMessage('pdkpLastEditReq', PDKP:Serialize(''), 'WHISPER', officer['name'], 'BULK')
         end
     end
 
@@ -285,7 +293,7 @@ end
 
 function Comms:SendShroudTable()
     if Raid:IsInRaid() then
-        PDKP:SendCommMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK')
+        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK')
     elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
         Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, nil, 'Pantheonbank')
     else -- For the sender to update their table.
@@ -294,5 +302,5 @@ function Comms:SendShroudTable()
 end
 
 function Comms:ClearShrouders()
-    PDKP:SendCommMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
+    Comms:SendCommsMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
 end

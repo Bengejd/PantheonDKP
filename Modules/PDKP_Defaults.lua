@@ -39,6 +39,7 @@ core.defaults = {
     addon_version = 'V0.8.9',
     addon_name = 'PantheonDKP',
     debug = false,
+    no_broadcast = true,
     debug_dkp = false;
 
     -- PLAYER INFO
