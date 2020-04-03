@@ -113,5 +113,109 @@
         </Scripts>
     </Frame>
 
+    <Frame name="pdkp_prio_window" parent="UIParent" movable="true" enableMouse="true" frameStrata="HIGH" resizable="true" hidden="true">
+        <Size><AbsDimension x="194" y="170"/></Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+            <Offset><AbsDimension x="300" y="0"/></Offset>
+        </Anchors>
+        <Backdrop name="$parentBackdrop" bgFile="Interface\TutorialFrame\TutorialFrameBackground"
+                  edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="64"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+        </Backdrop>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <FontString name="$parentTitle" inherits="GameFontNormal" text="Pantheon Loot Priority" justifyH="CENTER" justifyV="TOP">
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-10"/>
+                            </Offset>
+                        </Anchor>
+                        <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+                            <Offset>
+                                <AbsDimension x="-10" y="-30"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <!-- headline -->
+            <Button name="$parentCloseButton" inherits="pdkp_miniButton" Text="|TInterface\Buttons\UI-StopButton:0|t">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-6" y="-6"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                            pdkp_template_function_call('pdkp_prio_hide');
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <!-- Roll Tracker -->
+
+            <Frame name="pdkp_shrouding_frame" hidden="false" >
+                <Anchors>
+                    <Anchor point="TOPLEFT" >
+                        <Offset>
+                            <AbsDimension x="8" y="-30"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="BOTTOMRIGHT" >
+                        <Offset>
+                            <AbsDimension x="-8" y="8"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+
+
+                        <FontString name="$parentStatusText" inherits="GameFontNormalSmall" text="" justifyH="LEFT" justifyV="TOP">
+                            <Color r="0.5" g="0.5" b="1.0"/>
+                            <Anchors>
+                                <Anchor point="BOTTOMLEFT">
+                                    <Offset>
+                                        <AbsDimension x="2" y="2"/>
+                                    </Offset>
+                                </Anchor>
+                                <Anchor point="BOTTOMRIGHT">
+                                    <Offset>
+                                        <AbsDimension x="-2" y="12"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+
+                        </FontString>
+
+                    </Layer>
+                </Layers>
+            </Frame>
+
+
+        </Frames>
+        <Scripts>
+            <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>
+            <OnDragStart>self:StartMoving()</OnDragStart>
+            <OnDragStop>self:StopMovingOrSizing()</OnDragStop>
+        </Scripts>
+    </Frame>
+
 
 </Ui>

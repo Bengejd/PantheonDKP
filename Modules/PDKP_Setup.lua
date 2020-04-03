@@ -55,6 +55,7 @@ function Setup:MainUI()
         Setup:HistoryFrame()
         Setup:dkpPushButton()
         Setup:ShroudingWindow()
+        Setup:PrioList()
 
         Setup:PushTimer()
 
@@ -147,6 +148,44 @@ function Setup:ShroudingWindow()
     scrollcontainer.frame:Hide()
     Shroud.window = sf;
     Shroud.window.scroll = scroll;
+end
+
+function Setup:PrioList()
+    local lf = getglobal('pdkp_prio_window');
+    lf:SetPoint('BOTTOMLEFT', 0, 200);
+
+    lf:SetWidth(200);
+    lf:SetHeight(200);
+
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(130)
+    scrollcontainer:SetWidth(150)
+    scrollcontainer:SetLayout("Fill")
+
+    scrollcontainer:SetParent(lf)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", lf, "CENTER", 0, -10);
+
+    lf:SetScript("OnShow", function()
+        scrollcontainer.frame:Show() end)
+    lf:SetScript("OnHide", function()
+--        lf:SetWidth(350)
+        scrollcontainer.frame:Hide()
+    end)
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    scrollcontainer.frame:Hide()
+    lf:Hide()
+
+    lf.scroll = scroll
+    GUI.prio = lf;
+    GUI.prio.scroll = scroll;
+    GUI.prio.scrollcontainer = scrollcontainer
 end
 
 function Setup:dkpPushButton()

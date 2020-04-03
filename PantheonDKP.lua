@@ -15,6 +15,7 @@ local Raid = core.Raid;
 local Comms = core.Comms;
 local Setup = core.Setup;
 local Import = core.Import;
+local item = core.Item;
 
 
 local PlaySound = PlaySound
@@ -97,6 +98,7 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
     self:RegisterChatCommand("pdkp", "HandleSlashCommands")
     self:RegisterChatCommand("shroud", "HandleShroudCommands")
+    self:RegisterChatCommand("prio", "HandlePrioCommands")
 
     -----------------------------
     -- Register PDKP Databases --
@@ -145,6 +147,20 @@ function PDKP:HandleShroudCommands(item)
         -- Check to see if the GUI is open or not.
         if not GUI.shown then PDKP:Show() end
         GUI:UpdateShroudItemLink(Item:GetItemByName(item));
+    end
+end
+
+function PDKP:HandlePrioCommands(itemLink)
+    itemLink = itemLink or nil;
+    if itemLink ~= nil and itemLink ~= '' then
+        local prio = item:GetPriority(itemLink)
+
+        if prio == 'Undefined' then -- Possibly we have an item link.
+            local status, itemName = pcall(item:GetItemInfo(itemLink))
+            prio = item:GetPriority(itemName)
+        end
+        print(itemLink .. ' PRIO: ' .. prio)
+    else
     end
 end
 
@@ -356,6 +372,8 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'toggleSubmitButton' then return GUI:ToggleSubmitButton() end;
 
     if funcName == 'pdkp_select_all_classes' then return GUI:ToggleAllClasses(object) end;
+
+    if funcName == 'pdkp_prio_hide' then return GUI.prio:Hide() end;
 end
 
 
