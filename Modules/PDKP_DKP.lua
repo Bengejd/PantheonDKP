@@ -288,6 +288,10 @@ end
  ]]
 
 -- cheaty way to update dkp via the boss kill event.
+function DKP:BossKilled()
+
+end
+
 function DKP:BossKill(charObj)
 
     local name = charObj.name

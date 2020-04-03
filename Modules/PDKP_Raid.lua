@@ -15,6 +15,10 @@ local raidHistory;
 
 Raid.RaidInfo = {};
 
+-- Start raid, select a time for the raid on-time bonus to go out.
+-- Auto pop up raid boss kills when they occur
+-- Auto award the completion bonus when the finalboss is killed.
+
 Raid.bossIDS = {
 
     -- Molten Core
@@ -134,8 +138,7 @@ function Raid:BossKill(bossID, bossName)
     if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
     if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
 
-    Raid:GetRaidInfo()
-    if Raid.MasterLooter ~= Util:GetMyName() then return end;
+    if not Raid:isMasterLooter() then return end;
 
     local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
     popup.text = bossName .. ' was killed! Award 10 DKP?'

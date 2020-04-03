@@ -57,7 +57,7 @@
 			<!-- BASE FRAME START -->
 
 			<Layer level="BORDER" textureSubLevel="-1">
-				<Texture parentKey="pdkp_topLeft" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-TopLeft">
+				<Texture parentKey="pdkp_topLeft" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-TopLeft">
 					<Size x="341" y="230" />
 					<Anchors>
 						<Anchor point="TOPLEFT" y="2"/>
@@ -77,7 +77,7 @@
 			</Layer>
 
 			<Layer level="BORDER" textureSubLevel="-1">
-				<Texture parentKey="pdkp_top" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-Top">
+				<Texture parentKey="pdkp_top" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-Top">
 					<Size x="256" y="256" />
 					<Anchors>
 						<Anchor point="TOP" x="128" y="0" />
@@ -87,7 +87,7 @@
 			</Layer>
 
 			<Layer level="BORDER" textureSubLevel="-1">
-				<Texture parentKey="pdkp_topRight" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-TopRight">
+				<Texture parentKey="pdkp_topRight" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-TopRight">
 					<Size x="341" y="256" />
 					<Anchors>
 						<Anchor point="TOPRIGHT" relativePoint="pdkp_top" x="255"/>
@@ -97,7 +97,7 @@
 			</Layer>
 
             <Layer level="BORDER" textureSubLevel="-1">
-                <Texture parentKey="pdkp_midLeft" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-MidLeft">
+                <Texture parentKey="pdkp_midLeft" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-MidLeft">
                     <Size x="341" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMLEFT" relativePoint="pdkp_topLeft" x="11"/>
@@ -107,7 +107,7 @@
             </Layer>
 
             <Layer level="BORDER" textureSubLevel="-1">
-                <Texture parentKey="pdkp_mid" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-Middle">
+                <Texture parentKey="pdkp_mid" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-Middle">
                     <Size x="341" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMRIGHT" relativePoint="pdkp_midLeft"/>
@@ -117,7 +117,7 @@
             </Layer>
 
             <Layer level="BORDER" textureSubLevel="-1">
-                <Texture parentKey="pdkp_midRight" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-MidRight">
+                <Texture parentKey="pdkp_midRight" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-MidRight">
                     <Size x="256" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMRIGHT" relativePoint="pdkp_mid" x="255"/>
@@ -127,7 +127,7 @@
             </Layer>
 
             <Layer level="BORDER" textureSubLevel="-1" name="pdkp_botLeft">
-                <Texture parentKey="pdkp_botLeft" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-BotLeft">
+                <Texture parentKey="pdkp_botLeft" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-BotLeft">
                     <Size x="290" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMLEFT" relativePoint="pdkp_midLeft" y="-250" x="12"/>
@@ -137,7 +137,7 @@
             </Layer>
 
             <Layer level="BORDER" textureSubLevel="-1">
-                <Texture parentKey="pdkp_botMid" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-BotMid">
+                <Texture parentKey="pdkp_botMid" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-BotMid">
                     <Size x="341" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMRIGHT" relativePoint="pdkp_midLeft" y="-248.25" x="-40"/>
@@ -147,7 +147,7 @@
             </Layer>
 
             <Layer level="BORDER" textureSubLevel="-1">
-                <Texture parentKey="pdkp_botRight" file="Interface\AddOns\PantheonDKP\Media\PDKPFrame-BotRight">
+                <Texture parentKey="pdkp_botRight" file="Interface\AddOns\PantheonDKP\Media\Main_UI\PDKPFrame-BotRight">
                     <Size x="295" y="256" />
                     <Anchors>
                         <Anchor point="BOTTOMRIGHT" relativePoint="pdkp_botMid" y="-249.5" x="250"/>

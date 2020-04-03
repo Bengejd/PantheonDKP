@@ -729,6 +729,7 @@ StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
     bossID = nil,
     bossName = nil,
     OnAccept = function()
+
         pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossID);
         StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
     end,
