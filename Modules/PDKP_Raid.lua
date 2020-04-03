@@ -10,6 +10,7 @@ local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Raid = core.Raid;
+local item = core.Item;
 
 local raidHistory;
 
@@ -97,6 +98,22 @@ function Raid:IsInRaid()
     return IsInRaid()
 end
 
+function PDKP:GetSavedRaids()
+    local
+    name,
+    id,
+    reset,
+    difficulty,
+    locked,
+    extended,
+    instanceIDMostSig,
+    isRaid,
+    maxPlayers,
+    difficultyName,
+    numEncounters,
+    encounterProgress = GetSavedInstanceInfo(index)
+end
+
 function Raid:GetRaidInfo()
     local raidInfo = {}
     for i = 1, 40 do
@@ -164,25 +181,41 @@ function Raid:AcceptDKPUpdate(bossID)
 end
 
 function Raid:isMasterLooter()
+    Raid:GetRaidInfo()
     return Raid.MasterLooter == Util:GetMyName()
 end
 
 function Raid:AnnounceLoot()
-    if Raid:isMasterLooter() and Raid:IsInRaid() and Defaults.debug then -- Testing purposes rn.
+    local shouldContinue = false
+
+    if Defaults.debug then shouldContinue = true
+    elseif Raid:isMasterLooter() and Raid:IsInRaid() then
+        shouldContinue = true
+    else
+    end
+
+    local beginShroud = false
+
+    if shouldContinue then
+        local info = GetLootInfo()
         local items = {}
 
-        for index = 1, GetNumLootItems() do
-            print('index: ', index)
-            if LootSlotHasItem(index) then
-                local itemLink = GetLootSlotLink(index)
-                table.insert(items, itemLink)
+        for i=1, #info do
+            local lootItem = info[1]
+            lootItem.name = lootItem.item
+            local itemLink = GetLootSlotLink(i)
+            if lootItem.quality >= 3 or Defaults.debug then
+                lootItem.link = itemLink
+                lootItem.prio = item:GetPriority(lootItem.name)
+                table.insert(items, lootItem)
+                if beginShroud == false then beginShroud = true end
             end
         end
-        for i=1, #items do
-            SendChatMessage(items[i], "RAID", "Common", "Neekio");
-        end
 
-        -- Setup the item prio stuff to go here possibly?
+        for i=1, #items do
+            local lootItem = items[i]
+            SendChatMessage(lootItem.link .. ' PRIO: ' .. lootItem.prio, 'RAID', 'Common', 'Neekio')
+        end
     end
 end
 

@@ -39,7 +39,7 @@
 			<OnEnter>
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 					self.tiptext = getglobal('pdkp_item_link_text'):GetText()
-					if self.tiptext == nil or self.tiptext == '' then return end
+					if self.tiptext == nil or self.tiptext == '' or self.tiptext == 'None' then return end
 					GameTooltip:SetHyperlink(self.tiptext);
 			</OnEnter>
 			<OnLeave>
@@ -538,6 +538,9 @@
 					<OnEscapePressed>
 						self:ClearFocus()
 					</OnEscapePressed>
+					<OnTextChanged>
+						pdkp_template_function_call('toggleSubmitButton');
+					</OnTextChanged>
 				</Scripts>
 				<FontString inherits="ChatFontNormal" />
 			</EditBox>

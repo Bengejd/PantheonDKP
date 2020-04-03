@@ -112,11 +112,14 @@ function GUI:Hide()
 end
 
 function GUI:ToggleAllClasses(checked)
+    local allcb = _G['pdkp_all_classes']
+    local allChecked = allcb:GetChecked()
+
     for i=1, #Defaults.classes do
         local cb = _G['pdkp_'..Defaults.classes[i]..'_checkbox']
-        cb:SetChecked(true)
-        _G['pdkp_all_classes']:SetChecked(true)
-        GUI:pdkp_dkp_table_filter_class(cb:GetName(), true)
+        cb:SetChecked(allChecked)
+        _G['pdkp_all_classes']:SetChecked(allChecked)
+        GUI:pdkp_dkp_table_filter_class(cb:GetName(), allChecked)
     end
 end
 
@@ -141,6 +144,53 @@ function GUI:pdkp_change_view(view)
 end
 
 function GUI:ShowBossKillPopup()
+end
+
+function GUI:UpdateLootList(itemLink)
+    if GUI.prio == nil then Setup:PrioList() end
+
+    local lf = GUI.prio
+    local scroll = GUI.prio.scroll;
+    local scrollcontainer = GUI.prio.scrollcontainer;
+
+    local prio;
+
+    if itemLink ~= nil and itemLink ~= '' then
+        prio = Item:GetPriority(itemLink)
+        if prio == 'Undefined' then
+            local name = Item:GetItemInfo(itemLink)
+            print(name)
+            prio = Item:GetPriority(name)
+        end
+    end
+
+    scroll:ReleaseChildren()
+
+    if itemLink ~= nil and itemLink ~= '' then
+        local grp = AceGUI:Create("InlineGroup")
+        grp:SetFullWidth(true)
+
+        local t = AceGUI:Create("Label")
+        t:SetText(itemLink .. '\n' .. prio)
+        grp:AddChild(t)
+        scroll:AddChild(grp)
+    else
+
+        lf:SetWidth(500)
+        scrollcontainer:SetWidth(400)
+
+
+        for name, prio in pairs(Item.priority) do
+            local grp = AceGUI:Create("InlineGroup")
+            grp:SetTitle(name)
+            local label = AceGUI:Create("Label")
+            label:SetText(prio)
+            grp:AddChild(label)
+            scroll:AddChild(grp)
+        end
+    end
+
+    lf:Show()
 end
 
 ---------------------------
@@ -366,6 +416,7 @@ function GUI:ShowSelectedHistory(charObj)
             else table.insert(keys, obj)
             end
         end
+        table.sort(keys, function(a,b) return a<b end)
         return keys;
     end
 
@@ -394,6 +445,7 @@ function GUI:ShowSelectedHistory(charObj)
     local function compare(a,b)
         return a > b
     end
+
     table.sort(historyKeys, compare)
 
     for i=1, #historyKeys do
@@ -542,6 +594,15 @@ function GUI:ToggleSubmitButton()
 
     local isEmpty = Util:IsEmpty(GUI.pdkp_dkp_amount_box:GetText());
     local isEnabled = GUI.pdkp_dropdown_enables_submit and hasSelected and not isEmpty and core.canEdit;
+
+    local otherBox = _G['pdkp_other_entry_box']
+
+    if otherBox:IsVisible() then -- we are using the otherbox.
+        local val = otherBox.value
+        if val ~= nil and val ~= '' then
+
+        end
+    end
 
     GUI.pdkp_submit_button:SetEnabled(isEnabled);
 end
@@ -795,13 +856,17 @@ StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'] = {
 }
 
 StaticPopupDialogs['PDKP_OFFICER_PUSH_CONFIRM'] = {
-    text = "Warning: This is permanent, are you sure?",
-    button1 = "Send Push",
-    button2 = "Cancel",
-    OnAccept = function(self) -- Confirm
-        Comms:SendGuildPush()
+    text = "WARNING THIS IS GUILD WIDE \n Overwrite is permanent and cannot be reversed. Merge is a safer option.",
+    button1 = "Overwrite",
+    button3 = 'Cancel',
+    button2 = "Merge",
+    OnAccept = function(self) -- FIrst
+        Comms:SendGuildPush(true)
     end,
-    OnCancel = function() -- Cancel
+    OnCancel = function() -- Second
+        Comms:SendGuildPush(false)
+    end,
+    OnAlt = function() -- Third
     end,
     timeout = 0,
     whileDead = true,

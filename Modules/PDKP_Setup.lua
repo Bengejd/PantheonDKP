@@ -32,6 +32,7 @@ function Setup:MainUI()
 
         GUI.pdkp_frame = CreateFrame("Frame", "pdkpCoreFrame", UIParent, "pdkp_core_frame");
         GUI.pdkp_frame:SetPoint("TOP", 0, 0)
+        GUI.pdkp_frame:SetScale(1) -- Just incase. This might fix the scaling issue that Sparkle has?
 
         GUI.pdkp_dkp_amount_box = _G['pdkp_dkp_amount_box'];
         GUI.pdkp_submit_button = _G['pdkp_dkp_submit'];
@@ -54,6 +55,7 @@ function Setup:MainUI()
         Setup:HistoryFrame()
         Setup:dkpPushButton()
         Setup:ShroudingWindow()
+        Setup:PrioList()
 
         Setup:PushTimer()
 
@@ -109,8 +111,6 @@ function Setup:PushTimer()
     statusbar:Hide()
 end
 
-
-
 function Setup:ShroudingWindow()
     local sf = getglobal('pdkp_shrouding_window');
     sf:SetPoint('BOTTOMLEFT', 0, 0);
@@ -147,6 +147,45 @@ function Setup:ShroudingWindow()
     sf:Hide()
     scrollcontainer.frame:Hide()
     Shroud.window = sf;
+    Shroud.window.scroll = scroll;
+end
+
+function Setup:PrioList()
+    local lf = getglobal('pdkp_prio_window');
+    lf:SetPoint('BOTTOMLEFT', 0, 200);
+
+    lf:SetWidth(200);
+    lf:SetHeight(200);
+
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(130)
+    scrollcontainer:SetWidth(150)
+    scrollcontainer:SetLayout("Fill")
+
+    scrollcontainer:SetParent(lf)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", lf, "CENTER", 0, -10);
+
+    lf:SetScript("OnShow", function()
+        scrollcontainer.frame:Show() end)
+    lf:SetScript("OnHide", function()
+--        lf:SetWidth(350)
+        scrollcontainer.frame:Hide()
+    end)
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    scrollcontainer.frame:Hide()
+    lf:Hide()
+
+    lf.scroll = scroll
+    GUI.prio = lf;
+    GUI.prio.scroll = scroll;
+    GUI.prio.scrollcontainer = scrollcontainer
 end
 
 function Setup:dkpPushButton()
@@ -257,63 +296,24 @@ function Setup:AdjustmentDropdowns()
     thirdDropdown:SetText('Other');
     reasonDropdown:SetLabel('Reason');
 
-    local otherBox = getglobal('pdkp_other_entry_box')
+    local otherBox = _G['pdkp_other_entry_box']
 
     local function DropdownValueChanged(this, event, index)
-
-        this.value = index
-        local adjustAmount;
+        local currentRaid = DKP.dkpDB.currentDB
+        local dropdownName = this.name
         local bossKillBonus = 10;
         local updateAmountBox = false;
-        -- First Dropdown Logic
+        local adjustAmount;
 
-        if this.name == 'first' then
-            for i = 2, #dropdowns do
-                if i ~= 4 then
-                    local d = dropdowns[i];
-                    d:SetValue('')
-                    d.frame:Hide()
-                    d:SetLabel('');
-                    GUI.pdkp_dkp_amount_box:SetText('');
-                    GUI.pdkp_submit_button:SetEnabled(false);
-                end
-            end
-
-            -- On time, Signup, Boss kill, Unexcused Absence.
-            if index <= 5 then
-                secondaryDropdown.frame:Show()
-                secondaryDropdown:SetLabel('Raid');
-                otherBox:Hide();
-            end
-
-            if index == 6 then
-                local buttonText = getglobal('pdkp_item_link_text')
-                if Util:IsEmpty(buttonText:GetText()) then GUI.pdkp_submit_button:SetEnabled(false);
-                else GUI.pdkp_dropdown_enables_submit = true;
-                end
-            end
-
-            if index == 7 then
-                otherBox:Show();
-                GUI.pdkp_dropdown_enables_submit = false;
-
-                otherBox:SetScript("OnTextChanged", function(self)
-                    local isEmpty = Util:IsEmpty(self:GetText());
-                    if isEmpty then
-                        GUI.pdkp_dropdown_enables_submit = false;
-                    else
-                        GUI.pdkp_dropdown_enables_submit = true;
-                    end
-                end)
-            end
-
-            -- Second Dropdown Logic
-        elseif this.name == 'second' then
+        local function secondLogic()
+            print('second called')
             thirdDropdown.frame:Hide() -- Hide it by default
             local d1 = dropdowns[1];
+            local d2 = secondaryDropdown
+
 
             if d1.value >= 1 and d1.value <= 5 then
-                local raid = core.raids[index];
+                local raid = core.raids[d2.value];
                 if raid == core.raids[1] then adjustAmount = 5 else adjustAmount = 10 end;
 
                 if d1.value >= 1 and d1.value <= 3 then -- Ontime / Signup bonus
@@ -324,7 +324,6 @@ function Setup:AdjustmentDropdowns()
                         adjustAmount = (bossKillBonus + (adjustAmount * 2)) / 2;
                     end
                 end
-
 
                 if d1.value == 4 then -- boss kill
                     local bosses = core.raidBosses[raid]
@@ -344,13 +343,63 @@ function Setup:AdjustmentDropdowns()
             end
 
             -- Third Dropdown Logic
+        end
+        local function firstLogic()
+            for i=2, #dropdowns do
+                if i ~= 4 then
+                    local d = dropdowns[i];
+                    d:SetValue('')
+                    d.frame:Hide()
+                    d:SetLabel('');
+                    GUI.pdkp_dkp_amount_box:SetText('');
+                    GUI.pdkp_submit_button:SetEnabled(false);
+                end
+            end
 
-        elseif this.name == 'third' then
-            GUI.pdkp_dropdown_enables_submit = true;
+            if index <= 5 then -- On time, Signup, Boss kill, Unexcused Absence.
+                secondaryDropdown.frame:Show()
+                secondaryDropdown:SetLabel('Raid');
+                otherBox:Hide();
+            elseif index == 6 then
+                local itemButtonText = _G['pdkp_item_link_text'];
+                if Util:IsEmpty(itemButtonText:GetText()) then
+                    otherBox:Show();
+                    GUI.pdkp_submit_button:SetEnabled(false);
+                else
+                    GUI.pdkp_dropdown_enables_submit = true;
+                end
+            elseif index == 7 then -- other
+                otherBox:Show();
+                GUI.pdkp_dropdown_enables_submit = false;
+                otherBox:SetScript("OnTextChanged", function(self)
+                    local isEmpty = Util:IsEmpty(otherBox:GetText());
+                    if isEmpty then
+                        GUI.pdkp_dropdown_enables_submit = false;
+                    else
+                        GUI.pdkp_dropdown_enables_submit = true;
+                    end
+                    GUI:ToggleSubmitButton()
+                end)
+            end
+
+            if index <= 5 then
+                for i=1, #core.raids do
+                    local raid = core.raids[i]
+                    if raid == currentRaid then
+                        secondaryDropdown:SetValue(i)
+                        secondaryDropdown:SetText(currentRaid)
+                        secondLogic()
+                    end
+                end
+            end
+        end
+
+        if this.name == 'first' then firstLogic()
+        elseif this.name == 'second' then secondLogic()
+        elseif this.name == 'third' then GUI.pdkp_dropdown_enables_submit = true;
         end
 
         if updateAmountBox then
-
             GUI.pdkp_dkp_amount_box:SetText(adjustAmount);
         end
 

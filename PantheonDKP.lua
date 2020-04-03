@@ -15,6 +15,7 @@ local Raid = core.Raid;
 local Comms = core.Comms;
 local Setup = core.Setup;
 local Import = core.Import;
+local item = core.Item;
 
 
 local PlaySound = PlaySound
@@ -39,7 +40,6 @@ core.filterOffline = nil
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
-
     if event == "ADDON_LOADED" then
         Util:Debug('Addon loaded')
         PDKP:OnInitialize(event, arg1)
@@ -66,12 +66,12 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     elseif event == "OPEN_MASTER_LOOT_LIST" then return -- when the master loot list is opened.
     elseif event == "CHAT_MSG_RAID" then
         local msg = arg1;
-        local _, name, _, _,_, _, _ _, _ ,_, _, _ = ...;
-        PDKP:MessageRecieved(msg, name)
+        local playerName, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _= ...;
+        playerName = Util:RemoveServerName(playerName)
+        PDKP:MessageRecieved(msg, playerName)
         return
     elseif event == "CHAT_MSG_RAID_LEADER" then return
     elseif event == "CHAT_MSG_WHISPER" then
-        --        local msg = arg1;
         local _, _, _, arg4,_, _, _,_, _, _, _, _ = ...;
         local msg = arg1;
         local name = arg4;
@@ -98,6 +98,7 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
     self:RegisterChatCommand("pdkp", "HandleSlashCommands")
     self:RegisterChatCommand("shroud", "HandleShroudCommands")
+    self:RegisterChatCommand("prio", "HandlePrioCommands")
 
     -----------------------------
     -- Register PDKP Databases --
@@ -123,6 +124,7 @@ end
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
     if Shroud.shroudPhrases[string.lower(msg)] and (Raid:isMasterLooter() or Defaults.debug) then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
+        print(name)
         Shroud:UpdateShrouders(name)
     end
 end
@@ -145,6 +147,20 @@ function PDKP:HandleShroudCommands(item)
         -- Check to see if the GUI is open or not.
         if not GUI.shown then PDKP:Show() end
         GUI:UpdateShroudItemLink(Item:GetItemByName(item));
+    end
+end
+
+function PDKP:HandlePrioCommands(itemLink)
+    itemLink = itemLink or nil;
+    if itemLink ~= nil and itemLink ~= '' then
+        local prio = item:GetPriority(itemLink)
+
+        if prio == 'Undefined' then -- Possibly we have an item link.
+            local status, itemName = pcall(item:GetItemInfo(itemLink))
+            prio = item:GetPriority(itemName)
+        end
+        print(itemLink .. ' PRIO: ' .. prio)
+    else
     end
 end
 
@@ -217,6 +233,10 @@ function PDKP:HandleSlashCommands(msg, item)
         Raid:GetCurrentRaid()
     end
 
+    if msg == 'test_getML' then
+        Raid:isMasterLooter()
+    end
+
     if msg == 'pdkp_testing_com' then
         Comms:pdkp_send_comm()
     end
@@ -231,6 +251,14 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'TestImportData' then
         Import:AcceptData()
+    end
+
+    if msg == 'enableDebugging' then
+        core.defaults.debug = true
+    end
+
+    if msg == 'validateTables' then
+        DKP:ValidateTables()
     end
 end
 
@@ -344,6 +372,8 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'toggleSubmitButton' then return GUI:ToggleSubmitButton() end;
 
     if funcName == 'pdkp_select_all_classes' then return GUI:ToggleAllClasses(object) end;
+
+    if funcName == 'pdkp_prio_hide' then return GUI.prio:Hide() end;
 end
 
 

@@ -9,7 +9,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
-local Comms = core.comms;
+local Comms = core.Comms;
 local Setup = core.Setup;
 local Raid = core.Raid;
 
@@ -61,6 +61,10 @@ Shroud.shroudPhrases = {
 }
 
 function Shroud:UpdateWindow()
+    if Shroud.window == nil then
+        Setup:ShroudingWindow()
+    end
+
     local scroll = Shroud.window.scroll
 
     scroll:ReleaseChildren() -- Clear the previous entries.
@@ -142,11 +146,10 @@ end
 
 -- Updates the shrouding table to reflect the ML's DKP totals.
 function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to access this, ideally.
-    if Defaults.debug then Shroud.shrouders = testShrouders  end
+    if Defaults.debug then Shroud.shrouders = testShrouders end
     local shrouders = Shroud.shrouders
 
     local player = { name=playerName, dkpTotal=DKP:GetPlayerDKP(playerName) }
-
     if shrouders.names[playerName] == nil then -- player isn't in the table yet.
         Util:Debug('Adding shrouder!');
         table.insert(shrouders.names, playerName)
@@ -157,6 +160,7 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
             if shrouder.name == playerName then shrouder.dkpTotal = DKP:GetPlayerDKP(playerName) end
         end
     end
+
     shrouders.names[playerName] = true;
 
     core.Comms:SendShroudTable()
@@ -164,8 +168,10 @@ end
 
 -- Resets the shrouding table.
 function Shroud:ClearShrouders()
-    Shroud.shrouders.names = {};
-    Shroud.shrouders.table = {};
+    Shroud.shrouders = {
+        names={},
+        table={},
+    };
 
     if Shroud.window.open then Shroud.window:Hide() end
 

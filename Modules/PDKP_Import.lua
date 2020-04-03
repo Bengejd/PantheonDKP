@@ -106,82 +106,98 @@ local reqDBHistory = {
 --
 
 function Import:AcceptData(requestedData)
-    local reqHistory = requestedData.history
-    local reqLastEdit = requestedData.lastEdit;
-    local reqDeleted = requestedData.history.deleted
-    local reqAllData = reqHistory.all
+    if requestedData.full then
+        Import:AcceptFullDatabase(requestedData)
+    else
+        local dkpData = requestedData.dkpDB
 
-    local deletedHistory = DKP.dkpDB.history.deleted;
+        local reqHistory, reqLastEdit, reqDeleted, reqAllData
 
-    if reqAllData == nil then reqAllData = reqHistory end
+        reqHistory = dkpData.history
+        reqLastEdit = dkpData.lastEdit;
+        local deletedHistory = DKP.dkpDB.history.deleted;
 
-    if reqDeleted ~= nil then
-        for i=1, #reqDeleted do -- Look through our deleted and see if they match their deleted.
-            local theirKey = reqDeleted[i]
-            local newDeletedKey = true
-            for j=1, #deletedHistory do
-                local myKey = deletedHistory[j];
-                if myKey == theirKey then
-                    newDeletedKey = false
-                    break; -- We don't need to update it.
+        if reqHistory then
+            reqDeleted = dkpData.history.deleted
+            reqAllData = reqHistory.all
+        end
+
+        local function processDeleted()
+            Util:Debug("Processing Deleted Data")
+            for i=1, #reqDeleted do -- Look through our deleted and see if they match their deleted.
+                local theirKey = reqDeleted[i]
+                local newDeletedKey = true
+                for j=1, #deletedHistory do
+                    local myKey = deletedHistory[j];
+                    if myKey == theirKey then
+                        newDeletedKey = false
+                        break; -- We don't need to update it.
+                    end
                 end
-            end
-            if newDeletedKey then
-                local histItem = DKP.dkpDB.history.all[theirKey]
-                if histItem ~= nil then -- WE NEED TO DELETE THIS.
-                    print('Deleting this entry now!')
-                    DKP:DeleteEntry(histItem, true)
-                else -- We never even had the entry.
-                    table.insert(DKP.dkpDB.history.deleted, theirKey)
+                if newDeletedKey then
+                    local histItem = DKP.dkpDB.history.all[theirKey]
+                    if histItem ~= nil then -- WE NEED TO DELETE THIS.
+                        print('Deleting this entry now!')
+                        DKP:DeleteEntry(histItem, true)
+                    else -- We never even had the entry.
+                        table.insert(DKP.dkpDB.history.deleted, theirKey)
+                    end
                 end
             end
         end
-    end
+        local function processAllData()
+            Util:Debug("Processing All Data")
+            for key, obj in pairs(reqAllData) do -- This is bugging out for some reason?
+                local histItem = DKP.dkpDB.history.all[obj.id]
+                local raid = obj['raid']
+                if histItem == nil then
+                    local names = {};
+                    if obj.names ~= nil then
+                        for name in string.gmatch(obj.names, '([^,]+)') do -- Fix the names so that they don't include the color.
+                            name = Util:RemoveColorFromname(name)
+                            table.insert(names, name)
+                        end
+                        -- The DKP change
+                        DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
 
-    for key, obj in pairs(reqAllData) do -- This is bugging out for some reason?
-        local histItem = DKP.dkpDB.history.all[obj.id]
-        local raid = obj['raid']
-        if histItem == nil then
-            local names = {};
-            if obj.names ~= nil then
-                for name in string.gmatch(obj.names, '([^,]+)') do -- Fix the names so that they don't include the color.
-                    name = Util:RemoveColorFromname(name)
-                    table.insert(names, name)
-                end
-                -- The DKP change
-                DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
+                        for i=1, #names do -- For each person, update their DKP.
+                            local name = names[i];
+                            local member = DKP.dkpDB.members[name]
+                            local dkpChange = obj['dkpChange']
+                            local currentDKP = member[raid]
+                            if currentDKP == nil then
+                                currentDKP = 0
+                            end
+                            local newDKP = currentDKP + dkpChange
+                            member[raid] = newDKP
 
-                for i=1, #names do -- For each person, update their DKP.
-                    local name = names[i];
-                    local member = DKP.dkpDB.members[name]
-                    local dkpChange = obj['dkpChange']
-                    local currentDKP = member[raid]
-                    if currentDKP == nil then
-                       currentDKP = 0
+                            if member['entries'] == nil then
+                                member['entries'] = {};
+                            end
+
+                            table.insert(member['entries'], key)
+
+                            if raid == DKP.dkpDB.currentDB then -- update the sheet visually.
+                                member['dkpTotal'] = newDKP
+                            end
+                        end
                     end
-                    local newDKP = currentDKP + dkpChange
-                    member[raid] = newDKP
 
-                    if member['entries'] == nil then
-                       member['entries'] = {};
-                    end
-
-                    table.insert(member['entries'], key)
-
-                    if raid == DKP.dkpDB.currentDB then -- update the sheet visually.
-                        member['dkpTotal'] = newDKP
-                    end
+                elseif Defaults.debuga then -- Only for debugging purposes.
+                    Util:Debug('Setting this shit to nil for testing purposes!')
+                    --            DKP.dkpDB.history.all[key] = nil
                 end
             end
-
-        elseif Defaults.debug then -- Only for debugging purposes.
-            Util:Debug('Setting this shit to nil for testing purposes!')
---            DKP.dkpDB.history.all[key] = nil
         end
-    end
+        local function processLastEdit()
+            Util:Debug("Processing LastEdit")
+            DKP.dkpDB.lastEdit = reqLastEdit
+        end
 
-    if reqLastEdit > DKP.dkpDB.lastEdit then
-        DKP.dkpDB.lastEdit = reqLastEdit
+        if reqAllData == nil then reqAllData = reqHistory end
+        if reqAllData ~= nil then processAllData() end
+        if reqDeleted ~= nil then processDeleted() end
+        if reqLastEdit ~= nil and reqLastEdit > DKP.dkpDB.lastEdit then processLastEdit() end
     end
 
     GUI:pdkp_dkp_table_sort('dkpTotal')
@@ -191,6 +207,21 @@ function Import:AcceptData(requestedData)
     GUI:pdkp_dkp_table_sort('dkpTotal')
 
     GUI.pushFrame:Hide()
+
+    PDKP:Print("The DKP push has completed successfully")
+end
+
+function Import:AcceptFullDatabase(data)
+    local guildData = data.guildDB
+    local dkpData = data.dkpDB
+
+    Guild.db.numOfMembers = guildData.numOfMembers
+    Guild.db.members = guildData.members
+
+    DKP.dkpDB.lastEdit = dkpData.lastEdit;
+    DKP.dkpDB.history = dkpData.history;
+    DKP.dkpDB.members = dkpData.members;
+    DKP.dkpDB.currentDB = dkpData.currentDB;
 end
 
 function Import:RequestData(officer)
