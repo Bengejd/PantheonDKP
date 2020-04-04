@@ -385,33 +385,28 @@ function DKP:ConfirmChange()
     local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
     if dkpChange == 0 then return end; -- Don't need to change anything.
 
-    if dkpChange > 0 then
-        dkpChange = Util:FormatFontTextColor(Util.success, dkpChange)
-    else
-        dkpChange = Util:FormatFontTextColor(Util.warning, dkpChange)
+    if dkpChange > 0 then dkpChange = Util:FormatFontTextColor(Util.success, dkpChange)
+    else dkpChange = Util:FormatFontTextColor(Util.warning, dkpChange)
     end
 
     local text = ''
     local chars = {};
 
-    for _, charObj in pairs(GUI.selected) do
-        if charObj.name then
-           table.insert(chars, charObj)
-        end
+    for _, char in pairs(GUI.selected) do
+       if char.name then
+          table.insert(chars, char)
+       end
     end
 
     local function compare(a,b) return a.class < b.class end
-
     table.sort(chars, compare)
 
-    for i=1, #chars do
-        local char = chars[i];
-        text = text..char['formattedName'];
-        if i < #chars then text = text.. ', ' end
+    for key, member in pairs(chars) do
+        text = text..member['formattedName']
+        if key < #chars then text = text .. ', ' end
     end
 
     local titleText = 'Are you sure you\'d like to give '..dkpChange..' DKP to the following players: \n \n'..text
-
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = titleText
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data = chars;
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames = text
@@ -517,11 +512,16 @@ function DKP:UpdateEntries()
 
     if raid == nil then
         raid = DKP.dkpDB.currentDB
-        print('No raid found, setting raid to '.. raid)
+        Util:Debug('No raid found, setting raid to '.. raid)
     end
 
     local charObjs = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data -- Grab the data from our popup.
     local charNames = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames -- The char name string.
+
+    local memberNames = {}
+    for key, member in pairs(charObjs) do
+        table.insert(memberNames, member.name)
+    end
 
     local historyEntry = {
         ['id']=server_time,
@@ -531,35 +531,30 @@ function DKP:UpdateEntries()
         ['raid'] = raid,
         ['dkpChange'] = dkpChange,
         ['dkpChangeText'] = dkpChangeText,
-        ['dkpType']=nil,
         ['officer'] = Util:GetMyNameColored(),
         ['item']= itemText,
         ['date']= dDate,
         ['time']=tTime,
         ['serverTime']=server_time,
         ['datetime']=datetime,
-        ['names']=charNames
+        ['names']=charNames,
+        ['members']= memberNames,
+        ['deleted']=false
     }
 
-    for i=1, #charObjs do
-        local char = charObjs[i]
-        local name = char['name'];
-        local member = dkpDB.members[name]
-        if member.entries == nil then member.entries = {} end
-        table.insert(member.entries, server_time)
+    for key, member in pairs(charObjs) do
+        local name = member.name;
+        local dkp = member.dkp[raid];
+        if dkp.entries == nil then member.dkp[raid].entries = {} end
+        table.insert(dkp.entries, server_time)
 
-        -- Determine if we're adding or subtracting
-        if dkpChange > 0 then char.dkpTotal = DKP:Add(char.name, dkpChange);
-        elseif dkpChange < 0 then char.dkpTotal = DKP:Subtract(char.name, dkpChange);
+        dkp.total = dkp.total + dkpChange
+
+        if member.bName then
+           local dkpText = _G[member.bName ..'_col3'];
+            dkpText:SetText(dkp.total)
         end
-
-        -- Now update the visual text
-        if char.bName then
-            local dkpText = _G[char.bName .. '_col3'];
-            dkpText:SetText(char.dkpTotal);
-        end
-
-        DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange);
+       member:UpdateGuildDB()  -- Update the database locally.
     end
 
     dkpDB.history['all'][server_time] = historyEntry;
@@ -603,21 +598,16 @@ end
 function DKP:ChangeDKPSheets(raid, noUpdate)
     if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
 
-    for key, name in ipairs(DKP:GetMembers()) do
-        dkpDB.members[name].dkpTotal = dkpDB.members[name][raid];
-    end
     dkpDB.currentDB = raid;
 
-    PDKP:BuildAllData()
     GUI:GetTableDisplayData()
     pdkp_dkp_scrollbar_Update()
+    GUI:UpdateDKPSliderMax()
 
     GUI:ClearSelected()
 
     print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
 end
-
-
 
 function DKP:Add(name, dkp)
     dkpDB.members[name].dkpTotal = dkpDB.members[name].dkpTotal + dkp;
@@ -647,6 +637,10 @@ function DKP:GetDB()
     return dkpDB;
 end
 
+function DKP:GetHistory()
+    return dkpDB.history.all
+end
+
 function DKP:GetMembers()
     return dkpDB.members;
 end
@@ -657,14 +651,15 @@ end
 
 function DKP:GetHighestDKP()
     local maxDKP = 0;
-    for key, charObj in pairs(DKP:GetMembers()) do
-        if charObj.dkpTotal then
-            if charObj.dkpTotal > maxDKP then
-                if Guild:IsMember(key) then maxDKP = charObj.dkpTotal end
-            end
-        end
-    end
+    local currentRaid = DKP:GetCurrentDB();
 
+    for key, charObj in pairs(Guild.members) do
+       if charObj.dkp then
+           if charObj.dkp[currentRaid].total > maxDKP then
+              maxDKP = charObj.dkp[currentRaid].total
+           end
+       end
+    end
     if maxDKP == 0 and Defaults.debug then return 50 end;
     return maxDKP;
 end

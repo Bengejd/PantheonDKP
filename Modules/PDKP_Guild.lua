@@ -93,9 +93,7 @@ function Guild:GetMemberByName(name)
     return GuildDB.members[name], Guild.members[name]
 end
 
--- Needs reworked
 function Guild:VerifyGuildData()
-    print('Verifying guild data...')
     for key, member in pairs(GuildDB.members) do
        if type(key) == type(1) then
            print('removing key', key)

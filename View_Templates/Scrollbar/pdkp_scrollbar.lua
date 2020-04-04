@@ -64,6 +64,7 @@ function GUI:pdkp_dkp_table_sort(sortBy)
 
     local function compare(a,b)
         if a == 0 and b == 0 then return end
+
         if core.sortDir == 'ASC' then
             return a[sortBy] > b[sortBy]
         else
@@ -71,7 +72,23 @@ function GUI:pdkp_dkp_table_sort(sortBy)
         end
     end
 
-    table.sort(tableData, compare) -- call the compare function on table PDKP.data
+    local currentRaid = DKP:GetCurrentDatabase()
+
+    local function compareDKP(a,b)
+        if core.sortDir == 'DESC' then
+            return a.dkp[currentRaid].total > b.dkp[currentRaid].total
+        else
+            return a.dkp[currentRaid].total < b.dkp[currentRaid].total
+        end
+    end
+
+    if sortBy == 'dkpTotal' then
+        table.sort(tableData, compareDKP)
+    else
+        table.sort(tableData, compare) -- call the compare function on table PDKP.data
+    end
+
+
     pdkp_dkp_scrollbar_Update()
 end
 
@@ -104,7 +121,7 @@ function pdkp_dkp_scrollbar_Update()
         for col=1, #cols do
             local name =  entry_name .. line .. "_col" .. col
             local textVal = charObj[cols[col]]
-            local entryCol = getglobal(name);
+            local entryCol = _G[name];
 
             if lineplusoffset <= #tableData then
                 if col == 2 then
@@ -224,6 +241,8 @@ function pdkp_dkp_table_filter()
     local selectedFilterChecked = GUI:GetSelectedFilterStatus()
     local hasSearch = not Util:IsEmpty(textSearch);
 
+    local currentRaid = DKP:GetCurrentDB()
+
     -- filter out based on online status
     for i=1, PDKP:GetDataCount() do
         local char = PDKP.data[i]
@@ -243,7 +262,7 @@ function pdkp_dkp_table_filter()
 
         local selectStatusMatch = selectedFilterChecked == isSelected;
         local searchStatusMatch = searchFound == hasSearch;
-        local sliderValsMatch = true -- TODO: GUI.sliderVal <= char['dkpTotal'];
+        local sliderValsMatch = GUI.sliderVal <= char.dkp[currentRaid].total;
 
         -- This is really complicated... I should figure out a better way to handle this...
         if (showingOffline or onlineStatusMatch) -- If online selected, the status matches.

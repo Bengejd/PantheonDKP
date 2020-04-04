@@ -268,7 +268,7 @@ function PDKP:BuildAllData()
     PDKP.data = {};
     for _, member in pairs(Guild.members) do
         if type(member) == type({}) then
-            setmetatable(member, Member); -- Set the metatable so we used Character's __index
+            setmetatable(member, Member); -- Set the metatable so we used Members's __index
             table.insert(PDKP.data, member)
         end
     end

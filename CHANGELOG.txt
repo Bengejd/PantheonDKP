@@ -1,0 +1,22 @@
+====== Version 0.9.0 ======
+
+General Usage:
+    - Added in ability to deselect all classes using the "All Classes" button.
+    - Loaded Pantheon's Loot Prio List into the addon.
+    - Added Loot announcements when the ML opens loot entity.
+        - Will now announce the item name & the current loot prio for each item (if defined). If not defined, it will
+            return "Undefined".
+        - Members can now view loot prio in game by linking an item in game via:
+            - /prio Item_Link - example: /prio [Staff of the Shadow Flame]
+            - /prio Item_Name - example: /prio Boots of the Shadow Flame
+            - If the name is misspelled or the item doesn't have a defined prio, it will return "Undefined".
+
+Admin Usage:
+    - Other text box should now properly update the submit button enable / disable property.
+    - Selecting DKP adjustment reason dropdown will now:
+        - Auto-populate the raid selection, based on the sheet you're working in.
+        - Auto-calculate & update the dkp amount text-box.
+
+Addon-Code:
+    - Streamlined the member data propagation, so there should be less mistakes with data being sync'd (hopefully).
+    -

@@ -495,7 +495,7 @@ function Setup:HistoryFrame()
     hf:SetHeight(570);
     hf:SetWidth(450);
     hf:SetBackdrop({
-        bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\PDKPFrame-Middle",
+        bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\Main_UI\\PDKPFrame-Middle",
         edgeFile = nil,
         tile = false,
         tileEdge = true,

@@ -402,6 +402,194 @@ function GUI:UpdatePushFrame()
 end
 
 function GUI:ShowSelectedHistory(charObj)
+    local b, member, dkpHistory, charName, title, entries, historyKeys;
+
+    if (GUI.HistoryShown == false) then return
+    elseif (charObj == nil and GUI:GetSelectedCount() == 1) then
+        charObj = Guild.members[GUI.selected[1]] -- Show the selected members history.
+    end;
+
+    GUI.HistoryFrame.historyTitle:SetText(GUI.HistoryTItle)
+    GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
+
+    local historyLimit = 10;
+    local currentRaid = DKP:GetCurrentDB()
+
+    local function getHistoryKeys(charObj, all)
+        local keys = {};
+        if not all and charObj then
+           for key, val in pairs(charObj['entries']) do
+               table.insert(keys, key)
+           end
+        else
+            for key, val in pairs(DKP:GetHistory()) do
+               table.insert(keys, key)
+            end
+        end
+        return keys;
+    end
+
+    if charObj ~= nil then -- We have an actual member we're looking at.
+        member = Guild.members[charObj.name]
+        local dkp = member.dkp[currentRaid]
+        historyKeys = getHistoryKeys(dkp, false)
+        charName = member.formattedName
+        title = Util:FormatFontTextColor('FFBA49', 'Recent History for '..charName)
+        GUI.HistoryFrame.historyTitle:SetText(title)
+    else
+        historyKeys = getHistoryKeys(nil, true)
+    end
+
+    if historyKeys == nil or #historyKeys == 0 then -- there is no dkp history to show. Hide the frame & end function.
+        local scroll = GUI.HistoryFrame.scroll
+        local empty =  Util:FormatFontTextColor('E71D36', "No historical data found")
+
+        local label = AceGUI:Create("Label")
+        label:SetText(empty)
+        scroll:AddChild(label)
+        return
+    end
+
+    local scroll = GUI.HistoryFrame.scroll
+
+    if historyLimit > #historyKeys then historyLimit = #historyKeys; end-- So we don't go out of bounds.
+
+    local function compare(a,b ) return a > b end
+    table.sort(historyKeys, compare)
+
+    local function loadHistoryEntries()
+        GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
+
+        for i=1, historyLimit do
+            local key = historyKeys[i];
+
+           if key ~= nil then
+               local entry = DKP.dkpDB.history.all[key]
+               local raid = entry['raid'];
+               if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end;
+
+               local dkpChangeText = entry['dkpChangeText']
+               local lineText = entry['text']
+
+               if raid and raid == DKP:GetCurrentDB() then -- Only show the history for the sheet we're on.
+
+                   local dkpChangeLabel = AceGUI:Create("Label")
+                   dkpChangeLabel:SetWidth(50)
+
+                   local reasonLabel = AceGUI:Create("InteractiveLabel")
+                   reasonLabel:SetWidth(250)
+                   local officerLabel = AceGUI:Create("Label")
+
+                   officerLabel:SetText('Officer: ' ..entry['officer'])
+                   reasonLabel:SetText('Reason: '..lineText)
+                   dkpChangeLabel:SetText(string.trim(dkpChangeText))
+
+                   local labels = {officerLabel, reasonLabel, dkpChangeLabel }
+
+                   local function labelCallback(self, _, buttonType)
+                       if buttonType == 'RightButton' and Guild:CanEdit() then
+                           StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry = self.entry;
+                           StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_POPUP')
+                       end
+                   end
+
+                   for i=1, #labels do
+                       local label = labels[i];
+                       label.entry = entry;
+                       label:SetCallback("OnClick", labelCallback)
+                   end
+
+                   if entry['item'] ~= nil then
+                       reasonLabel:SetCallback("OnEnter", function(self)
+                           GameTooltip:SetOwner(reasonLabel.frame, "ANCHOR_RIGHT")
+                           local tiptext = entry['item']
+                           GameTooltip:SetHyperlink(tiptext);
+                       end)
+                       reasonLabel:SetCallback("OnLeave", function(self)
+                           GameTooltip:Hide()
+                       end)
+                   end
+
+                   reasonLabel:SetFullWidth(false)
+                   dkpChangeLabel:SetFullWidth(false)
+
+                   local ig = AceGUI:Create("InlineGroup")
+
+                   local formattedDate = Util:Format12HrDateTime(entry['datetime'])
+                   local title = formattedDate
+
+                   if entry['raid'] then
+                       title = entry['raid'] .. ' | ' .. formattedDate
+                   end
+
+                   ig:SetTitle(title)
+                   ig:SetLayout("Flow")
+                   ig:SetFullWidth(true)
+
+                   local officerGroup = AceGUI:Create("SimpleGroup")
+                   local textGroup = AceGUI:Create("SimpleGroup")
+                   local dkpGroup = AceGUI:Create("SimpleGroup")
+
+                   officerGroup:SetFullWidth(true)
+                   textGroup:SetFullWidth(false)
+                   dkpGroup:SetFullWidth(false)
+
+                   officerGroup:AddChild(officerLabel)
+                   textGroup:AddChild(reasonLabel)
+                   dkpGroup:AddChild(dkpChangeLabel)
+
+                   textGroup:SetWidth(275)
+                   dkpGroup:SetWidth(30)
+
+                   ig:AddChild(officerGroup)
+                   ig:AddChild(textGroup)
+                   ig:AddChild(dkpGroup)
+
+                   if charObj == nil then -- List all entries, with the people affected.
+                       local names = entry['names'];
+                       local sg3 = AceGUI:Create("SimpleGroup")
+                       local namesLabel = AceGUI:Create("Label")
+                       namesLabel:SetText('Members: '..names)
+                       sg3:AddChild(namesLabel)
+                       sg3:SetFullWidth(true)
+                       sg3:SetWidth(300)
+                       namesLabel:SetWidth(325)
+                       ig:AddChild(sg3)
+                   end
+
+                   scroll:AddChild(ig)
+               end
+           end
+       end
+    end
+    local function addLoadMoreButton()
+        local lb = AceGUI:Create("Button")
+        lb:SetText("Load More")
+
+        if historyLimit > #historyKeys then
+            lb:SetText("End of history")
+            lb:SetDisabled(true)
+        end
+        lb:SetCallback("OnClick", function()
+            historyLimit = historyLimit + 10;
+            if historyLimit > #historyKeys then
+                lb:SetText("End of history")
+                lb:SetDisabled(true)
+            else
+                loadHistoryEntries()
+                addLoadMoreButton()
+            end
+
+        end)
+        scroll:AddChild(lb)
+    end
+
+    loadHistoryEntries() -- Run the function.
+    addLoadMoreButton()
+    GUI.HistoryObj = charObj
+end
+
+function GUI:ShowSelectedHistory2(charObj)
     if GUI.HistoryShown == false then return end; -- No need to do anything if history isn't being shown.
 
     local b, member, dkpHistory, charName, title, entries, historyKeys;
@@ -419,34 +607,33 @@ function GUI:ShowSelectedHistory(charObj)
         table.sort(keys, function(a,b) return a<b end)
         return keys;
     end
-
-    if charObj ~= nil then -- We actually have a character we're checking out.
-        b = _G[charObj['bName']]
-        member = DKP.dkpDB.members[charObj['name']]
-        historyKeys = getDkpHistoryKeys(member['entries'], false)
-        charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
-        title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
-        GUI.HistoryFrame.historyTitle:SetText(title) -- Set the title.
-    else
-        Util:Debug('Showing history for everyone')
-        historyKeys = getDkpHistoryKeys(DKP.dkpDB.history['all'], true)
-    end
-
-    if historyKeys == nil or #historyKeys == 0 then -- there is no dkp history to show, hide the frame and end function.
-        local scroll = GUI.HistoryFrame.scroll
-        local empty = 'No historical data found'
-        empty = Util:FormatFontTextColor('E71D36', empty)
-        local label = AceGUI:Create("Label")
-        label:SetText(empty)
-        scroll:AddChild(label)
-        return
-    end
-
-    local function compare(a,b)
-        return a > b
-    end
-
-    table.sort(historyKeys, compare)
+    ---
+--    if charObj ~= nil then -- We actually have a character we're checking out.
+--        b = _G[charObj['bName']]
+--        member = DKP.dkpDB.members[charObj['name']]
+--        historyKeys = getDkpHistoryKeys(member['entries'], false)
+--        charName = Util:FormatFontTextColor(Util:GetClassColor(b.char.class), b.char.name)
+--        title = Util:FormatFontTextColor('FFBA49', 'Recent History for ') .. charName
+--        GUI.HistoryFrame.historyTitle:SetText(title) -- Set the title.
+--    else
+--        Util:Debug('Showing history for everyone')
+--        historyKeys = getDkpHistoryKeys(DKP.dkpDB.history['all'], true)
+--    end
+--
+--    if historyKeys == nil or #historyKeys == 0 then -- there is no dkp history to show, hide the frame and end function.
+--        local scroll = GUI.HistoryFrame.scroll
+--        local empty = 'No historical data found'
+--        empty = Util:FormatFontTextColor('E71D36', empty)
+--        local label = AceGUI:Create("Label")
+--        label:SetText(empty)
+--        scroll:AddChild(label)
+--        return
+--    end
+--    local function compare(a,b)
+--        return a > b
+--    end
+--
+--    table.sort(historyKeys, compare)
 
     for i=1, #historyKeys do
         local key = historyKeys[i]
