@@ -39,24 +39,22 @@ function Member:new(guildIndex)
 
     if self.name == Util:GetMyName() then core.canEdit = self.canEdit end
 
-    if DKP.dkpDB.members[self.name] ~= nil then -- we need to migrate the data.
-        self.dkp = {
-            ['Molten Core'] = {
-                previousTotal = 0,
-                total = 0,
-                entries = {},
-                deleted = {}
-            },
-            ['Blackwing Lair'] = {
-                previousTotal = 0,
-                total = 0,
-                entries = {},
-                deleted = {}
-            },
-        };
-    end
+    self.dkp = {
+        ['Molten Core'] = {
+            previousTotal = 0,
+            total = 0,
+            entries = {},
+            deleted = {}
+        },
+        ['Blackwing Lair'] = {
+            previousTotal = 0,
+            total = 0,
+            entries = {},
+            deleted = {}
+        },
+    };
     self:GetDkpValues()
-    --        self:UpdateGuildDB()
+    self:UpdateGuildDB()
     return self
 end
 
@@ -85,9 +83,9 @@ function Member:UpdateGuildDB()
             },
             ['Molten Core'] = {
                 previousTotal = self.dkp['Molten Core'].previousTotal,
-                total = self.dkp['Blackwing Lair'].total,
-                entries = self.dkp['Blackwing Lair'].entries,
-                deleted = self.dkp['Blackwing Lair'].deleted,
+                total = self.dkp['Molten Core'].total,
+                entries = self.dkp['Molten Core'].entries,
+                deleted = self.dkp['Molten Core'].deleted,
             }
         },
     }
@@ -104,6 +102,10 @@ function Member:GetDkpValues()
         local bwl = dkp['Blackwing Lair']
         bwl.total = dbEntity['Blackwing Lair']
         mc.total = dbEntity['Molten Core']
+
+        if self.name == 'Neekio' then
+           print(mc.total, bwl.total)
+        end
 
         local entries = dbEntity['entries'];
 

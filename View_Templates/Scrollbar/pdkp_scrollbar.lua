@@ -109,6 +109,12 @@ function pdkp_dkp_scrollbar_Update()
             if lineplusoffset <= #tableData then
                 if col == 2 then
                     entryCol:SetText(charObj.coloredClass)
+                elseif col == 3 then
+                    if charObj.dkp then
+                        entryCol:SetText(charObj.dkp[currentRaid].total)
+                    else
+                        entryCol:SetText(0)
+                    end
                 else
                     entryCol:SetText(textVal)
                 end
