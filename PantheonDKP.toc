@@ -20,6 +20,9 @@ Modules\PDKP_Defaults.lua
 Modules\Util.lua
 Modules\PDKP_Comms.lua
 
+## Classes
+Classes\PDKP_Member.lua
+
 ## Database files
 Modules\PDKP_GUI.lua
 Modules\PDKP_Character.lua

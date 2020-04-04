@@ -110,6 +110,8 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
 
     Guild:GetGuildData(false);
+    DKP:VerifyTables()
+
     DKP:SyncWithGuild();
 
     PDKP:BuildAllData();
@@ -227,6 +229,7 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'pdkp_reset_all_db' and core.defaults.debug then
         DKP:ResetDB()
+        Guild:ResetDB()
     end
 
     if msg == 'test_boss' then
@@ -271,28 +274,30 @@ function PDKP:BuildAllData()
 
     local errorText;
 
-    for i=1, #gMembers do
-        local gMember = gMembers[i];
+    -- Do the guild first, as those will always have info in it.
 
-        -- Check for weird gMember bug where shit is missing?
-        if gMember.name then
-            local dkpEntry = dkpEntries[gMember.name];
-
-            if gMember and dkpEntry then
-                gMember.dkpTotal = dkpEntry.dkpTotal;
-                table.insert(PDKP.data, gMember);
-            elseif gMember.name then
-                errorText = 'BuildAllData...Member was not found ' .. gMember.name;
-            else
-                errorText = 'BuildAllData Initilization... Index: ' .. i
-            end
-
-        else
-            errorText = 'BuildAllData...Improperly created member ' .. i;
-        end
-        if errorText then Util:ThrowError(errorText); end
-        errorText = nil;
-    end
+--    for i=1, #gMembers do
+--        local gMember = gMembers[i];
+--
+--        -- Check for weird gMember bug where shit is missing?
+--        if gMember.name then
+--            local dkpEntry = dkpEntries[gMember.name];
+--
+--            if gMember and dkpEntry then
+--                gMember.dkpTotal = dkpEntry.dkpTotal;
+--                table.insert(PDKP.data, gMember);
+--            elseif gMember.name then
+--                errorText = 'BuildAllData...Member was not found ' .. gMember.name;
+--            else
+--                errorText = 'BuildAllData Initilization... Index: ' .. i
+--            end
+--
+--        else
+--            errorText = 'BuildAllData...Improperly created member ' .. i;
+--        end
+--        if errorText then Util:ThrowError(errorText); end
+--        errorText = nil;
+--    end
 end
 
 function PDKP:GetAllTableData()

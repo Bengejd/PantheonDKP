@@ -9,20 +9,22 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
+local Member = core.Member;
 
 local GuildDB;
-
 
 local Player = nil;
 Guild.officers = {};
 Guild.bankIndex = 0;
+Guild.online = {};
+Guild.members = {};
 
 local guildDBDefaults = {
     profile = {
         name = nil,
         numOfMembers = 0,
-        serialized = false,
-        members = {}
+        members = {},
+        officers = {},
     }
 }
 
@@ -35,7 +37,13 @@ function Guild:InitGuildDB()
     Guild.db = GuildDB;
 end
 
--- Sets the guildDB's data.
+function Guild:UpdateDB()
+    for _, member in pairs(Guild.members) do
+        member:UpdateGuildDB()
+    end
+end
+
+-- Gets & Sets the guildDB's data.
 function Guild:GetGuildData(onlineOnly)
     --	name—Name of the member (string)
     --	rank—Name of the member’s rank (string)
@@ -56,76 +64,33 @@ function Guild:GetGuildData(onlineOnly)
 
     GuildRoster()
     local gMemberCount, _, _ = GetNumGuildMembers();
-    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else ReloadUI() end
-    local onlineMembers = {}
+    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount end
+    Guild.online = {};
+    Guild.members = {};
     Guild.officers = {};
 
     for i=1, GuildDB.numOfMembers do
-        local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
-        name = Util:RemoveServerName(name)
-        local formattedName;
-        if name then formattedName = Util:GetClassColoredName(name, class) end
+        local member = Member:new(i)
 
-        local canEdit = rankIndex <= 3;
-
-        if onlineOnly then
-            table.insert(onlineMembers, {
-                ["name"]=name,
-                ['online']=online,
-            });
-        else
-            if lvl >= 55 or canEdit then
-                if not Guild:IsMember(name, rankIndex) then
-                    table.insert(GuildDB.members, {
-                        ["name"]=name,
-                        ['rankIndex']=rankIndex,
-                        ["class"]=class,
-                        ['online']=online,
-                        ['canEdit']=canEdit,
-                        ['formattedName']=formattedName,
-                    });
-                end
-            end
+        if member.online then Guild.online[member.name]=member; end
+        if member.isBank then
+            Guild.bankIndex = i
+            DKP.bankID = member.officerNote;
         end
+        if member.isOfficer then table.insert(Guild.officers, member) end
 
-        if canEdit then
-           table.insert(Guild.officers, {
-               ['name']=name,
-               ['rankIndex']=rankIndex,
-               ['online']=online,
-               ['canEdit']= canEdit,
-               ['formattedName']=formattedName,
-               ['lastEdit']=-1,
-           })
-        end
+        -- TODO: Data transfer from old DKP system to the new object system for the DKP values. Put them into the GuildDB instead of DkpDB.
 
-        if name == Util:GetMyName() then
-            core.canEdit = canEdit;
-
-            Util:Debug("Can Edit: " .. tostring(core.canEdit));
-        end
+--        member:GetDkpValues()
+        member:UpdateGuildDB()
+        Guild.members[member.name] = member;
     end
 
-    if onlineOnly then Util:Debug("Online Members Total: " .. #onlineMembers) end
     Guild:VerifyGuildData()
-    Guild:GetBankInfo()
-
-    return onlineMembers; -- Always return, even if it's empty.
+    return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
-function Guild:GetBankInfo()
-    for i = 1, Guild:GetMemberCount() do
-        local name, _, rankIndex, lvl, class, __, __, officerNote, online, __, __ = GetGuildRosterInfo(i)
-        name = Util:RemoveServerName(name)
-        if name == 'Pantheonbank' then
-            Guild.bankIndex = i;
-            DKP.bankID = officerNote;
-            Util:Debug('Found BankIndex '.. i .. ' officerNote: ' .. officerNote)
-            return
-        end
-    end
-end
-
+-- Needs reworked
 function Guild:VerifyGuildData()
     for i=1, #GuildDB.members do
         local member = GuildDB.members[i]
@@ -136,6 +101,7 @@ function Guild:VerifyGuildData()
     end
 end
 
+-- Needs reworked
 function Guild:GetMyGuildInfo()
     if IsInGuild() then
         local guildName, guildRankName, guildRankIndex, realmName = GetGuildInfo("player");
@@ -143,6 +109,7 @@ function Guild:GetMyGuildInfo()
     end
 end
 
+-- Needs reworked
 function Guild:IsMember(name, rankIndex)
     for _,v in pairs(GuildDB.members) do
         if v['name'] == name then
@@ -153,11 +120,15 @@ function Guild:IsMember(name, rankIndex)
     return false;
 end
 
+-- Needs reworked
 function Guild:CanEdit()
     return core.canEdit;
 end
 
+-- Needs reworked
 function Guild:CanMemberEdit(name)
+    local member = Guild.members[name]
+
     for _, v in pairs(GuildDB.members) do
         if v['name'] == name then
             return v['canEdit'];
@@ -203,10 +174,16 @@ end
 
 -- returns the members table from the database.
 function Guild:GetMembers()
-    return GuildDB.members;
+    if GuildDB.members == nil then return Guild.members
+    else return GuildDB.members
+    end
+end
+
+function Guild:ResetDB()
+
 end
 
 function Guild:UpdateBankNote(id)
-    Guild:GetBankInfo()
+    Guild:GetGuildData() -- retrieve the bank info.
     GuildRosterSetOfficerNote(Guild.bankIndex, id)
 end

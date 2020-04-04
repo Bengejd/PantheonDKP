@@ -310,6 +310,35 @@ end
 --  than list 2 still has that entry, list 2 knows to delete that entry as well.
  ]]
 
+function DKP:VerifyTables()
+    local next = next
+    for key, member in pairs(dkpDB.members) do
+        if type(member) == type('') then -- Remove the string.
+            table.remove(dkpDB.members, key)
+        end
+    end
+end
+
+function DKP:SyncWithGuild()
+    Util:Debug('Syncing Guild Data...');
+    local guildMembers = Guild.members;
+    local dkpMembers = DKP:GetMembers();
+
+    if #guildMembers + #dkpMembers == 0 then StaticPopup_Show('PDKP_RELOAD_UI') end
+
+    for key, member in pairs(guildMembers) do
+        if member.name then
+            if dkpMembers[member.name] == nil then -- Add a new entry to the database
+                DKP:NewEntry(member.name)
+            else -- Update the existing entry in the database.
+--                member:UpdateDdkpDB()
+            end
+        else
+            table.remove(dkpDB.members, key)
+        end
+    end
+end
+
 -- cheaty way to update dkp via the boss kill event.
 function DKP:BossKilled()
 
@@ -602,22 +631,7 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
     print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
 end
 
-function DKP:SyncWithGuild()
-    Util:Debug('Syncing Guild Data...');
-    local guildMembers = Guild:GetMembers();
-    local dkpMembers = DKP:GetMembers();
 
-    if #guildMembers + #dkpMembers == 0 then
-        StaticPopup_Show('PDKP_RELOAD_UI')
-    end
-
-    for i=1, #guildMembers do
-        local gMember = guildMembers[i];
-        if not dkpMembers[gMember.name] then -- Add a new entry to the database.
-            DKP:NewEntry(gMember.name)
-        end
-    end
-end
 
 function DKP:Add(name, dkp)
     dkpDB.members[name].dkpTotal = dkpDB.members[name].dkpTotal + dkp;
@@ -640,7 +654,6 @@ function DKP:NewEntry(name)
         Util:Debug("This entry already exists!!")
     else
         Util:Debug("Adding new DKP entry for " .. name)
-        table.insert(dkpDB.members, name)
         dkpDB.members[name] = {
             dkpTotal = 0;
             ['Molten Core'] = 0,
@@ -653,6 +666,8 @@ function DKP:NewEntry(name)
         }
     end
 end
+
+
 
 function DKP:GetPlayerDKP(name)
     local player = dkpDB.members[name]

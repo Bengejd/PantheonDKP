@@ -133,7 +133,9 @@ end
 function pdkp_init_scrollbar()
 
     GUI:GetTableDisplayData()
+
     pdkp_setup_scrollbar_cols()
+
     GUI:pdkp_dkp_table_sort('dkpTotal')
     pdkp_dkp_scrollbar:Show()
     pdkp_dkp_scrollbar_Update()
@@ -144,11 +146,9 @@ end
 function pdkp_setup_scrollbar_cols()
     for row=1, displayLimit do
         local b = CreateFrame("Button", entry_name .. row, pdkpCoreFrame, entry_template)
-
-        if row == 1 then
-            b:SetPoint("LEFT", pdkp_dkp_scrollbar, "LEFT", relPointX, relPointY)
+        if  row == 1 then b:SetPoint("LEFT", pdkp_dkp_scrollbar, "LEFT", relPointX, relPointY)
         else
-            local prevName = "pdkp_dkp_entry" .. row -1
+            local prevName = entry_name .. row - 1;
             b:SetPoint("TOPLEFT", prevName, "BOTTOMLEFT")
         end
     end

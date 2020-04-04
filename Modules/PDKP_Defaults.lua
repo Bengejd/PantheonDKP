@@ -38,9 +38,10 @@ core.defaults = {
     -- ADDON INFO
     addon_version = 'V0.8.9',
     addon_name = 'PantheonDKP',
+    bank_name = 'Pantheonbank',
     debug = true,
     no_broadcast = true,
-    debug_dkp = false;
+    debug_dkp = true;
 
     -- PLAYER INFO
     playerUID = UnitGUID("PLAYER"), -- Unique Blizzard Player ID

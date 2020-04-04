@@ -44,15 +44,6 @@
             </Anchors>
         </PushedTexture>
         <Scripts>
-            <OnEnter>
---                if not self.char.name then return end; -- An empty entry was hovered, ignore it.
---                self.historyFrame:Show()
-            </OnEnter>
-            <OnLeave>
---                if not self.char.name then return end; -- An empty entry was hovered, ignore it.
---                if self.historyOpen then return end;
---                self.historyFrame:Hide();
-            </OnLeave>
             <OnLoad>
                     self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
 
