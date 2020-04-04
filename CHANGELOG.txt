@@ -39,3 +39,11 @@ Addon-Code:
     [Data Migration]
         - Added in migration from old data structure to the new one. Shouldn't have any negative affect going forward
         though a /reload might be necessary after initially uploading if an error occurs.
+
+Work In Progress:
+    [Shroud Popup Box Update]
+        - Currently working to get the shroud box to auto-close when an item that is defined in the loot-prio list is
+        handed out to a member in the raid.
+    [New: Roll Box]
+        - Similar concept to the shroud box, but this would capture the rolls that are going out, and order them by the
+        highest roller.
