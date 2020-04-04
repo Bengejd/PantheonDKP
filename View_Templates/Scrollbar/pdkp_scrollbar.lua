@@ -82,6 +82,8 @@ function pdkp_dkp_scrollbar_Update()
     local maxEntries = #tableData;
     FauxScrollFrame_Update(pdkp_dkp_scrollbar,maxEntries,displayLimit,entryHeight);
 
+    local currentRaid = DKP:GetCurrentDatabase();
+
     for line=1,displayLimit do
 
         lineplusoffset = line + FauxScrollFrame_GetOffset(pdkp_dkp_scrollbar);
@@ -106,8 +108,7 @@ function pdkp_dkp_scrollbar_Update()
 
             if lineplusoffset <= #tableData then
                 if col == 2 then
-                    local textColor = Util:GetClassColor(charObj['class']);
-                    entryCol:SetText(Util:FormatFontTextColor(textColor, textVal))
+                    entryCol:SetText(charObj.coloredClass)
                 else
                     entryCol:SetText(textVal)
                 end
