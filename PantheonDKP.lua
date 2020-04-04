@@ -16,6 +16,7 @@ local Comms = core.Comms;
 local Setup = core.Setup;
 local Import = core.Import;
 local item = core.Item;
+local Member = core.Member;
 
 
 local PlaySound = PlaySound
@@ -111,8 +112,6 @@ function PDKP:OnInitialize(event, name)
 
     Guild:GetGuildData(false);
     DKP:VerifyTables()
-
-    DKP:SyncWithGuild();
 
     PDKP:BuildAllData();
 
@@ -266,38 +265,13 @@ function PDKP:HandleSlashCommands(msg, item)
 end
 
 function PDKP:BuildAllData()
-    -- Pug Data -- Need to think of clever solution for this!
-    local dkpEntries = DKP:GetMembers();
-    local gMembers = Guild:GetMembers();
-
     PDKP.data = {};
-
-    local errorText;
-
-    -- Do the guild first, as those will always have info in it.
-
---    for i=1, #gMembers do
---        local gMember = gMembers[i];
---
---        -- Check for weird gMember bug where shit is missing?
---        if gMember.name then
---            local dkpEntry = dkpEntries[gMember.name];
---
---            if gMember and dkpEntry then
---                gMember.dkpTotal = dkpEntry.dkpTotal;
---                table.insert(PDKP.data, gMember);
---            elseif gMember.name then
---                errorText = 'BuildAllData...Member was not found ' .. gMember.name;
---            else
---                errorText = 'BuildAllData Initilization... Index: ' .. i
---            end
---
---        else
---            errorText = 'BuildAllData...Improperly created member ' .. i;
---        end
---        if errorText then Util:ThrowError(errorText); end
---        errorText = nil;
---    end
+    for _, member in pairs(Guild.members) do
+        if type(member) == type({}) then
+            setmetatable(member, Member); -- Set the metatable so we used Character's __index
+            table.insert(PDKP.data, member)
+        end
+    end
 end
 
 function PDKP:GetAllTableData()

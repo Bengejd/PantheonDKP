@@ -25,6 +25,7 @@ local guildDBDefaults = {
         numOfMembers = 0,
         members = {},
         officers = {},
+        migrated = false,
     }
 }
 
@@ -64,40 +65,42 @@ function Guild:GetGuildData(onlineOnly)
 
     GuildRoster()
     local gMemberCount, _, _ = GetNumGuildMembers();
-    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount end
-    Guild.online = {};
-    Guild.members = {};
-    Guild.officers = {};
+    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else gMemberCount = GuildDB.numOfMembers; end
 
-    for i=1, GuildDB.numOfMembers do
+    for i=1, gMemberCount do
         local member = Member:new(i)
 
-        if member.online then Guild.online[member.name]=member; end
-        if member.isBank then
-            Guild.bankIndex = i
-            DKP.bankID = member.officerNote;
+        if member.lvl >= 55 or member.canEdit or member.isOfficer then
+            if member.online then
+                table.insert(Guild.online, member.name)
+                Guild.online[member.name]=member;
+            end
+            if member.isBank then
+                Guild.bankIndex = i
+                DKP.bankID = member.officerNote;
+            end
+            if member.isOfficer then table.insert(Guild.officers, member) end
+            table.insert(Guild.members, member.name)
+            Guild.members[member.name] = member;
         end
-        if member.isOfficer then table.insert(Guild.officers, member) end
-
-        -- TODO: Data transfer from old DKP system to the new object system for the DKP values. Put them into the GuildDB instead of DkpDB.
-
---        member:GetDkpValues()
-        member:UpdateGuildDB()
-        Guild.members[member.name] = member;
     end
 
     Guild:VerifyGuildData()
     return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
+function Guild:GetMemberByName(name)
+    return GuildDB.members[name], Guild.members[name]
+end
+
 -- Needs reworked
 function Guild:VerifyGuildData()
-    for i=1, #GuildDB.members do
-        local member = GuildDB.members[i]
-        if member['name'] == nil then
-            table.remove(GuildDB.members, i)
-            GuildDB.numOfMembers = GuildDB.numOfMembers - 1;
-        end
+    print('Verifying guild data...')
+    for key, member in pairs(GuildDB.members) do
+       if type(key) == type(1) then
+           print('removing key', key)
+           GuildDB.members[key] = nil
+       end
     end
 end
 

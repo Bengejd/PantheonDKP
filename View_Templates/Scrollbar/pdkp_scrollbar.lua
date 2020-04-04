@@ -15,6 +15,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
+local Member = core.Member;
 
 local displayLimit = 26 -- the amount of rows we want to be shown on the table
 local relPointY = 230 -- relative point for the col y offset
@@ -121,7 +122,7 @@ end
 
 function GUI:GetTableDisplayData(noQuery)
     if noQuery then return tableData; end
-    tableData = PDKP:GetAllTableData();
+    tableData = Guild:GetMembers();
     return tableData;
 end
 
@@ -195,22 +196,18 @@ end
 
 function GUI:UpdateOnlineStatus(status)
     core.filterOffline = status
-    local onlineMembers = Guild:GetGuildData(true)
+    local onlineMembers, allMembers = Guild:GetGuildData(true)
 
     if #onlineMembers == 0 then return end; -- Just incase something weird happens.
 
-    for i=1, PDKP:GetDataCount() do
-        local char = PDKP.data[i];
-
-        for j=1, #onlineMembers do
-            local onlineChar = onlineMembers[j];
-
-            if onlineChar['name'] == char['name'] then
-                char['online'] = onlineChar['online'];
-                break;
-            end
-            char['online'] = false;
-        end
+    for key, char in pairs(PDKP.data) do
+       for name, onlineChar in pairs(onlineMembers) do
+          if onlineChar.name == char.name then
+             char.online = onlineChar.online;
+              break;
+          end
+          char.online = false;
+       end
     end
 end
 
@@ -239,7 +236,7 @@ function pdkp_dkp_table_filter()
 
         local selectStatusMatch = selectedFilterChecked == isSelected;
         local searchStatusMatch = searchFound == hasSearch;
-        local sliderValsMatch = GUI.sliderVal <= char['dkpTotal'];
+        local sliderValsMatch = true -- TODO: GUI.sliderVal <= char['dkpTotal'];
 
         -- This is really complicated... I should figure out a better way to handle this...
         if (showingOffline or onlineStatusMatch) -- If online selected, the status matches.

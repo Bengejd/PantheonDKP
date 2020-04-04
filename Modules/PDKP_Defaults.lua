@@ -42,6 +42,7 @@ core.defaults = {
     debug = true,
     no_broadcast = true,
     debug_dkp = true;
+    migrate = false, -- whether this version requires a migration or not.
 
     -- PLAYER INFO
     playerUID = UnitGUID("PLAYER"), -- Unique Blizzard Player ID

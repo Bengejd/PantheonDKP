@@ -145,6 +145,8 @@ end
 
 -- Utility function to format text to include a color.
 function Util:FormatFontTextColor(color_hex, text)
+    if text == nil then return text end
+
     if not color_hex then
         Util:Debug("You did not give FormtFontTextColor() a hex color, setting a default!")
         color_hex = 'ff0000'

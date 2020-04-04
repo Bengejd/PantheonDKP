@@ -314,29 +314,15 @@ function DKP:VerifyTables()
     local next = next
     for key, member in pairs(dkpDB.members) do
         if type(member) == type('') then -- Remove the string.
-            table.remove(dkpDB.members, key)
+            dkpDB.members[key] = nil;
+        elseif next(dkpDB.members[key]) == nil then
+            dkpDB.members[key] = nil;
         end
     end
 end
 
-function DKP:SyncWithGuild()
-    Util:Debug('Syncing Guild Data...');
-    local guildMembers = Guild.members;
-    local dkpMembers = DKP:GetMembers();
-
-    if #guildMembers + #dkpMembers == 0 then StaticPopup_Show('PDKP_RELOAD_UI') end
-
-    for key, member in pairs(guildMembers) do
-        if member.name then
-            if dkpMembers[member.name] == nil then -- Add a new entry to the database
-                DKP:NewEntry(member.name)
-            else -- Update the existing entry in the database.
---                member:UpdateDdkpDB()
-            end
-        else
-            table.remove(dkpDB.members, key)
-        end
-    end
+function DKP:GetCurrentDatabase()
+    return dkpDB.currentDB
 end
 
 -- cheaty way to update dkp via the boss kill event.
@@ -643,28 +629,6 @@ function DKP:Subtract(name, dkp)
     if newTotal < 0 then newTotal = 0 end-- It shouldn't be possible for anyone to go negative in this system.
     dkpDB.members[name].dkpTotal = newTotal;
     return dkpDB.members[name].dkpTotal;
-end
-
-function DKP:NewEntry(name)
-    if Util:IsEmpty(name) then return end;
-
-    local dkpEntry = dkpDB.members[name];
-
-    if dkpEntry then -- Entry already exists!
-        Util:Debug("This entry already exists!!")
-    else
-        Util:Debug("Adding new DKP entry for " .. name)
-        dkpDB.members[name] = {
-            dkpTotal = 0;
-            ['Molten Core'] = 0,
-            ['Blackwing Lair'] = 0,
-            ['entries']={},
-            ['previousValues'] = {
-                ['Molten Core'] = 0,
-                ['Blackwing Lair'] = 0,
-            }
-        }
-    end
 end
 
 
