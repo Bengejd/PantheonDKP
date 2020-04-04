@@ -27,9 +27,11 @@ local PlaySound = PlaySound
 
 --[[
     FEATURE REQUESTS:
-        - Show MS > OS > Roll for pdkp shrouding.
-        - Display what classes / specs are allowed to roll on certain items.
-        - When an item is linked for distribution, throw a RW out for people to see.
+        TODO: SILENT MODE - Doesn't print when an update comes through.
+        TODO: Minimap Icon
+        TODO: Auto-shroud wishlist.
+            - Be able to move items up and down in priority when they are linked. That way your most coveted items are
+            - automatically shrouded upon first?
  ]]
 
 PDKP.data = {} -- All of the data that is supposed to be shown.
