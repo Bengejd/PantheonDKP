@@ -565,7 +565,7 @@ function GUI:ShowSelectedHistory(charObj)
     local function addLoadMoreButton()
         local lb = AceGUI:Create("Button")
         lb:SetText("Load More")
-
+        lb:SetFullWidth(true)
         if historyLimit > #historyKeys then
             lb:SetText("End of history")
             lb:SetDisabled(true)
@@ -579,7 +579,6 @@ function GUI:ShowSelectedHistory(charObj)
                 loadHistoryEntries()
                 addLoadMoreButton()
             end
-
         end)
         scroll:AddChild(lb)
     end
