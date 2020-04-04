@@ -1,22 +1,41 @@
 ====== Version 0.9.0 ======
 
 General Usage:
-    - Added in ability to deselect all classes using the "All Classes" button.
-    - Loaded Pantheon's Loot Prio List into the addon.
-    - Added Loot announcements when the ML opens loot entity.
-        - Will now announce the item name & the current loot prio for each item (if defined). If not defined, it will
-            return "Undefined".
-        - Members can now view loot prio in game by linking an item in game via:
+    [PDKP UI Scaling]
+        - Scaling should hopefully be fixed for everyone now. TBD, as I never have encountered and scaling issues.
+    [Deselect All Classes]
+        - Added ability to deselect all classes via the "All Classes" button.
+    [History]
+        - History is now loaded on demand, rather than all at once. It will load the 10 most recent items, with
+        additional 10 being able to be loaded at a time. This should fix the lag issues when opening the history
+        frame. Unfortunately, the scroll position is not saved between sessions, so it defaults back to the top.
+        Nothing I can do about that, unfortuantely.
+    [Loot Announcements]
+        - When the MasterLooter opens a lootable entity, they will now automatically link all items in the entity
+        along with the prio for each item (if defined). If the item is not defined, it will return "Undefined".
+    [Loot Prio Lookup]
+        - Members will now be able to access our Loot Prio in game, by using these two methods:
             - /prio Item_Link - example: /prio [Staff of the Shadow Flame]
             - /prio Item_Name - example: /prio Boots of the Shadow Flame
-            - If the name is misspelled or the item doesn't have a defined prio, it will return "Undefined".
+        - These commands are case, plural & singular sensitive, so the link option is probably best for consistent results.
 
 Admin Usage:
-    - Other text box should now properly update the submit button enable / disable property.
-    - Selecting DKP adjustment reason dropdown will now:
-        - Auto-populate the raid selection, based on the sheet you're working in.
-        - Auto-calculate & update the dkp amount text-box.
+    [Other Text Box]
+        - Should now properly update the submit button enable / disable property.
+    [DKP Adjustment Dropdown]
+        - The dropdown should now properly auto-populate the raid selection, based on the sheet you're working in.
+        - It will also Auto-calculate & update the dkp amount text box, if applicable.
+    [Boss Kill Popup]
+        - Upon detecting a boss kill, the addon will now present a popup for the ML to award 10 dkp to all members who
+        are in the raid & are currently online.
+        - Upon detecting the final boss kill, it will additionally add in the "Completion Bonus" for the raid, with the
+        popup.
 
 Addon-Code:
-    - Streamlined the member data propagation, so there should be less mistakes with data being sync'd (hopefully).
-    -
+    [Data Sync]
+        - Streamlined the member data propagation, so there should be less mistakes with data being sync'd (hopefully).
+    [Cut down on database size]
+        - Removed unnecessary & duplicated data.
+    [Data Migration]
+        - Added in migration from old data structure to the new one. Shouldn't have any negative affect going forward
+        though a /reload might be necessary after initially uploading if an error occurs.
