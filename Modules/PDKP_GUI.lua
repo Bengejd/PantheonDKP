@@ -269,6 +269,23 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     GUI.lastEntryNameClicked = charObj['name'];
 end
 
+-- selects all entries that are currently visible or should be visible.
+function GUI:SelectAllVisible()
+    local cb = _G['pdkp_select_all_filtered_checkbox'];
+    local selectAll = cb:GetChecked()
+
+    local displayData = GUI:GetTableDisplayData(true);
+
+    if selectAll then
+        for key, member in pairs(displayData) do
+            GUI:AddToSelected(member)
+        end
+    else
+        pdkp_dkp_scrollbar_Update(true)
+        GUI:ClearSelected()
+    end
+end
+
 ---------------------------
 -- Selected Functions   --
 ---------------------------

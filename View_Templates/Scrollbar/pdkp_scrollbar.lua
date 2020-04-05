@@ -93,7 +93,7 @@ function GUI:pdkp_dkp_table_sort(sortBy)
 end
 
 -- runs everytime the scroll bar positioning moves.
-function pdkp_dkp_scrollbar_Update()
+function pdkp_dkp_scrollbar_Update(forceHide)
 
     local lineplusoffset; -- an index into our data calculated from the scroll offset
     local maxEntries = #tableData;
@@ -112,7 +112,9 @@ function pdkp_dkp_scrollbar_Update()
 
         entry.char = charObj
 
-        if GUI.selected[charObj.name] then
+        if forceHide == true then
+            entry.customTexture:Hide();
+        elseif GUI.selected[charObj.name] then
             entry.customTexture:Show();
         elseif GUI.GetSelectedCount() > 0 then
             entry.customTexture:Hide();
@@ -200,7 +202,13 @@ end
 function GUI:ToggleInRaid(status)
     core.filterInRaid = status;
 
+    local select_all = _G['pdkp_select_all_filtered_checkbox']
     local raidMembers = Raid:GetRaidInfo()
+
+    if status then select_all:Show() else
+        select_all:SetChecked(false)
+        select_all:Hide()
+    end
 
     for i=1, PDKP:GetDataCount() do
         local char = PDKP.data[i];

@@ -368,6 +368,22 @@
 				</Scripts>
 			</CheckButton>
 
+			<CheckButton name="pdkp_select_all_filtered_checkbox" inherits="InterfaceOptionsCheckButtonTemplate" hidden="true" checked="false">
+				<Size x="25" y="25" />
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="85" y="-150" />
+				</Anchors>
+				<Scripts>
+					<OnShow>
+							getglobal(self:GetName() .. "Text"):SetText('Select All')
+					</OnShow>
+					<OnClick>
+							pdkp_template_function_call("pdkp_select_all_filtered_checkbox");
+							pdkp_template_function_call("pdkp_dkp_table_filter")
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 			<!--Search Edit section -->
 
 			<Button name="pdkp_search_box_clear" parentKey="pdkp_botLeft" inherits="UIPanelButtonTemplate" text="Clear">

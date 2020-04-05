@@ -201,6 +201,10 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
+    if msg == 'selectAll' then
+        GUI:SelectAllVisible()
+    end
+
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then return end;
 
@@ -264,6 +268,8 @@ function PDKP:HandleSlashCommands(msg, item)
     if msg == 'validateTables' then
         DKP:ValidateTables()
     end
+
+
 end
 
 function PDKP:BuildAllData()
@@ -355,6 +361,8 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'pdkp_select_all_classes' then return GUI:ToggleAllClasses(object) end;
 
     if funcName == 'pdkp_prio_hide' then return GUI.prio:Hide() end;
+
+    if funcName == 'pdkp_select_all_filtered_checkbox' then return GUI:SelectAllVisible() end
 end
 
 
