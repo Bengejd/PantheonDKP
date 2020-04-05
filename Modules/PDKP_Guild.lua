@@ -66,13 +66,12 @@ function Guild:GetGuildData(onlineOnly)
     GuildRoster()
     local gMemberCount, _, _ = GetNumGuildMembers();
     if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else gMemberCount = GuildDB.numOfMembers; end
-
+    local iCounter = 0;
     for i=1, gMemberCount do
         local member = Member:new(i)
-
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
+            iCounter = iCounter + 1
             if member.online then
-                table.insert(Guild.online, member.name)
                 Guild.online[member.name]=member;
             end
             if member.isBank then
@@ -80,7 +79,6 @@ function Guild:GetGuildData(onlineOnly)
                 DKP.bankID = member.officerNote;
             end
             if member.isOfficer then table.insert(Guild.officers, member) end
-            table.insert(Guild.members, member.name)
             Guild.members[member.name] = member;
         end
     end
@@ -90,8 +88,13 @@ function Guild:GetGuildData(onlineOnly)
 end
 
 function Guild:GetMemberByName(name)
-    return GuildDB.members[name], Guild.members[name]
+    local tempMember = Guild.members[name]
+    if tempMember == nil then
+        return GuildDB.members[name]
+    end
+    return tempMember
 end
+
 
 function Guild:VerifyGuildData()
     for key, member in pairs(GuildDB.members) do
@@ -175,9 +178,10 @@ end
 
 -- returns the members table from the database.
 function Guild:GetMembers()
-    if GuildDB.members == nil then return Guild.members
-    else return GuildDB.members
+    if Guild.members == nil or #Guild.members == 0 then
+       return GuildDB.members;
     end
+    return Guild.members
 end
 
 function Guild:ResetDB()

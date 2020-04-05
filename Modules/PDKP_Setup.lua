@@ -298,6 +298,8 @@ function Setup:AdjustmentDropdowns()
 
     local otherBox = _G['pdkp_other_entry_box']
 
+    otherBox:SetHyperlinksEnabled(true)
+
     local function DropdownValueChanged(this, event, index)
         local currentRaid = DKP.dkpDB.currentDB
         local dropdownName = this.name

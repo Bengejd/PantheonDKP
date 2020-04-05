@@ -2,25 +2,15 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
-local next = next
-
 local DKP = core.DKP;
-local GUI = core.GUI;
-local Item = core.Item;
 local Util = core.Util;
-local PDKP = core.PDKP;
 local Guild = core.Guild;
-local Shroud = core.Shroud;
 local Defaults = core.defaults;
-local Invites = core.Invites;
-local Raid = core.Raid;
-local Comms = core.Comms;
-local Setup = core.Setup;
-local Import = core.Import;
-local item = core.Item;
 
 local Member = core.Member;
 Member.__index = Member;    -- Set the __index parameter to reference Character
+
+local acceptableDKPVariables = {['previousTotal']=true, ['total']=true, ['entries']=true, ['deleted']=true, ['all']=true}
 
 function Member:new(guildIndex)
     local self = {};
@@ -53,9 +43,25 @@ function Member:new(guildIndex)
             deleted = {}
         },
     };
-    self:GetDkpValues()
-    self:UpdateGuildDB()
+    self:MigrateAndLocate()
+    self:Save()
+
     return self
+end
+
+function Member:GetDKP(raidName, variableName)
+    if Util:IsEmpty(raidName) then
+        return Util:ThrowError('No raid provided to GetDKP')
+    elseif not acceptableDKPVariables[variableName] then
+        return Util:ThrowError('Invalid dkpVariable '.. variableName)
+    end
+    if variableName == 'all' then return self.dkp[raidName] end
+    return self.dkp[raidName][variableName]
+end
+
+function Member:SetDKP(raidName, histObj)
+    if Util:IsEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
+    elseif histObj == nil then return Util:ThrowError('History Object is nil!') end
 end
 
 -- Returns whether the user can edit the databases on their own.
@@ -63,7 +69,7 @@ function Member:CanEdit()
     return self.canEdit;
 end
 
-function Member:UpdateGuildDB()
+function Member:Save()
     if self.lvl < 55 and not self.canEdit then return end
 
     local db = Guild.db.members
@@ -91,7 +97,7 @@ function Member:UpdateGuildDB()
     }
 end
 
-function Member:GetDkpValues()
+function Member:MigrateAndLocate()
     local db = DKP.dkpDB.members
     local hist = DKP.dkpDB.history;
     local dkp = self.dkp
@@ -102,10 +108,6 @@ function Member:GetDkpValues()
         local bwl = dkp['Blackwing Lair']
         bwl.total = dbEntity['Blackwing Lair']
         mc.total = dbEntity['Molten Core']
-
-        if self.name == 'Neekio' then
-           print(mc.total, bwl.total)
-        end
 
         local entries = dbEntity['entries'];
 
