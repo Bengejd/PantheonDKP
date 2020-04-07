@@ -79,9 +79,16 @@ function Comms:Deserialize(string)
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    if Defaults.no_broadcast then
+    if sendTo ~= 'Pantheonbank' then
+        print('Skipping broadcast Cause '..sendTo.. ' is not bank!!!')
+        return
+    elseif Defaults.no_broadcast then
         print('Skipping broadcast!')
-        return end;
+        return
+    else
+        print('Sending message ', prefix, ' to', sendTo)
+    end
+
     PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
 end
 
@@ -91,7 +98,7 @@ function OnCommReceived(prefix, message, distribution, sender)
     end
 
     if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
-        if prefix ~= 'pdkpNewShrouds' then return end;
+--        if prefix ~= 'pdkpNewShrouds' then return end;
     end;
 
     Comms.processing = false -- This should be true, but it's not working for some reason...
@@ -143,19 +150,24 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
     -- We received a communication that we shouldn't have...
     if not UNSAFE_COMMS[prefix] or not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
 
-    if prefix == 'pdkpBusyTryAgai' then
-        PDKP:Print(sender .. ' is currently busy, please try again later')
-    elseif prefix == 'pdkpPushReceive' then -- When a member requests a DKP push from an officer.
-        PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
-        Import:AcceptData(message)
-    elseif prefix == 'pdkpEntryDelete' then -- When an entry is deleted
-        DKP:DeleteEntry(message, false)
-    elseif prefix == 'pdkpClearShrouds' then -- Clear the shrouding window.
-        Shroud:ClearShrouders()
-    elseif prefix == 'pdkpNewShrouds' then -- New shrouders have been discovered!
-        Shroud.shrouders = message -- assign the shrouding table that was sent.
-        Shroud:UpdateWindow() -- Update the window.
-    end
+    local unsafeFuncs = {
+        ['pdkpBusyTryAgai'] = function() PDKP:Print(sender .. ' is currently busy, please try again later') end,
+        ['pdkpPushReceive'] = function()
+            PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
+            Import:AcceptData(message)
+        end,
+        ['pdkpEntryDelete'] = function()
+            DKP:DeleteEntry(message, false)
+        end,
+        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
+        ['pdkpNewShrouds'] = function()
+            Shroud.shrouders = message -- assign the shrouding table that was sent.
+            Shroud:UpdateWindow() -- Update the window.
+        end,
+        ['pdkpBusyTryAgai'] = function() end,
+    }
+
+    if unsafeFuncs[prefix] then unsafeFuncs[prefix]() end
 
     -- We've finished processing the comms.
     Comms.processing = false
