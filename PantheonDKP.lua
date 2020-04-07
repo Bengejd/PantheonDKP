@@ -39,6 +39,8 @@ PDKP.raidData = {}
 GUI.selected = {}
 core.initialized = false
 core.filterOffline = nil
+core.databasesInitialized = false
+core.firstLogin = true
 
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
@@ -46,18 +48,19 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     if event == "ADDON_LOADED" then
         Util:Debug('Addon loaded')
         PDKP:OnInitialize(event, arg1)
-        UnregisterEvent(self, event)
-        return
+        return UnregisterEvent(self, event)
+    elseif event == "ZONE_CHANGED_NEW_AREA" then -- This allows us to detect if the GuildInfo() event is available yet.
+        PDKP:InitializeGuildData()
+        return UnregisterEvent(self, event)
     elseif event == "PLAYER_ENTERING_WORLD" then
-        local arg1, arg2, arg3, arg4,arg5, _, _,_, _, _, _, _ = ...;
---        print(arg1, arg2)
---        print(event, ...)
-       -- UnregisterEvent(self, event)
-        return
+        local arg2 = ...
+        local initialLogin, uiReload = arg1, arg2
+        core.firstLogin = initialLogin
+        if uiReload then PDKP:InitializeGuildData() end
+    elseif event == 'WORLD_MAP_UPDATE' then
+        return UnregisterEvent(self, event)
     elseif event == "GUILD_ROSTER_UPDATE" then
---        Guild:GetGuildData();
---        DKP:SyncWithGuild();
-        return;
+        return UnregisterEvent(self, event)
     elseif event == "GROUP_ROSTER_UPDATE" then
         Raid:GetRaidInfo()
         return
@@ -81,8 +84,6 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         PDKP:MessageRecieved(msg, name)
         return
     elseif event == "CHAT_MSG_GUILD" then return
-
-    elseif event == "ZONE_CHANGED_NEW_AREA" then return
     elseif event == "BOSS_KILL" then
 --        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
 --        Raid:BossKill(event, arg1);
@@ -111,17 +112,21 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
     --  Initialize Addon Data  --
     -----------------------------
-
-    Guild:GetGuildData(false);
-    DKP:VerifyTables()
-
-    PDKP:BuildAllData();
+--
+--    PDKP:BuildAllData();
 
     -----------------------------
     -- Register Communications --
     -----------------------------
 
     Comms:RegisterCommCommands()
+end
+
+function PDKP:InitializeGuildData()
+    Guild:GetGuildData(false);
+    DKP:VerifyTables()
+    PDKP:BuildAllData();
+    core.initialized = true
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
@@ -136,8 +141,7 @@ end
 function PDKP:InitializeDatabases()
     Guild:InitGuildDB()
     DKP:InitDKPDB()
-
---    DKP:ImportMonolithData()
+    core.databasesInitialized = true
 end
 
 function PDKP:HandleShroudCommands(item)
@@ -201,10 +205,6 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
-    if msg == 'selectAll' then
-        GUI:SelectAllVisible()
-    end
-
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then return end;
 
@@ -218,6 +218,10 @@ function PDKP:HandleSlashCommands(msg, item)
         --        for i=1, #tempInvites do
         --            InviteUnit(tempInvites[i]);
         --        end
+    end
+
+    if msg == 'sortHistory' then
+        DKP:SortHistory()
     end
 
     if msg == 'bossKill' then
@@ -301,6 +305,7 @@ end
 -- Shows the PDKP UI
 function PDKP:Show()
     if GUI.shown then return end -- Don't open more than one instance of PDKP
+    if not core.initialized then return PDKP:Print("Initialization has not finished...") end
 
     PlaySound(826)
 
@@ -327,7 +332,6 @@ end
 -----------------------------
 --     GLOBAL FUNCTIONS    --
 -----------------------------
-
 
 
 -- General handler for template object clicks.

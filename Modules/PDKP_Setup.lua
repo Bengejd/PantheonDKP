@@ -308,7 +308,6 @@ function Setup:AdjustmentDropdowns()
         local adjustAmount;
 
         local function secondLogic()
-            print('second called')
             thirdDropdown.frame:Hide() -- Hide it by default
             local d1 = dropdowns[1];
             local d2 = secondaryDropdown

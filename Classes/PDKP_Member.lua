@@ -18,7 +18,9 @@ function Member:new(guildIndex)
 
     self.name, self.rank, self.rankIndex, self.lvl, self.class, self.zone,
     self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(guildIndex)
+
     self.name = Util:RemoveServerName(self.name) -- Remove the server name from the member's name.
+
     self.formattedName = Util:GetClassColoredName(self.name, self.class) -- Get their colored name.
     self.coloredClass = Util:FormatFontTextColor(Util:GetClassColor(self.class), self.class)
 
@@ -43,9 +45,6 @@ function Member:new(guildIndex)
             deleted = {}
         },
     };
-    self:MigrateAndLocate()
-    self:Save()
-
     return self
 end
 
@@ -59,6 +58,11 @@ function Member:GetDKP(raidName, variableName)
     return self.dkp[raidName][variableName]
 end
 
+function Member:GetHistory(raid)
+    Util:Debug('Getting history for ' .. self.name)
+    return self.dkp[raid].entries
+end
+
 function Member:SetDKP(raidName, histObj)
     if Util:IsEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
     elseif histObj == nil then return Util:ThrowError('History Object is nil!') end
@@ -69,12 +73,10 @@ function Member:CanEdit()
     return self.canEdit;
 end
 
-function Member:EntryOperation(entryID)
-
-end
-
 function Member:Save()
-    if self.lvl < 55 and not self.canEdit then return end
+    if self.lvl == nil then return end;
+    if (self.lvl < 55 and not self.canEdit) then return end
+    if self.name == nil then return Util:Debug('There is a rogue player!') end;
 
     local db = Guild.db.members
     db[self.name] = {
@@ -83,7 +85,6 @@ function Member:Save()
         class=self.class,
         canEdit = self.canEdit,
         formattedname = self.formattedName,
-        guildTest = 'The test worked!',
         dkp = {
             ['Blackwing Lair'] = {
                 previousTotal = self.dkp['Blackwing Lair'].previousTotal,
@@ -107,6 +108,7 @@ function Member:MigrateAndLocate()
     local dkp = self.dkp
 
     if db[self.name] ~= nil then -- We have some data to migrate
+        Util:Debug('Migrating data')
         local dbEntity = db[self.name]
         local mc = dkp['Molten Core']
         local bwl = dkp['Blackwing Lair']
@@ -123,9 +125,9 @@ function Member:MigrateAndLocate()
                         local entryRaid = entry['raid']
                         if entryRaid ~= nil then
                             if entryRaid == 'Molten Core' then
-                                dkp['Molten Core'].entries[entryId] = true
+                                table.insert(dkp['Molten Core'].entries, entryId)
                             elseif entryRaid == 'Blackwing Lair' then
-                                dkp['Blackwing Lair'].entries[entryId] = true
+                                table.insert(dkp['Blackwing Lair'].entries, entryId)
                             end
                         end
                     end
@@ -136,5 +138,7 @@ function Member:MigrateAndLocate()
     elseif Guild.db.members[self.name] ~= nil then -- We have the dkp data in the database already.
         local gmember = Guild.db.members[self.name]
         self.dkp = gmember.dkp
+    else
+        print('Falling back to defaults for ', self.name)
     end
 end

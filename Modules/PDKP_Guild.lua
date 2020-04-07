@@ -38,12 +38,6 @@ function Guild:InitGuildDB()
     Guild.db = GuildDB;
 end
 
-function Guild:UpdateDB()
-    for _, member in pairs(Guild.members) do
-        member:UpdateGuildDB()
-    end
-end
-
 -- Gets & Sets the guildDB's data.
 function Guild:GetGuildData(onlineOnly)
     --	name—Name of the member (string)
@@ -64,22 +58,27 @@ function Guild:GetGuildData(onlineOnly)
     --		(string)
 
     GuildRoster()
+    Guild.officers = {}; -- Clear out the old array, just incase.
     local gMemberCount, _, _ = GetNumGuildMembers();
     if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else gMemberCount = GuildDB.numOfMembers; end
-    local iCounter = 0;
     for i=1, gMemberCount do
         local member = Member:new(i)
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
-            iCounter = iCounter + 1
-            if member.online then
-                Guild.online[member.name]=member;
-            end
+            if member.online then Guild.online[member.name]=member;  end
             if member.isBank then
                 Guild.bankIndex = i
                 DKP.bankID = member.officerNote;
             end
             if member.isOfficer then table.insert(Guild.officers, member) end
-            Guild.members[member.name] = member;
+
+            if member.name == nil then
+                member.name = ''
+            else
+                member:MigrateAndLocate()
+                member:Save()
+                --                    if member.name == "Neekio" then Util:PrintTable(member) end
+                Guild.members[member.name] = member;
+            end
         end
     end
 
@@ -95,13 +94,9 @@ function Guild:GetMemberByName(name)
     return tempMember
 end
 
-
 function Guild:VerifyGuildData()
     for key, member in pairs(GuildDB.members) do
-       if type(key) == type(1) then
-           print('removing key', key)
-           GuildDB.members[key] = nil
-       end
+       if type(key) == type(1) then GuildDB.members[key] = nil end
     end
 end
 
@@ -182,10 +177,6 @@ function Guild:GetMembers()
        return GuildDB.members;
     end
     return Guild.members
-end
-
-function Guild:ResetDB()
-
 end
 
 function Guild:UpdateBankNote(id)

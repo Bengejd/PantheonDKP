@@ -393,13 +393,11 @@ function DKP:ConfirmChange()
     local chars = {};
 
     for _, char in pairs(GUI.selected) do
-       if char.name then
-          table.insert(chars, char)
-       end
+       if char.name then table.insert(chars, char) end
     end
 
-    local function compare(a,b) return a.class < b.class end
-    table.sort(chars, compare)
+    local function compareClass(a,b) return a.class < b.class end
+    table.sort(chars, compareClass)
 
     for key, member in pairs(chars) do
         text = text..member['formattedName']
@@ -413,39 +411,71 @@ function DKP:ConfirmChange()
     StaticPopup_Show('PDKP_CONFIRM_DKP_CHANGE')
 end
 
+function DKP:SortHistory()
+    local tempTable = {}
+    for key, val in orderedPairs(dkpDB.history.all) do
+        tempTable[key] = val
+    end
+    dkpDB.history.all = tempTable;
+end
+
 function DKP:DeleteEntry(entry, noBroacast)
     local entryKey = entry['id']
 
-    if dkpDB.history['deleted'][entryKey] then
-        PDKP:Print("Already deleted entry")
-        return
+    for _, key in pairs(dkpDB.history['deleted']) do
+       if key == entryKey then
+           return Util:Debug("Entry was previously deleted")
+       end
     end
 
     local changeAmount = entry['dkpChange']
     local raid = entry['raid']
 
-    -- We have to inverse the amount (make negatives positives, and positives negatives).
+--    -- We have to inverse the amount (make negatives positives, and positives negatives).
     changeAmount = changeAmount * -1;
 
-    local members = dkpDB.members
+    local members = Guild.members
 
-    for key, obj in pairs(members) do
-        local entries = obj['entries']
-        local entryIndex;
-        if entries then -- Everyone that has history.
-           for i=1, #entries do -- check to see if they have the entry.
-               local memberEntryKey = entries[i]
-               if memberEntryKey == entryKey then -- We found a match!
-                   entryIndex = i
-                   DKP:UpdateEntryRaidDkpTotal(raid, key, changeAmount);
-               end
-           end
+    if entry['members'] == nil or #entry['members'] == 0 then -- Fixing legacy code.
+        entry['members'] = {}
+        for name in string.gmatch(entry['names'], '([^,]+)') do
+            name = Util:RemoveColorFromname(name)
+            table.insert(entry['members'], name)
         end
-        if entryIndex ~= nil then entries[entryIndex] = nil end
+        if #entry['members'] == 0 then
+           table.insert(entry['members'], Util:RemoveColorFromName(entry['names']))
+        end
     end
 
-    dkpDB.history['all'][entryKey] = nil;
+    local entryMembers = entry['members']
+    entry['deleted'] = true
+
+    for _, name in pairs(entryMembers) do
+        local member = Guild.members[name]
+        local history = member.dkp[raid].entries
+        local deleted = member.dkp[raid].deleted
+
+        for key, val in pairs(history) do
+           if val == entryKey then table.remove(history, key) end
+        end
+
+        table.insert(deleted, entryKey)
+
+        member.dkp[raid].previousTotal = member.dkp[raid].total
+        member.dkp[raid].total = changeAmount + member.dkp[raid].previousTotal
+        member:Save()
+
+        -- filter out based on online status
+        for key, charObj in pairs(PDKP.data) do
+           if charObj.name == member.name then
+                PDKP.data[key] = member;
+                break; -- Break the loop after we find our match.
+           end
+        end
+    end
+
     table.insert(dkpDB.history['deleted'], entryKey)
+
     DKP:ChangeDKPSheets(raid, true)
     GUI:UpdateEasyStats();
 
@@ -460,9 +490,7 @@ function DKP:DeleteEntry(entry, noBroacast)
     Guild:UpdateBankNote(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
 
-    if noBroacast == nil then
-        Comms:SendCommsMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
-    end
+    Comms:SendCommsMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
 end
 
 function DKP:UpdateEntries()
@@ -519,9 +547,7 @@ function DKP:UpdateEntries()
     local charNames = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames -- The char name string.
 
     local memberNames = {}
-    for key, member in pairs(charObjs) do
-        table.insert(memberNames, member.name)
-    end
+    for key, member in pairs(charObjs) do table.insert(memberNames, member.name) end
 
     local historyEntry = {
         ['id']=server_time,
@@ -548,13 +574,16 @@ function DKP:UpdateEntries()
         if dkp.entries == nil then member.dkp[raid].entries = {} end
         table.insert(dkp.entries, server_time)
 
+        dkp.previousTotal = dkp.total
         dkp.total = dkp.total + dkpChange
 
-        if member.bName then
+        if dkp.total < 0 then dkp.total = 0 end
+
+        if member.bName then -- update the player, visually.
            local dkpText = _G[member.bName ..'_col3'];
             dkpText:SetText(dkp.total)
         end
-       member:UpdateGuildDB()  -- Update the database locally.
+       member:Save() -- Update the database locally.
     end
 
     dkpDB.history['all'][server_time] = historyEntry;
@@ -580,7 +609,7 @@ function DKP:GetLastEdit()
 end
 
 function DKP:GetCurrentDB()
-    return dkpDB.currentDB
+return dkpDB.currentDB
 end
 
 function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
@@ -608,20 +637,6 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
 
     print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
 end
-
-function DKP:Add(name, dkp)
-    dkpDB.members[name].dkpTotal = dkpDB.members[name].dkpTotal + dkp;
-    return dkpDB.members[name].dkpTotal;
-end
-
-function DKP:Subtract(name, dkp)
-    local newTotal = dkpDB.members[name].dkpTotal + dkp; -- Add the negative number.
-    if newTotal < 0 then newTotal = 0 end-- It shouldn't be possible for anyone to go negative in this system.
-    dkpDB.members[name].dkpTotal = newTotal;
-    return dkpDB.members[name].dkpTotal;
-end
-
-
 
 function DKP:GetPlayerDKP(name)
     local player = dkpDB.members[name]
