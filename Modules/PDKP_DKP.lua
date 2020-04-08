@@ -419,6 +419,21 @@ function DKP:SortHistory()
     dkpDB.history.all = tempTable;
 end
 
+-- Fixes the names of the entry members, if necessary.
+function DKP:FixEntryMembers(entry)
+    if entry['members'] == nil or #entry['members'] == 0 then -- Fixing legacy code.
+        entry['members'] = {}
+        for name in string.gmatch(entry['names'], '([^,]+)') do
+            name = Util:RemoveColorFromname(name)
+            table.insert(entry['members'], name)
+        end
+        if #entry['members'] == 0 then
+            table.insert(entry['members'], Util:RemoveColorFromName(entry['names']))
+        end
+    end
+    return entry
+end
+
 function DKP:DeleteEntry(entry, noBroacast)
     local entryKey = entry['id']
 
@@ -428,6 +443,14 @@ function DKP:DeleteEntry(entry, noBroacast)
        end
     end
 
+    local isInHistory = false;
+
+    for key, _ in pairs(dkpDB.history['all']) do
+        if key == entryKey then isInHistory = true; end
+    end
+
+    if isInHistory == false then return PDKP:Print('You dkp tables are outdated, please request a full dkp push') end
+
     local changeAmount = entry['dkpChange']
     local raid = entry['raid']
 
@@ -436,16 +459,7 @@ function DKP:DeleteEntry(entry, noBroacast)
 
     local members = Guild.members
 
-    if entry['members'] == nil or #entry['members'] == 0 then -- Fixing legacy code.
-        entry['members'] = {}
-        for name in string.gmatch(entry['names'], '([^,]+)') do
-            name = Util:RemoveColorFromname(name)
-            table.insert(entry['members'], name)
-        end
-        if #entry['members'] == 0 then
-           table.insert(entry['members'], Util:RemoveColorFromName(entry['names']))
-        end
-    end
+    entry = DKP:FixEntryMembers(entry)
 
     local entryMembers = entry['members']
     entry['deleted'] = true
@@ -490,7 +504,8 @@ function DKP:DeleteEntry(entry, noBroacast)
     Guild:UpdateBankNote(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
 
-    Comms:SendCommsMessage('pdkpEntryDelete', PDKP:Serialize(entry), 'GUILD', nil, 'BULK')
+    if noBroacast then return end -- Don't broadcast this change.
+    Comms:SendGuildUpdate(entry)
 end
 
 function DKP:UpdateEntries()
@@ -565,7 +580,8 @@ function DKP:UpdateEntries()
         ['datetime']=datetime,
         ['names']=charNames,
         ['members']= memberNames,
-        ['deleted']=false
+        ['deleted']=false,
+        ['edited']=false
     }
 
     for key, member in pairs(charObjs) do

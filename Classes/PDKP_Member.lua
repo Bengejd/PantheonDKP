@@ -8,9 +8,9 @@ local Guild = core.Guild;
 local Defaults = core.defaults;
 
 local Member = core.Member;
-Member.__index = Member;    -- Set the __index parameter to reference Character
+Member.__index = Member; -- Set the __index parameter to reference Character
 
-local acceptableDKPVariables = {['previousTotal']=true, ['total']=true, ['entries']=true, ['deleted']=true, ['all']=true}
+local acceptableDKPVariables = { ['previousTotal'] = true, ['total'] = true, ['entries'] = true, ['deleted'] = true, ['all'] = true }
 
 function Member:new(guildIndex)
     local self = {};
@@ -52,7 +52,7 @@ function Member:GetDKP(raidName, variableName)
     if Util:IsEmpty(raidName) then
         return Util:ThrowError('No raid provided to GetDKP')
     elseif not acceptableDKPVariables[variableName] then
-        return Util:ThrowError('Invalid dkpVariable '.. variableName)
+        return Util:ThrowError('Invalid dkpVariable ' .. variableName)
     end
     if variableName == 'all' then return self.dkp[raidName] end
     return self.dkp[raidName][variableName]
@@ -63,9 +63,38 @@ function Member:GetHistory(raid)
     return self.dkp[raid].entries
 end
 
+function Member:CheckForEntryHistory(entry)
+    local raid = entry['raid'];
+    local isInHistory = false
+    local isInDeleted = false
+
+    local entryKey = entry['id']
+
+    local dkp = self.dkp[raid];
+    local history = dkp.entries;
+    local deleted = dkp.deleted;
+
+    for _, entryId in pairs(history) do
+        if entryId == entryKey then
+            isInHistory = true
+            break;
+        end
+    end
+
+    for _, entryId in pairs(deleted) do
+        if entryId == entryKey then
+            isInDeleted = true
+            break;
+        end
+    end
+
+    return isInDeleted, isInHistory;
+end
+
 function Member:SetDKP(raidName, histObj)
     if Util:IsEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
-    elseif histObj == nil then return Util:ThrowError('History Object is nil!') end
+    elseif histObj == nil then return Util:ThrowError('History Object is nil!')
+    end
 end
 
 -- Returns whether the user can edit the databases on their own.
@@ -80,9 +109,9 @@ function Member:Save()
 
     local db = Guild.db.members
     db[self.name] = {
-        name=self.name,
-        rankIndex=self.rankIndex,
-        class=self.class,
+        name = self.name,
+        rankIndex = self.rankIndex,
+        class = self.class,
         canEdit = self.canEdit,
         formattedname = self.formattedName,
         dkp = {

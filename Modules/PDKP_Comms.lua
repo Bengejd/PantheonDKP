@@ -128,18 +128,23 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     -- We received a communication that we shouldn't have...
     if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
 
-    if prefix == 'pdkpBusyTryAgai' then PDKP:Print(sender .. ' is currently busy, please try again later')
-    elseif prefix == 'pdkpLastEditReq' then -- Send them back your lastEdit time
-        Comms:SendCommsMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
-    elseif prefix == 'pdkpLastEditRec' then -- Process their lastEdit time
-        Comms:LastEditReceived(sender, message)
-    elseif prefix == 'pdkpPushRequest' then -- Someone Sent you a push request
-        PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
-        Comms:PrepareDatabase(false)
-        Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
-    elseif prefix == 'pdkpPushInProg' then
+    local safeFuncs = {
+        ['pdkpBusyTryAgai'] = function() PDKP:Print(sender .. ' is currently busy, please try again later') end,
+        -- Send them back your lastEdit time
+        ['pdkpLastEditReq'] = function()
+            Comms:SendCommsMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
+        end,
+        -- Process their lastEdit time
+        ['pdkpLastEditRec'] = function() Comms:LastEditReceived(sender, message) end,
+        -- Someone Sent you a push request
+        ['pdkpPushRequest'] = function()
+            PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
+            Comms:PrepareDatabase(false)
+            Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
+        end,
+    }
 
-    end
+    if safeFuncs[prefix] then safeFuncs[prefix]() end
 end
 
 ---------------------------
@@ -164,7 +169,7 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
             Shroud.shrouders = message -- assign the shrouding table that was sent.
             Shroud:UpdateWindow() -- Update the window.
         end,
-        ['pdkpBusyTryAgai'] = function() end,
+        ['pdkpPlaceholder'] = function() end,
     }
 
     if unsafeFuncs[prefix] then unsafeFuncs[prefix]() end
@@ -185,11 +190,12 @@ function Comms:SendGuildUpdate(histEntry)
     pdkpPushDatabase.dkpDB.lastEdit = DKP.dkpDB.lastEdit
     table.insert(pdkpPushDatabase.dkpDB.history, histEntry)
 
-    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
+    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', 'Pantheonbank', nil)
 end
 
 function Comms:ResetDatabse()
     pdkpPushDatabase = {
+        addon_version = '',
         full = false,
         guildDB = {
             numOfMembers = nil,
@@ -207,6 +213,7 @@ end
 function Comms:PrepareDatabase(full)
     if full then -- full overwrite
         pdkpPushDatabase = {
+            addon_version = '',
             full = full,
             guildDB = {
                 numOfMembers = Guild.db.numOfMembers,
@@ -215,16 +222,17 @@ function Comms:PrepareDatabase(full)
             dkpDB = {
                 lastEdit=DKP.dkpDB.lastEdit,
                 history=DKP.dkpDB.history,
-                members=DKP.dkpDB.members,
-                currentDB=DKP.dkpDB.currentDB
+                members=nil,
+                currentDB=nil
             }
         }
     else -- merge, partial.
         pdkpPushDatabase = {
+            addon_version = '',
             full = full,
             guildDB = {
-                numOfMembers = nil,
-                members = nil
+                numOfMembers = Guild.db.numOfMembers,
+                members = Guild.members,
             },
             dkpDB = {
                 lastEdit=DKP.dkpDB.lastEdit,

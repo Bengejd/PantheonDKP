@@ -105,99 +105,96 @@ local reqDBHistory = {
 -- edit is equal to the banks last edit or greater than your own. If not, continue until you find one.
 --
 
-function Import:AcceptData(requestedData)
-    if requestedData.full then
-        Import:AcceptFullDatabase(requestedData)
-    else
-        local dkpData = requestedData.dkpDB
+function Import:AcceptData(reqData)
+    if reqData.full then -- THIS IS A FULL OVERWRITE
+--        Import:AcceptFullDatabase(requestedData)
+        print('Full database overwrite in progress')
+    else -- THIS IS A MERGE
+        local reqDKP = reqData.dkpDB;
+        local reqGuild = reqData.guildDB;
 
-        local reqHistory, reqLastEdit, reqDeleted, reqAllData
+        local reqNumOfMembers, reqMembers = reqGuild.numOfMembers, reqGuild.members;
+        local reqLastEdit, reqHistory = reqDKP.lastEdit, reqDKP.history;
+        local reqAll, reqDeleted = reqHistory.all, reqHistory.deleted
 
-        reqHistory = dkpData.history
-        reqLastEdit = dkpData.lastEdit;
-        local deletedHistory = DKP.dkpDB.history.deleted;
+        local members = Guild.members;
+        local history = DKP.dkpDB.history;
+        local allHistory = history.all;
+        local deleted = history.deleted;
 
-        if reqHistory then
-            reqDeleted = dkpData.history.deleted
-            reqAllData = reqHistory.all
-        end
+        local function updateEntry(entry)
+            if entry['deleted'] then
+                Util:Debug("Processing as a delete")
+                return DKP:DeleteEntry(entry, true)
+            elseif entry['edited'] then
+                Util:Debug("Processing as an edit")
+            else
+                Util:Debug('Processing an addition')
+                local raid = entry['raid']
+                local entryKey = entry['id']
 
-        local function processDeleted()
-            Util:Debug("Processing Deleted Data")
-            for i=1, #reqDeleted do -- Look through our deleted and see if they match their deleted.
-                local theirKey = reqDeleted[i]
-                local newDeletedKey = true
-                for j=1, #deletedHistory do
-                    local myKey = deletedHistory[j];
-                    if myKey == theirKey then
-                        newDeletedKey = false
-                        break; -- We don't need to update it.
-                    end
-                end
-                if newDeletedKey then
-                    local histItem = DKP.dkpDB.history.all[theirKey]
-                    if histItem ~= nil then -- WE NEED TO DELETE THIS.
-                        print('Deleting this entry now!')
-                        DKP:DeleteEntry(histItem, true)
-                    else -- We never even had the entry.
-                        table.insert(DKP.dkpDB.history.deleted, theirKey)
+                for _, memberName in pairs(entry['members']) do
+                    local member = members[memberName];
+                    local isInDeleted, isInHistory = member:CheckForEntryHistory(entry)
+
+                    if isInDeleted == false and isInHistory == false then
+                        local dkp = member.dkp[raid]
+                        if dkp.entries == nil then member.dkp[raid].entries = {} end
+                        table.insert(dkp.entries, entryKey)
+                        dkp.previousTotal = dkp.total;
+                        dkp.total = dkp.total + entry['dkpChange']
+                        if dkp.total < 0 then dkp.total = 0 end;
+
+                        if member.bName then -- update the player visually.
+                            local dkpText = _G[member.bName .. '_col3']
+                            dkpText:SetText(dkp.total)
+                        end
+                        member:Save() -- Update the database locally.
+                    else
+                        if isInDeleted then
+                           Util:Debug('This entry was recently deleted, skipping.')
+                        elseif isInHistory then
+                            Util:Debug('This entry already exists, skipping.')
+                        end
                     end
                 end
             end
         end
-        local function processAllData()
-            Util:Debug("Processing All Data")
-            for key, obj in pairs(reqAllData) do -- This is bugging out for some reason?
-                local histItem = DKP.dkpDB.history.all[obj.id]
-                local raid = obj['raid']
-                if histItem == nil then
-                    local names = {};
-                    if obj.names ~= nil then
-                        for name in string.gmatch(obj.names, '([^,]+)') do -- Fix the names so that they don't include the color.
-                            name = Util:RemoveColorFromname(name)
-                            table.insert(names, name)
-                        end
-                        -- The DKP change
-                        DKP.dkpDB.history.all[key] = obj -- Set the history to have the updated history object.
 
-                        for i=1, #names do -- For each person, update their DKP.
-                            local name = names[i];
-                            local member = DKP.dkpDB.members[name]
-                            local dkpChange = obj['dkpChange']
-                            local currentDKP = member[raid]
-                            if currentDKP == nil then
-                                currentDKP = 0
-                            end
-                            local newDKP = currentDKP + dkpChange
-                            member[raid] = newDKP
+        if #reqHistory == 1 and (reqAll == nil and reqDeleted == nil) then -- This is a single entry update.
+            local entry = DKP:FixEntryMembers(reqHistory[1])
+            updateEntry(entry)
+        elseif #reqHistory > 1 then
 
-                            if member['entries'] == nil then
-                                member['entries'] = {};
-                            end
-
-                            table.insert(member['entries'], key)
-
-                            if raid == DKP.dkpDB.currentDB then -- update the sheet visually.
-                                member['dkpTotal'] = newDKP
-                            end
-                        end
-                    end
-
-                elseif Defaults.debuga then -- Only for debugging purposes.
-                    Util:Debug('Setting this shit to nil for testing purposes!')
-                    --            DKP.dkpDB.history.all[key] = nil
-                end
-            end
-        end
-        local function processLastEdit()
-            Util:Debug("Processing LastEdit")
-            DKP.dkpDB.lastEdit = reqLastEdit
         end
 
-        if reqAllData == nil then reqAllData = reqHistory end
-        if reqAllData ~= nil then processAllData() end
-        if reqDeleted ~= nil then processDeleted() end
-        if reqLastEdit ~= nil and reqLastEdit > DKP.dkpDB.lastEdit then processLastEdit() end
+--        dkpDB.history['all'][server_time] = historyEntry;
+--        dkpDB.lastEdit = server_time
+--
+--        GUI:UpdateEasyStats()
+--
+--        -- Update the slider max (if needed)
+--        GUI:UpdateDKPSliderMax();
+--        -- Re-run the table filters.
+--        pdkp_dkp_table_filter()
+--
+--        Guild:UpdateBankNote(server_time)
+--        DKP.bankID = server_time
+--
+--        GUI.pdkp_dkp_amount_box:SetText('');
+--
+--        Comms:SendGuildUpdate(historyEntry)
+
+
+--        local function processLastEdit()
+--            Util:Debug("Processing LastEdit")
+--            DKP.dkpDB.lastEdit = reqLastEdit
+--        end
+--
+--        if reqAllData == nil then reqAllData = reqHistory end
+--        if reqAllData ~= nil then processAllData() end
+--        if reqDeleted ~= nil then processDeleted() end
+--        if reqLastEdit ~= nil and reqLastEdit > DKP.dkpDB.lastEdit then processLastEdit() end
     end
 
     GUI:pdkp_dkp_table_sort('dkpTotal')
