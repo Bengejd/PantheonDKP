@@ -270,8 +270,10 @@ function pdkp_dkp_table_filter()
 
         local selectStatusMatch = selectedFilterChecked == isSelected;
         local searchStatusMatch = searchFound == hasSearch;
-        local sliderValsMatch = GUI.sliderVal <= char.dkp[currentRaid].total;
-
+        local sliderValsMatch = true;
+        if char.dkp then
+            local sliderValsMatch = GUI.sliderVal <= char.dkp[currentRaid].total;
+        end
         -- This is really complicated... I should figure out a better way to handle this...
         if (showingOffline or onlineStatusMatch) -- If online selected, the status matches.
                 and (selectStatusMatch) -- If selections, the entry is in the array.
