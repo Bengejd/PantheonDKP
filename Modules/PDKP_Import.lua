@@ -20,7 +20,7 @@ local Comms = core.Comms;
 
 function Import:AcceptData(reqData)
     if reqData.full then -- THIS IS A FULL OVERWRITE
-        Import:AcceptFullDatabase(requestedData)
+        Import:AcceptFullDatabase(reqData)
         PDKP:Print('Full database overwrite in progress')
     else -- THIS IS A MERGE
         local reqDKP = reqData.dkpDB;
