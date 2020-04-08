@@ -96,7 +96,7 @@ function OnCommReceived(prefix, message, distribution, sender)
     end
 
     if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
---        if prefix ~= 'pdkpNewShrouds' then return end;
+        if prefix ~= 'pdkpNewShrouds' then return end;
     end;
 
     Comms.processing = false -- This should be true, but it's not working for some reason...
@@ -191,7 +191,7 @@ function Comms:SendGuildUpdate(histEntry)
     pdkpPushDatabase.dkpDB.lastEdit = DKP.dkpDB.lastEdit
     table.insert(pdkpPushDatabase.dkpDB.history, histEntry)
 
-    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', 'Pantheonbank', nil)
+    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
 end
 
 function Comms:ResetDatabse()
