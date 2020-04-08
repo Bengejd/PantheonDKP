@@ -91,6 +91,12 @@ function Member:CheckForEntryHistory(entry)
     return isInDeleted, isInHistory;
 end
 
+function Member:QuickCalculate(type, raid)
+    local percent = 0.1;
+    if type == 'shroud' then percent = 0.5 end;
+    return math.ceil(self.dkp[raid].total * percent);
+end
+
 function Member:SetDKP(raidName, histObj)
     if Util:IsEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
     elseif histObj == nil then return Util:ThrowError('History Object is nil!')

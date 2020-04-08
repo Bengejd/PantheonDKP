@@ -79,16 +79,14 @@ function Comms:Deserialize(string)
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    if sendTo ~= 'Pantheonbank' then
+    if Defaults.debug and sendTo ~= 'Pantheonbank' then
         print('Skipping broadcast Cause '..sendTo.. ' is not bank!!!')
         return
     elseif Defaults.no_broadcast then
         print('Skipping broadcast!')
         return
-    else
-        print('Sending message ', prefix, ' to', sendTo)
     end
-
+    print('Sending message ', prefix, ' to', sendTo)
     PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
 end
 
@@ -139,6 +137,9 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         -- Someone Sent you a push request
         ['pdkpPushRequest'] = function()
             PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
+
+            -- TODO: Fix this so that it only requests the keys that you don't have.
+
             Comms:PrepareDatabase(false)
             Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,

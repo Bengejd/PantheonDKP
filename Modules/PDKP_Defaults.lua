@@ -41,7 +41,7 @@ core.defaults = {
     bank_name = 'Pantheonbank',
     debug = true,
     no_broadcast = false,
-    debug_dkp = true;
+    debug_dkp = false;
     migrate = false, -- whether this version requires a migration or not.
 
     -- PLAYER INFO

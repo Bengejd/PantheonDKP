@@ -778,3 +778,8 @@ function DKP:ImportMonolithData()
     end
     print('Finished Import data')
 end
+
+function DKP:CheckHistoryKeys(history)
+    local deleted = history['deleted']
+    local all = history['all']
+end

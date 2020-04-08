@@ -665,13 +665,8 @@ end
 
 -- Type can be 'shroud' or 'roll'
 function GUI:QuickCalculate(type)
-    local charObj = GUI.selected[GUI.selected[1]]; -- Ugly way of doing this...
-    local percent = 0.1;
-    local amount;
-    if type == 'shroud' then percent = 0.5 end;
-
-    amount = math.ceil(charObj.dkpTotal * percent);
-    GUI.pdkp_dkp_amount_box:SetText('-' .. amount);
+    local member = GUI.selected[GUI.selected[1]]; -- Ugly way of doing this...
+    GUI.pdkp_dkp_amount_box:SetText('-' .. member:QuickCalculate(type, DKP.dkpDB.currentDB));
 end
 
 -- Update personal DKP text at the top
@@ -716,10 +711,10 @@ function GUI:UpdateShroudItemLink(itemLink)
     local button = GUI:GetItemButton();
     button:Show();
 
-    Util:Debug(itemLink);
-
-
-    -- THIS SHOULD ALSO CHANGE DROPDOWN TO ITEM-WIN IF NECESSARY.
+    GUI.reasonDropdown:SetValue(GUI.adjustmentReasons[6])
+    GUI.reasonDropdown:SetText(GUI.adjustmentReasons[6]);
+    GUI.pdkp_dropdown_enables_submit = true;
+    GUI:ToggleSubmitButton()
 end
 
 function GUI:GetItemButton()

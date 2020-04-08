@@ -132,7 +132,6 @@ end
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
     if Shroud.shroudPhrases[string.lower(msg)] and (Raid:isMasterLooter() or Defaults.debug) then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
-        print(name)
         Shroud:UpdateShrouders(name)
     end
 end
@@ -147,10 +146,9 @@ end
 function PDKP:HandleShroudCommands(item)
     -- Normal shrouding command send by a non officer, bidding on an item.
     if item == nil or string.len(item) == 0 then
-        return Shroud:ShroudingSent('shroud', Util:GetMyName());
+        return PDKP:MessageRecieved('shroud', Util:GetMyName())
     -- Item linked by the officer.
     elseif core.canEdit then -- NEED TO CHECK IF THEY ARE THE ML AS WELL.
-
         -- Check to see if the GUI is open or not.
         if not GUI.shown then PDKP:Show() end
         GUI:UpdateShroudItemLink(Item:GetItemByName(item));
