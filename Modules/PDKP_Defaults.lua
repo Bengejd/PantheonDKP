@@ -36,7 +36,7 @@ core.GUI = {
 
 core.defaults = {
     -- ADDON INFO
-    addon_version = 'V0.9.3',
+    addon_version = 'V0.9.4',
     addon_name = 'PantheonDKP',
     bank_name = 'Pantheonbank',
     debug = false,
