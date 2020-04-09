@@ -302,7 +302,7 @@ function Comms:LastEditReceived(sender, message)
     for i=1, #Guild.officers do
         local officer = Guild.officers[i];
         if officer['name'] == sender then
-           officer['lastEdit'] = message
+            officer['lastEdit'] = message
         end
     end
     GUI:UpdatePushFrame()
@@ -316,7 +316,7 @@ function Comms:SendShroudTable()
     if Raid:IsInRaid() then
         Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK')
     elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
-        Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, nil, 'Pantheonbank')
+        Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, 'RAID', nil, nil)
     else -- For the sender to update their table.
         Shroud:UpdateWindow()
     end
