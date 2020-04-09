@@ -68,33 +68,34 @@ function Import:AcceptData(reqData)
                         member:Save() -- Update the database locally.
                     else
                         if isInDeleted then
-                           Util:Debug('This entry was recently deleted, skipping.')
+                            Util:Debug('This entry was recently deleted, skipping.')
                         elseif isInHistory then
                             Util:Debug('This entry already exists, skipping.')
                         end
                     end
                 end
-                if entryKey > lastEdit then DKP.dkpDB.lastEdit = entryKey;
+                if entryKey > lastEdit then DKP.dkpDB.lastEdit = entryKey; end
             end
-        end
-        if #reqHistory == 1 and (reqAll == nil and reqDeleted == nil) then -- This is a single entry update.
-            local entry = DKP:FixEntryMembers(reqHistory[1])
-            updateEntry(entry)
-        elseif #reqHistory > 1 then -- we have the [deleted] and [all] tables in this table.
-            for entryId, entry in pairs(reqAll) do
+            if #reqHistory == 1 and (reqAll == nil and reqDeleted == nil) then -- This is a single entry update.
+                local entry = DKP:FixEntryMembers(reqHistory[1])
                 updateEntry(entry)
+            elseif #reqHistory > 1 then -- we have the [deleted] and [all] tables in this table.
+                for _, entry in pairs(reqAll) do
+                    updateEntry(entry)
+                end
             end
-        end
         end
     end
 
-    GUI:pdkp_dkp_table_sort('dkpTotal')
-    DKP:ChangeDKPSheets(DKP.dkpDB.currentDB, true)
-    pdkp_dkp_scrollbar_Update()
-    pdkp_dkp_table_filter()
-    GUI:pdkp_dkp_table_sort('dkpTotal')
+   if GUI.pdkp_frame:IsVisible() then
+       GUI:pdkp_dkp_table_sort('dkpTotal')
+       DKP:ChangeDKPSheets(DKP.dkpDB.currentDB, true)
+       pdkp_dkp_scrollbar_Update()
+       pdkp_dkp_table_filter()
+       GUI:pdkp_dkp_table_sort('dkpTotal')
 
-    GUI.pushFrame:Hide()
+       GUI.pushFrame:Hide()
+   end
 
     PDKP:Print("The DKP push has completed successfully")
 end
@@ -111,7 +112,7 @@ function Import:AcceptFullDatabase(data)
 end
 
 function Import:GetHistoryKeys()
-    local pushHistory = { ['all']={}, ['deleted']={}, }
+    local pushHistory = { ['all'] = {}, ['deleted'] = {}, }
     for entryKey, entry in pairs(DKP.dkpDB.history) do
         pushHistory['all'][entryKey] = true
     end

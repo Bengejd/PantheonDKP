@@ -122,12 +122,6 @@ function PDKP:OnInitialize(event, name)
     PDKP:InitializeDatabases();
 
     -----------------------------
-    --  Initialize Addon Data  --
-    -----------------------------
---
---    PDKP:BuildAllData();
-
-    -----------------------------
     -- Register Communications --
     -----------------------------
 
