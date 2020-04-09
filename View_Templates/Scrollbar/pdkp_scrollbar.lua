@@ -257,8 +257,7 @@ function pdkp_dkp_table_filter()
 
         local showingOffline = core.filterOffline == nil or core.filterOffline == false;
         local onlineStatusMatch = char["online"] == not showingOffline
-        local isSelected = false;
-        local searchFound = false;
+        local isSelected, searchFound = false, false;
 
         local showingInRaid = core.filterInRaid == true;
         local inRaidStatusMatch = true; -- set this as the default.
@@ -271,9 +270,8 @@ function pdkp_dkp_table_filter()
         local selectStatusMatch = selectedFilterChecked == isSelected;
         local searchStatusMatch = searchFound == hasSearch;
         local sliderValsMatch = true;
-        if char.dkp then
-            local sliderValsMatch = GUI.sliderVal <= char.dkp[currentRaid].total;
-        end
+        local sliderValsMatch = GUI.sliderVal <= char.dkp[currentRaid].total
+
         -- This is really complicated... I should figure out a better way to handle this...
         if (showingOffline or onlineStatusMatch) -- If online selected, the status matches.
                 and (selectStatusMatch) -- If selections, the entry is in the array.
