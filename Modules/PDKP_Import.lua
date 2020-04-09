@@ -61,7 +61,9 @@ function Import:AcceptData(reqData)
 
                         if member.bName then -- update the player visually.
                             local dkpText = _G[member.bName .. '_col3']
-                            dkpText:SetText(dkp.total)
+                            if dkpText:IsVisible() then
+                                dkpText:SetText(dkp.total)
+                            end
                         end
                         member:Save() -- Update the database locally.
                     else

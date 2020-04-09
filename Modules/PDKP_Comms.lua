@@ -79,14 +79,19 @@ function Comms:Deserialize(string)
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    if Defaults.debug and sendTo ~= 'Pantheonbank' then
+    if Defaults.debug and distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
         print('Skipping broadcast Cause '..sendTo.. ' is not bank!!!')
+
         return
     elseif Defaults.no_broadcast then
         print('Skipping broadcast!')
         return
     end
-    print('Sending message ', prefix, ' to', sendTo)
+
+    if distro == 'WHISPER' then
+        Util:Debug('Sending message '.. prefix.. ' to'.. sendTo)
+    end
+
     PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
 end
 
@@ -96,7 +101,9 @@ function OnCommReceived(prefix, message, distribution, sender)
     end
 
     if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
-        if prefix ~= 'pdkpNewShrouds' then return end;
+        if prefix ~= 'pdkpNewShrouds' then
+            Util:Debug('Ignoring comm from me ', prefix)
+        end;
     end;
 
     Comms.processing = false -- This should be true, but it's not working for some reason...
@@ -284,19 +291,6 @@ function Comms:RequestOfficersLastEdit()
     end
 end
 
-function Comms:Wait(waitTime)
-    local timerCount = 0
-
-    local function TimerFeedback()
-        timerCount = timerCount + 1;
-        if timerCount > waitTime then
-            PDKP:CancelAllTimers()
-        end
-    end
-
-    PDKP:ScheduleRepeatingTimer(TimerFeedback, 1)
-end
-
 function Comms:LastEditReceived(sender, message)
     Util:Debug('Received Last Edit from '..sender)
     for i=1, #Guild.officers do
@@ -314,9 +308,9 @@ end
 
 function Comms:SendShroudTable()
     if Raid:IsInRaid() then
-        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK')
+        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
     elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
-        Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, 'RAID', nil, nil)
+        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
     else -- For the sender to update their table.
         Shroud:UpdateWindow()
     end

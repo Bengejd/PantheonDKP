@@ -655,9 +655,8 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
 end
 
 function DKP:GetPlayerDKP(name)
-    local player = dkpDB.members[name]
-    if player ~= nil then return player.dkpTotal end
-    return 0 -- fallback. We disregard these anyway.
+    local member = Guild.members[name]
+    return member:GetDKP(dkpDB.currentDB, 'total')
 end
 
 function DKP:ResetDB()

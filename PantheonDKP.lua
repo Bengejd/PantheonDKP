@@ -45,38 +45,50 @@ core.firstLogin = true
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
-    if event == "ADDON_LOADED" then
-        Util:Debug('Addon loaded')
-        PDKP:OnInitialize(event, arg1)
-        return UnregisterEvent(self, event)
-    elseif event == "ZONE_CHANGED_NEW_AREA" then -- This allows us to detect if the GuildInfo() event is available yet.
-        PDKP:InitializeGuildData()
-        return UnregisterEvent(self, event)
-    elseif event == "PLAYER_ENTERING_WORLD" then
-        local arg2 = ...
-        local initialLogin, uiReload = arg1, arg2
-        core.firstLogin = initialLogin
-        if uiReload then PDKP:InitializeGuildData() end
-    elseif event == 'WORLD_MAP_UPDATE' then
-        return UnregisterEvent(self, event)
-    elseif event == "GUILD_ROSTER_UPDATE" then
-        return UnregisterEvent(self, event)
-    elseif event == "GROUP_ROSTER_UPDATE" then
-        Raid:GetRaidInfo()
-        return
-    elseif event == "ENCOUNTER_START" then return -- for testing purposes
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then return -- NPC kill event
-    elseif event == "LOOT_OPENED" then
-        Raid:AnnounceLoot()
-        return -- when the loot bag is opened.
-    elseif event == "OPEN_MASTER_LOOT_LIST" then return -- when the master loot list is opened.
-    elseif event == "CHAT_MSG_RAID" then
+
+    local arg2 = ...
+
+    local PDKP_SIMPLE_EVENT_FUNCS = {
+        ['ADDON_LOADED']=function() -- The addon finished loading, most things should be available.
+            Util:Debug('Addon loaded')
+            PDKP:OnInitialize(event, arg1)
+            return UnregisterEvent(self, event)
+        end,
+        ['ZONE_CHANGED_NEW_AREA']=function() -- This allows us to detect if the GuildInfo() event is available yet.
+            PDKP:InitializeGuildData()
+            return UnregisterEvent(self, event)
+        end,
+        ['PLAYER_ENTERING_WORLD']=function()
+            local initialLogin, uiReload = arg1, arg2
+            core.firstLogin = initialLogin
+            if uiReload then PDKP:InitializeGuildData() end
+        end,
+        ['WORLD_MAP_UPDATE']=function()
+            return UnregisterEvent(self, event)
+        end,
+        ['GUILD_ROSTER_UPDATE']=function()
+            return UnregisterEvent(self, event)
+        end,
+        ['GROUP_ROSTER_UPDATE']=function()
+            return Raid:GetRaidInfo()
+        end,
+        ['LOOT_OPENED']=function()  -- when the loot bag is opened.
+            return Raid:AnnounceLoot()
+        end,
+        ['OPEN_MASTER_LOOT_LIST']=function()  -- when the master loot list is opened.
+            return
+        end,
+        ['']=function() end,
+        ['']=function() end,
+        ['']=function() end,
+    }
+
+    if PDKP_SIMPLE_EVENT_FUNCS[event] then PDKP_SIMPLE_EVENT_FUNCS[event]()
+    elseif event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" then -- uses the same arguments
         local msg = arg1;
         local playerName, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _= ...;
         playerName = Util:RemoveServerName(playerName)
-        PDKP:MessageRecieved(msg, playerName)
-        return
-    elseif event == "CHAT_MSG_RAID_LEADER" then return
+        return PDKP:MessageRecieved(msg, playerName)
     elseif event == "CHAT_MSG_WHISPER" then
         local _, _, _, arg4,_, _, _,_, _, _, _, _ = ...;
         local msg = arg1;
@@ -85,8 +97,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         return
     elseif event == "CHAT_MSG_GUILD" then return
     elseif event == "BOSS_KILL" then
---        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
---        Raid:BossKill(event, arg1);
+        --        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
+        --        Raid:BossKill(event, arg1);
         return
     end
 end
