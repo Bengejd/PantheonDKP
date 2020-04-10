@@ -20,19 +20,21 @@ local Raid = core.Raid;
  ]]
 
 local SAFE_COMMS = {
-    ['pdkpPushRequest']=true,
-    ['pdkpLastEditReq']=true,
-    ['pdkpLastEditRec']=true,
-    ['pdkpBusyTryAgai']=true,
-    ['pdkpPushInProg']=true,
+    ['pdkpPushRequest'] = true,
+    ['pdkpLastEditReq'] = true,
+    ['pdkpLastEditRec'] = true,
+    ['pdkpBusyTryAgai'] = true,
+    ['pdkpPushInProg'] = true,
+    ['pdkpSyncRequest'] = true,
 };
 
 local UNSAFE_COMMS = {
-    ['pdkpPushReceive']=true,
-    ['pdkpBusyTryAgai']=true,
-    ['pdkpEntryDelete']=true,
-    ['pdkpClearShrouds']=true,
-    ['pdkpNewShrouds']=true,
+    ['pdkpPushReceive'] = true,
+    ['pdkpBusyTryAgai'] = true,
+    ['pdkpEntryDelete'] = true,
+    ['pdkpClearShrouds'] = true,
+    ['pdkpNewShrouds'] = true,
+    ['pdkpSyncResponse'] = true
 }
 
 local pdkpPushDatabase = {
@@ -42,19 +44,18 @@ local pdkpPushDatabase = {
         members = {},
     },
     dkpDB = {
-        lastEdit=nil,
-        currentDB=nil,
-        history={},
-        members={},
+        lastEdit = nil,
+        currentDB = nil,
+        history = {},
+        members = {},
     }
 }
 
 Comms.processing = false
 
 ---------------------------
---   GENERIC Functions   --
+-- GENERIC Functions   --
 ---------------------------
-
 function Comms:RegisterCommCommands()
     for key, _ in pairs(SAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
     for key, _ in pairs(UNSAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
@@ -80,7 +81,7 @@ end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if Defaults.debug and distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
-        print('Skipping broadcast Cause '..sendTo.. ' is not bank!!!')
+        print('Skipping broadcast Cause ' .. sendTo .. ' is not bank!!!')
 
         return
     elseif Defaults.no_broadcast then
@@ -89,7 +90,7 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     end
 
     if distro == 'WHISPER' then
-        Util:Debug('Sending message '.. prefix.. ' to'.. sendTo)
+        Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo)
     end
 
     PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
@@ -100,7 +101,7 @@ function OnCommReceived(prefix, message, distribution, sender)
         return Comms:SendCommsMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
     end
 
-    if sender == Util:GetMyName() then  -- Don't need to respond to our own messages...
+    if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
         if prefix ~= 'pdkpNewShrouds' then
             Util:Debug('Ignoring comm from me ', prefix)
         end;
@@ -126,9 +127,8 @@ function Comms:ThrowError(prefix, sender)
 end
 
 ---------------------------
---    SAFE FUNCTIONS     --
+-- SAFE FUNCTIONS     --
 ---------------------------
-
 function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     -- We received a communication that we shouldn't have...
     if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
@@ -150,13 +150,19 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
             Comms:PrepareDatabase(false)
             Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,
+        ['pdkpSyncRequest'] = function()
+            if core.canEdit then
+                local database = Comms:PrepareDatabaseSyncResponse(message)
+                Comms:SendCommsMessage('pdkpSyncResponse', PDKP:Serialize(database), 'WHISPER', sender, 'BULK')
+            end
+        end,
     }
 
     if safeFuncs[prefix] then safeFuncs[prefix]() end
 end
 
 ---------------------------
---   UNSAFE FUNCTIONS    --
+-- UNSAFE FUNCTIONS    --
 ---------------------------
 function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
 
@@ -176,6 +182,9 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
         ['pdkpNewShrouds'] = function()
             Shroud.shrouders = message -- assign the shrouding table that was sent.
             Shroud:UpdateWindow() -- Update the window.
+        end,
+        ['pdkpSyncResponse'] = function()
+            Import:AcceptData(message)
         end,
         ['pdkpPlaceholder'] = function() end,
     }
@@ -210,10 +219,10 @@ function Comms:ResetDatabse()
             members = nil,
         },
         dkpDB = {
-            lastEdit=nil,
-            history={},
-            members=nil,
-            currentDB=nil
+            lastEdit = nil,
+            history = {},
+            members = nil,
+            currentDB = nil
         }
     }
 end
@@ -228,10 +237,10 @@ function Comms:PrepareDatabase(full)
                 members = Guild.db.members
             },
             dkpDB = {
-                lastEdit=DKP.dkpDB.lastEdit,
-                history=DKP.dkpDB.history,
-                members=nil,
-                currentDB=nil
+                lastEdit = DKP.dkpDB.lastEdit,
+                history = DKP.dkpDB.history,
+                members = nil,
+                currentDB = nil
             }
         }
     else -- merge, partial.
@@ -243,10 +252,10 @@ function Comms:PrepareDatabase(full)
                 members = Guild.members,
             },
             dkpDB = {
-                lastEdit=DKP.dkpDB.lastEdit,
-                history=DKP.dkpDB.history,
-                members=nil,
-                currentDB=nil
+                lastEdit = DKP.dkpDB.lastEdit,
+                history = DKP.dkpDB.history,
+                members = nil,
+                currentDB = nil
             }
         }
     end
@@ -258,19 +267,19 @@ function Comms:RequestOfficersLastEdit()
     local oneReqTriggered = false
 
     local officers = Guild.officers;
-    for i=1, #officers do
+    for i = 1, #officers do
         local officer = officers[i]
         officer['lastEdit'] = -1
         if officer['online'] and officer['name'] ~= Util:GetMyName() then
             oneReqTriggered = true
-            Util:Debug('sending lastEdit request to '..officer['name'])
+            Util:Debug('sending lastEdit request to ' .. officer['name'])
             Comms:SendCommsMessage('pdkpLastEditReq', PDKP:Serialize(''), 'WHISPER', officer['name'], 'BULK')
         end
     end
 
     if oneReqTriggered == true then -- check for if the officer actually has the addon or not.
         local shouldContinue = false
-        for i=1, #officers do
+        for i = 1, #officers do
             local officer = officers[i]
             if officer['online'] and officer['name'] ~= Util:GetMyName() then
                 if officer['lastEdit'] ~= -1 then
@@ -292,8 +301,8 @@ function Comms:RequestOfficersLastEdit()
 end
 
 function Comms:LastEditReceived(sender, message)
-    Util:Debug('Received Last Edit from '..sender)
-    for i=1, #Guild.officers do
+    Util:Debug('Received Last Edit from ' .. sender)
+    for i = 1, #Guild.officers do
         local officer = Guild.officers[i];
         if officer['name'] == sender then
             officer['lastEdit'] = message
@@ -303,9 +312,8 @@ function Comms:LastEditReceived(sender, message)
 end
 
 ---------------------------
---  SHROUDING FUNCTIONS  --
+-- SHROUDING FUNCTIONS  --
 ---------------------------
-
 function Comms:SendShroudTable()
     if Raid:IsInRaid() then
         Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
@@ -318,4 +326,79 @@ end
 
 function Comms:ClearShrouders()
     Comms:SendCommsMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
+end
+
+-- Innermediate function between Request & Reponse.
+function Comms:PrepareDatabaseSyncResponse(historyKeys)
+    local pdkpSyncResponseDatabase = {
+        addon_version = Defaults.addon_version,
+        full = false,
+        guildDB = {
+            numOfMembers = nil,
+            members = nil,
+        },
+        dkpDB = {
+            lastEdit = DKP.dkpDB.lastEdit,
+            history = {
+                all = nil,
+                deleted = nil,
+            },
+            members = nil,
+            currentDB = nil
+        }
+    }
+
+    local theirAll = historyKeys.all;
+    local theirDeleted = historyKeys.deleted;
+
+    local myAll = {}
+    local myDeleted = {}
+
+    for key, entry in pairs(DKP.dkpDB.history.all) do
+        myAll[key] = entry;
+        for i = 1, #theirAll do
+            local theirKey = theirAll[i];
+            if theirKey == entry['id'] then -- Found a match
+                myAll[key] = nil -- Remove it from the list.
+                break -- Break out of the inner loop & continue.
+            end
+        end
+    end
+
+    for _, entryID in pairs(DKP.dkpDB.history.deleted) do
+        table.insert(myDeleted, entryID)
+        for i = 1, #theirDeleted do
+            local theirKey = theirDeleted[i];
+            if theirKey == entryID then -- Found a match
+                for j = 1, #myDeleted do -- loop through myDeleted and remove the entry.
+                    local deleteKey = myDeleted[j];
+                    if deleteKey == theirKey then  -- Found a match
+                        table.remove(myDeleted, j); -- Remove it
+                        break; -- Break out
+                    end
+                end
+                break -- Break out
+            end
+        end
+    end
+
+    pdkpSyncResponseDatabase.dkpDB.history = {
+        all = myAll,
+        deleted = myDeleted
+    }
+    return pdkpSyncResponseDatabase
+end
+
+function Comms:DatabaseSyncRequest()
+    PDKP:Print('Attempting Automatic Database Sync...')
+
+    local myHistory = {
+        all = {},
+        deleted = {}
+    }
+    local dkpDB = DKP.dkpDB.history
+    for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
+    for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
+
+    Comms:SendCommsMessage('pdkpSyncRequest', PDKP:Serialize(myHistory), 'GUILD', nil, 'BULK', nil)
 end

@@ -5292,8 +5292,8 @@ function Import:AcceptData(reqData)
             updateEntry(entry)
         elseif reqAll and reqDeleted and (#reqAll > 1 or #reqDeleted > 1) then -- we have the [deleted] and [all] tables in this table.
             for key, entry in pairs(reqAll) do
-                print('Processing entry...', key)
-                if key ~= 1 then
+                Util:Debug('Processing entry...' .. key)
+                if key ~= 1 and entry ~= nil then
                     entry = DKP:FixEntryMembers(entry)
                     updateEntry(entry)
                 end

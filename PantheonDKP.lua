@@ -216,6 +216,10 @@ function PDKP:HandleSlashCommands(msg, item)
         return Import:TestDataImport()
     end
 
+    if msg == 'pdkpTestAutoSync' then
+        Comms:DatabaseSyncRequest()
+    end
+
     if msg == 'item' and item then
         return Item:LinkItem();
     end
