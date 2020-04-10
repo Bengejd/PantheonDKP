@@ -440,11 +440,9 @@ function GUI:ShowSelectedHistory(charObj)
         GUI.HistoryFrame.historyTitle:SetText(title)
     else
         historyKeys = {}
-
-        local keys = {};
-        for key, val in pairs(DKP:GetHistory()) do
+        for key, val in pairs(DKP.dkpDB.history.all) do
             local entry = DKP.dkpDB.history.all[key]
-            if entry['deleted'] == nil or entry['deleted'] == false then
+            if (entry['deleted'] == nil or entry['deleted'] == false) and DKP:GetCurrentDB() == entry['raid'] then
                 table.insert(historyKeys, key)
             end
         end
@@ -484,7 +482,7 @@ function GUI:ShowSelectedHistory(charObj)
                     local lineText = entry['text']
                     lineText = lineText:gsub('%None', 'Not Linked')
 
-                    if raid and raid == DKP:GetCurrentDB() then -- Only show the history for the sheet we're on.
+                    if raid ~= nil and raid == DKP:GetCurrentDB() then -- Only show the history for the sheet we're on.
 
                         local dkpChangeLabel = AceGUI:Create("Label")
                         dkpChangeLabel:SetWidth(300)
