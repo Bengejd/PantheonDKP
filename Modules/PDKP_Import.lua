@@ -5234,9 +5234,9 @@ function Import:AcceptData(reqData)
 
 
         local members = Guild.members;
---        local history = DKP.dkpDB.history;
---        local allHistory = history.all;
---        local deleted = history.deleted;
+        local history = DKP.dkpDB.history;
+        local allHistory = history.all;
+        local deleted = history.deleted;
         local lastEdit = DKP.dkpDB.lastEdit;
 
         local function updateEntry(entry)
@@ -5273,7 +5273,7 @@ function Import:AcceptData(reqData)
                                 end
                                 member:Save() -- Update the database locally.
                             else
-                                Util:ThrowError('Could not find dkp for '.. member.name)
+                                Util:ThrowError('Sync Error: Could not find dkp for '.. member.name)
                             end
                         else
                             if isInDeleted then
@@ -5288,12 +5288,9 @@ function Import:AcceptData(reqData)
             end
         end
         if #reqHistory == 1 and (reqAll == nil and reqDeleted == nil) then -- This is a single entry update.
-            print('single entry')
             local entry = DKP:FixEntryMembers(reqHistory[1])
             updateEntry(entry)
         elseif reqAll and reqDeleted and (#reqAll > 1 or #reqDeleted > 1) then -- we have the [deleted] and [all] tables in this table.
-            print('All', #reqAll)
-            print('Deleted', #reqDeleted)
             for key, entry in pairs(reqAll) do
                 print('Processing entry...', key)
                 if key ~= 1 then
@@ -5301,8 +5298,15 @@ function Import:AcceptData(reqData)
                     updateEntry(entry)
                 end
             end
+            for _, entryID in pairs(reqDeleted) do
+                Util:Debug('Processing deleted entry: ' .. entryID)
+                local entry = reqAll[entryID]
+                if entry ~= nil then
+                    entry['deleted'] = true
+                    updateEntry(entry)
+                end
+            end
         end
-        print(#reqHistory)
     end
 
    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
