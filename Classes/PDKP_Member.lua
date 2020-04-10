@@ -68,9 +68,19 @@ function Member:CheckForEntryHistory(entry)
     local isInHistory = false
     local isInDeleted = false
 
+    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
+
     local entryKey = entry['id']
 
-    local dkp = self.dkp[raid];
+    local dkp = self.dkp;
+
+    if dkp == nil then
+        Util:ThrowError(self.name .. ' has nil DKP!!!!')
+        return true, true;
+    else
+        dkp = self.dkp[raid];
+    end
+
     local history = dkp.entries;
     local deleted = dkp.deleted;
 

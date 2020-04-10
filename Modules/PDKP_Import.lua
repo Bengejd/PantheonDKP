@@ -17,8 +17,8 @@ local pdkpTestDatabase = {
         addon_version = '0.9.6',
         full = false,
         guildDB = {
-                    ["numOfMembers"] = 410,
-                    ["members"] = {
+            numOfMembers = 410,
+            members = {
                         {
                             ["inRaid"] = false,
                             ["class"] = "Paladin",
@@ -2258,9 +2258,9 @@ local pdkpTestDatabase = {
                     },
             },
         dkpDB = {
-            ['lastEdit']=1585807486,
-             ["history"] = {
-                ["deleted"] = {
+            lastEdit=1585807486,
+            history = {
+                deleted = {
                     1585173018, -- [1]
                     1585191793, -- [2]
                     1585777354, -- [3]
@@ -2286,7 +2286,7 @@ local pdkpTestDatabase = {
                     1585779744, -- [23]
                     1585779734, -- [24]
                 },
-                ["all"] = {
+                all = {
                     {
                         ["reason"] = "Boss Kill",
                         ["id"] = 1585801611,
@@ -5217,6 +5217,8 @@ local pdkpTestDatabase = {
 --
 
 function Import:AcceptData(reqData)
+    print('Import received from addon version ', reqData.addon_version)
+
     if reqData.full then -- THIS IS A FULL OVERWRITE
         Import:AcceptFullDatabase(reqData)
         PDKP:Print('Full database overwrite in progress')
@@ -5228,6 +5230,8 @@ function Import:AcceptData(reqData)
 --        local reqNumOfMembers, reqMembers = reqGuild.numOfMembers, reqGuild.members;
         local reqLastEdit, reqHistory = reqDKP.lastEdit, reqDKP.history;
         local reqAll, reqDeleted = reqHistory.all, reqHistory.deleted
+
+
 
         local members = Guild.members;
 --        local history = DKP.dkpDB.history;
@@ -5248,28 +5252,35 @@ function Import:AcceptData(reqData)
 
                 for _, memberName in pairs(entry['members']) do
                     local member = members[memberName];
-                    local isInDeleted, isInHistory = member:CheckForEntryHistory(entry)
 
-                    if isInDeleted == false and isInHistory == false then
-                        local dkp = member.dkp[raid]
-                        if dkp.entries == nil then member.dkp[raid].entries = {} end
-                        table.insert(dkp.entries, entryKey)
-                        dkp.previousTotal = dkp.total;
-                        dkp.total = dkp.total + entry['dkpChange']
-                        if dkp.total < 0 then dkp.total = 0 end;
+                    if member ~= nil then
+                        local isInDeleted, isInHistory = member:CheckForEntryHistory(entry)
 
-                        if member.bName then -- update the player visually.
-                            local dkpText = _G[member.bName .. '_col3']
-                            if dkpText:IsVisible() then
-                                dkpText:SetText(dkp.total)
+                        if isInDeleted == false and isInHistory == false then
+                            local dkp = member:GetDKP(raid, 'all')
+                            if dkp then
+                                if dkp.entries == nil then member.dkp[raid].entries = {} end
+                                table.insert(dkp.entries, entryKey)
+                                dkp.previousTotal = dkp.total;
+                                dkp.total = dkp.total + entry['dkpChange']
+                                if dkp.total < 0 then dkp.total = 0 end;
+
+                                if member.bName then -- update the player visually.
+                                    local dkpText = _G[member.bName .. '_col3']
+                                    if dkpText:IsVisible() then
+                                        dkpText:SetText(dkp.total)
+                                    end
+                                end
+                                member:Save() -- Update the database locally.
+                            else
+                                Util:ThrowError('Could not find dkp for '.. member.name)
                             end
-                        end
-                        member:Save() -- Update the database locally.
-                    else
-                        if isInDeleted then
-                            Util:Debug('This entry was recently deleted, skipping.')
-                        elseif isInHistory then
-                            Util:Debug('This entry already exists, skipping.')
+                        else
+                            if isInDeleted then
+                                Util:Debug('This entry was recently deleted, skipping.')
+                            elseif isInHistory then
+                                Util:Debug('This entry already exists, skipping.')
+                            end
                         end
                     end
                 end
@@ -5280,10 +5291,15 @@ function Import:AcceptData(reqData)
             print('single entry')
             local entry = DKP:FixEntryMembers(reqHistory[1])
             updateEntry(entry)
-        elseif #reqHistory > 1 then -- we have the [deleted] and [all] tables in this table.
-            print(#reqDeleted, #reqAll)
-            for _, entry in pairs(reqAll) do
-                updateEntry(entry)
+        elseif reqAll and reqDeleted and (#reqAll > 1 or #reqDeleted > 1) then -- we have the [deleted] and [all] tables in this table.
+            print('All', #reqAll)
+            print('Deleted', #reqDeleted)
+            for key, entry in pairs(reqAll) do
+                print('Processing entry...', key)
+                if key ~= 1 then
+                    entry = DKP:FixEntryMembers(entry)
+                    updateEntry(entry)
+                end
             end
         end
         print(#reqHistory)
