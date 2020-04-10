@@ -212,6 +212,10 @@ function PDKP:HandleSlashCommands(msg, item)
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then return end;
 
+    if msg == 'pdkpTestDataImport' then
+        return Import:TestDataImport()
+    end
+
     if msg == 'item' and item then
         return Item:LinkItem();
     end

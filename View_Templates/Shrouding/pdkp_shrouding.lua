@@ -146,7 +146,7 @@ end
 
 -- Updates the shrouding table to reflect the ML's DKP totals.
 function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to access this, ideally.
-    if Defaults.debug then Shroud.shrouders = testShrouders end
+--    if Defaults.debug then Shroud.shrouders = testShrouders end
     local shrouders = Shroud.shrouders
 
     local player = { name=playerName, dkpTotal=DKP:GetPlayerDKP(playerName) }

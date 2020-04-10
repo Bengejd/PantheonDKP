@@ -40,239 +40,7 @@ DKP.bankID = nil
 --
 ]]
 
-local MonolithData = {
-    {["name"]="Acehart",["dkp"]=150},
-    {["name"]="Adjora",["dkp"]=316},
-    {["name"]="Advanty",["dkp"]=466},
-    {["name"]="Aeropress",["dkp"]=0},
-    {["name"]="Aku",["dkp"]=697},
-    {["name"]="Angelyheth",["dkp"]=169},
-    {["name"]="Apolyne",["dkp"]=378},
-    {["name"]="Arkleis",["dkp"]=295},
-    {["name"]="Artorion",["dkp"]=118},
-    {["name"]="Astlan",["dkp"]=360},
-    {["name"]="Athico",["dkp"]=548},
-    {["name"]="Awwswitch",["dkp"]=0},
-    {["name"]="Ballour",["dkp"]=1208},
-    {["name"]="Bigbootyhoho",["dkp"]=528},
-    {["name"]="Blanebites",["dkp"]=355},
-    {["name"]="Bojack",["dkp"]=0},
-    {["name"]="Bruhtato",["dkp"]=400},
-    {["name"]="Bubblè",["dkp"]=1057},
-    {["name"]="Bugaboom",["dkp"]=735},
-    {["name"]="Buldur",["dkp"]=0},
-    {["name"]="Bunsoffury",["dkp"]=210},
-    {["name"]="Bádtothebow",["dkp"]=470},
-    {["name"]="Calixta",["dkp"]=635},
-    {["name"]="Captnutsack",["dkp"]=369},
-    {["name"]="Capybara",["dkp"]=531},
-    {["name"]="Celestaes",["dkp"]=414},
-    {["name"]="Cenarios",["dkp"]=0},
-    {["name"]="Chaintoker",["dkp"]=100},
-    {["name"]="Cheeza",["dkp"]=110},
-    {["name"]="Chipgizmo",["dkp"]=502},
-    {["name"]="Chutter",["dkp"]=140},
-    {["name"]="Claireamy",["dkp"]=0},
-    {["name"]="Coldjuice",["dkp"]=222},
-    {["name"]="Coneofcool",["dkp"]=186},
-    {["name"]="Corseau",["dkp"]=275},
-    {["name"]="Cptncold",["dkp"]=194},
-    {["name"]="Crazymarbles",["dkp"]=214},
-    {["name"]="Curseberry",["dkp"]=72},
-    {["name"]="Cyndr",["dkp"]=609},
-    {["name"]="Cyskul",["dkp"]=888},
-    {["name"]="Dalia",["dkp"]=1158},
-    {["name"]="Danatelo",["dkp"]=166},
-    {["name"]="Dasmook",["dkp"]=306},
-    {["name"]="Deathfrenzy",["dkp"]=504},
-    {["name"]="Deeprider",["dkp"]=255},
-    {["name"]="Dolamroth",["dkp"]=283},
-    {["name"]="Drrl",["dkp"]=430},
-    {["name"]="Dwindle",["dkp"]=780},
-    {["name"]="Edgyboi",["dkp"]=470},
-    {["name"]="Ellara",["dkp"]=225},
-    {["name"]="Emmyy",["dkp"]=444},
-    {["name"]="Eolith",["dkp"]=948},
-    {["name"]="Erectdwarf",["dkp"]=0},
-    {["name"]="Evangelina",["dkp"]=499},
-    {["name"]="Fardon",["dkp"]=0},
-    {["name"]="Fawntine",["dkp"]=531},
-    {["name"]="Finrir",["dkp"]=246},
-    {["name"]="Finryr",["dkp"]=347},
-    {["name"]="Fiz",["dkp"]=0},
-    {["name"]="Flatulent",["dkp"]=318},
-    {["name"]="Forerunner",["dkp"]=434},
-    {["name"]="Fradge",["dkp"]=1038},
-    {["name"]="Galagus",["dkp"]=1221},
-    {["name"]="Galeb",["dkp"]=10},
-    {["name"]="Gartog",["dkp"]=379},
-    {["name"]="Getcrit",["dkp"]=221},
-    {["name"]="Ghettonaga",["dkp"]=100},
-    {["name"]="Girlslayer",["dkp"]=590},
-    {["name"]="Gneissguy",["dkp"]=303},
-    {["name"]="Gnomenuts",["dkp"]=100},
-    {["name"]="Goobimus",["dkp"]=603},
-    {["name"]="Goossepoop",["dkp"]=0},
-    {["name"]="Gorthaurr",["dkp"]=50},
-    {["name"]="Gregord",["dkp"]=0},
-    {["name"]="Grymmlock",["dkp"]=563},
-    {["name"]="Hamickle",["dkp"]=95},
-    {["name"]="Hazie",["dkp"]=99},
-    {["name"]="Healsonweelz",["dkp"]=100},
-    {["name"]="Hew",["dkp"]=103},
-    {["name"]="Hititnquitit",["dkp"]=89},
-    {["name"]="Holychaos",["dkp"]=0},
-    {["name"]="Holycritpal",["dkp"]=605},
-    {["name"]="Holyfingerer",["dkp"]=224},
-    {["name"]="Honeypot",["dkp"]=773},
-    {["name"]="Hotdogbroth",["dkp"]=805},
-    {["name"]="Huenolairc",["dkp"]=0},
-    {["name"]="Ihurricanel",["dkp"]=498},
-    {["name"]="Inebriated",["dkp"]=761},
-    {["name"]="Inigma",["dkp"]=494},
-    {["name"]="Insub",["dkp"]=928},
-    {["name"]="Iszell",["dkp"]=270},
-    {["name"]="Ithgar",["dkp"]=633},
-    {["name"]="Itsbritneyb",["dkp"]=380},
-    {["name"]="Jakemeoff",["dkp"]=477},
-    {["name"]="Jeabus",["dkp"]=0},
-    {["name"]="Jeffry",["dkp"]=58},
-    {["name"]="Jellytime",["dkp"]=20},
-    {["name"]="Joreid",["dkp"]=176},
-    {["name"]="Jumbognome",["dkp"]=300},
-    {["name"]="Junglemain",["dkp"]=233},
-    {["name"]="Kalijah",["dkp"]=199},
-    {["name"]="Kalita",["dkp"]=825},
-    {["name"]="Katherra",["dkp"]=0},
-    {["name"]="Kharlin",["dkp"]=240},
-    {["name"]="Killerdwarf",["dkp"]=0},
-    {["name"]="Killionaire",["dkp"]=189},
-    {["name"]="Kinter",["dkp"]=293},
-    {["name"]="Kithala",["dkp"]=20},
-    {["name"]="Kittysnake",["dkp"]=410},
-    {["name"]="Knifeyspoony",["dkp"]=0},
-    {["name"]="Knittie",["dkp"]=163},
-    {["name"]="Kuckuck",["dkp"]=130},
-    {["name"]="Laird",["dkp"]=135},
-    {["name"]="Landlubbers",["dkp"]=393},
-    {["name"]="Lawduk",["dkp"]=744},
-    {["name"]="Lemonz",["dkp"]=153},
-    {["name"]="Leovold",["dkp"]=120},
-    {["name"]="Limeybeard",["dkp"]=120},
-    {["name"]="Lindo",["dkp"]=1103},
-    {["name"]="Littledubs",["dkp"]=579},
-    {["name"]="Littleshiv",["dkp"]=409},
-    {["name"]="Lixx",["dkp"]=0},
-    {["name"]="Luckerdawg",["dkp"]=450},
-    {["name"]="Lööpsbröther",["dkp"]=0},
-    {["name"]="Madmartagen",["dkp"]=716},
-    {["name"]="Maebelle",["dkp"]=0},
-    {["name"]="Mallix",["dkp"]=632},
-    {["name"]="Mariku",["dkp"]=431},
-    {["name"]="Maryjohanna",["dkp"]=641},
-    {["name"]="Maryse",["dkp"]=0},
-    {["name"]="Mcstaberson",["dkp"]=701},
-    {["name"]="Mihai",["dkp"]=427},
-    {["name"]="Minifridge",["dkp"]=0},
-    {["name"]="Moldyrag",["dkp"]=240},
-    {["name"]="Mongous",["dkp"]=1458},
-    {["name"]="Moonblazer",["dkp"]=191},
-    {["name"]="Morphintyme",["dkp"]=406},
-    {["name"]="Mozzarella",["dkp"]=449},
-    {["name"]="Mujinn",["dkp"]=650},
-    {["name"]="Mystile",["dkp"]=604},
-    {["name"]="Natgeo",["dkp"]=160},
-    {["name"]="Neckbeardo",["dkp"]=795},
-    {["name"]="Neekio",["dkp"]=1049},
-    {["name"]="Neonlight",["dkp"]=130},
-    {["name"]="Neotemplar",["dkp"]=0},
-    {["name"]="Nightshelf",["dkp"]=416},
-    {["name"]="Nubslayer",["dkp"]=146},
-    {["name"]="Odin",["dkp"]=672},
-    {["name"]="Oldmanmike",["dkp"]=110},
-    {["name"]="Ones",["dkp"]=870},
-    {["name"]="Oragan",["dkp"]=402},
-    {["name"]="Oxford",["dkp"]=1260},
-    {["name"]="Pamplemousse",["dkp"]=112},
-    {["name"]="Pantheonbank",["dkp"]=0},
-    {["name"]="Papasquach",["dkp"]=974},
-    {["name"]="Partywolf",["dkp"]=100},
-    {["name"]="Phasetwoscum",["dkp"]=212},
-    {["name"]="Philonious",["dkp"]=806},
-    {["name"]="Pootootwo",["dkp"]=200},
-    {["name"]="Priesticuffs",["dkp"]=572},
-    {["name"]="Primera",["dkp"]=1019},
-    {["name"]="Puffhead",["dkp"]=650},
-    {["name"]="Puffypoose",["dkp"]=130},
-    {["name"]="Qew",["dkp"]=343},
-    {["name"]="Raspütin",["dkp"]=481},
-    {["name"]="Regaskogena",["dkp"]=83},
-    {["name"]="Reina",["dkp"]=942},
-    {["name"]="Retkin",["dkp"]=595},
-    {["name"]="Rez",["dkp"]=772},
-    {["name"]="Rollnfatties",["dkp"]=71},
-    {["name"]="Savos",["dkp"]=308},
-    {["name"]="Schnazzy",["dkp"]=321},
-    {["name"]="Scudd",["dkp"]=403},
-    {["name"]="Shadowheals",["dkp"]=344},
-    {["name"]="Shinynickels",["dkp"]=157},
-    {["name"]="Shixx",["dkp"]=0},
-    {["name"]="Sicarrio",["dkp"]=130},
-    {["name"]="Sjada",["dkp"]=20},
-    {["name"]="Slipperyjohn",["dkp"]=724},
-    {["name"]="Snaildaddy",["dkp"]=722},
-    {["name"]="Sneakattac",["dkp"]=160},
-    {["name"]="Softfondle",["dkp"]=260},
-    {["name"]="Solana",["dkp"]=170},
-    {["name"]="Solidsix",["dkp"]=401},
-    {["name"]="Solten",["dkp"]=0},
-    {["name"]="Sparklenips",["dkp"]=518},
-    {["name"]="Spellbender",["dkp"]=840},
-    {["name"]="Sprocket",["dkp"]=20},
-    {["name"]="Squach",["dkp"]=201},
-    {["name"]="Squidprophet",["dkp"]=325},
-    {["name"]="Sretsam",["dkp"]=239},
-    {["name"]="Stellâ",["dkp"]=824},
-    {["name"]="Stikyiki",["dkp"]=864},
-    {["name"]="Stitchess",["dkp"]=496},
-    {["name"]="Stoleurbike",["dkp"]=0},
-    {["name"]="Straton",["dkp"]=281},
-    {["name"]="Stridder",["dkp"]=150},
-    {["name"]="Suprarz",["dkp"]=617},
-    {["name"]="Talisker",["dkp"]=220},
-    {["name"]="Tankdaddy",["dkp"]=243},
-    {["name"]="Thelora",["dkp"]=275},
-    {["name"]="Thenight",["dkp"]=608},
-    {["name"]="Thepink",["dkp"]=115},
-    {["name"]="Thepurple",["dkp"]=870},
-    {["name"]="Tokentoken",["dkp"]=812},
-    {["name"]="Toysfordots",["dkp"]=0},
-    {["name"]="Trickster",["dkp"]=590},
-    {["name"]="Tripodd",["dkp"]=40},
-    {["name"]="Ttoken",["dkp"]=31},
-    {["name"]="Tuggernuts",["dkp"]=250},
-    {["name"]="Tuggspeedman",["dkp"]=0},
-    {["name"]="Turboboom",["dkp"]=114},
-    {["name"]="Turbodeeps",["dkp"]=263},
-    {["name"]="Turbohealz",["dkp"]=380},
-    {["name"]="Ugro",["dkp"]=704},
-    {["name"]="Urkh",["dkp"]=255},
-    {["name"]="Varix",["dkp"]=458},
-    {["name"]="Vehicle",["dkp"]=404},
-    {["name"]="Veltrix",["dkp"]=0},
-    {["name"]="Veriandra",["dkp"]=731},
-    {["name"]="Wahcha",["dkp"]=427},
-    {["name"]="Walterpayton",["dkp"]=303},
-    {["name"]="Weapoñ",["dkp"]=290},
-    {["name"]="Webroinacint",["dkp"]=0},
-    {["name"]="Wernstrum",["dkp"]=651},
-    {["name"]="Winancy",["dkp"]=298},
-    {["name"]="Xamina",["dkp"]=382},
-    {["name"]="Xyen",["dkp"]=388},
-    {["name"]="Zeeksa",["dkp"]=114},
-    {["name"]="Ziggi",["dkp"]=149},
-    {["name"]="Zukohere",["dkp"]=551},
-}
+local MonolithData = {}
 
 
 local dkpDBDefaults = {
@@ -596,26 +364,27 @@ function DKP:UpdateEntries()
         if dkp.total < 0 then dkp.total = 0 end
 
         if member.bName then -- update the player, visually.
-           local dkpText = _G[member.bName ..'_col3'];
+            local dkpText = _G[member.bName ..'_col3'];
             dkpText:SetText(dkp.total)
         end
-       member:Save() -- Update the database locally.
+        member:Save() -- Update the database locally.
     end
 
     dkpDB.history['all'][server_time] = historyEntry;
     dkpDB.lastEdit = server_time
-
-    GUI:UpdateEasyStats()
-
-    -- Update the slider max (if needed)
-    GUI:UpdateDKPSliderMax();
-    -- Re-run the table filters.
-    pdkp_dkp_table_filter()
-
     Guild:UpdateBankNote(server_time)
     DKP.bankID = server_time
 
-    GUI.pdkp_dkp_amount_box:SetText('');
+    if GUI.pdkp_frame:IsVisible() then
+        GUI:UpdateEasyStats()
+
+        -- Update the slider max (if needed)
+        GUI:UpdateDKPSliderMax();
+        -- Re-run the table filters.
+        pdkp_dkp_table_filter()
+
+        GUI.pdkp_dkp_amount_box:SetText('');
+    end
 
     Comms:SendGuildUpdate(historyEntry)
 end
@@ -646,8 +415,11 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
     dkpDB.currentDB = raid;
 
     GUI:GetTableDisplayData()
-    pdkp_dkp_scrollbar_Update()
-    GUI:UpdateDKPSliderMax()
+
+    if GUI.pdkp_frame:IsVisible() then
+        pdkp_dkp_scrollbar_Update()
+        GUI:UpdateDKPSliderMax()
+    end
 
     GUI:ClearSelected()
 
@@ -656,6 +428,7 @@ end
 
 function DKP:GetPlayerDKP(name)
     local member = Guild.members[name]
+    if member == nil then return 0 end;
     return member:GetDKP(dkpDB.currentDB, 'total')
 end
 
