@@ -137,7 +137,7 @@ function PDKP:InitializeGuildData()
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
-    if Shroud.shroudPhrases[string.lower(msg)] and (Raid:isMasterLooter() or Defaults.debug) then
+    if Shroud.shroudPhrases[string.lower(msg)] and Raid:isMasterLooter() then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
         Shroud:UpdateShrouders(name)
     end
