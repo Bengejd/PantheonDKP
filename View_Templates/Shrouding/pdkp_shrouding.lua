@@ -62,6 +62,7 @@ Shroud.shroudPhrases = {
 
 function Shroud:UpdateWindow()
     if Shroud.window == nil then
+        Util:Debug('Setting up shrouding window')
         Setup:ShroudingWindow()
     end
 
@@ -173,7 +174,7 @@ function Shroud:ClearShrouders()
         table={},
     };
 
-    if Shroud.window.open then Shroud.window:Hide() end
+    if Shroud.window then Shroud.window:Hide() end
 
     -- The ML should sent out a comm command that wipes everyones tables after this is closed.
     if Raid:isMasterLooter() then

@@ -103,7 +103,8 @@ function OnCommReceived(prefix, message, distribution, sender)
 
     if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
         if prefix ~= 'pdkpNewShrouds' then
-            Util:Debug('Ignoring comm from me ', prefix)
+            Util:Debug('Ignoring comm from me ' .. prefix)
+            return
         end;
     end;
 
