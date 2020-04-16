@@ -60,6 +60,8 @@ function Setup:MainUI()
         Setup:PushTimer()
 
         GUI:CheckOutOfDate()
+
+        Setup:ShroudingWindow()
     end
 end
 

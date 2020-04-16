@@ -20,6 +20,7 @@ Shroud.window = nil;
 Shroud.shrouders = {
     names={},
     table={},
+    database_name='',
 };
 
 local testShrouders = {
@@ -73,6 +74,12 @@ function Shroud:UpdateWindow()
     Util:Debug('Updating the shrouding window')
 
     local shrouders = Shroud.shrouders.table
+
+    local dbName = Shroud.shrouders.database_name;
+
+    if dbName ~= nil and dbName ~= '' then
+       _G['pdkp_shrouding_window_title']:SetText(dbName .. ' Shrouding')
+    end
 
     local function compareDesc(a,b) return a.dkpTotal < b.dkpTotal end
     local function compareAsc(a,b) return a.dkpTotal > b.dkpTotal end
@@ -152,19 +159,32 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
 
     local player = { name=playerName, dkpTotal=DKP:GetPlayerDKP(playerName) }
     if shrouders.names[playerName] == nil then -- player isn't in the table yet.
-        Util:Debug('Adding shrouder!');
-        table.insert(shrouders.names, playerName)
-        table.insert(shrouders.table, player);
+        if player.dkpTotal > 0 then
+            Util:Debug('Adding shrouder!');
+            table.insert(shrouders.names, playerName)
+            table.insert(shrouders.table, player);
+        end
     else
         for i=1, #shrouders.table do
             local shrouder = shrouders.table[i];
-            if shrouder.name == playerName then shrouder.dkpTotal = DKP:GetPlayerDKP(playerName) end
+            if shrouder.name == playerName then
+                shrouder.dkpTotal = DKP:GetPlayerDKP(playerName)
+            end
         end
     end
 
-    shrouders.names[playerName] = true;
+    if player.dkpTotal > 0 then
+        shrouders.names[playerName] = true;
+        Shroud.shrouders.database_name = DKP.dkpDB.currentDB;
 
-    core.Comms:SendShroudTable()
+        if _G['pdkp_shrouding_window_title']:GetText() ~= DKP.dkpDB.currentDB .. ' Shrouding' then
+            Shroud:ClearShrouders()
+            _G['pdkp_shrouding_window_title']:SetText(DKP.dkpDB.currentDB .. ' Shrouding')
+            return Shroud:UpdateShrouders(playerName)
+        end
+
+        core.Comms:SendShroudTable()
+    end
 end
 
 -- Resets the shrouding table.
@@ -172,9 +192,14 @@ function Shroud:ClearShrouders()
     Shroud.shrouders = {
         names={},
         table={},
+        database_name='',
     };
 
-    if Shroud.window then Shroud.window:Hide() end
+    if Shroud.window then
+        Shroud.window:Hide()
+        local scroll = Shroud.window.scroll
+        scroll:ReleaseChildren() -- Clear the previous entries.
+    end
 
     -- The ML should sent out a comm command that wipes everyones tables after this is closed.
     if Raid:isMasterLooter() then

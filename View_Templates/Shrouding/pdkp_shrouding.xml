@@ -30,11 +30,11 @@
 
         <Layers>
             <Layer level="BACKGROUND">
-                <FontString name="$parentTitle" inherits="GameFontNormal" text="PDKP Shrouding" justifyH="CENTER" justifyV="TOP">
+                <FontString name="pdkp_shrouding_window_title" inherits="GameFontNormal" text="PDKP Shrouding" justifyH="CENTER" justifyV="TOP">
                     <Anchors>
                         <Anchor point="TOPLEFT">
                             <Offset>
-                                <AbsDimension x="10" y="-10"/>
+                                <AbsDimension x="5" y="-10"/>
                             </Offset>
                         </Anchor>
                         <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">

@@ -319,9 +319,9 @@ function Comms:SendShroudTable()
     if Raid:IsInRaid() then
         Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
     elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
-        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
+--        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
     else -- For the sender to update their table.
-        Shroud:UpdateWindow()
+--        Shroud:UpdateWindow()
     end
 end
 
