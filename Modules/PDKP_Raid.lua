@@ -194,28 +194,33 @@ function Raid:AnnounceLoot()
     else
     end
 
-    local beginShroud = false
-
     if shouldContinue then
-        local info = GetLootInfo()
-        local items = {}
+        local numLootItems = GetNumLootItems();
+        local items = {};
 
-        for i=1, #info do
-            local lootItem = info[1]
-            lootItem.name = lootItem.item
-            local itemLink = GetLootSlotLink(i)
-            if lootItem.quality >= 3 or Defaults.debug then
-                lootItem.link = itemLink
-                lootItem.prio = item:GetPriority(lootItem.name)
-                table.insert(items, lootItem)
-                if beginShroud == false then beginShroud = true end
-            end
+        for i=1, numLootItems do
+            local _, lootName, lootQuantity, currencyID, lootQuality, locked, isQuestItem,
+            questID, isActive = GetLootSlotInfo(i)
+            -- TODO: Implement the commented out code here instead of using GetLootInfo().
         end
-
-        for i=1, #items do
-            local lootItem = items[i]
-            SendChatMessage(lootItem.link .. ' PRIO: ' .. lootItem.prio, 'RAID', 'Common', 'Neekio')
-        end
+        --        local info = GetLootInfo()
+--        local items = {}
+--
+--        for i=1, #info do
+--            local lootItem = info[1]
+--            lootItem.name = lootItem.item
+--            local itemLink = GetLootSlotLink(i)
+--            if lootItem.quality >= 3 or Defaults.debug then
+--                lootItem.link = itemLink
+--                lootItem.prio = item:GetPriority(lootItem.name)
+--                table.insert(items, lootItem)
+--            end
+--        end
+--
+--        for i=1, #items do
+--            local lootItem = items[i]
+--            SendChatMessage(lootItem.link .. ' PRIO: ' .. lootItem.prio, 'RAID', 'Common', 'Neekio')
+--        end
     end
 end
 

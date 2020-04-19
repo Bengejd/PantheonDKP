@@ -65,24 +65,24 @@ function Comms:Serialize(data)
     return PDKP:Serialize(data);
 end
 
-function pdkp_serialize(data)
-    return PDKP:Serialize(data);
-end
-
 function Comms:Deserialize(string)
     local success, data = PDKP:Deserialize(string)
 
     if success == false or success == nil then
-        Util:ThrowError('Deserialization of data...');
+        Util:ThrowError('An error occured Deserializing the data...');
         return nil;
     end
     return data;
 end
 
+function pdkp_serialize(data)
+    return PDKP:Serialize(data);
+end
+
+
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if Defaults.debug and distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
         print('Skipping broadcast Cause ' .. sendTo .. ' is not bank!!!')
-
         return
     elseif Defaults.no_broadcast then
         print('Skipping broadcast!')
@@ -146,15 +146,15 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         ['pdkpPushRequest'] = function()
             PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
 
-            -- TODO: Fix this so that it only requests the keys that you don't have.
 
-            Comms:PrepareDatabase(false)
-            Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
+
+--            Comms:PrepareDatabase(false)
+--            Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,
         ['pdkpSyncRequest'] = function()
             if core.canEdit then
-                local database = Comms:PrepareDatabaseSyncResponse(message)
-                Comms:SendCommsMessage('pdkpSyncResponse', PDKP:Serialize(database), 'WHISPER', sender, 'BULK')
+--                local database = Comms:PrepareDatabaseSyncResponse(message)
+--                Comms:SendCommsMessage('pdkpSyncResponse', PDKP:Serialize(database), 'WHISPER', sender, 'BULK')
             end
         end,
     }
@@ -185,7 +185,7 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
             Shroud:UpdateWindow() -- Update the window.
         end,
         ['pdkpSyncResponse'] = function()
-            Import:AcceptData(message)
+--            Import:AcceptData(message)
         end,
         ['pdkpPlaceholder'] = function() end,
     }
@@ -195,6 +195,10 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
     -- We've finished processing the comms.
     Comms.processing = false
 end
+
+---------------------------
+--   REWORK FUNCTIONS    --
+---------------------------
 
 function Comms:SendGuildPush(full)
     Comms:ResetDatabse()
@@ -402,4 +406,16 @@ function Comms:DatabaseSyncRequest()
     for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
 
     Comms:SendCommsMessage('pdkpSyncRequest', PDKP:Serialize(myHistory), 'GUILD', nil, 'BULK', nil)
+end
+
+function Comms:DataEncoder(data)
+    local serialized = PDKP:Serialize(data)
+    local compressed = core.LibDeflate:CompressDeflate(serialized)
+    return core.LibDeflate:EncodeForWoWAddonChannel(compressed)
+end
+
+function Comms:DataDecoder(data)
+    local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
+    local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
+    return Comms:Deserialize(decompressed)
 end

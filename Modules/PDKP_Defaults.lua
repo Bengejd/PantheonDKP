@@ -39,8 +39,8 @@ core.defaults = {
     addon_version = '1.0.5',
     addon_name = 'PantheonDKP',
     bank_name = 'Pantheonbank',
-    debug = false,
-    no_broadcast = false,
+    debug = true,
+    no_broadcast = true,
     debug_dkp = false;
     migrate = false, -- whether this version requires a migration or not.
 

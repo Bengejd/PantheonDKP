@@ -19,6 +19,13 @@ local Comms = core.Comms;
 --
 
 function Import:AcceptData(reqData)
+    local addon_version = tonumber(reqData.addon_version)
+    local my_addon_version = tonumber(Defaults.addon_version)
+
+    if (my_addon_version and addon_version) and (my_addon_version > addon_version) then
+        -- TODO: Possibly do something here??
+    end
+
     print('Import received from addon version ', reqData.addon_version)
 
     if reqData.full then -- THIS IS A FULL OVERWRITE
@@ -38,8 +45,6 @@ function Import:AcceptData(reqData)
         local allHistory = history.all;
         local deleted = history.deleted;
         local lastEdit = DKP.dkpDB.lastEdit;
-
-        Util:PrintTable(reqData)
 
         local function updateEntry(entry)
             if entry['deleted'] then
