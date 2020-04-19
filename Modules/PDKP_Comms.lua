@@ -119,12 +119,11 @@ function OnCommReceived(prefix, message, distribution, sender)
 
     if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
         if prefix ~= 'pdkpNewShrouds' then
-            Util:Debug('Ignoring comm from me ' .. prefix)
-            return
+            return Util:Debug('Ignoring comm from me ' .. prefix)
         end;
     end;
 
-    local data = Comms:DataDecoder(message) -- deserialize it.
+    local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
     if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
@@ -328,23 +327,6 @@ function Comms:LastEditReceived(sender, message)
     GUI:UpdatePushFrame()
 end
 
----------------------------
--- SHROUDING FUNCTIONS  --
----------------------------
-function Comms:SendShroudTable()
-    if Raid:IsInRaid() then
-        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
-    elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
---        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
-    else -- For the sender to update their table.
---        Shroud:UpdateWindow()
-    end
-end
-
-function Comms:ClearShrouders()
-    Comms:SendCommsMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
-end
-
 -- Innermediate function between Request & Reponse.
 function Comms:PrepareDatabaseSyncResponse(historyKeys)
     local pdkpSyncResponseDatabase = {
@@ -422,3 +404,21 @@ end
 
 function Comms:TestNonEncoded()
 end
+
+---------------------------
+-- SHROUDING FUNCTIONS  --
+---------------------------
+function Comms:SendShroudTable()
+    if Raid:IsInRaid() then
+        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
+    elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
+--        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
+    else -- For the sender to update their table.
+--        Shroud:UpdateWindow()
+    end
+end
+
+function Comms:ClearShrouders()
+    Comms:SendCommsMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
+end
+
