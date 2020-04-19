@@ -53,6 +53,8 @@ local pdkpPushDatabase = {
 
 Comms.processing = false
 
+local skipBroadcastMsg = 'Skipping broadcast because '
+
 ---------------------------
 -- GENERIC Functions   --
 ---------------------------
@@ -75,25 +77,36 @@ function Comms:Deserialize(string)
     return data;
 end
 
-function pdkp_serialize(data)
-    return PDKP:Serialize(data);
+function Comms:DataEncoder(data)
+    local serialized = PDKP:Serialize(data)
+    local compressed = core.LibDeflate:CompressDeflate(serialized)
+    return core.LibDeflate:EncodeForWoWAddonChannel(compressed)
 end
 
+function Comms:DataDecoder(data)
+    local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
+    local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
+    return Comms:Deserialize(decompressed)
+end
+
+---------------------------
+--    Send Functions     --
+---------------------------
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    if Defaults.debug and distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
-        print('Skipping broadcast Cause ' .. sendTo .. ' is not bank!!!')
-        return
-    elseif Defaults.no_broadcast then
-        print('Skipping broadcast!')
-        return
-    end
 
-    if distro == 'WHISPER' then
-        Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo)
+    if Defaults.debug then -- Don't send messages unnecessarily when developing.
+        if distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
+           return print(skipBroadcastMsg .. sendTo .. " is not bank!")
+        elseif Defaults.no_baordcast then
+            return print(skipBroadcastMsg .. ' it is disabled')
+        end
     end
+    if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
-    PDKP:SendCommMessage(prefix, data, distro, sendTo, bulk, func)
+    local transmitData = Comms:DataEncoder(data)
+
+    PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
 
 function OnCommReceived(prefix, message, distribution, sender)
