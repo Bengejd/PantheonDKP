@@ -86,7 +86,10 @@ end
 function Comms:DataDecoder(data)
     local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
     local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
-    return Comms:Deserialize(decompressed)
+    if decompressed == nil then -- It wasn't a message that can be decompressed.
+        return Comms:Deserialize(detransmit) -- Return the regular deserialized messge
+    end
+    return Comms:Deserialize(decompressed) -- Deserialize the compressed message
 end
 
 ---------------------------
@@ -121,17 +124,13 @@ function OnCommReceived(prefix, message, distribution, sender)
         end;
     end;
 
-    Comms.processing = false -- This should be true, but it's not working for some reason...
-
-    local data = Comms:Deserialize(message) -- deserialize it.
+    local data = Comms:DataDecoder(message) -- deserialize it.
 
     if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
     else
         print("Unknown Prefix " .. prefix, " found in request...")
     end
-
-    Comms.processing = false
 end
 
 function Comms:ThrowError(prefix, sender)
@@ -421,14 +420,5 @@ function Comms:DatabaseSyncRequest()
     Comms:SendCommsMessage('pdkpSyncRequest', PDKP:Serialize(myHistory), 'GUILD', nil, 'BULK', nil)
 end
 
-function Comms:DataEncoder(data)
-    local serialized = PDKP:Serialize(data)
-    local compressed = core.LibDeflate:CompressDeflate(serialized)
-    return core.LibDeflate:EncodeForWoWAddonChannel(compressed)
-end
-
-function Comms:DataDecoder(data)
-    local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
-    local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
-    return Comms:Deserialize(decompressed)
+function Comms:TestNonEncoded()
 end

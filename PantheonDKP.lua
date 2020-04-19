@@ -218,7 +218,7 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     if msg == 'TestDatabaseCompression' then
---        Comms:TestDatabaseCompression()
+        Comms:TestNonEncoded()
     end
 
     if msg == 'pdkpTestAutoSync' then
