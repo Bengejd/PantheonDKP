@@ -26,6 +26,8 @@ local SAFE_COMMS = {
     ['pdkpBusyTryAgai'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
+
+    ['pdkpModLastEdit']=true,
 };
 
 local UNSAFE_COMMS = {
@@ -100,6 +102,9 @@ end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
+    if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
+
+    if Defaults.no_broadcast then return print(skipBroadcastMsg .. ' no_broadcast is enabled') end
     if Defaults.debug then -- Don't send messages unnecessarily when developing.
         if distro == 'GUILD' then -- in debug, change distro to whisper, and send to bank, or Pantheonbank or KarolBaskins
             distro = 'WHISPER'
@@ -108,8 +113,6 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
         elseif distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
             return print(skipBroadcastMsg .. sendTo .. " is not bank!")
-        elseif Defaults.no_baordcast then
-            return print(skipBroadcastMsg .. ' it is disabled')
         end
     end
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
@@ -163,11 +166,8 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         -- Someone Sent you a push request
         ['pdkpPushRequest'] = function()
             PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
-
-
-
---            Comms:PrepareDatabase(false)
---            Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
+            Comms:PrepareDatabase(false)
+            Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,
         ['pdkpSyncRequest'] = function()
             if core.canEdit then
@@ -284,43 +284,13 @@ function Comms:PrepareDatabase(full)
     end
 end
 
+function Comms:RequestOfficerLastEdit(isRequest)
+
+end
+
 function Comms:RequestOfficersLastEdit()
     Guild:GetGuildData() -- Retrieve up to date guild data.
-
-    local oneReqTriggered = false
-
-    local officers = Guild.officers;
-    for i = 1, #officers do
-        local officer = officers[i]
-        officer['lastEdit'] = -1
-        if officer['online'] and officer['name'] ~= Util:GetMyName() then
-            oneReqTriggered = true
-            Util:Debug('sending lastEdit request to ' .. officer['name'])
-            Comms:SendCommsMessage('pdkpLastEditReq', '', 'WHISPER', officer['name'], 'BULK')
-        end
-    end
-
-    if oneReqTriggered == true then -- check for if the officer actually has the addon or not.
-        local shouldContinue = false
-        for i = 1, #officers do
-            local officer = officers[i]
-            if officer['online'] and officer['name'] ~= Util:GetMyName() then
-                if officer['lastEdit'] ~= -1 then
-                    shouldContinue = true
-                    break
-                end
-            end
-        end
-        oneReqTriggered = shouldContinue
-    end
-
-    -- Pop up the frame if we didn't get any hits from the officers & you are an officer.
-    if oneReqTriggered == false and Guild:CanEdit() then
-        GUI:UpdatePushFrame()
-    elseif oneReqTriggered == false then
-        PDKP:Print('No up to date officers are online currently. Please try again later!')
-    else
-    end
+    Comms:SendCommsMessage('pdkpLastEditReq', '', 'GUILD', nil, 'BULK')
 end
 
 function Comms:LastEditReceived(sender, message)
@@ -396,6 +366,7 @@ function Comms:PrepareDatabaseSyncResponse(historyKeys)
 end
 
 function Comms:DatabaseSyncRequest()
+    if IsInGuild() == nil then return end; -- Fix for players not being in guild error message.
     PDKP:Print('Attempting Automatic Database Sync...')
 
     local myHistory = {

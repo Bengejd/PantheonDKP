@@ -3,8 +3,16 @@
 [Bug fixes]:
     - Shrouding popup now works properly
     - "You are not in a guild" error message now handled properly for alts not in guild.
+    - Live updates now work again, sorry about breaking them before.
+    - Push merges and overwrites are considerably faster (originally was around 10 minutes, now around 1.5)
+    - History fixed for updates
+    - DKP re-sync'd between the different raids (check yours to make sure it's correct).
+    - Raid loot announcements should now properly link the item prio only if it is defined in our database.
 
-
+[Disabled]:
+    - Auto-sync when logging in. This appears to create an error on the officer's side of things. When a member logs in
+        and out in quick succession, it tries to send a bulk message (a few messages that are queued) to the now offline
+        member causing an error message ("Player xyz is not online") to fill up their chat box.
 
 ====== Version 0.9.0 ======
 

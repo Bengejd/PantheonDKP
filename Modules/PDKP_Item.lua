@@ -42,7 +42,7 @@ function item:GetPriority(itemName)
     if prio == nil then
         local name = item:GetItemInfo(itemName)
         prio = item.priority[name]
-        if prio == nil then return 'Undefined' end
+        if prio == nil then return nil end
     end
 
     -- Make it look pretty

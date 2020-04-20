@@ -738,6 +738,9 @@ function UpdatePushBar(arg, sent, total)
     if percentage >= 100 then
         statusbar:Hide();
         PDKP:CancelTimer(GUI.pushbar)
+        percentage = 0
+        statusbar.value:SetText(statusText .. percentage .. '%');
+        statusbar:SetValue(percentage)
     end
 end
 

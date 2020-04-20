@@ -49,8 +49,6 @@ local function PDKP_OnEvent(self, event, arg1, ...)
 
     local arg2 = ...
 
---    if GetGuildInfo("PLAYER") == nil then return end; -- Fix for players not being in guild error message.
-
     local PDKP_SIMPLE_EVENT_FUNCS = {
         ['ADDON_LOADED']=function() -- The addon finished loading, most things should be available.
             Util:Debug('Addon loaded')
@@ -134,6 +132,8 @@ function PDKP:OnInitialize(event, name)
 end
 
 function PDKP:InitializeGuildData()
+    if IsInGuild() == nil then return end; -- Fix for players not being in guild error message.
+
     Guild:GetGuildData(false);
     DKP:VerifyTables()
     PDKP:BuildAllData();
@@ -143,6 +143,7 @@ end
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
     if Shroud.shroudPhrases[string.lower(msg)] and Raid:isMasterLooter() then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
+        Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
     end
 end
@@ -260,30 +261,6 @@ function PDKP:HandleSlashCommands(msg, item)
     if msg == 'pdkp_reset_all_db' and core.defaults.debug then
         DKP:ResetDB()
         Guild:ResetDB()
-    end
-
-    if msg == 'test_boss' then
-        Raid:GetCurrentRaid()
-    end
-
-    if msg == 'test_getML' then
-        Raid:isMasterLooter()
-    end
-
-    if msg == 'pdkp_testing_com' then
-        Comms:pdkp_send_comm()
-    end
-
-    if msg == 'pdkp_getTime' then
-        print(Util:Format12HrDateTime(GetServerTime()))
-    end
-
-    if msg == 'importDKP' then
-        DKP:ImportMonolithData()
-    end
-
-    if msg == 'TestImportData' then
-        Import:AcceptData()
     end
 
     if msg == 'enableDebugging' then
