@@ -23,6 +23,7 @@ local PlaySound = PlaySound
 
 --[[
     KNOWN BUGS:
+    TODO: Sending messages to offline members results in massave error message.
 ]]
 
 --[[
@@ -48,11 +49,12 @@ local function PDKP_OnEvent(self, event, arg1, ...)
 
     local arg2 = ...
 
-    if GetGuildInfo("PLAYER") == nil then return end; -- Fix for players not being in guild error message.
+--    if GetGuildInfo("PLAYER") == nil then return end; -- Fix for players not being in guild error message.
 
     local PDKP_SIMPLE_EVENT_FUNCS = {
         ['ADDON_LOADED']=function() -- The addon finished loading, most things should be available.
             Util:Debug('Addon loaded')
+
             PDKP:OnInitialize(event, arg1)
             return UnregisterEvent(self, event)
         end,

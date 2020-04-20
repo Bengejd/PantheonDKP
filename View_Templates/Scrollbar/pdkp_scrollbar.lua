@@ -92,6 +92,17 @@ function GUI:pdkp_dkp_table_sort(sortBy)
     pdkp_dkp_scrollbar_Update()
 end
 
+function GUI:UpdateVisualDKP(member, raid)
+    local dkp = member:GetDKP(raid, 'total') -- Get the new DKP totals.
+    for i=1, #tableData do
+        local charObj = tableData[i]
+        if charObj['name'] == member.name then
+            charObj.dkp[raid].total = dkp
+            break;
+        end
+    end
+end
+
 -- runs everytime the scroll bar positioning moves.
 function pdkp_dkp_scrollbar_Update(forceHide)
 

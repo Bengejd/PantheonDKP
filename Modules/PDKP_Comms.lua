@@ -80,7 +80,8 @@ end
 function Comms:DataEncoder(data)
     local serialized = PDKP:Serialize(data)
     local compressed = core.LibDeflate:CompressDeflate(serialized)
-    return core.LibDeflate:EncodeForWoWAddonChannel(compressed)
+    local encoded = core.LibDeflate:EncodeForWoWAddonChannel(compressed)
+    return encoded;
 end
 
 function Comms:DataDecoder(data)
@@ -89,7 +90,8 @@ function Comms:DataDecoder(data)
     if decompressed == nil then -- It wasn't a message that can be decompressed.
         return Comms:Deserialize(detransmit) -- Return the regular deserialized messge
     end
-    return Comms:Deserialize(decompressed) -- Deserialize the compressed message
+    local deserialized = Comms:Deserialize(decompressed)
+    return deserialized -- Deserialize the compressed message
 end
 
 ---------------------------
@@ -99,8 +101,13 @@ end
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
     if Defaults.debug then -- Don't send messages unnecessarily when developing.
-        if distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
-           return print(skipBroadcastMsg .. sendTo .. " is not bank!")
+        if distro == 'GUILD' then -- in debug, change distro to whisper, and send to bank, or Pantheonbank or KarolBaskins
+            distro = 'WHISPER'
+            sendTo = 'Pantheonbank'
+            if Util:GetMyName() == sendTo then sendTo = 'Karenbaskins' end -- send to alt char instead of bank.
+
+        elseif distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
+            return print(skipBroadcastMsg .. sendTo .. " is not bank!")
         elseif Defaults.no_baordcast then
             return print(skipBroadcastMsg .. ' it is disabled')
         end
@@ -114,7 +121,7 @@ end
 
 function OnCommReceived(prefix, message, distribution, sender)
     if Comms.processing then -- If we're processing a com, don't overload yourself.
-        return Comms:SendCommsMessage('pdkpBusyTryAgai', PDKP:Serialize('Busy'), 'WHISPER', sender, 'BULK')
+        return Comms:SendCommsMessage('pdkpBusyTryAgai', 'Busy', 'WHISPER', sender, 'BULK')
     end
 
     if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
@@ -149,7 +156,7 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
         ['pdkpBusyTryAgai'] = function() PDKP:Print(sender .. ' is currently busy, please try again later') end,
         -- Send them back your lastEdit time
         ['pdkpLastEditReq'] = function()
-            Comms:SendCommsMessage('pdkpLastEditRec', PDKP:Serialize(DKP.dkpDB.lastEdit), 'WHISPER', sender, 'BULK')
+            Comms:SendCommsMessage('pdkpLastEditRec', DKP.dkpDB.lastEdit, 'WHISPER', sender, 'BULK')
         end,
         -- Process their lastEdit time
         ['pdkpLastEditRec'] = function() Comms:LastEditReceived(sender, message) end,
@@ -160,12 +167,12 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 
 
 --            Comms:PrepareDatabase(false)
---            Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'WHISPER', sender, 'BULK', UpdatePushBar)
+--            Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,
         ['pdkpSyncRequest'] = function()
             if core.canEdit then
 --                local database = Comms:PrepareDatabaseSyncResponse(message)
---                Comms:SendCommsMessage('pdkpSyncResponse', PDKP:Serialize(database), 'WHISPER', sender, 'BULK')
+--                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
     }
@@ -215,7 +222,7 @@ function Comms:SendGuildPush(full)
     Comms:ResetDatabse()
     PDKP:Print("Preparing data to push to GUILD this may take a few minutes...")
     Comms:PrepareDatabase(full)
-    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, 'BULK', UpdatePushBar)
+    Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'GUILD', nil, 'BULK', UpdatePushBar)
 end
 
 function Comms:SendGuildUpdate(histEntry)
@@ -223,7 +230,7 @@ function Comms:SendGuildUpdate(histEntry)
     pdkpPushDatabase.dkpDB.lastEdit = DKP.dkpDB.lastEdit
     table.insert(pdkpPushDatabase.dkpDB.history, histEntry)
 
-    Comms:SendCommsMessage('pdkpPushReceive', PDKP:Serialize(pdkpPushDatabase), 'GUILD', nil, nil)
+    Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'GUILD', nil, nil)
 end
 
 function Comms:ResetDatabse()
@@ -289,7 +296,7 @@ function Comms:RequestOfficersLastEdit()
         if officer['online'] and officer['name'] ~= Util:GetMyName() then
             oneReqTriggered = true
             Util:Debug('sending lastEdit request to ' .. officer['name'])
-            Comms:SendCommsMessage('pdkpLastEditReq', PDKP:Serialize(''), 'WHISPER', officer['name'], 'BULK')
+            Comms:SendCommsMessage('pdkpLastEditReq', '', 'WHISPER', officer['name'], 'BULK')
         end
     end
 
@@ -399,7 +406,7 @@ function Comms:DatabaseSyncRequest()
     for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
     for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
 
-    Comms:SendCommsMessage('pdkpSyncRequest', PDKP:Serialize(myHistory), 'GUILD', nil, 'BULK', nil)
+    Comms:SendCommsMessage('pdkpSyncRequest', myHistory, 'GUILD', nil, 'BULK', nil)
 end
 
 function Comms:TestNonEncoded()
@@ -410,15 +417,15 @@ end
 ---------------------------
 function Comms:SendShroudTable()
     if Raid:IsInRaid() then
-        Comms:SendCommsMessage('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
+        Comms:SendCommsMessage('pdkpNewShrouds', Shroud.shrouders, 'RAID', nil, 'BULK', nil)
     elseif Defaults.debug then -- debug mode, we can't send messages to ourselves.
---        Comms:OnUnsafeCommReceived('pdkpNewShrouds', PDKP:Serialize(Shroud.shrouders), 'RAID', nil, 'BULK', nil)
+--        Comms:OnUnsafeCommReceived('pdkpNewShrouds', Shroud.shrouders, 'RAID', nil, 'BULK', nil)
     else -- For the sender to update their table.
 --        Shroud:UpdateWindow()
     end
 end
 
 function Comms:ClearShrouders()
-    Comms:SendCommsMessage('pdkpClearShrouds', PDKP:Serialize(''), 'RAID', nil, nil)
+    Comms:SendCommsMessage('pdkpClearShrouds', '', 'RAID', nil, nil)
 end
 

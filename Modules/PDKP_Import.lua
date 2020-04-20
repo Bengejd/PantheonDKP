@@ -33,10 +33,9 @@ function Import:AcceptData(reqData)
         PDKP:Print('Full database overwrite in progress')
     else -- THIS IS A MERGE
         PDKP:Print('Merging data...')
-        local reqDKP = reqData.dkpDB;
-        local reqGuild = reqData.guildDB;
 
---        local reqNumOfMembers, reqMembers = reqGuild.numOfMembers, reqGuild.members;
+        local reqDKP = reqData.dkpDB;
+
         local reqLastEdit, reqHistory = reqDKP.lastEdit, reqDKP.history;
         local reqAll, reqDeleted = reqHistory.all, reqHistory.deleted
 
@@ -72,6 +71,8 @@ function Import:AcceptData(reqData)
                                 dkp.total = dkp.total + entry['dkpChange']
                                 if dkp.total < 0 then dkp.total = 0 end;
 
+                                GUI:UpdateVisualDKP(member, raid)
+
                                 if member.bName then -- update the player visually.
                                     local dkpText = _G[member.bName .. '_col3']
                                     if dkpText:IsVisible() then
@@ -92,8 +93,10 @@ function Import:AcceptData(reqData)
                     end
                 end
                 if entryKey > lastEdit then DKP.dkpDB.lastEdit = entryKey; end
+                allHistory[entryKey] = entry; -- Add the entry to the all history.
             end
         end
+
         if #reqHistory == 1 and (reqAll == nil and reqDeleted == nil) then -- This is a single entry update.
             local entry = DKP:FixEntryMembers(reqHistory[1])
             updateEntry(entry)
@@ -122,14 +125,9 @@ function Import:AcceptData(reqData)
        pdkp_dkp_scrollbar_Update()
        pdkp_dkp_table_filter()
        GUI:pdkp_dkp_table_sort('dkpTotal')
-
        GUI.pushFrame:Hide()
-       PDKP:Print("The DKP push has completed successfully")
-   else
-       PDKP:Print('The DKP push has completed successfully, a reload may be required.')
    end
-
-
+    PDKP:Print("The DKP push has completed successfully")
 end
 
 function Import:AcceptFullDatabase(data)
