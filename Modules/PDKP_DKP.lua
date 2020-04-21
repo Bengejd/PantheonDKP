@@ -234,25 +234,27 @@ function DKP:DeleteEntry(entry, noBroacast)
 
     for _, name in pairs(entryMembers) do
         local member = Guild.members[name]
-        local history = member.dkp[raid].entries
-        local deleted = member.dkp[raid].deleted
+        if member then
+            local history = member.dkp[raid].entries
+            local deleted = member.dkp[raid].deleted
 
-        for key, val in pairs(history) do
-           if val == entryKey then table.remove(history, key) end
-        end
+            for key, val in pairs(history) do
+                if val == entryKey then table.remove(history, key) end
+            end
 
-        table.insert(deleted, entryKey)
+            table.insert(deleted, entryKey)
 
-        member.dkp[raid].previousTotal = member.dkp[raid].total
-        member.dkp[raid].total = changeAmount + member.dkp[raid].previousTotal
-        member:Save()
+            member.dkp[raid].previousTotal = member.dkp[raid].total
+            member.dkp[raid].total = changeAmount + member.dkp[raid].previousTotal
+            member:Save()
 
-        -- filter out based on online status
-        for key, charObj in pairs(PDKP.data) do
-           if charObj.name == member.name then
-                PDKP.data[key] = member;
-                break; -- Break the loop after we find our match.
-           end
+            -- filter out based on online status
+            for key, charObj in pairs(PDKP.data) do
+                if charObj.name == member.name then
+                    PDKP.data[key] = member;
+                    break; -- Break the loop after we find our match.
+                end
+            end
         end
     end
 
@@ -458,7 +460,7 @@ function DKP:GetHighestDKP()
 
     for key, charObj in pairs(Guild.members) do
        if charObj.dkp then
-           if charObj.dkp[currentRaid].total > maxDKP then
+           if charObj.dkp[currentRaid] and charObj.dkp[currentRaid].total and charObj.dkp[currentRaid].total > maxDKP then
               maxDKP = charObj.dkp[currentRaid].total
            end
        end

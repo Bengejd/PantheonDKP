@@ -111,7 +111,7 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
             sendTo = 'Pantheonbank'
             if Util:GetMyName() == sendTo then sendTo = 'Karenbaskins' end -- send to alt char instead of bank.
 
-        elseif distro == 'WHISPER' and sendTo ~= 'Pantheonbank' then
+        elseif distro == 'WHISPER' and (sendTo ~= 'Pantheonbank' and sendTo ~= 'Karenbaskins') then
             return print(skipBroadcastMsg .. sendTo .. " is not bank!")
         end
     end
@@ -399,4 +399,5 @@ end
 function Comms:ClearShrouders()
     Comms:SendCommsMessage('pdkpClearShrouds', '', 'RAID', nil, nil)
 end
+
 

@@ -58,8 +58,53 @@ function Member:GetDKP(raidName, variableName)
     return self.dkp[raidName][variableName]
 end
 
+function Member:ValidateTable()
+    local histKeys = self:GetHistory('Blackwing Lair')
+    local dkpDB = DKP.dkpDB
+    local allHistory = dkpDB.history.all
+    local deletedHistory = dkpDB.history.deleted
+    if #histKeys == 0 then return false end -- Only want to look at people that have entries.
+    local validDKP = 0
+    local dkp = self.dkp['Blackwing Lair']['total']
+
+    for i=1, #histKeys do
+        local entryKey = histKeys[i]
+        local entry = allHistory[entryKey]
+        if entry and entry['raid'] == 'Blackwing Lair' then
+            if entry and entry['deleted'] == false then
+                validDKP  = validDKP + entry.dkpChange
+            elseif entry and entry['deleted'] == true then
+                validDKP  = validDKP - entry.dkpChange
+            end
+        end
+    end
+
+    if validDKP ~= dkp then
+        if validDKP < 0 then
+            print(self.name, ' is broken?', dkp, validDKP)
+        elseif dkp > validDKP then
+            print(self.name, dkp, validDKP)
+--            if dkp > validDKP + 200 then
+--                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+--            elseif dkp > 400 and validDKP == 400 then
+--                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+--            elseif dkp > validDKP + 150 then
+--                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+--            else
+--                if dkp > 500 then
+--                    --                       self.dkp['Blackwing Lair']['total'] = dkp - 200
+--                else
+--                    --                       self.dkp['Blackwing Lair']['total'] = validDKP - 100
+--                end
+--            end
+        end
+    end
+
+--    self:Save()
+end
+
 function Member:GetHistory(raid)
-    Util:Debug('Getting history for ' .. self.name)
+--    Util:Debug('Getting history for ' .. self.name)
     return self.dkp[raid].entries
 end
 

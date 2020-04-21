@@ -341,7 +341,7 @@ function GUI:UpdatePushFrame()
     local scroll = pf.scroll;
     local myLastEdit = DKP.dkpDB.lastEdit
 
-    if core.debug then myLastEdit = myLastEdit - 1 end -- Testing purposes.
+    if core.debug then myLastEdit = myLastEdit - 10000 end -- Testing purposes.
 
     scroll:ReleaseChildren() -- Clear the previous entries.
 
@@ -723,6 +723,9 @@ end
 -- TIMER Functions    --
 ---------------------------
 function UpdatePushBar(arg, sent, total)
+    if GUI.pushbar == nil then
+        Setup:PushTimer()
+    end
     GUI.pushbar:Show()
     local percentage = math.floor((sent / total) * 100)
 

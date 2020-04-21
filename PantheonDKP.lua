@@ -216,10 +216,21 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     -- OFFICER ONLY COMMANDS
-    if not core.canEdit then return end;
+    if not core.canEdit then
+        return Util:Debug('Cannot process this command because you are not an officer')
+    end;
 
     if msg == 'pdkpTestDataImport' then
         return Import:TestDataImport()
+    end
+
+    if msg == 'pdkpTestValidateTables' then
+        local invalidMembers = {}
+        for key, member in pairs(Guild.members) do
+            member:ValidateTable()
+
+--            if hasEntries then break end;
+        end
     end
 
     if msg == 'TestDatabaseCompression' then
@@ -244,6 +255,10 @@ function PDKP:HandleSlashCommands(msg, item)
 
     if msg == 'sortHistory' then
         DKP:SortHistory()
+    end
+
+    if msg == 'pdkpExportDKP' then
+        Setup:dkpExport()
     end
 
     if msg == 'bossKill' then

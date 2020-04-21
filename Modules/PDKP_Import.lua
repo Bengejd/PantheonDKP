@@ -146,8 +146,10 @@ function Import:GetHistoryKeys()
     for entryKey, entry in pairs(DKP.dkpDB.history) do
         pushHistory['all'][entryKey] = true
     end
-    for key, entryKey in pairs(DKP.dkpDB.deleted) do
-        pushHistory['deleted'][entryKey] = true
+    if DKP.dkpDB.deleted ~= nil then
+        for key, entryKey in pairs(DKP.dkpDB.deleted) do
+            pushHistory['deleted'][entryKey] = true
+        end
     end
     return pushHistory
 end
@@ -162,6 +164,5 @@ function Import:RequestData(officer)
 end
 
 function Import:TestDataImport()
-    Import:AcceptData(pdkpTestDatabase)
-end
 
+end

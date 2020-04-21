@@ -693,3 +693,44 @@ function Setup:CreateTestMenuDropdown()
 
     GUI.reasonDropdown = dropDown
 end
+
+function Setup:dkpExport()
+    local frame = AceGUI:Create('Frame')
+    local eb = AceGUI:Create("EditBox")
+
+    frame:SetHeight(500)
+    frame:SetWidth(500)
+    frame:SetLayout("Fill")
+
+    frame:AddChild(eb)
+
+    eb.frame:SetHeight(400)
+    eb.frame:SetWidth(400)
+
+    local text = '';
+
+    local members = Guild.members
+    local memberNames = {}
+    for key, member in pairs(members) do
+        table.insert(memberNames, key)
+    end
+
+    local function compare(a,b)
+        return a < b;
+    end
+
+    table.sort(memberNames, compare)
+
+    for i=1, #memberNames do
+        local member = members[memberNames[i]];
+        local dkp = member:GetDKP('Blackwing Lair', 'total')
+        if dkp > 0 then
+            text = text .. member.name .. ':' .. dkp .. ', '
+        end
+    end
+
+    eb:SetText(text)
+
+    eb.frame:Show()
+    frame:Show()
+end
