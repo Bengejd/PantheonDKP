@@ -132,7 +132,7 @@ function PDKP:OnInitialize(event, name)
 end
 
 function PDKP:InitializeGuildData()
-    if IsInGuild() == nil then return end; -- Fix for players not being in guild error message.
+    if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
 
     Guild:GetGuildData(false);
     DKP:VerifyTables()

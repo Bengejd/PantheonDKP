@@ -40,6 +40,8 @@ end
 
 -- Gets & Sets the guildDB's data.
 function Guild:GetGuildData(onlineOnly)
+    if IsInGuild() == false then return end;
+
     --	name—Name of the member (string)
     --	rank—Name of the member’s rank (string)
     --	rankIndex—Numeric rank of the member (0 = guild leader; higher numbers

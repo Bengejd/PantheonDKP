@@ -26,13 +26,13 @@ function Import:AcceptData(reqData)
         -- TODO: Possibly do something here??
     end
 
-    print('Import received from addon version ', reqData.addon_version)
+    Util:Debug('Import received from addon version ', reqData.addon_version)
 
     if reqData.full then -- THIS IS A FULL OVERWRITE
         Import:AcceptFullDatabase(reqData)
         PDKP:Print('Full database overwrite in progress')
     else -- THIS IS A MERGE
-        PDKP:Print('Merging data...')
+        Util:Debug('Merging data...')
 
         local reqDKP = reqData.dkpDB;
 
@@ -139,6 +139,9 @@ function Import:AcceptFullDatabase(data)
     DKP.dkpDB.lastEdit = dkpData.lastEdit;
     DKP.dkpDB.history = dkpData.history;
     DKP.dkpDB.members = dkpData.members;
+
+    PDKP:InitializeGuildData() -- Re-initialize the guild data.
+    pdkp_init_scrollbar() -- re-setup the scroll section, if necessary.
 end
 
 function Import:GetHistoryKeys()

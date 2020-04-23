@@ -229,6 +229,6 @@ function Member:MigrateAndLocate()
         local gmember = Guild.db.members[self.name]
         self.dkp = gmember.dkp
     else
-        print('Falling back to defaults for ', self.name)
+        Util:Debug('Falling back to defaults for ', self.name)
     end
 end

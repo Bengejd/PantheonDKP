@@ -366,7 +366,7 @@ function Comms:PrepareDatabaseSyncResponse(historyKeys)
 end
 
 function Comms:DatabaseSyncRequest()
-    if IsInGuild() == nil then return end; -- Fix for players not being in guild error message.
+    if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
     PDKP:Print('Attempting Automatic Database Sync...')
 
     local myHistory = {
