@@ -166,9 +166,6 @@ item.priority = {
 
     -- MISC Loot --
 
-    ['Crag Boar Rib'] =  'MS > OS',
-    ['Stringy Wolf Meat'] =  'MS > OS',
-
     ['Band of Dark Dominion'] =  'Warlock = Shadow Priest',
     ['Boots of Pure Thought'] =  'MS > OS',
     ['Cloak of Draconic Might'] =  'Warrior (DPS) = Ret Paladin = Warrior (Tank) > Rogue > MS>OS',
@@ -178,7 +175,6 @@ item.priority = {
     ['Essence Gatherer'] =  'Priest > MS>OS',
     ['Interlaced Shadow Jerkin'] =  'MS > OS',
     ['Ringo\'s Blizzard Boots'] =  'Mage > MS>OS',
-    ['Elementium Ore'] =  'Guild Bank',
 
     ['Gloves of Rapid Evolution'] =  'Mage = Warlock = Shadow Priest > MS>OS',
     ['Mantle of the Blackwing Cabal'] =  'MS > OS',
