@@ -386,7 +386,7 @@ function GUI:UpdatePushFrame()
     for i = 1, #Guild.officers do
         local officer = Guild.officers[i];
         -- they are online to receive a request & it's good data
-        if (Defaults.debug and officer['online']) or (officer['online'] and (officer['lastEdit'] > myLastEdit)) then
+        if (Defaults.debug and officer['online']) or (officer['online'] and (officer['lastEdit'] and officer['lastEdit'] > myLastEdit)) then
             local ig = AceGUI:Create("InlineGroup")
             ig:SetLayout("Flow")
             ig:SetFullWidth(true)
