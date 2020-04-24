@@ -10,7 +10,7 @@
 
     <!--Main UI Frame Template-->
     <Frame name="pdkp_shrouding_window" parent="UIParent" movable="true" enableMouse="true" frameStrata="HIGH" resizable="true" hidden="true">
-        <Size><AbsDimension x="194" y="170"/></Size>
+        <Size><AbsDimension x="200" y="200"/></Size>
         <Anchors>
             <Anchor point="CENTER"/>
             <Offset><AbsDimension x="300" y="0"/></Offset>

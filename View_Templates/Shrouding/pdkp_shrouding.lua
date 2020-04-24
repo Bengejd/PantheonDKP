@@ -23,37 +23,6 @@ Shroud.shrouders = {
     database_name='',
 };
 
-local testShrouders = {
-    names={
-        ['GetCrit']=true,
-        ['Momo']=true,
-        ['Littledubs']=true,
-        ['Dwindle']=true,
-        ['Gartog']=true,
-        ['Dalia']=true,
-        ['Sparklenips']=true,
-        ['Flatulent']=true,
-        ['Chipgizmo']=true,
-        ['Jeffry']=true,
-        ['Insub']=true,
-        ['Jakemeoff']=true,
-    },
-    table={
-        {name='Getcrit', dkpTotal=100},
-        {name='Momo', dkpTotal=42},
-        {name='Littledubs', dkpTotal=103},
-        {name='Dwindle', dkpTotal=25},
-        {name='Gartog', dkpTotal=0},
-        {name='Dalia', dkpTotal=124},
-        {name='Sparklenips', dkpTotal=125},
-        {name='Flatulent', dkpTotal=231},
-        {name='Chipgizmo', dkpTotal=457},
-        {name='Jeffry', dkpTotal=457},
-        {name='Insub', dkpTotal=100},
-        {name='Jakemeoff', dkpTotal=100},
-    },
-};
-
 Shroud.shroudPhrases = {
     ['shrouding']=true,
     ['shroud']=true,
