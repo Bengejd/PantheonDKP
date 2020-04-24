@@ -328,6 +328,10 @@ function DKP:UpdateEntries()
         Util:Debug('No raid found, setting raid to '.. raid)
     end
 
+    if raid == 'Onyxia\'s Lair' then -- Fix for Onyxia.
+       raid = 'Molten Core'
+    end
+
     local charObjs = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data -- Grab the data from our popup.
     local charNames = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames -- The char name string.
 
