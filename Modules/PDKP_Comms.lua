@@ -39,6 +39,10 @@ local UNSAFE_COMMS = {
     ['pdkpSyncResponse'] = true
 }
 
+local OFFICER_COMMS = {
+    ['pdkpRequestPush'] = true,
+}
+
 local pdkpPushDatabase = {
     full = false,
     guildDB = {
@@ -63,6 +67,7 @@ local skipBroadcastMsg = 'Skipping broadcast because '
 function Comms:RegisterCommCommands()
     for key, _ in pairs(SAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
     for key, _ in pairs(UNSAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
+    for key, _ in pairs(OFFICER_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
 end
 
 function Comms:Serialize(data)
@@ -99,6 +104,26 @@ end
 ---------------------------
 --    Send Functions     --
 ---------------------------
+function OnCommReceived(prefix, message, distribution, sender)
+    if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
+        if prefix ~= 'pdkpNewShrouds' then
+            return Util:Debug('Ignoring comm from me ' .. prefix)
+        end;
+    end;
+
+    local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
+
+    if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
+    elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
+    elseif OFFICER_COMMS[prefix] then Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
+    else
+        print("Unknown Prefix " .. prefix, " found in request...")
+    end
+end
+
+function Comms:OnOfficerCommReceived(prefix, data, distribution, sender)
+
+end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
@@ -122,25 +147,7 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
 
-function OnCommReceived(prefix, message, distribution, sender)
-    if Comms.processing then -- If we're processing a com, don't overload yourself.
-        return Comms:SendCommsMessage('pdkpBusyTryAgai', 'Busy', 'WHISPER', sender, 'BULK')
-    end
 
-    if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
-        if prefix ~= 'pdkpNewShrouds' then
-            return Util:Debug('Ignoring comm from me ' .. prefix)
-        end;
-    end;
-
-    local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
-
-    if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
-    elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
-    else
-        print("Unknown Prefix " .. prefix, " found in request...")
-    end
-end
 
 function Comms:ThrowError(prefix, sender)
     local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
