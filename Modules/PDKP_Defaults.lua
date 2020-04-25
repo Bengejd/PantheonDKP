@@ -39,7 +39,7 @@ core.defaults = {
     addon_version = '1.1.2',
     addon_name = 'PantheonDKP',
     bank_name = 'Pantheonbank',
-    debug = false,
+    debug = true,
     no_broadcast = false,
     debug_dkp = false;
     migrate = false, -- whether this version requires a migration or not.
@@ -77,6 +77,8 @@ core.raids = {
     'Onyxia\'s Lair',
     'Molten Core',
     'Blackwing Lair',
+--    'Ahn\'Qiraj',
+    --    'Naxxramas',
 }
 
 core.raidBosses = {
@@ -104,7 +106,35 @@ core.raidBosses = {
         "Flamegor",
         "Chromaggus",
         "Nefarian",
-    }
+    },
+    ['Ahn\'Qiraj']={
+        "The Prophet Skeram",
+        "Bug Trio",
+        "Battleguard Satura",
+        "Fankriss the Unyeilding",
+        "Viscidus",
+        "Princess Huhuran",
+        "Twin Emperors",
+        "Ouro",
+        "C\'Thun"
+    },
+    ['Naxxramas']={
+        "Anub\'Rekhan",
+        "Grand Widow Faerlina",
+        "Maexxna",
+        "Noth the Plaguebringer",
+        "Heigan the Unclean",
+        "Loatheb",
+        "Instructor Razuvious",
+        "Gothik the Harvester",
+        "The Four Horsemen",
+        "Patchwerk",
+        "Grobbulus",
+        "Gluth",
+        "Thaddius",
+        "Sapphiron",
+        "Kel\'Thuzad",
+    },
 }
 
 core.bossIDS = {
@@ -132,5 +162,33 @@ core.bossIDS = {
         [615] = "Flamegor",
         [616] =  "Chromaggus",
         [617] = "Nefarian",
+    },
+    ['Ahn\'Qiraj']={
+        [709] = 'The Prophet Skeram',
+        [710] = 'Bug Trio',
+        [711] = 'Battleguard Satura',
+        [712] = 'Fankriss the Unyeilding',
+        [713] = 'Viscidus',
+        [714] = 'Princess Huhuran',
+        [715] = 'Twin Emperors',
+        [716] = 'Ouro',
+        [717] = 'C\'Thun',
+    },
+    ['Naxxramas']={
+        [1107] = 'Anub\'Rekhan',
+        [1108] = 'Gluth',
+        [1109] = 'Gothik the Harvester',
+        [1110] = 'Grand Widow Faerlina',
+        [1111] = 'Grobbulus',
+        [1112] = 'Heigan the Unclean',
+        [1113] = 'Instructor Razuvious',
+        [1114] = 'Kel\'Thuzad',
+        [1115] = 'Loatheb',
+        [1116] = 'Maexxna',
+        [1117] = 'Noth the Plaguebringer',
+        [1118] = 'Patchwerk',
+        [1119] = 'Sapphiron',
+        [1120] = 'Thaddius',
+        [1121] = 'The Four Horsemen',
     },
 }

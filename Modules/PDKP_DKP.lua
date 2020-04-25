@@ -400,6 +400,9 @@ function DKP:GetLastEdit()
 end
 
 function DKP:GetCurrentDB()
+    if dkpDB.currentDB == 'Onyxia\'s Lair' then
+        dkpDB.currentDB = 'Molten Core';
+    end
 return dkpDB.currentDB
 end
 
