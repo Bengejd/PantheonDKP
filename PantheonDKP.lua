@@ -81,7 +81,9 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         ['OPEN_MASTER_LOOT_LIST']=function()  -- when the master loot list is opened.
             return
         end,
-        ['']=function() end,
+        ['BOSS_KILL']=function()
+            PDKP:Print('BOSS KILL: ', self, event, arg1)
+        end,
         ['']=function() end,
         ['']=function() end,
     }
@@ -100,8 +102,9 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         return
     elseif event == "CHAT_MSG_GUILD" then return
     elseif event == "BOSS_KILL" then
-        --        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
-        --        Raid:BossKill(event, arg1);
+        local bossID, bossName = arg1, arg2
+        PDKP:Print('BOSS KILL: ', bossID, bossName)
+--                Raid:BossKill(event, arg1);
         return
     end
 end
