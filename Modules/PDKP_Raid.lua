@@ -20,36 +20,10 @@ Raid.RaidInfo = {};
 -- Auto pop up raid boss kills when they occur
 -- Auto award the completion bonus when the finalboss is killed.
 
-Raid.bossIDS = {
-
-    -- Molten Core
-    [663] = "Lucifron",
-    [664] = 'Magmadar',
-    [665] = 'Gehennas',
-    [666] = 'Garr',
-    [667] = 'Shazzrah',
-    [668] = 'Baron Geddon',
-    [669] = 'Sulfuron Harbinger',
-    [670] = 'Golemagg the Incinerator',
-    [671] = 'Majordomo Executus',
-    [672] = 'Ragnaros',
-
-    -- Onyxia's Lair
-    [1084]='Onyxia',
-
-    -- Blackwing Lair
-    [610] = "Razorgore the Untamed",
-    [611] = "Vaelastrasz the Corrupt",
-    [612] = "Broodlord Lashlayer",
-    [613] = "Firemaw",
-    [614] = "Ebonroc",
-    [615] = "Flamegor",
-    [616] =  "Chromaggus",
-    [617] = "Nefarian",
-}
-
 Raid.recentBossKillID = nil
 Raid.MasterLooter = nil
+
+local bossIDs = core.bossIDS
 
 --[[ RAID DATABASE LAYOUT
 
@@ -153,15 +127,34 @@ end
 
 function Raid:BossKill(bossID, bossName)
     if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
-    if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
 
+    local bk
+
+    for raidName, raidObj in pairs(bossIDs) do
+       if bk == nil then
+            for pdkpBossID, pdkpBossName in pairs(raidObj) do
+                if pdkpBossID == bossID or pdkpBossName == bossName then
+                    bk = {
+                        name=pdkpBossName,
+                        id=pdkpBossID,
+                        raid=raidName,
+                    }
+                    break
+                end;
+            end
+       end
+    end
+
+    if bk == nil then return end; -- We should have found the boss kill by now.
     if not Raid:isMasterLooter() then return end;
 
-    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    popup.text = bossName .. ' was killed! Award 10 DKP?'
-    popup.bossID = bossID;
-    popup.bossName = bossName;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+
+--
+--    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+--    popup.text = bossName .. ' was killed! Award 10 DKP?'
+--    popup.bossID = bossID;
+--    popup.bossName = bossName;
+--    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
 function Raid:AcceptDKPUpdate(bossID)

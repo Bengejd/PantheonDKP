@@ -227,23 +227,6 @@ function PDKP:HandleSlashCommands(msg, item)
         return Util:Debug('Cannot process this command because you are not an officer')
     end;
 
-    if msg == 'pdkpTestDataImport' then
-        return Import:TestDataImport()
-    end
-
-    if msg == 'pdkpTestValidateTables' then
-        local invalidMembers = {}
-        for key, member in pairs(Guild.members) do
-            member:ValidateTable()
-
---            if hasEntries then break end;
-        end
-    end
-
-    if msg == 'TestDatabaseCompression' then
-        Comms:TestNonEncoded()
-    end
-
     if msg == 'pdkpTestAutoSync' then
         Comms:DatabaseSyncRequest()
     end
