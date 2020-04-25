@@ -215,6 +215,10 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
+    if msg == 'pdkpTestWho' then
+        SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
+    end
+
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then
         return Util:Debug('Cannot process this command because you are not an officer')
@@ -386,6 +390,11 @@ end
 function UnregisterEvent(self, event)
     self:UnregisterEvent(event);
 end
+
+--seterrorhandler(function(msg)
+--    print('PDKP ERROR: ', msg);
+--end);
+
 
 local events = CreateFrame("Frame", "EventsFrame");
 events:RegisterEvent("ADDON_LOADED");
