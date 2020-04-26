@@ -176,7 +176,6 @@ function Setup:PrioList()
     lf:SetScript("OnShow", function()
         scrollcontainer.frame:Show() end)
     lf:SetScript("OnHide", function()
---        lf:SetWidth(350)
         scrollcontainer.frame:Hide()
     end)
 
@@ -191,6 +190,8 @@ function Setup:PrioList()
     GUI.prio = lf;
     GUI.prio.scroll = scroll;
     GUI.prio.scrollcontainer = scrollcontainer
+
+--    GUI:UpdateLootList(nil)
 end
 
 function Setup:dkpPushButton()
@@ -757,7 +758,7 @@ function Setup:dkpOfficer()
 end
 
 function Setup:OfficerWindow()
-    if not core.canEdit or not Raid:IsInRaid() then
+    if core.canEdit == false or not Raid:IsInRaid() then
         return Util:Debug('Cant edit, not creating officer window')
     end
 
