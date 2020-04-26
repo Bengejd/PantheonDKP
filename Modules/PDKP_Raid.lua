@@ -169,11 +169,12 @@ function Raid:BossKill(bossID, bossName)
     if (dkpOfficer and Raid:IsDkpOfficer()) then
     elseif not dkpOfficer and Raid:isMasterLooter() then
     else
-        Util:Debug('Not the master looter, and not dkpOffcier, so fuck off')
+        Util:Debug('You are not the master looter, and not dkpOffcier, so fuck off')
         return
     end
 
-    print('made it here bitches!!')
+    Util:Debug('Starting up the boss kill stuff')
+    print(bk.name, bk.id, bk.raid)
 
 --    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
 --    popup.text = bossName .. ' was killed! Award 10 DKP?'
