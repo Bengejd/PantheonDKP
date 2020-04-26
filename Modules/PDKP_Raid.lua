@@ -11,6 +11,7 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Raid = core.Raid;
 local item = core.Item;
+local Comms = core.Comms;
 
 local raidHistory;
 
@@ -176,34 +177,110 @@ function Raid:BossKill(bossID, bossName)
     Util:Debug('Starting up the boss kill stuff')
     print(bk.name, bk.id, bk.raid)
 
---    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
---    popup.text = bossName .. ' was killed! Award 10 DKP?'
---    popup.bossID = bossID;
---    popup.bossName = bossName;
---    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
-
-    --
-    --    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    --    popup.text = bossName .. ' was killed! Award 10 DKP?'
-    --    popup.bossID = bossID;
-    --    popup.bossName = bossName;
-    --    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+    popup.text = bk.name .. ' was killed! Award 10 DKP?'
+    popup.bossInfo = bk;
+    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
-function Raid:AcceptDKPUpdate(bossID)
-    local raid = Raid:GetRaidInfo();
-    Raid.recentBossKillID = bossID
+function Raid:AcceptBossKillDKPUpdate(bossInfo)
+    Util:Debug('Initiating Boss Kill DKP')
 
-    for i=1, #raid do
-        local charObj = raid[i];
-        if charObj.online then
-            DKP:BossKill(charObj)
-        end
+--    for i=1, #raid do
+--        local charObj = raid[i];
+--        if charObj.online then
+--            DKP:BossKill(charObj)
+--        end
+--    end
+
+    local success = '22bb33';
+    local warning = 'E71D36';
+
+    local raidRoster = Raid:GetRaidInfo();
+
+    local dkpChange = 10;
+    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
+    local reason, raid, boss, historyText, dkpChangeText = 'Boss Kill', bossInfo.raid, bossInfo.name, nil, nil
+
+    historyText = raid .. ' - ' .. bossInfo.name
+
+    dkpChangeText = Util:FormatFontTextColor(success, dkpChange .. ' DKP')
+    historyText = Util:FormatFontTextColor(success, historyText)
+
+    if raid == 'Onyxia\'s Lair' then -- Fix for Onyxia.
+        raid = 'Molten Core'
     end
 
-    -- Possibly have to rebuild the data to get it to reflect the change? Seems clunky...
-    PDKP:BuildAllData()
-    pdkp_dkp_table_filter()
+    local memberNames = {};
+    local charNames = '';
+    local charObjs = {};
+
+    local function compareClass(a,b) return a.class < b.class end
+    table.sort(raidRoster, compareClass)
+
+    for key, raidMember in pairs(raidRoster) do
+        local member = Guild:GetMemberByName(raidMember.name)
+        table.insert(memberNames, member.name)
+        charNames = charNames..member['formattedName']
+        if key < #raidRoster then charNames = charNames .. ', ' end
+        charObjs[member.name] = member;
+    end
+
+    local historyEntry = {
+        ['id']=server_time,
+        ['text'] = historyText,
+        ['reason'] = reason,
+        ['bossKill'] = boss,
+        ['raid'] = raid,
+        ['dkpChange'] = dkpChange,
+        ['dkpChangeText'] = dkpChangeText,
+        ['officer'] = Util:GetMyNameColored(),
+        ['item']= nil,
+        ['date']= dDate,
+        ['time']=tTime,
+        ['serverTime']=server_time,
+        ['datetime']=datetime,
+        ['names']=charNames,
+        ['members']= memberNames,
+        ['deleted']=false,
+        ['edited']=false
+    }
+
+    for _, member in pairs(charObjs) do
+        local dkp = member.dkp[raid];
+
+        if dkp.entries == nil then member.dkp[raid].entries = {} end
+        table.insert(dkp.entries, server_time)
+
+        dkp.previousTotal = dkp.total
+        dkp.total = dkp.total + dkpChange
+
+        if member.bName then -- update the player, visually.
+            local dkpText = _G[member.bName ..'_col3'];
+            dkpText:SetText(dkp.total)
+        end
+        member:Save() -- Update the database locally.
+    end
+
+    local dkpDB = DKP.dkpDB;
+
+    dkpDB.history['all'][server_time] = historyEntry;
+    dkpDB.lastEdit = server_time
+    Guild:UpdateBankNote(server_time)
+    DKP.bankID = server_time
+
+    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+        GUI:UpdateEasyStats()
+
+        -- Update the slider max (if needed)
+        GUI:UpdateDKPSliderMax();
+        -- Re-run the table filters.
+        pdkp_dkp_table_filter()
+
+        GUI.pdkp_dkp_amount_box:SetText('');
+    end
+
+    Comms:SendGuildUpdate(historyEntry)
 end
 
 function Raid:isMasterLooter()

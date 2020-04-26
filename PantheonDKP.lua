@@ -378,7 +378,7 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'GetSelectedFilterStatus' then return GUI:GetSelectedFilterStatus() end;
     if funcName == 'SearchInputUpdated' then return GUI:SearchInputUpdated(object) end
     if funcName == 'pdkp_dkp_update' then return DKP:ConfirmChange() end;
-    if funcName == 'pdkp_boss_kill_dkp' then return Raid:AcceptDKPUpdate(object) end;
+    if funcName == 'pdkp_boss_kill_dkp' then return Raid:AcceptBossKillDKPUpdate(object) end;
 
     if funcName == 'pdkp_quick_shroud' then return GUI:QuickCalculate('shroud') end;
     if funcName == 'pdkp_quick_roll' then return GUI:QuickCalculate('roll') end;
