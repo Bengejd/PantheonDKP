@@ -1,6 +1,15 @@
 ====== Version 1.2.0 ======
 [Features]:
-    - Auto invite feature (defaults to: "inv" and "invite") for raids.
+    - Raid Officer Interface added (Requires you open pdkp at least once to show).
+        - Auto invite feature (defaults to: "inv" and "invite") for raids. This can be customized, if you're an officer.
+        - DKP Officer feature added to raid promotion menu (handles boss kill popups, shrouding data, etc...)
+        - Added a button to auto give "assist" to all officers in the raid.
+    - Added AQ40 & Naxx tables (currently disabled)
+
+[Bug fixes]:
+    - Fixed Onyxia's DKP table dropdown. Was referencing the wrong raid name.
+    - Removed Elementium Ore from announcements list.
+
 
 ====== Version 1.1.0 ======
 
