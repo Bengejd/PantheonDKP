@@ -139,11 +139,16 @@ function Raid:GetRaidInfo()
                 ['online']=online,
                 ['isDead']=isDead,
                 ['isML']=isML,
+                ['role']=role,
                 ['isAssist']=rank == 1,
                 ['isLeader']=rank == 2,
+                ['isDkpOfficer']=name == Guild.dkpOfficer
             })
             if isML then
                 Raid.MasterLooter = name;
+            end
+            if rank == 2 then
+               Raid.RaidLeader = name;
             end
         end
     end
@@ -151,17 +156,29 @@ function Raid:GetRaidInfo()
     return raidInfo;
 end
 
+function Raid:IsAssist()
+    if Raid.RaidInfo == nil then Raid:GetRaidInfo() end
+    for _, member in pairs(Raid.RaidInfo) do
+        if member.name == Util:GetMyName() and (member.isAssist or member.isLeader) then
+            return true
+        end
+    end
+    return false
+end
+
 function Raid:BossKill(bossID, bossName)
-    if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
-    if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
 
-    if not Raid:isMasterLooter() then return end;
-
-    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    popup.text = bossName .. ' was killed! Award 10 DKP?'
-    popup.bossID = bossID;
-    popup.bossName = bossName;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+    print(bossID, bossName)
+--    if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
+--    if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
+--
+--    if not Raid:isMasterLooter() then return end;
+--
+--    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+--    popup.text = bossName .. ' was killed! Award 10 DKP?'
+--    popup.bossID = bossID;
+--    popup.bossName = bossName;
+--    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
 function Raid:AcceptDKPUpdate(bossID)
@@ -183,6 +200,19 @@ end
 function Raid:isMasterLooter()
     Raid:GetRaidInfo()
     return Raid.MasterLooter == Util:GetMyName()
+end
+
+function Raid:isRaidLeader()
+    Raid:GetRaidInfo()
+    return Raid.RaidLeader == Util:GetMyName()
+end
+
+function Raid:IsDkpOfficer()
+    if Guild.dkpOfficer then -- We have established who the DKP officer is.
+
+    else
+        return false
+    end
 end
 
 function Raid:AnnounceLoot()

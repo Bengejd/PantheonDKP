@@ -44,6 +44,10 @@ core.filterOffline = nil
 core.databasesInitialized = false
 core.firstLogin = true
 
+core.inviteTextCommands = {
+    ['invite']=true, ['inv']=true
+}
+
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
@@ -130,6 +134,12 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
 
     Comms:RegisterCommCommands()
+
+    -----------------------------
+    --  Officer Raid Control   --
+    -----------------------------
+
+    Setup:dkpOfficer()
 end
 
 function PDKP:InitializeGuildData()
@@ -146,6 +156,10 @@ function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
         Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
+    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- need to test how
+        print('Sending invite to: ', name)
+    else
+        print(msg)
     end
 end
 

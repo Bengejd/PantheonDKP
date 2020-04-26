@@ -14,6 +14,7 @@ local Import = core.import;
 local Setup = core.Setup;
 local Comms = core.Comms;
 local Shroud = core.Shroud;
+local Raid = core.Raid;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local PlaySound = PlaySound
@@ -25,6 +26,9 @@ function Setup:MainUI()
         GUI.pdkp_frame = _G['pdkpCoreFrame']
     else -- We haven't initialized the frame yet.
         -- Create frame args: frameType, frameName, parentFrame, inheritsFrame
+
+        Setup:OfficerWindow()
+
 
         -----------------------------
         --        Main Frame       --
@@ -733,4 +737,97 @@ function Setup:dkpExport()
 
     eb.frame:Show()
     frame:Show()
+end
+
+function Setup:dkpOfficer()
+    local dropdownList = _G['DropDownList1']
+    dropdownList:SetScript('OnShow', function()
+        local charName = _G['DropDownList1Button1']:GetText()
+        for i=1, 13 do -- There are 13 "buttons" on the dropdown list menu in the raid frames.
+            local b = _G['DropDownList1Button'..i]
+            if b and b:GetText() == 'Promote to Main Assist' then
+                b:SetText('Promote to DKP Officer')
+                b:SetScript('OnClick', function()
+                    PDKP:Print(charName .. ' is now the DKP Officer')
+                    Guild.dkpOfficer = charName;
+                    Comms:SendCommsMessage('pdkpDkpOfficer', Guild.dkpOfficer, 'RAID', nil, 'BULK', nil)
+                end)
+            end
+        end
+    end)
+end
+
+function Setup:OfficerWindow()
+    if not core.canEdit then
+       return Util:Debug('Cant edit, not creating officer window')
+    end
+
+    local mainFrame = CreateFrame("Frame", "pdkpOfficerFrame", RaidFrame, "BasicFrameTemplateWithInset")
+    mainFrame:SetSize(300, 425) -- Width, Height
+    mainFrame:SetPoint("RIGHT", RaidFrame, "RIGHT", 300, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+    mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
+    mainFrame.title:SetFontObject("GameFontHighlight")
+    mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
+    mainFrame.title:SetText('PDKP Officer Interface')
+    mainFrame:SetFrameStrata('MEDIUM')
+
+    GUI.OfficerFrame = mainFrame
+
+    mainFrame:Show()
+
+    local mainFrameKids = {}
+
+    local raidGroup = AceGUI:Create("InlineGroup")
+    raidGroup:SetTitle('Raid Control')
+
+    raidGroup:SetFullWidth(false)
+    raidGroup:SetFullHeight(true)
+    raidGroup:SetHeight(50)
+    raidGroup:SetWidth(250)
+    raidGroup:SetLayout("Flow")
+
+    raidGroup:SetParent(mainFrame)
+    raidGroup.frame:SetFrameStrata('HIGH');
+    raidGroup:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 10, -25);
+
+    local promoteOfficer = AceGUI:Create("Button")
+    promoteOfficer:SetText("Promote Officers")
+    promoteOfficer:SetWidth(140)
+    promoteOfficer:SetCallback('OnClick', function()
+        if Raid:isRaidLeader() then
+            local raidRoster = Raid:GetRaidInfo()
+            for key, rMember in pairs(raidRoster) do
+                for _, officer in pairs(Guild.officers) do
+                    if officer.name == rMember.name then PromoteToAssistant('raid'..key) end
+                end
+            end
+        end
+    end)
+
+    local inviteBox = AceGUI:Create("EditBox")
+    inviteBox:SetLabel('Auto Invite Commands')
+    inviteBox:SetCallback('OnEnterPressed', function()
+        local text = inviteBox:GetText()
+        local textTable = { strsplit(',', text) }
+        core.inviteTextCommands = {}; -- Reset the inv list.
+        for key, text in pairs(textTable) do
+--            core.inviteTextCommands[text] = true
+        end
+    end)
+
+    raidGroup:AddChild(promoteOfficer)
+    raidGroup:AddChild(inviteBox)
+
+    table.insert(mainFrameKids, raidGroup)
+
+
+
+    local function toggleKids(show)
+        for _, child in pairs(mainFrameKids) do
+            if show then child.frame:Show() else child.frame:Hide() end
+        end
+    end
+
+    mainFrame:SetScript('OnHide', function() toggleKids(false) end)
+    mainFrame:SetScript('OnShow', function() toggleKids(true) end)
 end

@@ -17,5 +17,5 @@ local Comms = core.Comms;
 local Officer = core.Officer;
 
 function Officer:Show()
-    print('Showing officer, show')
+    Setup:OfficerWindow()
 end
