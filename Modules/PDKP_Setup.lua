@@ -27,7 +27,7 @@ function Setup:MainUI()
     else -- We haven't initialized the frame yet.
         -- Create frame args: frameType, frameName, parentFrame, inheritsFrame
 
-        Setup:OfficerWindow()
+--        Setup:OfficerWindow()
 
 
         -----------------------------
@@ -762,6 +762,14 @@ function Setup:OfficerWindow()
         return Util:Debug('Not creating officer window: Edit: '..tostring(core.canEdit).. ' InRaid: '..tostring(Raid:IsInRaid()))
     end
 
+    if _G['pdkpOfficerFrame'] then return end;
+
+    if not GUI.pdkp_frame then -- We haven't initialized the frame yet.
+
+        PDKP:Show()
+        GUI:Hide()
+    end
+
     local mainFrame = CreateFrame("Frame", "pdkpOfficerFrame", RaidFrame, "BasicFrameTemplateWithInset")
     mainFrame:SetSize(300, 425) -- Width, Height
     mainFrame:SetPoint("RIGHT", RaidFrame, "RIGHT", 300, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
@@ -769,7 +777,12 @@ function Setup:OfficerWindow()
     mainFrame.title:SetFontObject("GameFontHighlight")
     mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
     mainFrame.title:SetText('PDKP Officer Interface')
-    mainFrame:SetFrameStrata('MEDIUM')
+    mainFrame:SetFrameStrata('FULLSCREEN');
+    mainFrame:SetFrameLevel(1);
+    mainFrame:SetToplevel(true)
+
+    local closeButton = mainFrame.CloseButton
+    closeButton:SetEnabled(false)
 
     GUI.OfficerFrame = mainFrame
 
@@ -777,18 +790,20 @@ function Setup:OfficerWindow()
 
     local mainFrameKids = {}
 
-    local raidGroup = AceGUI:Create("InlineGroup")
-    raidGroup:SetTitle('Raid Control')
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(350)
+    scrollcontainer:SetWidth(250)
+    scrollcontainer:SetLayout("Fill")
 
-    raidGroup:SetFullWidth(false)
-    raidGroup:SetFullHeight(true)
-    raidGroup:SetHeight(50)
-    raidGroup:SetWidth(250)
-    raidGroup:SetLayout("Flow")
+    scrollcontainer:SetParent(mainFrame)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", mainFrame, "CENTER", 0, -10);
 
-    raidGroup:SetParent(mainFrame)
-    raidGroup.frame:SetFrameStrata('HIGH');
-    raidGroup:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 10, -25);
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
 
     local promoteOfficer = AceGUI:Create("Button")
     promoteOfficer:SetText("Promote Officers")
@@ -843,8 +858,7 @@ function Setup:OfficerWindow()
         end
     end
 
-    whisperCommand:SetText("Start Raid Inv Spam (15 mins)")
-    whisperCommand:SetWidth(160)
+    whisperCommand:SetText("Start Raid Inv Spam")
     whisperCommand:SetDisabled(true)
     whisperCommand:SetCallback('OnClick', function()
         guildInviteSpam()
@@ -853,23 +867,64 @@ function Setup:OfficerWindow()
     local raidSpamTime = AceGUI:Create("MultiLineEditBox")
     raidSpamTime:SetLabel('Guild Invite Spam text')
     raidSpamTime:SetHeight(100)
+    raidSpamTime:SetWidth(200)
+    raidSpamTime:DisableButton(true)
     raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst for invite")
-    raidSpamTime:SetCallback('OnEnterPressed', function()
+    raidSpamTime:SetCallback('OnTextChanged', function()
         Raid.spamText = raidSpamTime:GetText()
-        whisperCommand:SetDisabled(false)
+
+        if Util:IsEmpty(Raid.spamText) then
+            whisperCommand:SetDisabled(true)
+        else
+            whisperCommand:SetDisabled(false)
+        end
     end)
 
     if Raid:isRaidLeader() then
+        local raidGroup = AceGUI:Create("InlineGroup")
+        raidGroup:SetTitle('Raid Control')
+        raidGroup:SetParent(scroll)
+        raidGroup.frame:SetFrameStrata('HIGH');
+
+        local label = AceGUI:Create("Label")
+        label:SetText("This will give all officers in the raid the 'Assist' role.")
         raidGroup:AddChild(promoteOfficer)
+        raidGroup:AddChild(label)
+
+        scroll:AddChild(raidGroup)
     end
 
-    raidGroup:AddChild(inviteBox)
-    raidGroup:AddChild(raidSpamTime)
-    raidGroup:AddChild(whisperCommand)
+    if Raid:IsAssist() then
+        local inviteControl = AceGUI:Create("InlineGroup")
+        inviteControl:SetTitle('Invite Control')
+        inviteControl:SetParent(scroll)
+        inviteControl.frame:SetFrameStrata('HIGH');
 
-    table.insert(mainFrameKids, raidGroup)
+        local inviteLabel = AceGUI:Create("Label")
+        inviteLabel:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
+        inviteControl:AddChild(inviteBox)
+        inviteControl:AddChild(inviteLabel)
 
+        local raidSpamLabel = AceGUI:Create("Label")
+        raidSpamLabel:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
+        inviteControl:AddChild(raidSpamTime)
+        inviteControl:AddChild(raidSpamLabel)
 
+        local emptyLabel = AceGUI:Create("Label") -- To create space between Guild invite spam text and the button.
+        emptyLabel:SetText("     ")
+
+        inviteControl:AddChild(emptyLabel)
+
+        local whisperLabel = AceGUI:Create("Label")
+        whisperLabel:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes. Click again to stop the message spam.")
+        inviteControl:AddChild(whisperCommand)
+        inviteControl:AddChild(whisperLabel)
+
+        scroll:AddChild(inviteControl)
+    end
+
+    scroll.frame:SetFrameLevel(1);
+    table.insert(mainFrameKids, scrollcontainer)
 
     local function toggleKids(show)
         for _, child in pairs(mainFrameKids) do
@@ -880,3 +935,4 @@ function Setup:OfficerWindow()
     mainFrame:SetScript('OnHide', function() toggleKids(false) end)
     mainFrame:SetScript('OnShow', function() toggleKids(true) end)
 end
+

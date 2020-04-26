@@ -13,7 +13,7 @@ local Defaults = core.defaults;
 local Import = core.Import;
 local Setup = core.Setup;
 local Comms = core.Comms;
-
+local Raid = core.Raid;
 
 GUI.countdownTimer = nil;
 GUI.statusbar = nil;
@@ -717,6 +717,18 @@ end
 
 function GUI:GetItemButton()
     return _G['pdkp_item_link'];
+end
+
+function GUI:ToggleOfficerInterface()
+    local officerFrame = _G['pdkpOfficerFrame']
+
+    if officerFrame then
+       if officerFrame:IsShown() and not Raid:IsInRaid() then officerFrame:Hide()
+       elseif Raid:IsInRaid() and not officerFrame:IsShown() then officerFrame:Show()
+       end
+    else
+        Setup:OfficerWindow()
+    end
 end
 
 ---------------------------

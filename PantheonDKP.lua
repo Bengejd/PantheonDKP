@@ -70,6 +70,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin
             if uiReload then PDKP:InitializeGuildData() end
+            Setup:OfficerWindow()
         end,
         ['WORLD_MAP_UPDATE']=function()
             return UnregisterEvent(self, event)
@@ -78,6 +79,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return UnregisterEvent(self, event)
         end,
         ['GROUP_ROSTER_UPDATE']=function()
+            Util:Debug('Group_roster_update')
+            GUI:ToggleOfficerInterface()
             return Raid:GetRaidInfo()
         end,
         ['LOOT_OPENED']=function()  -- when the loot bag is opened.
@@ -353,6 +356,10 @@ function PDKP:Show()
 
     if GUI.reasonDropdown then GUI.reasonDropdown.frame:Show() end;
     if GUI.raidDropdown then GUI.raidDropdown.frame:Show() end;
+
+    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+        GUI.pdkp_frame:SetFrameStrata('HIGH')
+    end
 
 end
 
