@@ -164,7 +164,6 @@ function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
         if not Raid:IsInRaid() then
             ConvertToRaid()
         end
-
         InviteUnit(name)
     end
 end

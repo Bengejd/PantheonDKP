@@ -815,8 +815,28 @@ function Setup:OfficerWindow()
         end
     end)
 
+    local raidSpamTime = AceGUI:Create("EditBox")
+    raidSpamTime:SetLabel('Guild Invite Spam text')
+    raidSpamTime:SetHeight(100)
+    raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst")
+    raidSpamTime:SetCallback('OnEnterPressed', function()
+        local text = raidSpamTime:GetText()
+    end)
+
+    local whisperCommand = AceGUI:Create("Button")
+    whisperCommand:SetText("Start Raid Inv Spam")
+    whisperCommand:SetWidth(140)
+    whisperCommand:SetCallback('OnClick', function()
+        local function TimerFeedback()
+            SendChatMessage("Sending message to guild" ,"RAID" ,nil, nil);
+        end
+        PDKP:ScheduleRepeatingTimer(TimerFeedback, 10)
+    end)
+
     raidGroup:AddChild(promoteOfficer)
     raidGroup:AddChild(inviteBox)
+    raidGroup:AddChild(raidSpamTime)
+    raidGroup:AddChild(whisperCommand)
 
     table.insert(mainFrameKids, raidGroup)
 
