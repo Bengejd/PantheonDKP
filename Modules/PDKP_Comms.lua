@@ -26,7 +26,7 @@ local SAFE_COMMS = {
     ['pdkpBusyTryAgai'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
-
+    ['pdkpDkpOfficer']=true,
     ['pdkpModLastEdit']=true,
 };
 
@@ -175,6 +175,10 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 --                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
+        ['pdkpDkpOfficer'] = function()
+            Raid.dkpOfficer = message
+            PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
+        end
     }
 
     if safeFuncs[prefix] then safeFuncs[prefix]() end

@@ -17,6 +17,7 @@ local Setup = core.Setup;
 local Import = core.Import;
 local item = core.Item;
 local Member = core.Member;
+local Officer = core.Officer;
 
 
 local PlaySound = PlaySound
@@ -42,6 +43,10 @@ core.initialized = false
 core.filterOffline = nil
 core.databasesInitialized = false
 core.firstLogin = true
+
+core.inviteTextCommands = {
+    ['invite']=true, ['inv']=true
+}
 
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
@@ -129,6 +134,12 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
 
     Comms:RegisterCommCommands()
+
+    -----------------------------
+    --  Officer Raid Control   --
+    -----------------------------
+
+    Setup:dkpOfficer()
 end
 
 function PDKP:InitializeGuildData()
@@ -141,10 +152,19 @@ function PDKP:InitializeGuildData()
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
-    if Shroud.shroudPhrases[string.lower(msg)] and Raid:isMasterLooter() then
+    if Shroud.shroudPhrases[string.lower(msg)] and (
+    Raid:isMasterLooter()
+
+    -- Check if masterLooter if raid.dkpOfficer is nil
+    ) then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
         Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
+    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
+        if not Raid:IsInRaid() then
+            ConvertToRaid()
+        end
+        InviteUnit(name)
     end
 end
 
@@ -255,6 +275,10 @@ function PDKP:HandleSlashCommands(msg, item)
         --        for i=1, #tempInvites do
         --            InviteUnit(tempInvites[i]);
         --        end
+    end
+
+    if msg == 'officer' then
+        Officer:Show()
     end
 
     if msg == 'sortHistory' then
