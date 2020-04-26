@@ -748,8 +748,8 @@ function Setup:dkpOfficer()
                 b:SetText('Promote to DKP Officer')
                 b:SetScript('OnClick', function()
                     PDKP:Print(charName .. ' is now the DKP Officer')
-                    Guild.dkpOfficer = charName;
-                    Comms:SendCommsMessage('pdkpDkpOfficer', Guild.dkpOfficer, 'RAID', nil, 'BULK', nil)
+                    Raid.dkpOfficer = charName;
+                    Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
                 end)
             end
         end

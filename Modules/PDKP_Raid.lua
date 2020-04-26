@@ -50,6 +50,7 @@ Raid.bossIDS = {
 
 Raid.recentBossKillID = nil
 Raid.MasterLooter = nil
+Raid.dkpOfficer = nil;
 
 --[[ RAID DATABASE LAYOUT
 

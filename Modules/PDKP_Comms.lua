@@ -176,7 +176,7 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
             end
         end,
         ['pdkpDkpOfficer'] = function()
-            Guild.dkpOfficer = message
+            Raid.dkpOfficer = message
             PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
         end
     }

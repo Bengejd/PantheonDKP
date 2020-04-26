@@ -18,7 +18,7 @@ Guild.officers = {};
 Guild.bankIndex = 0;
 Guild.online = {};
 Guild.members = {};
-Guild.dkpOfficer = nil;
+
 
 local guildDBDefaults = {
     profile = {
