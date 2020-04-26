@@ -23,6 +23,7 @@ core.Raid = {};
 core.Comms = {};
 core.Import = {};
 core.Setup = {}; -- Creates the UI for us.
+core.Officer = {};
 
 core.Member = {}; -- Member class object.
 

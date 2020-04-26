@@ -17,6 +17,7 @@ local Setup = core.Setup;
 local Import = core.Import;
 local item = core.Item;
 local Member = core.Member;
+local Officer = core.Officer;
 
 
 local PlaySound = PlaySound
@@ -255,6 +256,10 @@ function PDKP:HandleSlashCommands(msg, item)
         --        for i=1, #tempInvites do
         --            InviteUnit(tempInvites[i]);
         --        end
+    end
+
+    if msg == 'officer' then
+        Officer:Show()
     end
 
     if msg == 'sortHistory' then

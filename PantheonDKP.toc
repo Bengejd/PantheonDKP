@@ -33,6 +33,7 @@ Modules\PDKP_Item.lua
 Modules\PDKP_Raid.lua
 Modules\PDKP_Import.lua
 Modules\PDKP_Setup.lua
+Modules\PDKP_Officer.lua
 
 
 View_Templates\Shrouding\pdkp_shrouding.xml
