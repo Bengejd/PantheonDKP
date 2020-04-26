@@ -757,8 +757,8 @@ function Setup:dkpOfficer()
 end
 
 function Setup:OfficerWindow()
-    if not core.canEdit then
-       return Util:Debug('Cant edit, not creating officer window')
+    if not core.canEdit or not Raid:IsInRaid() then
+        return Util:Debug('Cant edit, not creating officer window')
     end
 
     local mainFrame = CreateFrame("Frame", "pdkpOfficerFrame", RaidFrame, "BasicFrameTemplateWithInset")
@@ -814,26 +814,54 @@ function Setup:OfficerWindow()
             core.inviteTextCommands[strtrim(string.lower(text))] = true
         end
     end)
+    local whisperCommand = AceGUI:Create("Button")
 
-    local raidSpamTime = AceGUI:Create("EditBox")
+    local inviteSpamCount = 0;
+
+    local function guildInviteSpam()
+        if Raid.SpamTimer then
+            print('Canceling Invite Spam')
+            PDKP:CancelTimer(Raid.SpamTimer)
+            inviteSpamCount = 0;
+            Raid.SpamTimer = nil
+            whisperCommand:SetText("Start Raid Inv Spam")
+            return;
+        else
+            if Raid.spamText == nil then return end
+            whisperCommand:SetText('Stop Raid Inv Spam')
+
+            local function TimerFeedback()
+                inviteSpamCount = inviteSpamCount + 1
+                SendChatMessage(Raid.spamText.. ' '.. inviteSpamCount ,"GUILD" ,nil, nil);
+                if inviteSpamCount >= 10 then
+                    guildInviteSpam()
+                end
+            end
+            Raid.SpamTimer = PDKP:ScheduleRepeatingTimer(TimerFeedback, 90); -- Posts it every 90 seconds for 15 minutes.
+            SendChatMessage(Raid.spamText.. ' '.. inviteSpamCount ,"GUILD" ,nil, nil);
+        end
+    end
+
+    whisperCommand:SetText("Start Raid Inv Spam (15 mins)")
+    whisperCommand:SetWidth(160)
+    whisperCommand:SetDisabled(true)
+    whisperCommand:SetCallback('OnClick', function()
+        guildInviteSpam()
+    end)
+
+    local raidSpamTime = AceGUI:Create("MultiLineEditBox")
     raidSpamTime:SetLabel('Guild Invite Spam text')
     raidSpamTime:SetHeight(100)
-    raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst")
+    raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst for invite")
     raidSpamTime:SetCallback('OnEnterPressed', function()
-        local text = raidSpamTime:GetText()
+        Raid.spamText = raidSpamTime:GetText()
+        whisperCommand:SetDisabled(false)
     end)
 
-    local whisperCommand = AceGUI:Create("Button")
-    whisperCommand:SetText("Start Raid Inv Spam")
-    whisperCommand:SetWidth(140)
-    whisperCommand:SetCallback('OnClick', function()
-        local function TimerFeedback()
-            SendChatMessage("Sending message to guild" ,"RAID" ,nil, nil);
-        end
-        PDKP:ScheduleRepeatingTimer(TimerFeedback, 10)
-    end)
+    if Raid:isRaidLeader() then
+        raidGroup:AddChild(promoteOfficer)
+    end
 
-    raidGroup:AddChild(promoteOfficer)
     raidGroup:AddChild(inviteBox)
     raidGroup:AddChild(raidSpamTime)
     raidGroup:AddChild(whisperCommand)
