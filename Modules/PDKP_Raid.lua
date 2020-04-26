@@ -20,34 +20,6 @@ Raid.RaidInfo = {};
 -- Auto pop up raid boss kills when they occur
 -- Auto award the completion bonus when the finalboss is killed.
 
-Raid.bossIDS = {
-
-    -- Molten Core
-    [663] = "Lucifron",
-    [664] = 'Magmadar',
-    [665] = 'Gehennas',
-    [666] = 'Garr',
-    [667] = 'Shazzrah',
-    [668] = 'Baron Geddon',
-    [669] = 'Sulfuron Harbinger',
-    [670] = 'Golemagg the Incinerator',
-    [671] = 'Majordomo Executus',
-    [672] = 'Ragnaros',
-
-    -- Onyxia's Lair
-    [1084]='Onyxia',
-
-    -- Blackwing Lair
-    [610] = "Razorgore the Untamed",
-    [611] = "Vaelastrasz the Corrupt",
-    [612] = "Broodlord Lashlayer",
-    [613] = "Firemaw",
-    [614] = "Ebonroc",
-    [615] = "Flamegor",
-    [616] =  "Chromaggus",
-    [617] = "Nefarian",
-}
-
 Raid.recentBossKillID = nil
 Raid.MasterLooter = nil
 Raid.dkpOfficer = nil;
