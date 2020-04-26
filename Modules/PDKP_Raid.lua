@@ -142,11 +142,9 @@ end
 
 function Raid:BossKill(bossID, bossName)
     if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
-    if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
 
     local bk
-
-    for raidName, raidObj in pairs(bossIDs) do
+    for raidName, raidObj in pairs(core.bossIDS) do
         if bk == nil then
             for pdkpBossID, pdkpBossName in pairs(raidObj) do
                 if pdkpBossID == bossID or pdkpBossName == bossName then
@@ -162,13 +160,26 @@ function Raid:BossKill(bossID, bossName)
     end
 
     if bk == nil then return end; -- We should have found the boss kill by now.
-    if not Raid:isMasterLooter() then return end;
 
-    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    popup.text = bossName .. ' was killed! Award 10 DKP?'
-    popup.bossID = bossID;
-    popup.bossName = bossName;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+    -- You are the DKP Officer
+    -- There is no dkp Officer, but you're the master looter
+
+    local dkpOfficer = Raid.dkpOfficer
+
+    if (dkpOfficer and Raid:IsDkpOfficer()) then
+    elseif not dkpOfficer and Raid:isMasterLooter() then
+    else
+        Util:Debug('Not the master looter, and not dkpOffcier, so fuck off')
+        return
+    end
+
+    print('made it here bitches!!')
+
+--    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+--    popup.text = bossName .. ' was killed! Award 10 DKP?'
+--    popup.bossID = bossID;
+--    popup.bossName = bossName;
+--    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 
     --
     --    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
@@ -205,8 +216,8 @@ function Raid:isRaidLeader()
 end
 
 function Raid:IsDkpOfficer()
-    if Guild.dkpOfficer then -- We have established who the DKP officer is.
-
+    if Raid.dkpOfficer then -- We have established who the DKP officer is.
+        return Raid.dkpOfficer == Util:GetMyName()
     else
         return false
     end

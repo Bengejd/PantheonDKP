@@ -88,6 +88,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         end,
         ['BOSS_KILL']=function()
             PDKP:Print('BOSS KILL: ', self, event, arg1)
+            Raid:BossKill(arg1, arg2)
         end,
         ['']=function() end,
         ['']=function() end,
@@ -106,11 +107,6 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         PDKP:MessageRecieved(msg, name)
         return
     elseif event == "CHAT_MSG_GUILD" then return
-    elseif event == "BOSS_KILL" then
-        local bossID, bossName = arg1, arg2
-        PDKP:Print('BOSS KILL: ', bossID, bossName)
---                Raid:BossKill(event, arg1);
-        return
     end
 end
 
