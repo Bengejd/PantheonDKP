@@ -72,7 +72,6 @@ end
 -----------------------------
 --     CREATE FUNCTIONS    --
 -----------------------------
-
 function Setup:PushTimer()
     if GUI.pushbar == nil then
         GUI.pushbar = CreateFrame("StatusBar", 'pdkp_pushbar', UIParent)
@@ -806,12 +805,13 @@ function Setup:OfficerWindow()
 
     local inviteBox = AceGUI:Create("EditBox")
     inviteBox:SetLabel('Auto Invite Commands')
+    inviteBox:SetText("inv, invite")
     inviteBox:SetCallback('OnEnterPressed', function()
         local text = inviteBox:GetText()
         local textTable = { strsplit(',', text) }
         core.inviteTextCommands = {}; -- Reset the inv list.
         for key, text in pairs(textTable) do
---            core.inviteTextCommands[text] = true
+            core.inviteTextCommands[strtrim(string.lower(text))] = true
         end
     end)
 

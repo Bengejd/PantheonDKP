@@ -156,7 +156,7 @@ function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
         Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
-    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- need to test how
+    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
         InviteUnit(name)
     end
 end
