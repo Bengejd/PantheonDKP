@@ -186,15 +186,7 @@ end
 function Raid:AcceptBossKillDKPUpdate(bossInfo)
     Util:Debug('Initiating Boss Kill DKP')
 
---    for i=1, #raid do
---        local charObj = raid[i];
---        if charObj.online then
---            DKP:BossKill(charObj)
---        end
---    end
-
     local success = '22bb33';
-    local warning = 'E71D36';
 
     local raidRoster = Raid:GetRaidInfo();
 

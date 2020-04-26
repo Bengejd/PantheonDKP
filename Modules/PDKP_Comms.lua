@@ -123,22 +123,18 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 end
 
 function OnCommReceived(prefix, message, distribution, sender)
-    if Comms.processing then -- If we're processing a com, don't overload yourself.
-        return Comms:SendCommsMessage('pdkpBusyTryAgai', 'Busy', 'WHISPER', sender, 'BULK')
-    end
-
     if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
         if prefix ~= 'pdkpNewShrouds' then
             return Util:Debug('Ignoring comm from me ' .. prefix)
         end;
-    end;
+    end
 
     local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
     if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
     else
-        print("Unknown Prefix " .. prefix, " found in request...")
+        Util:Debug("Unknown Prefix " .. prefix, " found in request...")
     end
 end
 

@@ -139,6 +139,12 @@ function Guild:CanMemberEdit(name)
     return false; -- Member was not found in the Guild Roster.
 end
 
+function Guild:GetMyMemberObject()
+    local myName = Util:GetMyName()
+    local myMemberObject = Guild:GetMemberByName(myName)
+    return myMemberObject
+end
+
 function Guild:GetClassBreakdown()
     local classes={
         ['Druid']= 0, ['Hunter']=0, ['Mage']=0, ['Paladin']=0,

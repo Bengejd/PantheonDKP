@@ -759,7 +759,7 @@ end
 
 function Setup:OfficerWindow()
     if core.canEdit == false or not Raid:IsInRaid() then
-        return Util:Debug('Cant edit, not creating officer window')
+        return Util:Debug('Not creating officer window: Edit: '..tostring(core.canEdit).. ' InRaid: '..tostring(Raid:IsInRaid()))
     end
 
     local mainFrame = CreateFrame("Frame", "pdkpOfficerFrame", RaidFrame, "BasicFrameTemplateWithInset")

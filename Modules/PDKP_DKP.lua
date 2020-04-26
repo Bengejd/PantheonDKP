@@ -61,7 +61,7 @@ function DKP:InitDKPDB()
     dkpDB = core.DKP.db.profile
     DKP.dkpDB = dkpDB;
 
-    print('Current raid DKP shown: ', dkpDB.currentDB);
+    Util:Debug('Current raid DKP shown: '.. dkpDB.currentDB)
 end
 
 --[[

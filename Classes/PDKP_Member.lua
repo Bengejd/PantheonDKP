@@ -232,7 +232,7 @@ function Member:MigrateAndLocate()
                 self.dkp[raid] = gmember.dkp[raid]
             end
         end
-    else
-        Util:Debug('Falling back to defaults for ', self.name)
+    elseif self.name then
+--        Util:Debug('Falling back to defaults for '.. self.name)
     end
 end
