@@ -58,7 +58,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         end,
         ['ZONE_CHANGED_NEW_AREA']=function() -- This allows us to detect if the GuildInfo() event is available yet.
             PDKP:InitializeGuildData()
-            if core.firstLogin then Comms:DatabaseSyncRequest() end
+--            if core.firstLogin then Comms:DatabaseSyncRequest() end
             return UnregisterEvent(self, event)
         end,
         ['PLAYER_ENTERING_WORLD']=function()
