@@ -157,7 +157,7 @@ function Raid:GetRaidInfo()
 end
 
 function Raid:IsAssist()
-    if Raid.RaidInfo == nil then Raid:GetRaidInfo() end
+    Raid:GetRaidInfo()
     for _, member in pairs(Raid.RaidInfo) do
         if member.name == Util:GetMyName() and (member.isAssist or member.isLeader) then
             return true

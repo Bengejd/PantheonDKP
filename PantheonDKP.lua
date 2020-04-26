@@ -157,9 +157,7 @@ function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
         Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
     elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- need to test how
-        print('Sending invite to: ', name)
-    else
-        print(msg)
+        InviteUnit(name)
     end
 end
 
