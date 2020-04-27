@@ -295,6 +295,13 @@ function Raid:MemberIsInRaid(name)
     return false
 end
 
+function Raid:GetInstanceInfo()
+    local name, type, difficultyIndex, difficultyName, maxPlayers,
+    dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
+
+    -- if difficultyIndex is >= 1 then you're in an instance (5, 10 or 40 man)
+end
+
 function Raid:IsDkpOfficer()
     if Raid.dkpOfficer then -- We have established who the DKP officer is.
         return Raid.dkpOfficer == Util:GetMyName()
