@@ -127,7 +127,6 @@ function Guild:CanEdit()
     return core.canEdit;
 end
 
--- Needs reworked
 function Guild:CanMemberEdit(name)
     local member = Guild.members[name]
 

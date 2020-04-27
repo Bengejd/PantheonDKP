@@ -749,7 +749,7 @@ function Setup:dkpOfficer()
     dropdownList:HookScript('OnShow', function()
         local charName = strtrim(_G['DropDownList1Button1']:GetText())
 
-        if charName and Raid:MemberIsInRaid(charName) and Raid:IsAssist() then
+        if charName and Raid:MemberIsInRaid(charName) and Raid:IsAssist() and Guild:CanMemberEdit(charName) then
 
             local isDkpOfficer = charName == Raid.dkpOfficer
             local dkpOfficerText
