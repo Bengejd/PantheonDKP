@@ -131,9 +131,13 @@ end
 function Guild:CanMemberEdit(name)
     local member = Guild.members[name]
 
-    for _, v in pairs(GuildDB.members) do
-        if v['name'] == name then
-            return v['canEdit'];
+    if member then
+        return member.canEdit
+    else
+        for _, v in pairs(GuildDB.members) do
+            if v['name'] == name then
+                return v['canEdit'];
+            end
         end
     end
     return false; -- Member was not found in the Guild Roster.
