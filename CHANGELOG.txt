@@ -1,12 +1,20 @@
 ====== Version 1.2.0 ======
-[Features]:
-    - Raid Officer Interface added (Requires you open pdkp at least once to show).
+[New Features]:
+    - [Raid Officer Interface]
         - Auto invite feature (defaults to: "inv" and "invite") for raids. This can be customized, if you're an officer.
         - Added a button to auto give "assist" to all officers in the raid.
         - Added auto-guild reminder (once every 90 seconds) about raid invites being out. Stops after 15 mins
             or after you click the stop button.
-    - DKP Officer feature added to raid promotion menu (handles boss kill popups, shrouding data, etc...)
-    - Added AQ40 & Naxx tables
+    - [DKP Officer Raid Promotion]
+        - Raid leaders & assist can now "assign" someone to be the DKP Officer in their raid.
+        - Shrouding data will come from this person's addon (make sure they're up to date!)
+        - Boss kills will result in a pop-up on the DKP Officer's screen, for quick-boss-kill dkp distribution.
+    - [AQ & Naxx Tables]
+        - Added & Disabled for the time-being.
+    - [PDKP Map Icon]
+        - Notifies you when your DKP tables are out of date (or tries to)
+        - Left-click to open PDKP
+        - Left-Shift-Click to request a push (Herd-syncing!)
 
 [Bug fixes]:
     - Fixed Onyxia's DKP table dropdown. Was referencing the wrong raid name.

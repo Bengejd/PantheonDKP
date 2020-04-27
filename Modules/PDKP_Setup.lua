@@ -749,7 +749,7 @@ function Setup:dkpOfficer()
     dropdownList:HookScript('OnShow', function()
         local charName = strtrim(_G['DropDownList1Button1']:GetText())
 
-        if charName and Raid:MemberIsInRaid(charName) then
+        if charName and Raid:MemberIsInRaid(charName) and Raid:IsAssist() then
 
             local isDkpOfficer = charName == Raid.dkpOfficer
             local dkpOfficerText
@@ -781,7 +781,7 @@ function Setup:dkpOfficer()
                 isUninteractable = false;
                 notCheckable = true;
                 iconOnly = false;
-                keepShownOnClick=true,
+                keepShownOnClick=false,
                 tCoordLeft = 0;
                 tCoordRight = 1;
                 tCoordTop = 0;
@@ -796,7 +796,7 @@ function Setup:dkpOfficer()
                     else
                         Raid.dkpOfficer = charName;
                         PDKP:Print(charName .. ' is now the DKP Officer')
-                        self:SetText('Demote from DKP Officer')
+--                        self:SetText('Demote from DKP Officer')
                     end
                     Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
                 end
@@ -807,8 +807,13 @@ function Setup:dkpOfficer()
 end
 
 function Setup:OfficerWindow()
-    if core.canEdit == false or not Raid:IsInRaid() then
-        return Util:Debug('Not creating officer window: Edit: ' .. tostring(core.canEdit) .. ' InRaid: ' .. tostring(Raid:IsInRaid()))
+    if core.canEdit == false or not Raid:IsInRaid() or not Raid:IsAssist() then
+        return Util:Debug(
+            'Not creating officer window:' ..
+            ' Edit: ' .. tostring(core.canEdit) ..
+            ' InRaid: ' .. tostring(Raid:IsInRaid()) ..
+            ' IsAssist: ' .. tostring(Raid:IsAssist())
+        )
     end
 
     if _G['pdkpOfficerFrame'] then return end;
