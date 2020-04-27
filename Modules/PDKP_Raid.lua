@@ -285,6 +285,16 @@ function Raid:isRaidLeader()
     return Raid.RaidLeader == Util:GetMyName()
 end
 
+function Raid:MemberIsInRaid(name)
+    Raid:GetRaidInfo()
+    for _, member in pairs(Raid.RaidInfo) do
+        if member.name == name then
+            return true
+        end
+    end
+    return false
+end
+
 function Raid:IsDkpOfficer()
     if Raid.dkpOfficer then -- We have established who the DKP officer is.
         return Raid.dkpOfficer == Util:GetMyName()

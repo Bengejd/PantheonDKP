@@ -720,11 +720,21 @@ function GUI:GetItemButton()
 end
 
 function GUI:ToggleOfficerInterface()
-    local officerFrame = _G['pdkpOfficerFrame']
+    local officerFrame = GUI.officerInterfaceFrame
 
     if officerFrame then
        if officerFrame:IsShown() and not Raid:IsInRaid() then officerFrame:Hide()
-       elseif Raid:IsInRaid() and not officerFrame:IsShown() then officerFrame:Show()
+       elseif Raid:IsInRaid() and not officerFrame:IsShown() then
+            officerFrame:Show()
+
+           if Raid:isRaidLeader() then officerFrame.raidControlGroup.frame:Show()
+           else officerFrame.raidControlGroup.frame:Hide()
+           end
+
+           if Raid:IsAssist() then officerFrame.inviteControlGroup.frame:Show()
+           else officerFrame.inviteControlGroup.frame:Hide()
+               officerFrame:Hide()
+           end
        end
     else
         Setup:OfficerWindow()
