@@ -194,7 +194,13 @@ end
 -- GUILD COMMS FUNCTIONS --
 ---------------------------
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
---    PackupSyncDatabse
+    local officerFunc = {
+        ['pdkpSyncRes'] = function()
+            Import:AcceptData(message)
+        end,
+    }
+    local func = officerFunc[prefix]
+    if func then return func() end
 end
 
 ---------------------------
@@ -202,9 +208,8 @@ end
 ---------------------------
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
-        ['pdkpSyncRequest'] = function()
-            Comms:SendCommsMessage('pdkpSyncRes', database, 'WHISPER', sender, 'BULK')
-
+        ['pdkpSyncRequest'] = function() -- Send the data to the guild
+            Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK')
         end,
     }
     local func = officerFunc[prefix]
@@ -442,15 +447,25 @@ end
 
 function Comms:PackupSyncDatabse()
     if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
-    local myHistory = {
-        all = {},
-        deleted = {}
-    }
-    local dkpDB = DKP.dkpDB.history
-    for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
-    for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
 
-    return myHistory
+    local pdkpSyncResponseDatabase = {
+        addon_version = Defaults.addon_version,
+        full = false,
+        guildDB = {
+            numOfMembers = nil,
+            members = nil,
+        },
+        dkpDB = {
+            lastEdit = DKP.dkpDB.lastEdit,
+            history = {
+                all = DKP.dkpDB.history.all,
+                deleted = DKP.dkpDB.history.deleted,
+            },
+            members = nil,
+            currentDB = nil
+        }
+    }
+    return pdkpSyncResponseDatabase
 end
 
 ---------------------------
