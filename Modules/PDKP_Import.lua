@@ -26,7 +26,7 @@ function Import:AcceptData(reqData)
         -- TODO: Possibly do something here??
     end
 
-    Util:Debug('Import received from addon version ', reqData.addon_version)
+    Util:Debug('Import received from addon version '.. tostring(reqData.addon_version))
 
     if reqData.full then -- THIS IS A FULL OVERWRITE
         Import:AcceptFullDatabase(reqData)
@@ -127,7 +127,8 @@ function Import:AcceptData(reqData)
        GUI:pdkp_dkp_table_sort('dkpTotal')
        GUI.pushFrame:Hide()
    end
-    PDKP:Print("The DKP push has completed successfully")
+
+    PDKP:Print("A DKP push has completed")
 end
 
 function Import:AcceptFullDatabase(data)
