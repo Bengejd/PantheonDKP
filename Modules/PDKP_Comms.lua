@@ -23,7 +23,6 @@ local SAFE_COMMS = {
     ['pdkpLastEditReq'] = true,
     ['pdkpLastEditRec'] = true,
     ['pdkpPushInProg'] = true,
-    ['pdkpSyncRequest'] = true,
     ['pdkpModLastEdit']=true,
 };
 
@@ -32,7 +31,7 @@ local UNSAFE_COMMS = {
 }
 
 local OFFICER_COMMS = {
-    ['pdkpPushRequest'] = true,
+    ['pdkpSyncRequest'] = true,
 }
 
 local RAID_COMMS = {
@@ -45,6 +44,7 @@ local GUILD_COMMS = {
     ['pdkp_placeholder']=true,
     ['pdkpPushReceive'] = true, -- Officer check
     ['pdkpEntryDelete'] = true, -- Officer check
+    ['pdkpSyncRes']=true
 }
 
 Comms.commsRegistered = false
@@ -128,12 +128,11 @@ function OnCommReceived(prefix, message, distribution, sender)
     local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
     -- Might be able to get rid of these comms?
-    if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
-    elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
-
-    elseif OFFICER_COMMS[prefix] then Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
-    elseif GUILD_COMMS[prefix] then Comms:OnGuildCommReceived(prefix, data, distribution, sender);
-    elseif RAID_COMMS[prefix] then Comms:OnRaidCommReceived(prefix, data, distribution, sender);
+    if SAFE_COMMS[prefix] then return Comms:OnSafeCommReceived(prefix, data, distribution, sender);
+    elseif UNSAFE_COMMS[prefix] then return Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
+    elseif OFFICER_COMMS[prefix] then return Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
+    elseif GUILD_COMMS[prefix] then return Comms:OnGuildCommReceived(prefix, data, distribution, sender);
+    elseif RAID_COMMS[prefix] then return Comms:OnRaidCommReceived(prefix, data, distribution, sender);
     else
         Util:Debug("Unknown Prefix " .. prefix, " found in request...")
     end
@@ -144,16 +143,16 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
 
     if Defaults.no_broadcast then return print(skipBroadcastMsg .. ' no_broadcast is enabled') end
-    if Defaults.debug then -- Don't send messages unnecessarily when developing.
-        if distro == 'GUILD' then -- in debug, change distro to whisper, and send to bank, or Pantheonbank or KarolBaskins
-            distro = 'WHISPER'
-            sendTo = 'Pantheonbank'
-            if Util:GetMyName() == sendTo then sendTo = 'Karenbaskins' end -- send to alt char instead of bank.
-
-        elseif distro == 'WHISPER' and (sendTo ~= 'Pantheonbank' and sendTo ~= 'Karenbaskins') then
-            return print(skipBroadcastMsg .. sendTo .. " is not bank!")
-        end
-    end
+--    if Defaults.debug then -- Don't send messages unnecessarily when developing.
+--        if distro == 'GUILD' then -- in debug, change distro to whisper, and send to bank, or Pantheonbank or KarolBaskins
+--            distro = 'WHISPER'
+--            sendTo = 'Pantheonbank'
+--            if Util:GetMyName() == sendTo then sendTo = 'Karenbaskins' end -- send to alt char instead of bank.
+--
+--        elseif distro == 'WHISPER' and (sendTo ~= 'Pantheonbank' and sendTo ~= 'Karenbaskins') then
+--            return print(skipBroadcastMsg .. sendTo .. " is not bank!")
+--        end
+--    end
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
     local transmitData = Comms:DataEncoder(data)
@@ -195,14 +194,21 @@ end
 -- GUILD COMMS FUNCTIONS --
 ---------------------------
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
-
+--    PackupSyncDatabse
 end
 
 ---------------------------
 --OFFICER COMMS FUNCTIONS--
 ---------------------------
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
+    local officerFunc = {
+        ['pdkpSyncRequest'] = function()
+            Comms:SendCommsMessage('pdkpSyncRes', database, 'WHISPER', sender, 'BULK')
 
+        end,
+    }
+    local func = officerFunc[prefix]
+    if func then return func() end
 end
 
 ---------------------------
@@ -235,11 +241,6 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 --                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
---        -- Needs to be edited to be raid only
---        ['pdkpDkpOfficer'] = function()
---            Raid.dkpOfficer = message
---            PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
---        end
     }
 
     if safeFuncs[prefix] then safeFuncs[prefix]() end
@@ -261,11 +262,6 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
         ['pdkpEntryDelete'] = function()
             DKP:DeleteEntry(message, false)
         end,
---        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
---        ['pdkpNewShrouds'] = function()
---            Shroud.shrouders = message -- assign the shrouding table that was sent.
---            Shroud:UpdateWindow() -- Update the window.
---        end,
         ['pdkpSyncResponse'] = function()
 --            Import:AcceptData(message)
         end,
@@ -444,7 +440,17 @@ function Comms:DatabaseSyncRequest()
     Comms:SendCommsMessage('pdkpSyncRequest', myHistory, 'GUILD', nil, 'BULK', nil)
 end
 
-function Comms:TestNonEncoded()
+function Comms:PackupSyncDatabse()
+    if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
+    local myHistory = {
+        all = {},
+        deleted = {}
+    }
+    local dkpDB = DKP.dkpDB.history
+    for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
+    for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
+
+    return myHistory
 end
 
 ---------------------------
