@@ -194,12 +194,13 @@ end
 -- GUILD COMMS FUNCTIONS --
 ---------------------------
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
-    local officerFunc = {
+    local guildFunc = {
         ['pdkpSyncRes'] = function()
+            print('Sync res found')
             Import:AcceptData(message)
         end,
     }
-    local func = officerFunc[prefix]
+    local func = guildFunc[prefix]
     if func then return func() end
 end
 
@@ -209,7 +210,7 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncRequest'] = function() -- Send the data to the guild
-            Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK')
+            Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
         end,
     }
     local func = officerFunc[prefix]
@@ -447,6 +448,8 @@ end
 
 function Comms:PackupSyncDatabse()
     if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
+
+    print('Doing syncdatabase stuff')
 
     local pdkpSyncResponseDatabase = {
         addon_version = Defaults.addon_version,
