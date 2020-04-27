@@ -18,7 +18,7 @@ local Import = core.Import;
 local item = core.Item;
 local Member = core.Member;
 local Officer = core.Officer;
-
+local Minimap = core.Minimap
 
 local PlaySound = PlaySound
 
@@ -144,6 +144,10 @@ function PDKP:OnInitialize(event, name)
     Setup:dkpOfficer()
 end
 
+function PDKP:InitializeMinimap()
+    Minimap:Register("pdkpMinimapDB", myLDB, savedVarTable)
+end
+
 function PDKP:InitializeGuildData()
     if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
 
@@ -174,6 +178,7 @@ end
 function PDKP:InitializeDatabases()
     Guild:InitGuildDB()
     DKP:InitDKPDB()
+    Minimap:InitMapDB()
     core.databasesInitialized = true
 end
 

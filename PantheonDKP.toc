@@ -1,11 +1,11 @@
 ## Interface: 11302
 ## Title: PantheonDKP
 ## Author: Neekio
-## Version: 1.1.2
+## Version: 1.2.4
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory
+## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap
 
 #@no-lib-strip@
 embed.xml
@@ -34,6 +34,7 @@ Modules\PDKP_Raid.lua
 Modules\PDKP_Import.lua
 Modules\PDKP_Setup.lua
 Modules\PDKP_Officer.lua
+Modules\PDKP_Minimap.lua
 
 
 View_Templates\Shrouding\pdkp_shrouding.xml

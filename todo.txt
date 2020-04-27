@@ -3,18 +3,13 @@ OOP:
     - Members should be an object with associated functions attached as well.
 
 TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
-TODO: Start Raid (Starts Logging, Guild invites, party-join events)
 TODO: Enable PUGS
 TODO: Options table for changing Raid DKP amounts.
 TODO: Decay (No call / no-show: 20%)
 TODO: Excused absence: 15%
 
-TODO: Raid boss kills
 TODO: Rework-comms
-TODO: Create "Promote to DKP Officer" in raid frame
-TODO: Auto-invite commands
-TODO: Officer window (start raid, announce raid, etc...)
-
+TODO:
 
 Table Filters:
 	- Show Pugs

@@ -24,8 +24,9 @@ core.Comms = {};
 core.Import = {};
 core.Setup = {}; -- Creates the UI for us.
 core.Officer = {};
-
+core.Minimap = {};
 core.Member = {}; -- Member class object.
 
 core.PDKP = LibStub("AceAddon-3.0"):NewAddon("PDKP", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0"); -- set the plugin up.
 core.LibDeflate = LibStub:GetLibrary("LibDeflate")
+

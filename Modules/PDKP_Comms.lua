@@ -23,7 +23,6 @@ local SAFE_COMMS = {
     ['pdkpPushRequest'] = true,
     ['pdkpLastEditReq'] = true,
     ['pdkpLastEditRec'] = true,
-    ['pdkpBusyTryAgai'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
     ['pdkpDkpOfficer']=true,
@@ -32,7 +31,6 @@ local SAFE_COMMS = {
 
 local UNSAFE_COMMS = {
     ['pdkpPushReceive'] = true,
-    ['pdkpBusyTryAgai'] = true,
     ['pdkpEntryDelete'] = true,
     ['pdkpClearShrouds'] = true,
     ['pdkpNewShrouds'] = true,
@@ -121,10 +119,6 @@ function OnCommReceived(prefix, message, distribution, sender)
     end
 end
 
-function Comms:OnOfficerCommReceived(prefix, data, distribution, sender)
-
-end
-
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
@@ -147,12 +141,14 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
 
-
-
 function Comms:ThrowError(prefix, sender)
     local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
     errMsg = errMsg .. ' an Officer.'
     return Util:ThrowError(errMsg, true)
+end
+
+function Comms:OnOfficerCommReceived(prefix, data, distribution, sender)
+
 end
 
 ---------------------------
@@ -163,25 +159,29 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
 
     local safeFuncs = {
-        ['pdkpBusyTryAgai'] = function() PDKP:Print(sender .. ' is currently busy, please try again later') end,
         -- Send them back your lastEdit time
+        -- Need to edit to be only officers.
         ['pdkpLastEditReq'] = function()
             Comms:SendCommsMessage('pdkpLastEditRec', DKP.dkpDB.lastEdit, 'WHISPER', sender, 'BULK')
         end,
+        -- Need to edit to be only officers.
         -- Process their lastEdit time
         ['pdkpLastEditRec'] = function() Comms:LastEditReceived(sender, message) end,
         -- Someone Sent you a push request
+        -- Need to edit to be guild only instead of whispers.
         ['pdkpPushRequest'] = function()
             PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
             Comms:PrepareDatabase(false)
             Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
         end,
+        -- Need to edit to be guild only
         ['pdkpSyncRequest'] = function()
             if core.canEdit then
 --                local database = Comms:PrepareDatabaseSyncResponse(message)
 --                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
+        -- Needs to be edited to be raid only
         ['pdkpDkpOfficer'] = function()
             Raid.dkpOfficer = message
             PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
@@ -200,7 +200,6 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
     if not UNSAFE_COMMS[prefix] or not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
 
     local unsafeFuncs = {
-        ['pdkpBusyTryAgai'] = function() PDKP:Print(sender .. ' is currently busy, please try again later') end,
         ['pdkpPushReceive'] = function()
             PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
             Import:AcceptData(message)
