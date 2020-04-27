@@ -20,20 +20,14 @@ local Raid = core.Raid;
  ]]
 
 local SAFE_COMMS = {
---    ['pdkpPushRequest'] = true,
     ['pdkpLastEditReq'] = true,
     ['pdkpLastEditRec'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
---    ['pdkpDkpOfficer']=true,
     ['pdkpModLastEdit']=true,
 };
 
 local UNSAFE_COMMS = {
-    ['pdkpPushReceive'] = true,
-    ['pdkpEntryDelete'] = true,
---    ['pdkpClearShrouds'] = true,
---    ['pdkpNewShrouds'] = true,
     ['pdkpSyncResponse'] = true
 }
 
@@ -42,13 +36,15 @@ local OFFICER_COMMS = {
 }
 
 local RAID_COMMS = {
-    ['pdkpClearShrouds']=true,
-    ['pdkpNewShrouds']=true,
-    ['pdkpDkpOfficer']=true,
+    ['pdkpClearShrouds']=true, -- Officer check
+    ['pdkpNewShrouds']=true, -- Officer check
+    ['pdkpDkpOfficer']=true, -- Officer check
 }
 
 local GUILD_COMMS = {
     ['pdkp_placeholder']=true,
+    ['pdkpPushReceive'] = true, -- Officer check
+    ['pdkpEntryDelete'] = true, -- Officer check
 }
 
 Comms.commsRegistered = false
@@ -177,6 +173,7 @@ end
 function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
     -- This shouldn't ever happen, but who knows.
     if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
+    if not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
 
     local raidFuncs = {
         ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
