@@ -14,9 +14,12 @@ local Import = core.import;
 local Setup = core.Setup;
 local Comms = core.Comms;
 local Shroud = core.Shroud;
+local Raid = core.Raid;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local PlaySound = PlaySound
+
+local officerOldScript = {};
 
 -- Parent function to create all of the UI elements we need.
 function Setup:MainUI()
@@ -26,8 +29,11 @@ function Setup:MainUI()
     else -- We haven't initialized the frame yet.
         -- Create frame args: frameType, frameName, parentFrame, inheritsFrame
 
+        --        Setup:OfficerWindow()
+
+
         -----------------------------
-        --        Main Frame       --
+        -- Main Frame       --
         -----------------------------
 
         GUI.pdkp_frame = CreateFrame("Frame", "pdkpCoreFrame", UIParent, "pdkp_core_frame");
@@ -40,7 +46,7 @@ function Setup:MainUI()
         GUI.pdkp_version:SetText('V' .. core.defaults.addon_version)
 
         -----------------------------
-        --     Class Checkboxes    --
+        -- Class Checkboxes    --
         -----------------------------
 
         Setup:ClassFilterCheckboxes()
@@ -66,9 +72,8 @@ function Setup:MainUI()
 end
 
 -----------------------------
---     CREATE FUNCTIONS    --
+-- CREATE FUNCTIONS    --
 -----------------------------
-
 function Setup:PushTimer()
     if GUI.pushbar == nil then
         GUI.pushbar = CreateFrame("StatusBar", 'pdkp_pushbar', UIParent)
@@ -133,7 +138,8 @@ function Setup:ShroudingWindow()
 
     sf:SetScript("OnShow", function()
         Shroud.window.open = true
-        scrollcontainer.frame:Show() end)
+        scrollcontainer.frame:Show()
+    end)
     sf:SetScript("OnHide", function()
         scrollcontainer.frame:Hide()
         Shroud:ClearShrouders()
@@ -171,9 +177,9 @@ function Setup:PrioList()
     scrollcontainer:SetPoint("CENTER", lf, "CENTER", 0, -10);
 
     lf:SetScript("OnShow", function()
-        scrollcontainer.frame:Show() end)
+        scrollcontainer.frame:Show()
+    end)
     lf:SetScript("OnHide", function()
---        lf:SetWidth(350)
         scrollcontainer.frame:Hide()
     end)
 
@@ -188,6 +194,8 @@ function Setup:PrioList()
     GUI.prio = lf;
     GUI.prio.scroll = scroll;
     GUI.prio.scrollcontainer = scrollcontainer
+
+    --    GUI:UpdateLootList(nil)
 end
 
 function Setup:dkpPushButton()
@@ -347,8 +355,9 @@ function Setup:AdjustmentDropdowns()
 
             -- Third Dropdown Logic
         end
+
         local function firstLogic()
-            for i=2, #dropdowns do
+            for i = 2, #dropdowns do
                 if i ~= 4 then
                     local d = dropdowns[i];
                     d:SetValue('')
@@ -386,7 +395,7 @@ function Setup:AdjustmentDropdowns()
             end
 
             if index <= 5 then
-                for i=1, #core.raids do
+                for i = 1, #core.raids do
                     local raid = core.raids[i]
                     if raid == currentRaid then
                         secondaryDropdown:SetValue(i)
@@ -625,17 +634,17 @@ function Setup:CreateTestMenuDropdown()
     UIDROPDOWNMENU_SHOW_TIME = 2;
 
     local bossKillMenu = {
-        text="Boss Kill",
-        sub=true,
-        isTitle=true,
-        menuList={},
-        keepShownOnClick=true
+        text = "Boss Kill",
+        sub = true,
+        isTitle = true,
+        menuList = {},
+        keepShownOnClick = true
     }
 
     for raidName, bosses in pairs(core.raidBosses) do
         local subMenu = {};
         subMenu.text, subMenu.sub, subMenu.isTitle, subMenu.menuList, subMenu.notCheckable = raidName, true, true, {}, true
-        for i=1, #bosses do
+        for i = 1, #bosses do
             local b = bosses[i]
             local subItem = {};
             subItem.text, subItem.sub, subItem.isTitle, subItem.menuList = b, false, false, nil
@@ -646,19 +655,19 @@ function Setup:CreateTestMenuDropdown()
 
     local menus = {
         bossKillMenu,
-        {text="On Time Bonus", sub=false},
-        {text="Completion Bonus", sub=false},
-        {text="Benched", sub=false},
-        {text="Unexcused Absence", sub=false},
-        {text="Item Win", sub=false},
-        {text="Other", sub=false},
+        { text = "On Time Bonus", sub = false },
+        { text = "Completion Bonus", sub = false },
+        { text = "Benched", sub = false },
+        { text = "Unexcused Absence", sub = false },
+        { text = "Item Win", sub = false },
+        { text = "Other", sub = false },
     }
 
     -- Implement the function to change the favoriteNumber
     function dropDown:SetValue(newValue)
         -- validation
-        local badValues = {'Boss Kill', 'Onyxia\'s Lair', 'Molten Core', 'Blackwing Lair' }
-        for i=1, #badValues do
+        local badValues = { 'Boss Kill', 'Onyxia\'s Lair', 'Molten Core', 'Blackwing Lair' }
+        for i = 1, #badValues do
             if newValue == badValues[i] then return end
         end
 
@@ -667,13 +676,12 @@ function Setup:CreateTestMenuDropdown()
         -- Because this is called from a sub-menu, only that menu level is closed by default.
         -- Close the entire menu with this next call
         CloseDropDownMenus()
-
     end
 
     -- Create and bind the initialization function to the dropdown menu
     UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
         local function setupMenu(list)
-            for i=1, #list do
+            for i = 1, #list do
                 local info = UIDropDownMenu_CreateInfo()
                 local m = list[i]
                 info.text, info.hasArrow, info.value, info.menuList, info.func = m.text, m.sub, m.text, m.menuList, function(self) dropDown:SetValue(self.value) end
@@ -715,13 +723,13 @@ function Setup:dkpExport()
         table.insert(memberNames, key)
     end
 
-    local function compare(a,b)
+    local function compare(a, b)
         return a < b;
     end
 
     table.sort(memberNames, compare)
 
-    for i=1, #memberNames do
+    for i = 1, #memberNames do
         local member = members[memberNames[i]];
         local dkp = member:GetDKP('Blackwing Lair', 'total')
         if dkp > 0 then
@@ -734,3 +742,253 @@ function Setup:dkpExport()
     eb.frame:Show()
     frame:Show()
 end
+
+function Setup:dkpOfficer()
+    local dropdownList = _G['DropDownList1']
+
+    dropdownList:HookScript('OnShow', function()
+        local charName = strtrim(_G['DropDownList1Button1']:GetText())
+
+        if charName and Raid:MemberIsInRaid(charName) then
+
+            local isDkpOfficer = charName == Raid.dkpOfficer
+            local dkpOfficerText
+
+            if isDkpOfficer then dkpOfficerText = 'Demote from DKP Officer' else
+               dkpOfficerText = 'Promote to DKP Officer'
+            end
+
+            _G['UIDropDownMenu_AddSeparator'](1)
+            _G['UIDropDownMenu_AddButton']({
+                hasArrow = false;
+                text = 'PDKP',
+                isTitle = true;
+                isUninteractable = true;
+                notCheckable = true;
+                iconOnly = false;
+                tCoordLeft = 0;
+                tCoordRight = 1;
+                tCoordTop = 0;
+                tCoordBottom = 1;
+                tSizeX = 0;
+                tSizeY = 8;
+                tFitDropDownSizeX = true;
+            }, 1) -- Title
+            _G['UIDropDownMenu_AddButton']({ -- Actual button
+                hasArrow = false;
+                text = dkpOfficerText,
+                isTitle = false;
+                isUninteractable = false;
+                notCheckable = true;
+                iconOnly = false;
+                keepShownOnClick=true,
+                tCoordLeft = 0;
+                tCoordRight = 1;
+                tCoordTop = 0;
+                tCoordBottom = 1;
+                tSizeX = 0;
+                tSizeY = 8;
+                tFitDropDownSizeX = true;
+                func=function(...)
+                    if isDkpOfficer then
+                        Raid.dkpOfficer = nil
+                        PDKP:Print(charName .. ' is no longer the DKP Officer')
+                    else
+                        Raid.dkpOfficer = charName;
+                        PDKP:Print(charName .. ' is now the DKP Officer')
+                        self:SetText('Demote from DKP Officer')
+                    end
+                    Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
+                end
+            }, 1)
+            _G['UIDropDownMenu_AddSeparator'](1)
+        end
+    end)
+end
+
+function Setup:OfficerWindow()
+    if core.canEdit == false or not Raid:IsInRaid() then
+        return Util:Debug('Not creating officer window: Edit: ' .. tostring(core.canEdit) .. ' InRaid: ' .. tostring(Raid:IsInRaid()))
+    end
+
+    if _G['pdkpOfficerFrame'] then return end;
+
+    if not GUI.pdkp_frame then -- We haven't initialized the frame yet.
+
+        PDKP:Show()
+        GUI:Hide()
+    end
+
+    local mainFrame = CreateFrame("Frame", "pdkpOfficerFrame", RaidFrame, "BasicFrameTemplateWithInset")
+    mainFrame:SetSize(300, 425) -- Width, Height
+    mainFrame:SetPoint("RIGHT", RaidFrame, "RIGHT", 300, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+    mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
+    mainFrame.title:SetFontObject("GameFontHighlight")
+    mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
+    mainFrame.title:SetText('PDKP Officer Interface')
+    mainFrame:SetFrameStrata('FULLSCREEN');
+    mainFrame:SetFrameLevel(1);
+    mainFrame:SetToplevel(true)
+
+    local closeButton = mainFrame.CloseButton
+    closeButton:SetEnabled(false)
+
+    GUI.OfficerFrame = mainFrame
+
+    mainFrame:Show()
+
+    local mainFrameKids = {}
+
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(350)
+    scrollcontainer:SetWidth(250)
+    scrollcontainer:SetLayout("Fill")
+
+    scrollcontainer:SetParent(mainFrame)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", mainFrame, "CENTER", 0, -10);
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    local promoteOfficer = AceGUI:Create("Button")
+    promoteOfficer:SetText("Promote Officers")
+    promoteOfficer:SetWidth(140)
+    promoteOfficer:SetCallback('OnClick', function()
+        if Raid:isRaidLeader() then
+            local raidRoster = Raid:GetRaidInfo()
+            for key, rMember in pairs(raidRoster) do
+                for _, officer in pairs(Guild.officers) do
+                    if officer.name == rMember.name then PromoteToAssistant('raid' .. key) end
+                end
+            end
+        end
+    end)
+
+    local inviteBox = AceGUI:Create("EditBox")
+    inviteBox:SetLabel('Auto Invite Commands')
+    inviteBox:SetText("inv, invite")
+    inviteBox:SetCallback('OnEnterPressed', function()
+        local text = inviteBox:GetText()
+        local textTable = { strsplit(',', text) }
+        core.inviteTextCommands = {}; -- Reset the inv list.
+        for key, text in pairs(textTable) do
+            core.inviteTextCommands[strtrim(string.lower(text))] = true
+        end
+    end)
+    local whisperCommand = AceGUI:Create("Button")
+
+    local inviteSpamCount = 0;
+
+    local function guildInviteSpam()
+        if Raid.SpamTimer then
+            print('Canceling Invite Spam')
+            PDKP:CancelTimer(Raid.SpamTimer)
+            inviteSpamCount = 0;
+            Raid.SpamTimer = nil
+            whisperCommand:SetText("Start Raid Inv Spam")
+            return;
+        else
+            if Raid.spamText == nil then return end
+            whisperCommand:SetText('Stop Raid Inv Spam')
+
+            local function TimerFeedback()
+                inviteSpamCount = inviteSpamCount + 1
+                SendChatMessage(Raid.spamText .. ' ' .. inviteSpamCount, "GUILD", nil, nil);
+                if inviteSpamCount >= 10 then
+                    guildInviteSpam()
+                end
+            end
+
+            Raid.SpamTimer = PDKP:ScheduleRepeatingTimer(TimerFeedback, 90); -- Posts it every 90 seconds for 15 minutes.
+            SendChatMessage(Raid.spamText .. ' ' .. inviteSpamCount, "GUILD", nil, nil);
+        end
+    end
+
+    whisperCommand:SetText("Start Raid Inv Spam")
+    whisperCommand:SetDisabled(true)
+    whisperCommand:SetCallback('OnClick', function()
+        guildInviteSpam()
+    end)
+
+    local raidSpamTime = AceGUI:Create("MultiLineEditBox")
+    raidSpamTime:SetLabel('Guild Invite Spam text')
+    raidSpamTime:SetHeight(100)
+    raidSpamTime:SetWidth(200)
+    raidSpamTime:DisableButton(true)
+    raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst for invite")
+    raidSpamTime:SetCallback('OnTextChanged', function()
+        Raid.spamText = raidSpamTime:GetText()
+
+        if Util:IsEmpty(Raid.spamText) then
+            whisperCommand:SetDisabled(true)
+        else
+            whisperCommand:SetDisabled(false)
+        end
+    end)
+
+    local raidGroup = AceGUI:Create("InlineGroup")
+    raidGroup:SetTitle('Raid Control')
+    raidGroup:SetParent(scroll)
+    raidGroup.frame:SetFrameStrata('HIGH');
+
+    local label = AceGUI:Create("Label")
+    label:SetText("This will give all officers in the raid the 'Assist' role.")
+    raidGroup:AddChild(promoteOfficer)
+    raidGroup:AddChild(label)
+
+    raidGroup.frame:Hide()
+
+    scroll:AddChild(raidGroup)
+
+    mainFrame.raidControlGroup = raidGroup
+
+    local inviteControl = AceGUI:Create("InlineGroup")
+    inviteControl:SetTitle('Invite Control')
+    inviteControl:SetParent(scroll)
+    inviteControl.frame:SetFrameStrata('HIGH');
+
+    local inviteLabel = AceGUI:Create("Label")
+    inviteLabel:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
+    inviteControl:AddChild(inviteBox)
+    inviteControl:AddChild(inviteLabel)
+
+    local raidSpamLabel = AceGUI:Create("Label")
+    raidSpamLabel:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
+    inviteControl:AddChild(raidSpamTime)
+    inviteControl:AddChild(raidSpamLabel)
+
+    local emptyLabel = AceGUI:Create("Label") -- To create space between Guild invite spam text and the button.
+    emptyLabel:SetText("     ")
+
+    inviteControl:AddChild(emptyLabel)
+
+    local whisperLabel = AceGUI:Create("Label")
+    whisperLabel:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes. Click again to stop the message spam.")
+    inviteControl:AddChild(whisperCommand)
+    inviteControl:AddChild(whisperLabel)
+
+    inviteControl.frame:Hide()
+
+    scroll:AddChild(inviteControl)
+
+    mainFrame.inviteControlGroup = inviteControl
+
+    scroll.frame:SetFrameLevel(1);
+    table.insert(mainFrameKids, scrollcontainer)
+
+    local function toggleKids(show)
+        for _, child in pairs(mainFrameKids) do
+            if show then child.frame:Show() else child.frame:Hide() end
+        end
+    end
+
+    mainFrame:SetScript('OnHide', function() toggleKids(false) end)
+    mainFrame:SetScript('OnShow', function() toggleKids(true) end)
+
+    GUI.officerInterfaceFrame = mainFrame;
+end
+

@@ -7,6 +7,8 @@ local Util = core.Util;
 local Guild = core.Guild;
 local Defaults = core.defaults;
 
+local raids = core.raids
+
 local Member = core.Member;
 Member.__index = Member; -- Set the __index parameter to reference Character
 
@@ -31,20 +33,18 @@ function Member:new(guildIndex)
 
     if self.name == Util:GetMyName() then core.canEdit = self.canEdit end
 
-    self.dkp = {
-        ['Molten Core'] = {
-            previousTotal = 0,
-            total = 0,
-            entries = {},
-            deleted = {}
-        },
-        ['Blackwing Lair'] = {
-            previousTotal = 0,
-            total = 0,
-            entries = {},
-            deleted = {}
-        },
-    };
+    self.dkp = {};
+
+    for key, raid in pairs(raids) do
+        if key > 1 then
+            self.dkp[raid] = {
+                previousTotal = 0,
+                total = 0,
+                entries = {},
+                deleted = {}
+            }
+        end
+    end
     return self
 end
 
@@ -59,46 +59,46 @@ function Member:GetDKP(raidName, variableName)
 end
 
 function Member:ValidateTable()
-    local histKeys = self:GetHistory('Blackwing Lair')
-    local dkpDB = DKP.dkpDB
-    local allHistory = dkpDB.history.all
-    local deletedHistory = dkpDB.history.deleted
-    if #histKeys == 0 then return false end -- Only want to look at people that have entries.
-    local validDKP = 0
-    local dkp = self.dkp['Blackwing Lair']['total']
-
-    for i=1, #histKeys do
-        local entryKey = histKeys[i]
-        local entry = allHistory[entryKey]
-        if entry and entry['raid'] == 'Blackwing Lair' then
-            if entry and entry['deleted'] == false then
-                validDKP  = validDKP + entry.dkpChange
-            elseif entry and entry['deleted'] == true then
-                validDKP  = validDKP - entry.dkpChange
-            end
-        end
-    end
-
-    if validDKP ~= dkp then
-        if validDKP < 0 then
-            print(self.name, ' is broken?', dkp, validDKP)
-        elseif dkp > validDKP then
-            print(self.name, dkp, validDKP)
---            if dkp > validDKP + 200 then
---                --                   self.dkp['Blackwing Lair']['total'] = validDKP
---            elseif dkp > 400 and validDKP == 400 then
---                --                   self.dkp['Blackwing Lair']['total'] = validDKP
---            elseif dkp > validDKP + 150 then
---                --                   self.dkp['Blackwing Lair']['total'] = validDKP
---            else
---                if dkp > 500 then
---                    --                       self.dkp['Blackwing Lair']['total'] = dkp - 200
---                else
---                    --                       self.dkp['Blackwing Lair']['total'] = validDKP - 100
---                end
+--    local histKeys = self:GetHistory('Blackwing Lair')
+--    local dkpDB = DKP.dkpDB
+--    local allHistory = dkpDB.history.all
+--    local deletedHistory = dkpDB.history.deleted
+--    if #histKeys == 0 then return false end -- Only want to look at people that have entries.
+--    local validDKP = 0
+--    local dkp = self.dkp['Blackwing Lair']['total']
+--
+--    for i=1, #histKeys do
+--        local entryKey = histKeys[i]
+--        local entry = allHistory[entryKey]
+--        if entry and entry['raid'] == 'Blackwing Lair' then
+--            if entry and entry['deleted'] == false then
+--                validDKP  = validDKP + entry.dkpChange
+--            elseif entry and entry['deleted'] == true then
+--                validDKP  = validDKP - entry.dkpChange
 --            end
-        end
-    end
+--        end
+--    end
+--
+--    if validDKP ~= dkp then
+--        if validDKP < 0 then
+--            print(self.name, ' is broken?', dkp, validDKP)
+--        elseif dkp > validDKP then
+--            print(self.name, dkp, validDKP)
+----            if dkp > validDKP + 200 then
+----                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+----            elseif dkp > 400 and validDKP == 400 then
+----                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+----            elseif dkp > validDKP + 150 then
+----                --                   self.dkp['Blackwing Lair']['total'] = validDKP
+----            else
+----                if dkp > 500 then
+----                    --                       self.dkp['Blackwing Lair']['total'] = dkp - 200
+----                else
+----                    --                       self.dkp['Blackwing Lair']['total'] = validDKP - 100
+----                end
+----            end
+--        end
+--    end
 
 --    self:Save()
 end
@@ -169,27 +169,27 @@ function Member:Save()
     if self.name == nil then return Util:Debug('There is a rogue player!') end;
 
     local db = Guild.db.members
-    db[self.name] = {
+
+    local dbMember = {
         name = self.name,
         rankIndex = self.rankIndex,
         class = self.class,
         canEdit = self.canEdit,
         formattedname = self.formattedName,
-        dkp = {
-            ['Blackwing Lair'] = {
-                previousTotal = self.dkp['Blackwing Lair'].previousTotal,
-                total = self.dkp['Blackwing Lair'].total,
-                entries = self.dkp['Blackwing Lair'].entries,
-                deleted = self.dkp['Blackwing Lair'].deleted
-            },
-            ['Molten Core'] = {
-                previousTotal = self.dkp['Molten Core'].previousTotal,
-                total = self.dkp['Molten Core'].total,
-                entries = self.dkp['Molten Core'].entries,
-                deleted = self.dkp['Molten Core'].deleted,
-            }
-        },
+        dkp = {},
     }
+
+    for key, raid in pairs(raids) do
+        if key > 1 then
+            dbMember.dkp[raid] = {
+                previousTotal = self.dkp[raid].previousTotal,
+                total = self.dkp[raid].total,
+                entries = self.dkp[raid].entries,
+                deleted = self.dkp[raid].deleted
+            }
+        end
+    end
+--    db[self.name] = dbMember
 end
 
 function Member:MigrateAndLocate()
@@ -227,8 +227,12 @@ function Member:MigrateAndLocate()
         db[self.name] = {} -- release the data. We've migrated already.
     elseif Guild.db.members[self.name] ~= nil then -- We have the dkp data in the database already.
         local gmember = Guild.db.members[self.name]
-        self.dkp = gmember.dkp
-    else
-        Util:Debug('Falling back to defaults for ', self.name)
+        for _, raid in pairs(raids) do
+            if gmember.dkp[raid] ~= nil then
+                self.dkp[raid] = gmember.dkp[raid]
+            end
+        end
+    elseif self.name then
+--        Util:Debug('Falling back to defaults for '.. self.name)
     end
 end

@@ -8,11 +8,13 @@ TODO: Enable PUGS
 TODO: Options table for changing Raid DKP amounts.
 TODO: Decay (No call / no-show: 20%)
 TODO: Excused absence: 15%
-TODO: Partial Update
-TODO: Full database replacement
-TODO: Request Data (Event)
-TODO: Request Data (received)
-TODO: Fix Shrouding popup so that it doesn't pick winner if there are multiple that are tied.
+
+TODO: Raid boss kills
+TODO: Rework-comms
+TODO: Create "Promote to DKP Officer" in raid frame
+TODO: Auto-invite commands
+TODO: Officer window (start raid, announce raid, etc...)
+
 
 Table Filters:
 	- Show Pugs

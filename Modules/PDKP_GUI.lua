@@ -13,7 +13,7 @@ local Defaults = core.defaults;
 local Import = core.Import;
 local Setup = core.Setup;
 local Comms = core.Comms;
-
+local Raid = core.Raid;
 
 GUI.countdownTimer = nil;
 GUI.statusbar = nil;
@@ -719,6 +719,28 @@ function GUI:GetItemButton()
     return _G['pdkp_item_link'];
 end
 
+function GUI:ToggleOfficerInterface()
+    local officerFrame = GUI.officerInterfaceFrame
+
+    if officerFrame then
+       if officerFrame:IsShown() and not Raid:IsInRaid() then officerFrame:Hide()
+       elseif Raid:IsInRaid() and not officerFrame:IsShown() then
+            officerFrame:Show()
+
+           if Raid:isRaidLeader() then officerFrame.raidControlGroup.frame:Show()
+           else officerFrame.raidControlGroup.frame:Hide()
+           end
+
+           if Raid:IsAssist() then officerFrame.inviteControlGroup.frame:Show()
+           else officerFrame.inviteControlGroup.frame:Hide()
+               officerFrame:Hide()
+           end
+       end
+    else
+        Setup:OfficerWindow()
+    end
+end
+
 ---------------------------
 -- TIMER Functions    --
 ---------------------------
@@ -840,8 +862,7 @@ StaticPopupDialogs["PDKP_RAID_BOSS_KILL"] = {
     bossID = nil,
     bossName = nil,
     OnAccept = function()
-
-        pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossID);
+        pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossInfo);
         StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
     end,
     OnCancel = function() end,

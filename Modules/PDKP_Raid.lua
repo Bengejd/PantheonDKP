@@ -11,6 +11,7 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Raid = core.Raid;
 local item = core.Item;
+local Comms = core.Comms;
 
 local raidHistory;
 
@@ -20,36 +21,10 @@ Raid.RaidInfo = {};
 -- Auto pop up raid boss kills when they occur
 -- Auto award the completion bonus when the finalboss is killed.
 
-Raid.bossIDS = {
-
-    -- Molten Core
-    [663] = "Lucifron",
-    [664] = 'Magmadar',
-    [665] = 'Gehennas',
-    [666] = 'Garr',
-    [667] = 'Shazzrah',
-    [668] = 'Baron Geddon',
-    [669] = 'Sulfuron Harbinger',
-    [670] = 'Golemagg the Incinerator',
-    [671] = 'Majordomo Executus',
-    [672] = 'Ragnaros',
-
-    -- Onyxia's Lair
-    [1084]='Onyxia',
-
-    -- Blackwing Lair
-    [610] = "Razorgore the Untamed",
-    [611] = "Vaelastrasz the Corrupt",
-    [612] = "Broodlord Lashlayer",
-    [613] = "Firemaw",
-    [614] = "Ebonroc",
-    [615] = "Flamegor",
-    [616] =  "Chromaggus",
-    [617] = "Nefarian",
-}
-
 Raid.recentBossKillID = nil
 Raid.MasterLooter = nil
+Raid.dkpOfficer = nil;
+Raid.spamText = nil;
 
 --[[ RAID DATABASE LAYOUT
 
@@ -139,11 +114,16 @@ function Raid:GetRaidInfo()
                 ['online']=online,
                 ['isDead']=isDead,
                 ['isML']=isML,
+                ['role']=role,
                 ['isAssist']=rank == 1,
                 ['isLeader']=rank == 2,
+                ['isDkpOfficer']=name == Guild.dkpOfficer
             })
             if isML then
                 Raid.MasterLooter = name;
+            end
+            if rank == 2 then
+               Raid.RaidLeader = name;
             end
         end
     end
@@ -151,38 +131,183 @@ function Raid:GetRaidInfo()
     return raidInfo;
 end
 
-function Raid:BossKill(bossID, bossName)
-    if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
-    if Raid.bossIDS[bossID] == nil then return end; -- Isn't a raid boss that we care about.
-
-    if not Raid:isMasterLooter() then return end;
-
-    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    popup.text = bossName .. ' was killed! Award 10 DKP?'
-    popup.bossID = bossID;
-    popup.bossName = bossName;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+function Raid:IsAssist()
+    Raid:GetRaidInfo()
+    for _, member in pairs(Raid.RaidInfo) do
+        if member.name == Util:GetMyName() and (member.isAssist or member.isLeader) then
+            return true
+        end
+    end
+    return false
 end
 
-function Raid:AcceptDKPUpdate(bossID)
-    local raid = Raid:GetRaidInfo();
-    Raid.recentBossKillID = bossID
+function Raid:BossKill(bossID, bossName)
+    if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
 
-    for i=1, #raid do
-        local charObj = raid[i];
-        if charObj.online then
-            DKP:BossKill(charObj)
+    local bk
+    for raidName, raidObj in pairs(core.bossIDS) do
+        if bk == nil then
+            for pdkpBossID, pdkpBossName in pairs(raidObj) do
+                if pdkpBossID == bossID or pdkpBossName == bossName then
+                    bk = {
+                        name=pdkpBossName,
+                        id=pdkpBossID,
+                        raid=raidName,
+                    }
+                    break
+                end;
+            end
         end
     end
 
-    -- Possibly have to rebuild the data to get it to reflect the change? Seems clunky...
-    PDKP:BuildAllData()
-    pdkp_dkp_table_filter()
+    if bk == nil then return end; -- We should have found the boss kill by now.
+
+    -- You are the DKP Officer
+    -- There is no dkp Officer, but you're the master looter
+
+    local dkpOfficer = Raid.dkpOfficer
+
+    if (dkpOfficer and Raid:IsDkpOfficer()) then
+    elseif not dkpOfficer and Raid:isMasterLooter() then
+    else
+        Util:Debug('You are not the master looter, and not dkpOffcier, so fuck off')
+        return
+    end
+
+    Util:Debug('Starting up the boss kill stuff')
+    print(bk.name, bk.id, bk.raid)
+
+    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+    popup.text = bk.name .. ' was killed! Award 10 DKP?'
+    popup.bossInfo = bk;
+    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+end
+
+function Raid:AcceptBossKillDKPUpdate(bossInfo)
+    Util:Debug('Initiating Boss Kill DKP')
+
+    local success = '22bb33';
+
+    local raidRoster = Raid:GetRaidInfo();
+
+    local dkpChange = 10;
+    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
+    local reason, raid, boss, historyText, dkpChangeText = 'Boss Kill', bossInfo.raid, bossInfo.name, nil, nil
+
+    historyText = raid .. ' - ' .. bossInfo.name
+
+    dkpChangeText = Util:FormatFontTextColor(success, dkpChange .. ' DKP')
+    historyText = Util:FormatFontTextColor(success, historyText)
+
+    if raid == 'Onyxia\'s Lair' then -- Fix for Onyxia.
+        raid = 'Molten Core'
+    end
+
+    local memberNames = {};
+    local charNames = '';
+    local charObjs = {};
+
+    local function compareClass(a,b) return a.class < b.class end
+    table.sort(raidRoster, compareClass)
+
+    for key, raidMember in pairs(raidRoster) do
+        local member = Guild:GetMemberByName(raidMember.name)
+        table.insert(memberNames, member.name)
+        charNames = charNames..member['formattedName']
+        if key < #raidRoster then charNames = charNames .. ', ' end
+        charObjs[member.name] = member;
+    end
+
+    local historyEntry = {
+        ['id']=server_time,
+        ['text'] = historyText,
+        ['reason'] = reason,
+        ['bossKill'] = boss,
+        ['raid'] = raid,
+        ['dkpChange'] = dkpChange,
+        ['dkpChangeText'] = dkpChangeText,
+        ['officer'] = Util:GetMyNameColored(),
+        ['item']= nil,
+        ['date']= dDate,
+        ['time']=tTime,
+        ['serverTime']=server_time,
+        ['datetime']=datetime,
+        ['names']=charNames,
+        ['members']= memberNames,
+        ['deleted']=false,
+        ['edited']=false
+    }
+
+    for _, member in pairs(charObjs) do
+        local dkp = member.dkp[raid];
+
+        if dkp.entries == nil then member.dkp[raid].entries = {} end
+        table.insert(dkp.entries, server_time)
+
+        dkp.previousTotal = dkp.total
+        dkp.total = dkp.total + dkpChange
+
+        if member.bName then -- update the player, visually.
+            local dkpText = _G[member.bName ..'_col3'];
+            dkpText:SetText(dkp.total)
+        end
+        member:Save() -- Update the database locally.
+    end
+
+    local dkpDB = DKP.dkpDB;
+
+    dkpDB.history['all'][server_time] = historyEntry;
+    dkpDB.lastEdit = server_time
+    Guild:UpdateBankNote(server_time)
+    DKP.bankID = server_time
+
+    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+        GUI:UpdateEasyStats()
+
+        -- Update the slider max (if needed)
+        GUI:UpdateDKPSliderMax();
+        -- Re-run the table filters.
+        pdkp_dkp_table_filter()
+
+        GUI.pdkp_dkp_amount_box:SetText('');
+    end
+
+    Comms:SendGuildUpdate(historyEntry)
 end
 
 function Raid:isMasterLooter()
     Raid:GetRaidInfo()
     return Raid.MasterLooter == Util:GetMyName()
+end
+
+function Raid:isRaidLeader()
+    Raid:GetRaidInfo()
+    return Raid.RaidLeader == Util:GetMyName()
+end
+
+function Raid:MemberIsInRaid(name)
+    Raid:GetRaidInfo()
+    for _, member in pairs(Raid.RaidInfo) do
+        if member.name == name then
+            return true
+        end
+    end
+    return false
+end
+
+function Raid:GetInstanceInfo()
+    local name, type, difficultyIndex, difficultyName, maxPlayers,
+    dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
+
+    -- if difficultyIndex is >= 1 then you're in an instance (5, 10 or 40 man)
+end
+
+function Raid:IsDkpOfficer()
+    if Raid.dkpOfficer then -- We have established who the DKP officer is.
+        return Raid.dkpOfficer == Util:GetMyName()
+    else
+        return false
+    end
 end
 
 function Raid:AnnounceLoot()

@@ -19,6 +19,7 @@ Guild.bankIndex = 0;
 Guild.online = {};
 Guild.members = {};
 
+
 local guildDBDefaults = {
     profile = {
         name = nil,
@@ -72,13 +73,13 @@ function Guild:GetGuildData(onlineOnly)
                 DKP.bankID = member.officerNote;
             end
             if member.isOfficer then table.insert(Guild.officers, member) end
+            member.isDkpOfficer = false
 
             if member.name == nil then
                 member.name = ''
             else
                 member:MigrateAndLocate()
                 member:Save()
-                --                    if member.name == "Neekio" then Util:PrintTable(member) end
                 Guild.members[member.name] = member;
             end
         end
@@ -136,6 +137,12 @@ function Guild:CanMemberEdit(name)
         end
     end
     return false; -- Member was not found in the Guild Roster.
+end
+
+function Guild:GetMyMemberObject()
+    local myName = Util:GetMyName()
+    local myMemberObject = Guild:GetMemberByName(myName)
+    return myMemberObject
 end
 
 function Guild:GetClassBreakdown()

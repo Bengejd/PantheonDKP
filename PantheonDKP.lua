@@ -17,6 +17,7 @@ local Setup = core.Setup;
 local Import = core.Import;
 local item = core.Item;
 local Member = core.Member;
+local Officer = core.Officer;
 
 
 local PlaySound = PlaySound
@@ -43,6 +44,10 @@ core.filterOffline = nil
 core.databasesInitialized = false
 core.firstLogin = true
 
+core.inviteTextCommands = {
+    ['invite']=true, ['inv']=true
+}
+
 -- Generic event handler that handles all of the game events & directs them.
 -- This is the FIRST function to run on load triggered registered events at bottom of file
 local function PDKP_OnEvent(self, event, arg1, ...)
@@ -65,6 +70,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin
             if uiReload then PDKP:InitializeGuildData() end
+            Setup:OfficerWindow()
         end,
         ['WORLD_MAP_UPDATE']=function()
             return UnregisterEvent(self, event)
@@ -73,6 +79,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return UnregisterEvent(self, event)
         end,
         ['GROUP_ROSTER_UPDATE']=function()
+            Util:Debug('Group_roster_update')
+            GUI:ToggleOfficerInterface()
             return Raid:GetRaidInfo()
         end,
         ['LOOT_OPENED']=function()  -- when the loot bag is opened.
@@ -81,7 +89,10 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         ['OPEN_MASTER_LOOT_LIST']=function()  -- when the master loot list is opened.
             return
         end,
-        ['']=function() end,
+        ['BOSS_KILL']=function()
+            PDKP:Print('BOSS KILL: ', self, event, arg1)
+            Raid:BossKill(arg1, arg2)
+        end,
         ['']=function() end,
         ['']=function() end,
     }
@@ -99,10 +110,6 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         PDKP:MessageRecieved(msg, name)
         return
     elseif event == "CHAT_MSG_GUILD" then return
-    elseif event == "BOSS_KILL" then
-        --        PDKP:Print(self, event, arg1); -- TABLE, BOSS_KILL, EVENTID
-        --        Raid:BossKill(event, arg1);
-        return
     end
 end
 
@@ -129,6 +136,12 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
 
     Comms:RegisterCommCommands()
+
+    -----------------------------
+    --  Officer Raid Control   --
+    -----------------------------
+
+    Setup:dkpOfficer()
 end
 
 function PDKP:InitializeGuildData()
@@ -141,10 +154,19 @@ function PDKP:InitializeGuildData()
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
-    if Shroud.shroudPhrases[string.lower(msg)] and Raid:isMasterLooter() then
+    if Shroud.shroudPhrases[string.lower(msg)] and (
+    Raid:isMasterLooter()
+
+    -- Check if masterLooter if raid.dkpOfficer is nil
+    ) then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
         Util:Debug('Updating shrouders with ' .. name)
         Shroud:UpdateShrouders(name)
+    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
+        if not Raid:IsInRaid() then
+            ConvertToRaid()
+        end
+        InviteUnit(name)
     end
 end
 
@@ -215,27 +237,14 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
+    if msg == 'pdkpTestWho' then
+        SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
+    end
+
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then
         return Util:Debug('Cannot process this command because you are not an officer')
     end;
-
-    if msg == 'pdkpTestDataImport' then
-        return Import:TestDataImport()
-    end
-
-    if msg == 'pdkpTestValidateTables' then
-        local invalidMembers = {}
-        for key, member in pairs(Guild.members) do
-            member:ValidateTable()
-
---            if hasEntries then break end;
-        end
-    end
-
-    if msg == 'TestDatabaseCompression' then
-        Comms:TestNonEncoded()
-    end
 
     if msg == 'pdkpTestAutoSync' then
         Comms:DatabaseSyncRequest()
@@ -251,6 +260,14 @@ function PDKP:HandleSlashCommands(msg, item)
         --        for i=1, #tempInvites do
         --            InviteUnit(tempInvites[i]);
         --        end
+    end
+
+    if msg == 'pdkpPrioWindow' then
+--        Setup:PrioList()
+    end
+
+    if msg == 'officer' then
+        Officer:Show()
     end
 
     if msg == 'sortHistory' then
@@ -340,6 +357,10 @@ function PDKP:Show()
     if GUI.reasonDropdown then GUI.reasonDropdown.frame:Show() end;
     if GUI.raidDropdown then GUI.raidDropdown.frame:Show() end;
 
+    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+        GUI.pdkp_frame:SetFrameStrata('HIGH')
+    end
+
 end
 
 -----------------------------
@@ -368,7 +389,7 @@ function pdkp_template_function_call(funcName, object, clickType, buttonName)
     if funcName == 'GetSelectedFilterStatus' then return GUI:GetSelectedFilterStatus() end;
     if funcName == 'SearchInputUpdated' then return GUI:SearchInputUpdated(object) end
     if funcName == 'pdkp_dkp_update' then return DKP:ConfirmChange() end;
-    if funcName == 'pdkp_boss_kill_dkp' then return Raid:AcceptDKPUpdate(object) end;
+    if funcName == 'pdkp_boss_kill_dkp' then return Raid:AcceptBossKillDKPUpdate(object) end;
 
     if funcName == 'pdkp_quick_shroud' then return GUI:QuickCalculate('shroud') end;
     if funcName == 'pdkp_quick_roll' then return GUI:QuickCalculate('roll') end;
@@ -386,6 +407,11 @@ end
 function UnregisterEvent(self, event)
     self:UnregisterEvent(event);
 end
+
+--seterrorhandler(function(msg)
+--    print('PDKP ERROR: ', msg);
+--end);
+
 
 local events = CreateFrame("Frame", "EventsFrame");
 events:RegisterEvent("ADDON_LOADED");

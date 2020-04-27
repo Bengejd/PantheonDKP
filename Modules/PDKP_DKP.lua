@@ -61,7 +61,7 @@ function DKP:InitDKPDB()
     dkpDB = core.DKP.db.profile
     DKP.dkpDB = dkpDB;
 
-    print('Current raid DKP shown: ', dkpDB.currentDB);
+    Util:Debug('Current raid DKP shown: '.. dkpDB.currentDB)
 end
 
 --[[
@@ -96,57 +96,6 @@ end
 -- cheaty way to update dkp via the boss kill event.
 function DKP:BossKilled()
 
-end
-
-function DKP:BossKill(charObj)
-
-    local name = charObj.name
-
-    if Guild:IsMember(name) == false then return end;
-
-    local dDate, tTime, server_time, datetime = Util:GetDateTimes()
-    local boss = Raid.bossIDS[Raid.recentBossKillID];
-    local raid = Raid:GetCurrentRaid()
-
-    local dkpChangeText = Util:FormatFontTextColor(success, 10 .. ' DKP')
-    local historyText = raid .. ' - ' .. boss;
-    historyText = Util:FormatFontTextColor(success, historyText)
-
-    local historyEntry = {
-        ['text'] = historyText,
-        ['reason'] = 'Boss Kill',
-        ['bossKill'] = boss,
-        ['raid'] = raid,
-        ['dkpChange'] = pdkp_boss_kill_dkp,
-        ['dkpChangeText'] = dkpChangeText,
-        ['officer'] = Util:GetMyNameColored(),
-        ['item']= nil,
-        ['date']= dDate,
-        ['time']=tTime,
-        ['serverTime']=server_time,
-        ['datetime']=datetime
-    }
-
-    if not dkpDB.history[name] then
---        table.insert(dkpDB.history, name);
-        dkpDB.history[name] = {};
-    end
-
-    table.insert(dkpDB.history[name], historyEntry);
-
-    DKP:Add(name, pdkp_boss_kill_dkp);
-
-    GUI:UpdateEasyStats()
-    -- Update the slider max (if needed)
-    GUI:UpdateDKPSliderMax();
-    -- Re-run the table filters.
-
-    DKP:UpdateEntryRaidDkpTotal(raid, name, pdkp_boss_kill_dkp);
-
-    if charObj.bName then
-        local dkpText = _G[charObj.bName .. '_col3'];
-        dkpText:SetText(charObj.dkpTotal);
-    end
 end
 
 function DKP:ConfirmChange()
@@ -400,6 +349,9 @@ function DKP:GetLastEdit()
 end
 
 function DKP:GetCurrentDB()
+    if dkpDB.currentDB == 'Onyxia\'s Lair' then
+        dkpDB.currentDB = 'Molten Core';
+    end
 return dkpDB.currentDB
 end
 

@@ -26,7 +26,7 @@ local SAFE_COMMS = {
     ['pdkpBusyTryAgai'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
-
+    ['pdkpDkpOfficer']=true,
     ['pdkpModLastEdit']=true,
 };
 
@@ -117,7 +117,7 @@ function OnCommReceived(prefix, message, distribution, sender)
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
     elseif OFFICER_COMMS[prefix] then Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
     else
-        print("Unknown Prefix " .. prefix, " found in request...")
+        Util:Debug("Unknown Prefix " .. prefix, " found in request...")
     end
 end
 
@@ -182,6 +182,10 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 --                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
+        ['pdkpDkpOfficer'] = function()
+            Raid.dkpOfficer = message
+            PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
+        end
     }
 
     if safeFuncs[prefix] then safeFuncs[prefix]() end
