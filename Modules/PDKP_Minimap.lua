@@ -93,7 +93,7 @@ function Minimap:HandleIconClicks(buttonType)
     elseif hasShift then
         -- DKP Push request from officers.
         -- Check to see if there are officers online.
-        Util:Debug('Shift click')
+        Comms:SendCommsMessage('pdkpSyncRequest', ' ', 'GUILD', nil, 'BULK', nil)
     else
         if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
             GUI:Hide()
