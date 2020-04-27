@@ -50,7 +50,7 @@ function Minimap:InitMapDB()
             tooltip:AddLine('Sync Status: '..Minimap:GetDKPState(), 1, 1, 1, 1)  -- text, r, g, b, flag to wrap text.
             tooltip:AddLine(' ', 1, 1, 1, 1)
             tooltip:AddLine(clickText, 1, 1, 1)
---            tooltip:AddLine(shiftClickText, 1, 1, 1)
+            tooltip:AddLine(shiftClickText, 1, 1, 1)
 --            tooltip:AddLine(altShiftText, 1, 1, 1, 1)
             tooltip:Show()
         end,
@@ -64,9 +64,6 @@ end
 
 function Minimap:GetAddonVersion()
     return "PantheonDKP "..Defaults.addon_version
-end
-
-function Minimap:GetInfoText()
 end
 
 function Minimap:GetDKPState()
@@ -95,6 +92,7 @@ function Minimap:HandleIconClicks(buttonType)
         Util:Debug('ShiftAlt click')
     elseif hasShift then
         -- DKP Push request from officers.
+        -- Check to see if there are officers online.
         Util:Debug('Shift click')
     else
         if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
