@@ -20,26 +20,38 @@ local Raid = core.Raid;
  ]]
 
 local SAFE_COMMS = {
-    ['pdkpPushRequest'] = true,
+--    ['pdkpPushRequest'] = true,
     ['pdkpLastEditReq'] = true,
     ['pdkpLastEditRec'] = true,
     ['pdkpPushInProg'] = true,
     ['pdkpSyncRequest'] = true,
-    ['pdkpDkpOfficer']=true,
+--    ['pdkpDkpOfficer']=true,
     ['pdkpModLastEdit']=true,
 };
 
 local UNSAFE_COMMS = {
     ['pdkpPushReceive'] = true,
     ['pdkpEntryDelete'] = true,
-    ['pdkpClearShrouds'] = true,
-    ['pdkpNewShrouds'] = true,
+--    ['pdkpClearShrouds'] = true,
+--    ['pdkpNewShrouds'] = true,
     ['pdkpSyncResponse'] = true
 }
 
 local OFFICER_COMMS = {
-    ['pdkpRequestPush'] = true,
+    ['pdkpPushRequest'] = true,
 }
+
+local RAID_COMMS = {
+    ['pdkpClearShrouds']=true,
+    ['pdkpNewShrouds']=true,
+    ['pdkpDkpOfficer']=true,
+}
+
+local GUILD_COMMS = {
+    ['pdkp_placeholder']=true,
+}
+
+Comms.commsRegistered = false
 
 local pdkpPushDatabase = {
     full = false,
@@ -63,9 +75,17 @@ local skipBroadcastMsg = 'Skipping broadcast because '
 -- GENERIC Functions   --
 ---------------------------
 function Comms:RegisterCommCommands()
+    Comms.commsRegistered = true -- Check to make sure we don't re-register the comms.
+
     for key, _ in pairs(SAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
     for key, _ in pairs(UNSAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
-    for key, _ in pairs(OFFICER_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
+    for key, _ in pairs(GUILD_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General guild comms
+    for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
+
+    if core.canEdit then -- Only register officers to the officer_comms.
+        Util:Debug('Register Officer Comms')
+        for key, _ in pairs(OFFICER_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
+    end
 end
 
 function Comms:Serialize(data)
@@ -111,9 +131,13 @@ function OnCommReceived(prefix, message, distribution, sender)
 
     local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
+    -- Might be able to get rid of these comms?
     if SAFE_COMMS[prefix] then Comms:OnSafeCommReceived(prefix, data, distribution, sender);
     elseif UNSAFE_COMMS[prefix] then Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
+
     elseif OFFICER_COMMS[prefix] then Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
+    elseif GUILD_COMMS[prefix] then Comms:OnGuildCommReceived(prefix, data, distribution, sender);
+    elseif RAID_COMMS[prefix] then Comms:OnRaidCommReceived(prefix, data, distribution, sender);
     else
         Util:Debug("Unknown Prefix " .. prefix, " found in request...")
     end
@@ -147,7 +171,40 @@ function Comms:ThrowError(prefix, sender)
     return Util:ThrowError(errMsg, true)
 end
 
-function Comms:OnOfficerCommReceived(prefix, data, distribution, sender)
+---------------------------
+-- RAID COMMS FUNCTIONS  --
+---------------------------
+function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
+    -- This shouldn't ever happen, but who knows.
+    if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
+
+    local raidFuncs = {
+        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
+        ['pdkpNewShrouds'] = function()
+            Shroud.shrouders = message -- assign the shrouding table that was sent.
+            Shroud:UpdateWindow() -- Update the window.
+        end,
+        ['pdkpDkpOfficer'] = function()
+            Raid.dkpOfficer = message
+            PDKP:Print(Raid.dkpOfficer .. ' is now the DKP Officer')
+        end
+    }
+
+    local func = raidFuncs[prefix]
+    if func then return func() end
+end
+
+---------------------------
+-- GUILD COMMS FUNCTIONS --
+---------------------------
+function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
+
+end
+
+---------------------------
+--OFFICER COMMS FUNCTIONS--
+---------------------------
+function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
 
 end
 
@@ -181,11 +238,11 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
 --                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
             end
         end,
-        -- Needs to be edited to be raid only
-        ['pdkpDkpOfficer'] = function()
-            Raid.dkpOfficer = message
-            PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
-        end
+--        -- Needs to be edited to be raid only
+--        ['pdkpDkpOfficer'] = function()
+--            Raid.dkpOfficer = message
+--            PDKP:Print(Guild.dkpOfficer .. ' is now the DKP Officer')
+--        end
     }
 
     if safeFuncs[prefix] then safeFuncs[prefix]() end
@@ -207,11 +264,11 @@ function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
         ['pdkpEntryDelete'] = function()
             DKP:DeleteEntry(message, false)
         end,
-        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
-        ['pdkpNewShrouds'] = function()
-            Shroud.shrouders = message -- assign the shrouding table that was sent.
-            Shroud:UpdateWindow() -- Update the window.
-        end,
+--        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
+--        ['pdkpNewShrouds'] = function()
+--            Shroud.shrouders = message -- assign the shrouding table that was sent.
+--            Shroud:UpdateWindow() -- Update the window.
+--        end,
         ['pdkpSyncResponse'] = function()
 --            Import:AcceptData(message)
         end,

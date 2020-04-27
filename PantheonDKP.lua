@@ -135,7 +135,7 @@ function PDKP:OnInitialize(event, name)
     -- Register Communications --
     -----------------------------
 
-    Comms:RegisterCommCommands()
+--    Comms:RegisterCommCommands()
 
     -----------------------------
     --  Officer Raid Control   --
@@ -155,6 +155,10 @@ function PDKP:InitializeGuildData()
     DKP:VerifyTables()
     PDKP:BuildAllData();
     core.initialized = true
+
+    if not Comms.commsRegistered then
+        Comms:RegisterCommCommands()
+    end
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
