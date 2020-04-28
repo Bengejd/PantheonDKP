@@ -402,7 +402,10 @@ function Setup:HistoryFrame()
     GUI.HistoryCheck = check
 
     local function showHistoryFrame(checked, buttonCall)
-        if checked then GUI.HistoryFrame:Show() else GUI.HistoryFrame:Hide() end
+        if checked then
+            GUI.HistoryFrame:SetFrameStrata('DIALOG')
+            GUI.HistoryFrame.scroll.frame:SetFrameStrata('DIALOG')
+            GUI.HistoryFrame:Show() else GUI.HistoryFrame:Hide() end
         -- Workaround for check button not firing when using the easyStats to toggle.
         if not buttonCall and checked then PlaySound(856) elseif not buttonCall then PlaySound(857) end
     end
@@ -426,6 +429,8 @@ function Setup:HistoryFrame()
     hf:SetPoint("TOPRIGHT", 235, -75)
     hf:SetHeight(570);
     hf:SetWidth(450);
+    hf:SetFrameStrata('HIGH');
+    hf:Raise()
     hf:SetBackdrop({
         bgFile = "Interface\\AddOns\\PantheonDKP\\Media\\Main_UI\\PDKPFrame-Middle",
         edgeFile = nil,
@@ -438,7 +443,6 @@ function Setup:HistoryFrame()
         backdropColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
     });
     hf:EnableMouse(true)
-    hf:SetFrameStrata('FULLSCREEN_DIALOG');
     hf:RegisterForDrag("LeftButton")
 
     local scrollcontainer = AceGUI:Create("InlineGroup")
@@ -455,7 +459,7 @@ function Setup:HistoryFrame()
     hf.historyTitle = title;
 
     scrollcontainer:SetParent(hf)
-    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer.frame:SetFrameStrata('DIALOG');
     scrollcontainer:SetPoint("CENTER", hf, "CENTER", 25, -15);
 
     hf:SetScript("OnShow", function()
