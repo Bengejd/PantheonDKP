@@ -502,9 +502,9 @@ function DKP:CanRequestPush()
 
         local secondsSinceSync = (server_time - DKP.lastSync) -- the seconds since our last sync
         local minsSinceSync = secondsSinceSync * 60 -- Minutes since last sync.
-        
 
-    else -- We don't knoww the last sync time, best be safe.
+
+    else -- We don't knoww the last sync time, try to get it from the bank note.
 
     end
 end

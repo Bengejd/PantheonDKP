@@ -189,7 +189,7 @@ function Member:Save()
             }
         end
     end
---    db[self.name] = dbMember
+    db[self.name] = dbMember
 end
 
 function Member:MigrateAndLocate()
