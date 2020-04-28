@@ -902,14 +902,21 @@ function Setup:OfficerWindow()
 
             local function TimerFeedback()
                 inviteSpamCount = inviteSpamCount + 1
-                SendChatMessage(Raid.spamText .. ' ' .. inviteSpamCount, "GUILD", nil, nil);
+
+                if Raid:IsInRaid() then
+                    SendChatMessage(Raid.spamText, "GUILD", nil, nil);
+                else -- Something happened, we're not in the raid anymore, so cancel the callback.
+                    return guildInviteSpam()
+                end
+
                 if inviteSpamCount >= 10 then
                     guildInviteSpam()
                 end
+                PDKP:Print('Raid Invite Spam count: ' .. tostring(inviteSpamCount))
             end
 
             Raid.SpamTimer = PDKP:ScheduleRepeatingTimer(TimerFeedback, 90); -- Posts it every 90 seconds for 15 minutes.
-            SendChatMessage(Raid.spamText .. ' ' .. inviteSpamCount, "GUILD", nil, nil);
+            SendChatMessage(Raid.spamText, "GUILD", nil, nil);
         end
     end
 
@@ -924,7 +931,7 @@ function Setup:OfficerWindow()
     raidSpamTime:SetHeight(100)
     raidSpamTime:SetWidth(200)
     raidSpamTime:DisableButton(true)
-    raidSpamTime:SetText("[TIME] [RAID] invites starting. Pst for invite")
+    raidSpamTime:SetText("[TIME] [RAID] invites going out. Pst for invite")
     raidSpamTime:SetCallback('OnTextChanged', function()
         Raid.spamText = raidSpamTime:GetText()
 

@@ -168,7 +168,10 @@ end
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
 function Util:Debug(string)
-    if core.defaults.debug then PDKP:Print(string) end
+    if core.defaults.debug then
+        local info = 'F4A460'
+        PDKP:Print(Util:FormatFontTextColor(info, string))
+    end
 end
 
 -- Debugging utility function that prints what's inside of a table.

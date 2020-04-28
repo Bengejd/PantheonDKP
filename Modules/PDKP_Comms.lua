@@ -31,7 +31,7 @@ local UNSAFE_COMMS = {
 }
 
 local OFFICER_COMMS = {
-    ['pdkpSyncRequest'] = true,
+    ['pdkpSyncReq'] = true,
 }
 
 local RAID_COMMS = {
@@ -123,7 +123,7 @@ function OnCommReceived(prefix, message, distribution, sender)
         if prefix ~= 'pdkpNewShrouds' then
             return Util:Debug('Ignoring comm from me ' .. prefix)
         end;
-    end;
+    end
 
     local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
@@ -209,7 +209,7 @@ end
 ---------------------------
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
-        ['pdkpSyncRequest'] = function() -- Send the data to the guild
+        ['pdkpSyncReq'] = function() -- Send the data to the guild
             Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
         end,
     }
@@ -443,7 +443,7 @@ function Comms:DatabaseSyncRequest()
     for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
     for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
 
-    Comms:SendCommsMessage('pdkpSyncRequest', myHistory, 'GUILD', nil, 'BULK', nil)
+--    Comms:SendCommsMessage('pdkpSyncRequest', myHistory, 'GUILD', nil, 'BULK', nil)
 end
 
 function Comms:PackupSyncDatabse()

@@ -35,6 +35,8 @@ local minimapDBDefaults = {
     }
 }
 
+Minimap.canRequestPush = true
+
 function Minimap:InitMapDB()
     Util:Debug('Map DB init');
     core.Minimap.db = LibStub("AceDB-3.0"):New("pdkp_minimap", minimapDBDefaults, true)
@@ -50,7 +52,10 @@ function Minimap:InitMapDB()
             tooltip:AddLine('Sync Status: '..Minimap:GetDKPState(), 1, 1, 1, 1)  -- text, r, g, b, flag to wrap text.
             tooltip:AddLine(' ', 1, 1, 1, 1)
             tooltip:AddLine(clickText, 1, 1, 1)
-            tooltip:AddLine(shiftClickText, 1, 1, 1)
+
+            if Minimap.canRequestPush then
+                tooltip:AddLine(shiftClickText, 1, 1, 1)
+            end
 --            tooltip:AddLine(altShiftText, 1, 1, 1, 1)
             tooltip:Show()
         end,
@@ -93,7 +98,9 @@ function Minimap:HandleIconClicks(buttonType)
     elseif hasShift then
         -- DKP Push request from officers.
         -- Check to see if there are officers online.
-        Comms:SendCommsMessage('pdkpSyncRequest', ' ', 'GUILD', nil, 'BULK', nil)
+        local _, _, server_time, _ = Util:GetDateTimes()
+
+        Comms:SendCommsMessage('pdkpSyncReq', server_time, 'GUILD', nil, 'BULK', nil)
     else
         if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
             GUI:Hide()

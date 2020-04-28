@@ -90,7 +90,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return
         end,
         ['BOSS_KILL']=function()
-            PDKP:Print('BOSS KILL: ', self, event, arg1)
+            PDKP:Print('BOSS KILL: ', self, event, arg1, arg2)
             Raid:BossKill(arg1, arg2)
         end,
         ['']=function() end,

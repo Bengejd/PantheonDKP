@@ -70,7 +70,7 @@ function Guild:GetGuildData(onlineOnly)
             if member.online then Guild.online[member.name]=member;  end
             if member.isBank then
                 Guild.bankIndex = i
-                DKP.bankID = member.officerNote;
+                DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)
             end
             if member.isOfficer then table.insert(Guild.officers, member) end
             member.isDkpOfficer = false
@@ -191,7 +191,20 @@ function Guild:GetMembers()
     return Guild.members
 end
 
-function Guild:UpdateBankNote(id)
+-- bank note is the lastEdit, lastSync
+function Guild:GetBankData(officerNote)
+
+    local lastEdit, lastSync = strsplit(',', officerNote)
+
+    print(lastEdit, lastSync)
+
+--    local bankData = loadstring(officerNote)
+--    print(bankData.lastEdit)
+--    return bankData.lastEdit, bankData.lastSync; -- Figure out how to have last edit, last sync
+    return officerNote, nil
+end
+
+function Guild:UpdateBankNote(id, lastSync)
     Guild:GetGuildData() -- retrieve the bank info.
     GuildRosterSetOfficerNote(Guild.bankIndex, id)
 end

@@ -21,6 +21,7 @@ local warning = 'E71D36'
 local pdkp_boss_kill_dkp = 10
 
 DKP.bankID = nil
+DKP.lastSync = nil
 
 --[[
 --  RAID DB LAYOUT
@@ -494,22 +495,16 @@ function DKP:ValidateTables()
     end
 end
 
-function DKP:ImportMonolithData()
-    local mono = MonolithData
-    local dkp = dkpDB.members
---    local g = Guild.GuildDB.members
+function DKP:CanRequestPush()
+    if DKP.lastSync then -- The last sync has been established.
+        local _, _, server_time, _ = Util:GetDateTimes() -- Grab the current server time.
+        -- get the difference between the current server time, and the lastSync time
 
-    for key,m in pairs(mono) do
-        local name = m['name']
-        if dkp[name] ~= nil then
-            dkp[name]['dkpTotal'] = m['dkp']
-            dkp[name]['Molten Core']=m['dkp']
-        end
+        local secondsSinceSync = (server_time - DKP.lastSync) -- the seconds since our last sync
+        local minsSinceSync = secondsSinceSync * 60 -- Minutes since last sync.
+        
+
+    else -- We don't knoww the last sync time, best be safe.
+
     end
-    print('Finished Import data')
-end
-
-function DKP:CheckHistoryKeys(history)
-    local deleted = history['deleted']
-    local all = history['all']
 end
