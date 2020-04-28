@@ -167,7 +167,7 @@ function DKP:DeleteEntry(entry, noBroacast)
         if key == entryKey then isInHistory = true; end
     end
 
-    if isInHistory == false then return PDKP:Print('You dkp tables are outdated, please request a full dkp push') end
+    if isInHistory == false then return PDKP:Print('Your dkp tables are outdated, please request a full dkp push') end
 
     local changeAmount = entry['dkpChange']
     local raid = entry['raid']
@@ -221,7 +221,7 @@ function DKP:DeleteEntry(entry, noBroacast)
     -- Re-run the table filters.
     pdkp_dkp_table_filter()
 
-    Guild:UpdateBankNote(dkpDB.lastEdit)
+    Guild:UpdateBankLastEdit(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
 
     if noBroacast then return end -- Don't broadcast this change.
@@ -328,7 +328,7 @@ function DKP:UpdateEntries()
 
     dkpDB.history['all'][server_time] = historyEntry;
     dkpDB.lastEdit = server_time
-    Guild:UpdateBankNote(server_time)
+    Guild:UpdateBankLastEdit(server_time)
     DKP.bankID = server_time
 
     if GUI.pdkp_frame:IsVisible() then
@@ -495,16 +495,17 @@ function DKP:ValidateTables()
     end
 end
 
-function DKP:CanRequestPush()
+function DKP:CanRequestSync()
     if DKP.lastSync then -- The last sync has been established.
         local _, _, server_time, _ = Util:GetDateTimes() -- Grab the current server time.
-        -- get the difference between the current server time, and the lastSync time
-
         local secondsSinceSync = (server_time - DKP.lastSync) -- the seconds since our last sync
-        local minsSinceSync = secondsSinceSync * 60 -- Minutes since last sync.
-
-
-    else -- We don't knoww the last sync time, try to get it from the bank note.
-
+        local minsSinceSync = math.floor(secondsSinceSync / 60) -- Minutes since last sync.
+        if minsSinceSync >= 15 then
+           return true, minsSinceSync, 0
+        else
+            local minsTillNextSync = 15 - minsSinceSync
+            return false, minsSinceSync, minsTillNextSync
+        end
     end
+    return false, 0, 0
 end

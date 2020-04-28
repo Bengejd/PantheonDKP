@@ -125,6 +125,8 @@ function Setup:ShroudingWindow()
     sf:SetWidth(200);
     sf:SetHeight(200);
 
+    sf:SetScale(1) -- Just incase. This might fix the scaling issue that Mozz has?
+
     local scrollcontainer = AceGUI:Create("SimpleGroup")
     scrollcontainer:SetFullWidth(false)
     scrollcontainer:SetFullHeight(true)
@@ -196,87 +198,6 @@ function Setup:PrioList()
     GUI.prio.scrollcontainer = scrollcontainer
 
     --    GUI:UpdateLootList(nil)
-end
-
-function Setup:dkpPushButton()
-    local b = CreateFrame("Button", "pdkpPushButton", pdkpCoreFrame, 'UIPanelButtonTemplate')
-    b:SetPoint("TOPLEFT", 20, -5)
-    b:SetHeight(55);
-    b:SetWidth(55);
-    b:SetAlpha(0);
-    b:SetScript("OnClick", function()
-        Util:Debug("Push button clicked")
-        PlaySound(856)
-        Comms:RequestOfficersLastEdit()
-    end)
-    GUI.pushButton = b
-
-    local pf = CreateFrame("Frame", "pdkpPushFrame", UIParent, nil)
-    pf:SetPoint("TOPLEFT", 0, -100)
-    pf:SetHeight(300);
-    pf:SetWidth(300);
-    pf:SetBackdrop({
-        edgeFile = nil,
-        tile = false,
-        tileEdge = true,
-        tileSize = 0,
-        edgeSize = 32,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 },
-        backdropBorderColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
-        backdropColor = { r = 0.7, g = 1, b = 0.7, a = 1 },
-    });
-    pf:EnableMouse(false)
-    pf:SetFrameStrata('FULLSCREEN');
-    pf:RegisterForDrag("LeftButton")
-    pf:SetMovable(true)
-    pf:SetScript("OnDragStart", pf.StartMoving)
-    pf:SetScript("OnDragStop", pf.StopMovingOrSizing)
-
-    local cb = CreateFrame("Button", 'pdkpPushCloseButton', pf, 'UIPanelCloseButton')
-    cb:SetPoint("TOPRIGHT", pf, "TOPRIGHT", 45, 10)
-    cb:SetHeight(35);
-    cb:SetWidth(35);
-    cb:SetScript("OnClick", function()
-        pf:Hide()
-    end)
-
-    local scrollcontainer = AceGUI:Create("InlineGroup")
-    scrollcontainer:SetFullWidth(false)
-    scrollcontainer:SetFullHeight(true)
-    scrollcontainer:SetHeight(300)
-    scrollcontainer:SetWidth(300)
-    scrollcontainer:SetLayout("Fill")
-    scrollcontainer.frame:EnableMouse(false)
-
-    local font = "AchievementPointsFont"
-    local title = pf:CreateFontString('pdkp_push_title', "ARTWORK", font);
-    title:SetText('DKP Push Request Portal')
-    title:SetPoint("TOP", 25, -30);
-    pf.pushTitle = title;
-
-    scrollcontainer:SetParent(pf)
-    scrollcontainer.frame:SetFrameStrata('HIGH');
-    scrollcontainer:SetPoint("CENTER", pf, "CENTER", 25, -15);
-
-    pf:SetScript("OnShow", function()
-        scrollcontainer.frame:Show()
-        cb:Show()
-    end)
-    pf:SetScript("OnHide", function()
-        scrollcontainer.frame:Hide()
-        cb:Hide()
-    end)
-
-    local scroll = AceGUI:Create("ScrollFrame")
-    scroll.frame:EnableMouse(true)
-    scroll:SetLayout("Flow") -- probably?
-    scrollcontainer:AddChild(scroll)
-
-    pf.scroll = scroll
-
-    pf:Hide()
-    scrollcontainer.frame:Hide()
-    GUI.pushFrame = pf;
 end
 
 function Setup:AdjustmentDropdowns()
@@ -622,84 +543,6 @@ function Setup:ClassFilterCheckboxes()
         end
         cb:SetPoint(point, relativeTo, relativePoint, relPointX, relPointY);
     end
-end
-
--- Dropdown test between ACE GUI and Custom Solutions. Results inconclusive.
-function Setup:CreateTestMenuDropdown()
-    -- Create the dropdown, and configure its appearance
-    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", pdkpCoreFrame, "UIDropDownMenuTemplate")
-    dropDown:SetPoint("BOTTOM", 230, -160)
-    UIDropDownMenu_SetWidth(dropDown, 150)
-    UIDropDownMenu_SetText(dropDown, 'Reason for change')
-    UIDROPDOWNMENU_SHOW_TIME = 2;
-
-    local bossKillMenu = {
-        text = "Boss Kill",
-        sub = true,
-        isTitle = true,
-        menuList = {},
-        keepShownOnClick = true
-    }
-
-    for raidName, bosses in pairs(core.raidBosses) do
-        local subMenu = {};
-        subMenu.text, subMenu.sub, subMenu.isTitle, subMenu.menuList, subMenu.notCheckable = raidName, true, true, {}, true
-        for i = 1, #bosses do
-            local b = bosses[i]
-            local subItem = {};
-            subItem.text, subItem.sub, subItem.isTitle, subItem.menuList = b, false, false, nil
-            table.insert(subMenu.menuList, subItem)
-        end
-        table.insert(bossKillMenu.menuList, subMenu)
-    end
-
-    local menus = {
-        bossKillMenu,
-        { text = "On Time Bonus", sub = false },
-        { text = "Completion Bonus", sub = false },
-        { text = "Benched", sub = false },
-        { text = "Unexcused Absence", sub = false },
-        { text = "Item Win", sub = false },
-        { text = "Other", sub = false },
-    }
-
-    -- Implement the function to change the favoriteNumber
-    function dropDown:SetValue(newValue)
-        -- validation
-        local badValues = { 'Boss Kill', 'Onyxia\'s Lair', 'Molten Core', 'Blackwing Lair' }
-        for i = 1, #badValues do
-            if newValue == badValues[i] then return end
-        end
-
-        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
-        UIDropDownMenu_SetText(dropDown, newValue)
-        -- Because this is called from a sub-menu, only that menu level is closed by default.
-        -- Close the entire menu with this next call
-        CloseDropDownMenus()
-    end
-
-    -- Create and bind the initialization function to the dropdown menu
-    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
-        local function setupMenu(list)
-            for i = 1, #list do
-                local info = UIDropDownMenu_CreateInfo()
-                local m = list[i]
-                info.text, info.hasArrow, info.value, info.menuList, info.func = m.text, m.sub, m.text, m.menuList, function(self) dropDown:SetValue(self.value) end
-                info.notCheckable = m.menuList ~= nil
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
-
-        if (level or 1) == 1 then
-            setupMenu(menus)
-        elseif level == 2 and menuList ~= nil then
-            setupMenu(menuList)
-        elseif level == 3 and menuList ~= nil then
-            setupMenu(menuList)
-        end
-    end)
-
-    GUI.reasonDropdown = dropDown
 end
 
 function Setup:dkpExport()

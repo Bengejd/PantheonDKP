@@ -335,88 +335,6 @@ function GUI:RemoveFromSelected(charObj)
     if GUI:GetSelectedCount() == 0 then GUI:ShowSelectedHistory(nil) end
 end
 
-function GUI:UpdatePushFrame()
-    local pf = GUI.pushFrame;
-    pf:Hide()
-    local scroll = pf.scroll;
-    local myLastEdit = DKP.dkpDB.lastEdit
-
-    if core.debug then myLastEdit = myLastEdit - 10000 end -- Testing purposes.
-
-    scroll:ReleaseChildren() -- Clear the previous entries.
-
-    local function sortEditHistory(a, b)
-        if a['lastEdit'] and b['lastEdit'] then
-            return a['lastEdit'] > b['lastEdit']
-        else
-            return
-        end
-    end
-
-    table.sort(Guild.officers, sortEditHistory)
-
-    local myName = Util:GetMyName()
-    if Guild:CanMemberEdit(myName) then
-        local og = AceGUI:Create("InlineGroup")
-        og:SetLayout("Flow")
-        og:SetFullWidth(true)
-        og.frame:EnableMouse(true)
-
-        local reqButton = AceGUI:Create("Button")
-        reqButton:SetText("Push DKP")
-        reqButton:SetCallback("OnClick", function(self)
-            StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
-        end)
-        reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
-        reqButton:SetWidth(80)
-
-        local l = AceGUI:Create("Label")
-        l:SetText('Officer DKP Push')
-        l:SetFullWidth(false)
-        l:SetWidth(155)
-        og:AddChild(l)
-
-        og:AddChild(reqButton)
-
-        scroll:AddChild(og)
-    else
-        Util:Debug('Cannot edit this shit yo')
-    end
-
-    for i = 1, #Guild.officers do
-        local officer = Guild.officers[i];
-        -- they are online to receive a request & it's good data
-        if (Defaults.debug and officer['online']) or (officer['online'] and (officer['lastEdit'] and officer['lastEdit'] > myLastEdit)) then
-            local ig = AceGUI:Create("InlineGroup")
-            ig:SetLayout("Flow")
-            ig:SetFullWidth(true)
-            ig.frame:EnableMouse(true)
-            ig.frame:SetFrameStrata('FULLSCREEN_DIALOG');
-
-
-            local reqButton = AceGUI:Create("Button")
-            reqButton:SetText("Request")
-            reqButton:SetCallback("OnClick", function(self)
-                core.Import:RequestData(officer)
-            end)
-            reqButton.frame:SetFrameStrata('FULLSCREEN_DIALOG');
-            reqButton:SetWidth(80)
-
-            local l = AceGUI:Create("Label")
-            l:SetText(officer['name'])
-            l:SetFullWidth(false)
-            l:SetWidth(150)
-            ig:AddChild(l)
-
-            ig:AddChild(reqButton)
-
-            scroll:AddChild(ig)
-        end
-    end
-
-    pf:Show()
-end
-
 function GUI:ShowSelectedHistory(charObj)
     local b, member, dkpHistory, charName, title, entries, historyKeys;
 
@@ -931,13 +849,20 @@ StaticPopupDialogs['PDKP_OFFICER_PUSH_CONFIRM'] = {
     button1 = "Overwrite",
     button3 = 'Cancel',
     button2 = "Merge",
-    OnAccept = function(self) -- FIrst
+    OnAccept = function(...) -- First (Overwrite)
         Comms:SendGuildPush(true)
     end,
-    OnCancel = function() -- Second
-        Comms:SendGuildPush(false)
+    OnCancel = function(...) -- Second (Merge)
+        local _, _, clickType = ...
+        -- Because creating another instance of the popup calls onCancel with 'override' instead of 'clicked'.
+        -- This ensures that we actually clicked the cancel button. When hideOnEscape is enabled, this also is set as
+        -- 'clicked' so this can't be enabled when we are using 3 buttons, as ALT is the one that we're using for
+        -- cancel, for UX purposes.
+        if clickType == 'clicked' then
+            Comms:SendGuildPush(false)
+        end
     end,
-    OnAlt = function() -- Third
+    OnAlt = function(...) -- Third (Cancel)
     end,
     timeout = 0,
     whileDead = true,

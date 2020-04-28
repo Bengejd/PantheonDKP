@@ -210,6 +210,7 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
+            Guild:UpdateLastSync(message) -- message contains the lastSync time.
             Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
         end,
     }

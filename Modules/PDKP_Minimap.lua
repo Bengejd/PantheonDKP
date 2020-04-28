@@ -26,6 +26,7 @@ local info = 'F4A460'
 local clickText = Util:FormatFontTextColor(info, 'Click') .. ' to open PDKP. '
 local shiftClickText = Util:FormatFontTextColor(info, 'Shift-Click') ..  ' to request a push.'
 local altShiftText = Util:FormatFontTextColor(info, 'Alt-Shift-Click') .. ' to wipe your tables.'
+local shiftRightClickText = Util:FormatFontTextColor(info, 'Right-Shift-Click') .. ' to open Officer push'
 
 local minimapDBDefaults = {
     profile = {
@@ -53,10 +54,21 @@ function Minimap:InitMapDB()
             tooltip:AddLine(' ', 1, 1, 1, 1)
             tooltip:AddLine(clickText, 1, 1, 1)
 
-            if Minimap.canRequestPush then
+            local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
+
+            if canRequestSync then
                 tooltip:AddLine(shiftClickText, 1, 1, 1)
+            else
+                local nextSyncText = 'Next ' ..
+                        Util:FormatFontTextColor(info, 'Sync') ..
+                        ' available in: ' .. tostring(nextSyncAvailable) .. ' min(s).'
+                tooltip:AddLine(nextSyncText, 1, 1, 1)
             end
 --            tooltip:AddLine(altShiftText, 1, 1, 1, 1)
+
+            if core.canEdit then
+                tooltip:AddLine(shiftRightClickText, 1, 1, 1)
+            end
             tooltip:Show()
         end,
         OnClick = function(_, button)
@@ -87,26 +99,32 @@ function Minimap:GetDKPState()
 end
 
 function Minimap:HandleIconClicks(buttonType)
-    if buttonType ~= 'LeftButton' then return end; -- Right click does nothing.
 
     local hasCtrl, hasShift, hasAlt = IsAltKeyDown(), IsShiftKeyDown(), IsAltKeyDown()
+    local canRequestSync, minsSinceSync = DKP:CanRequestSync()
 
-    if hasShift and hasAlt then -- Table wipe
-        -- Popup notifying them that this cannot be reversed.
-        -- Letting them know that they will have to reload their UI after this is finished.
-        Util:Debug('ShiftAlt click')
-    elseif hasShift then
-        -- DKP Push request from officers.
-        -- Check to see if there are officers online.
-        local _, _, server_time, _ = Util:GetDateTimes()
-
-        Comms:SendCommsMessage('pdkpSyncReq', server_time, 'GUILD', nil, 'BULK', nil)
-    else
-        if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
-            GUI:Hide()
+    if buttonType == 'LeftButton' then -- Left button capabilities.
+        if hasShift and hasAlt then -- Table wipe
+            -- Popup notifying them that this cannot be reversed.
+            -- Letting them know that they will have to reload their UI after this is finished.
+            Util:Debug('ShiftAlt click')
+        elseif hasShift then
+            local canRequestSync, minsSinceSync, nextSyncAvailable = DKP:CanRequestSync()
+            if canRequestSync then
+                local _, _, server_time, _ = Util:GetDateTimes()
+                Comms:SendCommsMessage('pdkpSyncReq', server_time, 'GUILD', nil, 'BULK', nil)
+            else
+                PDKP:Print('Next sync available in: ' .. tostring(nextSyncAvailable) .. ' mins')
+            end
         else
-            PDKP:Show()
+            if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+                GUI:Hide()
+            else
+                PDKP:Show()
+            end
         end
+    elseif buttonType == 'RightButton' and hasShift then
+        StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
     end
 end
 

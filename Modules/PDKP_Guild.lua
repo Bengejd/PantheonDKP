@@ -191,20 +191,47 @@ function Guild:GetMembers()
     return Guild.members
 end
 
--- bank note is the lastEdit, lastSync
-function Guild:GetBankData(officerNote)
+---------------------------
+--    BANK FUNCTIONS     --
+---------------------------
 
-    local lastEdit, lastSync = strsplit(',', officerNote)
-
-    print(lastEdit, lastSync)
-
---    local bankData = loadstring(officerNote)
---    print(bankData.lastEdit)
---    return bankData.lastEdit, bankData.lastSync; -- Figure out how to have last edit, last sync
-    return officerNote, nil
+function Guild:GetBankMember()
+    return Guild.members['Pantheonbank']
 end
 
-function Guild:UpdateBankNote(id, lastSync)
+-- bank note is the lastEdit, lastSync
+function Guild:GetBankData(officerNote)
+    local lastEdit, lastSync = strsplit(',', officerNote)
+    return tonumber(lastEdit), tonumber(lastSync)
+end
+
+function Guild:UpdateLastSync(lastSync)
+    if not core.canEdit then return end; -- We can't edit the note anyway.
+    Guild:GetGuildData() -- Re-get the guild info just incase.
+    local bank = Guild:GetBankMember()
+    if bank then -- We found the bank object.
+        local bankNote = bank.officerNote
+        local _, bankLastSync = Guild:GetBankData(bankNote)
+        if bankLastSync and lastSync > bankLastSync then -- we have the right to update the lastSync.
+            Guild:UpdateBankNote(nil, lastSync)
+        else
+            Util:Debug('Skipping update LastSync because bankLastSync is greater')
+        end
+    end
+end
+
+function Guild:UpdateBankLastEdit(lastEdit)
+    return Guild:UpdateBankNote(lastEdit)
+end
+
+function Guild:FormatNewBankNote(lastEdit, lastSync)
+    return tostring(lastEdit) .. ',' .. tostring(lastSync)
+end
+
+function Guild:UpdateBankNote(lastEdit, lastSync)
+    if not core.canEdit then return end; -- We can't edit the note anyway.
     Guild:GetGuildData() -- retrieve the bank info.
-    GuildRosterSetOfficerNote(Guild.bankIndex, id)
+    lastEdit = lastEdit or DKP.dkpDB.lastEdit;
+    lastSync = lastSync or DKP.lastSync
+    GuildRosterSetOfficerNote(Guild.bankIndex, Guild:FormatNewBankNote(lastEdit, lastSync))
 end
