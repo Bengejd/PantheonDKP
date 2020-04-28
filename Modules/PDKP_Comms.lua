@@ -20,10 +20,7 @@ local Raid = core.Raid;
  ]]
 
 local SAFE_COMMS = {
-    ['pdkpLastEditReq'] = true,
-    ['pdkpLastEditRec'] = true,
     ['pdkpPushInProg'] = true,
-    ['pdkpModLastEdit']=true,
 };
 
 local UNSAFE_COMMS = {
@@ -196,7 +193,6 @@ end
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
     local guildFunc = {
         ['pdkpSyncRes'] = function()
-            print('Sync res found')
             Import:AcceptData(message)
         end,
     }
@@ -226,27 +222,10 @@ function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
     if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
 
     local safeFuncs = {
-        -- Send them back your lastEdit time
-        -- Need to edit to be only officers.
-        ['pdkpLastEditReq'] = function()
-            Comms:SendCommsMessage('pdkpLastEditRec', DKP.dkpDB.lastEdit, 'WHISPER', sender, 'BULK')
-        end,
-        -- Need to edit to be only officers.
-        -- Process their lastEdit time
-        ['pdkpLastEditRec'] = function() Comms:LastEditReceived(sender, message) end,
-        -- Someone Sent you a push request
-        -- Need to edit to be guild only instead of whispers.
         ['pdkpPushRequest'] = function()
             PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
             Comms:PrepareDatabase(false)
             Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
-        end,
-        -- Need to edit to be guild only
-        ['pdkpSyncRequest'] = function()
-            if core.canEdit then
---                local database = Comms:PrepareDatabaseSyncResponse(message)
---                Comms:SendCommsMessage('pdkpSyncResponse', database, 'WHISPER', sender, 'BULK')
-            end
         end,
     }
 
@@ -349,26 +328,6 @@ function Comms:PrepareDatabase(full)
             }
         }
     end
-end
-
-function Comms:RequestOfficerLastEdit(isRequest)
-
-end
-
-function Comms:RequestOfficersLastEdit()
-    Guild:GetGuildData() -- Retrieve up to date guild data.
-    Comms:SendCommsMessage('pdkpLastEditReq', '', 'GUILD', nil, 'BULK')
-end
-
-function Comms:LastEditReceived(sender, message)
-    Util:Debug('Received Last Edit from ' .. sender)
-    for i = 1, #Guild.officers do
-        local officer = Guild.officers[i];
-        if officer['name'] == sender then
-            officer['lastEdit'] = message
-        end
-    end
-    GUI:UpdatePushFrame()
 end
 
 -- Innermediate function between Request & Reponse.

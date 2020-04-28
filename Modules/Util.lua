@@ -87,11 +87,9 @@ end
 -- Utility function that removes the server name from a characters string.
 function Util:RemoveServerName(name)
     if Util:IsEmpty(name) then return nil end;
-
     -- Names come in with server attached e.g: ValhallaBank-Blaumeux (We gotta remove the server name)
-    for w in name:gmatch("([^-]+)") do -- I'm sure there is a better way to remove the server name *shrug*
-        return w;
-    end
+    local newName, _ = string.split('-', name)
+    return newName
 end
 
 function Util:GetDateTimes()
