@@ -123,7 +123,7 @@ function Minimap:HandleIconClicks(buttonType)
                 PDKP:Show()
             end
         end
-    elseif buttonType == 'RightButton' and hasShift then
+    elseif buttonType == 'RightButton' and hasShift and core.canEdit then
         StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
     end
 end
