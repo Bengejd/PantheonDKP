@@ -343,7 +343,7 @@ function Setup:AdjustmentDropdowns()
         local d = dropdowns[i]
         d:ClearAllPoints();
         d:SetParent(GUI.pdkp_frame);
-        d.frame:SetFrameStrata('HIGH')
+        d.frame:SetFrameStrata("DIALOG")
         d:SetWidth(dropdownWidths[i])
         d:SetPoint("BOTTOMRIGHT", GUI.pdkp_frame, "BOTTOMRIGHT", dropdownX[i], -150)
         d.name = dropdownNames[i];
@@ -366,7 +366,7 @@ function Setup:RaidDkpDropdown()
     rd:SetText(currentRaid);
 
     rd:SetParent(GUI.pdkp_frame);
-    rd.frame:SetFrameStrata('HIGH');
+    rd.frame:SetFrameStrata("DIALOG");
     rd:SetWidth(120);
     rd:SetPoint("TOPRIGHT", GUI.pdkp_frame, "TOPRIGHT", 200, -25);
 
