@@ -59,7 +59,6 @@ function Setup:MainUI()
 
         Setup:RaidDkpDropdown()
         Setup:HistoryFrame()
-        Setup:dkpPushButton()
         Setup:ShroudingWindow()
         Setup:PrioList()
 
