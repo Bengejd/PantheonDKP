@@ -13,7 +13,6 @@ local Defaults = core.defaults;
 local Import = core.import;
 local Comms = core.Comms;
 
-
 local dkpDB;
 
 local success = '22bb33'
@@ -508,4 +507,9 @@ function DKP:CanRequestSync()
         end
     end
     return false, 0, 0
+end
+
+function DKP:SyncReqAndLastSyncEqual(syncRequest)
+    Guild:GetGuildData() -- Regrab the guild data, just incase.
+    return DKP.lastSync == syncRequest
 end

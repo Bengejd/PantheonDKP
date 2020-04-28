@@ -19,14 +19,6 @@ local Raid = core.Raid;
 --
  ]]
 
-local SAFE_COMMS = {
-    ['pdkpPushInProg'] = true,
-};
-
-local UNSAFE_COMMS = {
-    ['pdkpSyncResponse'] = true
-}
-
 local OFFICER_COMMS = {
     ['pdkpSyncReq'] = true,
 }
@@ -70,8 +62,6 @@ local skipBroadcastMsg = 'Skipping broadcast because '
 function Comms:RegisterCommCommands()
     Comms.commsRegistered = true -- Check to make sure we don't re-register the comms.
 
-    for key, _ in pairs(SAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
-    for key, _ in pairs(UNSAFE_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end
     for key, _ in pairs(GUILD_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General guild comms
     for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
 
@@ -125,9 +115,7 @@ function OnCommReceived(prefix, message, distribution, sender)
     local data = Comms:DataDecoder(message) -- decode, decompress, deserialize it.
 
     -- Might be able to get rid of these comms?
-    if SAFE_COMMS[prefix] then return Comms:OnSafeCommReceived(prefix, data, distribution, sender);
-    elseif UNSAFE_COMMS[prefix] then return Comms:OnUnsafeCommReceived(prefix, data, distribution, sender);
-    elseif OFFICER_COMMS[prefix] then return Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
+    if OFFICER_COMMS[prefix] then return Comms:OnOfficerCommReceived(prefix, data, distribution, sender);
     elseif GUILD_COMMS[prefix] then return Comms:OnGuildCommReceived(prefix, data, distribution, sender);
     elseif RAID_COMMS[prefix] then return Comms:OnRaidCommReceived(prefix, data, distribution, sender);
     else
@@ -195,6 +183,13 @@ function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
         ['pdkpSyncRes'] = function()
             Import:AcceptData(message)
         end,
+        ['pdkpEntryDelete'] = function()
+            DKP:DeleteEntry(message, false)
+        end,
+        ['pdkpPushReceive'] = function()
+            PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
+            Import:AcceptData(message)
+        end,
     }
     local func = guildFunc[prefix]
     if func then return func() end
@@ -207,62 +202,13 @@ function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
             Guild:UpdateLastSync(message) -- message contains the lastSync time.
+            PDKP:Print(sender .. ' has sent a DKP sync request. Preparing sync data now, this may take a few minutes...')
             Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
         end,
     }
     local func = officerFunc[prefix]
     if func then return func() end
 end
-
----------------------------
--- SAFE FUNCTIONS     --
----------------------------
-function Comms:OnSafeCommReceived(prefix, message, distribution, sender)
-    -- We received a communication that we shouldn't have...
-    if not SAFE_COMMS[prefix] then return Comms:ThrowError(prefix, sender) end
-
-    local safeFuncs = {
-        ['pdkpPushRequest'] = function()
-            PDKP:Print("Preparing data to push to " .. sender .. ' This may take a few minutes...')
-            Comms:PrepareDatabase(false)
-            Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'WHISPER', sender, 'BULK', UpdatePushBar)
-        end,
-    }
-
-    if safeFuncs[prefix] then safeFuncs[prefix]() end
-end
-
----------------------------
--- UNSAFE FUNCTIONS    --
----------------------------
-function Comms:OnUnsafeCommReceived(prefix, message, distribution, sender)
-
-    -- We received a communication that we shouldn't have...
-    if not UNSAFE_COMMS[prefix] or not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
-
-    local unsafeFuncs = {
-        ['pdkpPushReceive'] = function()
-            PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
-            Import:AcceptData(message)
-        end,
-        ['pdkpEntryDelete'] = function()
-            DKP:DeleteEntry(message, false)
-        end,
-        ['pdkpSyncResponse'] = function()
---            Import:AcceptData(message)
-        end,
-        ['pdkpPlaceholder'] = function() end,
-    }
-
-    if unsafeFuncs[prefix] then unsafeFuncs[prefix]() end
-
-    -- We've finished processing the comms.
-    Comms.processing = false
-end
-
----------------------------
---   REWORK FUNCTIONS    --
----------------------------
 
 function Comms:SendGuildPush(full)
     Comms:ResetDatabse()
@@ -330,86 +276,8 @@ function Comms:PrepareDatabase(full)
     end
 end
 
--- Innermediate function between Request & Reponse.
-function Comms:PrepareDatabaseSyncResponse(historyKeys)
-    local pdkpSyncResponseDatabase = {
-        addon_version = Defaults.addon_version,
-        full = false,
-        guildDB = {
-            numOfMembers = nil,
-            members = nil,
-        },
-        dkpDB = {
-            lastEdit = DKP.dkpDB.lastEdit,
-            history = {
-                all = nil,
-                deleted = nil,
-            },
-            members = nil,
-            currentDB = nil
-        }
-    }
-
-    local theirAll = historyKeys.all;
-    local theirDeleted = historyKeys.deleted;
-
-    local myAll = {}
-    local myDeleted = {}
-
-    for key, entry in pairs(DKP.dkpDB.history.all) do
-        myAll[key] = entry;
-        for i = 1, #theirAll do
-            local theirKey = theirAll[i];
-            if theirKey == entry['id'] then -- Found a match
-                myAll[key] = nil -- Remove it from the list.
-                break -- Break out of the inner loop & continue.
-            end
-        end
-    end
-
-    for _, entryID in pairs(DKP.dkpDB.history.deleted) do
-        table.insert(myDeleted, entryID)
-        for i = 1, #theirDeleted do
-            local theirKey = theirDeleted[i];
-            if theirKey == entryID then -- Found a match
-                for j = 1, #myDeleted do -- loop through myDeleted and remove the entry.
-                    local deleteKey = myDeleted[j];
-                    if deleteKey == theirKey then  -- Found a match
-                        table.remove(myDeleted, j); -- Remove it
-                        break; -- Break out
-                    end
-                end
-                break -- Break out
-            end
-        end
-    end
-
-    pdkpSyncResponseDatabase.dkpDB.history = {
-        all = myAll,
-        deleted = myDeleted
-    }
-    return pdkpSyncResponseDatabase
-end
-
-function Comms:DatabaseSyncRequest()
-    if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
-    PDKP:Print('Attempting Automatic Database Sync...')
-
-    local myHistory = {
-        all = {},
-        deleted = {}
-    }
-    local dkpDB = DKP.dkpDB.history
-    for _, entry in pairs(dkpDB.all) do table.insert(myHistory.all, entry['id']); end
-    for _, entryKey in pairs(dkpDB.deleted) do table.insert(myHistory.deleted, entryKey); end
-
---    Comms:SendCommsMessage('pdkpSyncRequest', myHistory, 'GUILD', nil, 'BULK', nil)
-end
-
 function Comms:PackupSyncDatabse()
     if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
-
-    print('Doing syncdatabase stuff')
 
     local pdkpSyncResponseDatabase = {
         addon_version = Defaults.addon_version,

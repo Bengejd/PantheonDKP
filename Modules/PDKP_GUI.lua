@@ -672,6 +672,14 @@ function UpdatePushBar(arg, sent, total)
     local statusText = 'PDKP Push Progress: '
     local statusbar = GUI.pushbar
     local currVal = statusbar:GetValue()
+
+    if Defaults.debug then
+        if currVal ~= percentage then
+            local _, _, server_time, _ = Util:GetDateTimes()
+            Util:Debug('Time elapsed: ' .. Util:CalculateTimeDifference(DKP.lastSync, server_time))
+        end
+    end
+
     if currVal == nil then currVal = 0 end
     if currVal < percentage and percentage <= 100 then
         statusbar.value:SetText(statusText .. percentage .. '%');

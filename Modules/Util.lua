@@ -172,6 +172,13 @@ function Util:Debug(string)
     end
 end
 
+function Util:CalculateTimeDifference(startTime, endTime)
+    local difference = endTime - startTime -- in seconds
+    local mins = math.floor(difference / 60) -- mins
+    local seconds = difference - (mins * 60) -- seconds
+    return mins .. ':'..seconds
+end
+
 -- Debugging utility function that prints what's inside of a table.
 function Util:PrintTable(tt, indent)
     if not Defaults.debug then return end;
