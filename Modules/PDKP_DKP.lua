@@ -304,7 +304,10 @@ function DKP:UpdateEntries()
         ['names']=charNames,
         ['members']= memberNames,
         ['deleted']=false,
-        ['edited']=false
+        ['edited']=false,
+        ['isShroud']=false,
+        ['isRoll']=false,
+        ['previousTotals']={}
     }
 
     for key, member in pairs(charObjs) do
@@ -314,6 +317,16 @@ function DKP:UpdateEntries()
         table.insert(dkp.entries, server_time)
 
         dkp.previousTotal = dkp.total
+
+        local previousTotals = historyEntry['previousTotals'];
+        previousTotals[name] = dkp.total;
+
+        if #charObjs == 1 then
+            historyEntry['isShroud'] = member.shrouded
+            historyEntry['isRoll'] = not member.shrouded
+            print(historyEntry.id)
+        end
+
         dkp.total = dkp.total + dkpChange
 
         if dkp.total < 0 then dkp.total = 0 end

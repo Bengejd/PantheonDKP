@@ -33,6 +33,8 @@ function Member:new(guildIndex)
 
     if self.name == Util:GetMyName() then core.canEdit = self.canEdit end
 
+    self.shrouded = false;
+
     self.dkp = {};
 
     for key, raid in pairs(raids) do
@@ -107,7 +109,11 @@ end
 
 function Member:QuickCalculate(type, raid)
     local percent = 0.1;
-    if type == 'shroud' then percent = 0.5 end;
+    if type == 'shroud' then
+        self.shrouded = true
+        percent = 0.5
+    end;
+
     return math.ceil(self.dkp[raid].total * percent);
 end
 
