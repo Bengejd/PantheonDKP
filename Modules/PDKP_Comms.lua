@@ -126,18 +126,6 @@ end
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
-
-    if Defaults.no_broadcast then return print(skipBroadcastMsg .. ' no_broadcast is enabled') end
---    if Defaults.debug then -- Don't send messages unnecessarily when developing.
---        if distro == 'GUILD' then -- in debug, change distro to whisper, and send to bank, or Pantheonbank or KarolBaskins
---            distro = 'WHISPER'
---            sendTo = 'Pantheonbank'
---            if Util:GetMyName() == sendTo then sendTo = 'Karenbaskins' end -- send to alt char instead of bank.
---
---        elseif distro == 'WHISPER' and (sendTo ~= 'Pantheonbank' and sendTo ~= 'Karenbaskins') then
---            return print(skipBroadcastMsg .. sendTo .. " is not bank!")
---        end
---    end
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
     local transmitData = Comms:DataEncoder(data)
