@@ -93,11 +93,6 @@ function DKP:GetCurrentDatabase()
     return dkpDB.currentDB
 end
 
--- cheaty way to update dkp via the boss kill event.
-function DKP:BossKilled()
-
-end
-
 function DKP:ConfirmChange()
     local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
     if dkpChange == 0 then return end; -- Don't need to change anything.
