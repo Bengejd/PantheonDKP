@@ -1,4 +1,4 @@
-====== Version 1.2.0 ======
+====== Version 2.2.4 ======
 [New Features]:
     - [Raid Officer Interface]
         - Auto invite feature (defaults to: "inv" and "invite") for raids. This can be customized, if you're an officer.
