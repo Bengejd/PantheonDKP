@@ -263,8 +263,11 @@ function DKP:UpdateEntries()
 
     if reasonVal == 6 then -- item win
         local buttonText = _G['pdkp_item_link_text']
-        historyText = historyText .. buttonText:GetText()
-        itemText = buttonText:GetText();
+        local textButtonText = buttonText:GetText()
+        if not Util:IsEmpty(textButtonText) then
+            historyText = historyText .. textButtonText
+            itemText = textButtonText
+        end
     end
 
     if raid == nil then
