@@ -8,9 +8,6 @@ TODO: Options table for changing Raid DKP amounts.
 TODO: Decay (No call / no-show: 20%)
 TODO: Excused absence: 15%
 
-TODO: Rework-comms
-TODO:
-
 Table Filters:
 	- Show Pugs
 
@@ -25,20 +22,3 @@ Table Filters:
 	- Shroud: 50% (int or %)
 	- No call / No show: 20% (int or %)
 	- Absence (Excuse): 15%
-
-- PDKP values tables should initially be as shallow as possible.
-    - Loot History (Record the user's UID, Item ID, DKP cost amount, URaidID)
-    - Raid History (Record DKP awarded to user, RaidID, UID)
-    - DKP History (Record DKP amount, Reference RaidID's)
-
-
-
-Useful Functions:
-    - https://wowwiki.fandom.com/wiki/API_GuildControlGetRankFlags
-    - "GUILD_ROSTER_UPDATE"
-    - PLAYER_GUILD_UPDATE"
-
-- Only log recently updated data for merge purposes.
-
-- Comms name registrar
-    - pdkp_serverName_guildName

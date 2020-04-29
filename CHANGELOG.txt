@@ -1,3 +1,6 @@
+====== Version 2.2.5 ======
+[Bug Fixes]:
+    - Fixed item link concat issue.
 ====== Version 2.2.4 ======
 [New Features]:
     - [Raid Officer Interface]
