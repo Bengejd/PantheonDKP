@@ -12,9 +12,11 @@
     - [AQ & Naxx Tables]
         - Added & Disabled for the time-being.
     - [PDKP Map Icon]
-        - Notifies you when your DKP tables are out of date (or tries to)
+        - Notifies you when your DKP tables are out of date (or tries to).
         - Left-click to open PDKP
-        - Left-Shift-Click to request a push (Herd-syncing!)
+        - Left-Shift-Click to request an officer push (15 min cool-down between sync requests). This will sync all
+            members that are online with the broadcast data received from the officers.
+        - Officer manual push capabilities moved here.
 
 [Bug fixes]:
     - Fixed Onyxia's DKP table dropdown. Was referencing the wrong raid name.
