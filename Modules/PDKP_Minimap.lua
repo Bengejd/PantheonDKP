@@ -13,6 +13,7 @@ local Defaults = core.defaults;
 local Import = core.Import;
 local Setup = core.Setup;
 local Comms = core.Comms;
+local Raid = core.Raid;
 local Minimap = core.Minimap;
 
 Minimap.db = nil;
@@ -22,6 +23,7 @@ local miniDB;
 local success = '22bb33'
 local warning = 'E71D36'
 local info = 'F4A460'
+local system = '1E90FF'
 
 local clickText = Util:FormatFontTextColor(info, 'Click') .. ' to open PDKP. '
 local shiftClickText = Util:FormatFontTextColor(info, 'Shift-Click') ..  ' to request a push.'
@@ -54,6 +56,8 @@ function Minimap:InitMapDB()
             tooltip:AddLine(' ', 1, 1, 1, 1)
             tooltip:AddLine(clickText, 1, 1, 1)
 
+            Raid:GetLockedInfo()
+
             local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
 
             if canRequestSync then
@@ -69,6 +73,21 @@ function Minimap:InitMapDB()
             if core.canEdit then
                 tooltip:AddLine(shiftRightClickText, 1, 1, 1)
             end
+
+            if #Raid.lockedInstances > 0 then
+                tooltip:AddLine(' ', 1, 1, 1, 1)
+                for _, raid in pairs(Raid.lockedInstances) do
+                    tooltip:AddLine(raid.desc, 1, 1, 1)
+                end
+            end
+
+            if #Raid.lockedRaids > 0 then
+                tooltip:AddLine(' ', 1, 1, 1, 1)
+                for _, raid in pairs(Raid.lockedRaids) do
+                    tooltip:AddLine(raid.desc, 1, 1, 1)
+                end
+            end
+
             tooltip:Show()
         end,
         OnClick = function(_, button)

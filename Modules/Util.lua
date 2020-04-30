@@ -206,6 +206,15 @@ function Util:PrintTable(tt, indent)
     end
 end
 
+function Util:displayTime(timeInSeconds)
+    local math = math
+    local days = math.floor(timeInSeconds/86400)
+    local hours = math.floor(math.fmod(timeInSeconds, 86400)/3600)
+    local minutes = math.floor(math.fmod(timeInSeconds,3600)/60)
+    local seconds = math.floor(math.fmod(timeInSeconds,60))
+    return format("%dD%2d Hr %2d Min",days,hours,minutes)
+end
+
 --[[
 Ordered table iterator, allow to iterate on the natural order of the keys of a
 table.

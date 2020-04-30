@@ -26,6 +26,9 @@ Raid.MasterLooter = nil
 Raid.dkpOfficer = nil;
 Raid.spamText = nil;
 
+Raid.lockedInstances = {}
+Raid.lockedRaids = {}
+
 --[[ RAID DATABASE LAYOUT
 
    raids
@@ -300,6 +303,32 @@ function Raid:GetInstanceInfo()
     dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
 
     -- if difficultyIndex is >= 1 then you're in an instance (5, 10 or 40 man)
+end
+
+function Raid:GetLockedInfo()
+    -- Reset these
+    Raid.lockedInstances = {}
+    Raid.lockedRaids = {}
+    local numInstances = GetNumSavedInstances()
+    for i=1, numInstances do
+        local name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers,
+        _, numEncounters, encounterProgress = GetSavedInstanceInfo(i)
+        -- reset is the amount of time in seconds until it resets. Let's make it more readable.
+        local reset_display = Util:displayTime(reset)
+        local raidObj = {
+            name=name,
+            desc=name .. ' reset: ' .. Util:FormatFontTextColor('1E90FF', reset_display),
+            id=id,
+            reset=reset,
+            locked=locked,
+            reset_display = reset_display,
+        }
+        if isRaid and maxPlayers >= 20 then -- It's a raid we care about
+            table.insert(Raid.lockedRaids, raidObj)
+        else -- This is an instance or an instance raid.
+            table.insert(Raid.lockedInstances, raidObj)
+        end
+    end
 end
 
 function Raid:IsDkpOfficer()
