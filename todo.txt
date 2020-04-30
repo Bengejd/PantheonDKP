@@ -13,6 +13,11 @@ TODO: Disable print messages.
 TODO: Save shrouding window positioning
 TODO: Promote Class Leaders to the promote button
 TODO: Whisper command !pdkp that will send back the player's DKP totals.
+TODO: Make PDKP More Generic, so that other guilds can use it.
+    - Change command to bring it up (GM Only)
+    - Change Name
+    - Change Logo
+    - Change bank stuff
 
 Table Filters:
 	- Show Pugs

@@ -166,7 +166,7 @@ end
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
 function Util:Debug(string)
-    if core.defaults.debug then
+    if core.defaults.debug and not Defaults.silent then
         local info = 'F4A460'
         PDKP:Print(Util:FormatFontTextColor(info, string))
     end

@@ -116,7 +116,11 @@ end
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 
-    PDKP:Print("Welcome,", Util:GetMyName(), "to:", core.defaults.addon_name)
+    if Defaults.silent then
+       PDKP.Print = function() end
+    end
+
+    PDKP:Print("Welcome,", Util:GetMyName(), "to:", core.defaults.addon_name .. ': v' .. Defaults.addon_version)
 
     -----------------------------
     -- Register Slash Commands --
@@ -429,18 +433,16 @@ end
 
 
 local events = CreateFrame("Frame", "EventsFrame");
-events:RegisterEvent("ADDON_LOADED");
-events:RegisterEvent("GUILD_ROSTER_UPDATE");
-events:RegisterEvent("GROUP_ROSTER_UPDATE");
-events:RegisterEvent("ENCOUNTER_START"); -- FOR TESTING PURPOSES.
-events:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED"); -- NPC kill event
-events:RegisterEvent("LOOT_OPENED");
-events:RegisterEvent("CHAT_MSG_RAID");
-events:RegisterEvent("CHAT_MSG_RAID_LEADER");
-events:RegisterEvent("CHAT_MSG_WHISPER");
-events:RegisterEvent("CHAT_MSG_GUILD");
-events:RegisterEvent("CHAT_MSG_LOOT"); -- someone selects need, greed, passes, rolls, receives
-events:RegisterEvent("PLAYER_ENTERING_WORLD");
-events:RegisterEvent("ZONE_CHANGED_NEW_AREA");
-events:RegisterEvent("BOSS_KILL");
+
+local eventNames = {
+    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START",
+    "COMBAT_LOG_EVENT_UNFILTERED", "LOOT_OPENED", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_WHISPER",
+    "CHAT_MSG_GUILD", "CHAT_MSG_LOOT", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA","BOSS_KILL", "CHAT_MSG_SYSTEM"
+}
+
+for _, eventName in pairs(eventNames) do
+    events:RegisterEvent(eventName);
+end
 events:SetScript("OnEvent", PDKP_OnEvent); -- calls the above MonDKP_OnEvent function to determine what to do with the event
+
+

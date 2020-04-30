@@ -310,6 +310,7 @@ function Raid:GetLockedInfo()
     Raid.lockedInstances = {}
     Raid.lockedRaids = {}
     local numInstances = GetNumSavedInstances()
+
     for i=1, numInstances do
         local name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers,
         _, numEncounters, encounterProgress = GetSavedInstanceInfo(i)
