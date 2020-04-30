@@ -1,3 +1,7 @@
+====== Version 2.2.6 ======
+[Bug Fixes]:
+    - Fixed Sync error message from occurring. (Causes a lot of lag).
+
 ====== Version 2.2.5 ======
 [Bug Fixes]:
     - Fixed item link concat issue.
