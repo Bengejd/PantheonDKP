@@ -1,3 +1,11 @@
+====== Version 2.3.1 ======
+
+[Features]:
+    - Added raid/instance lockout timers to minimap button
+
+[Bug Fixes]:
+    - Fixed Mish'undare, Circlet of the Mind Flayer prio link
+
 ====== Version 2.2.6 ======
 [Bug Fixes]:
     - Fixed Sync error message from occurring. (Causes a lot of lag).

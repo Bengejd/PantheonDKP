@@ -8,6 +8,12 @@ TODO: Options table for changing Raid DKP amounts.
 TODO: Decay (No call / no-show: 20%)
 TODO: Excused absence: 15%
 
+TODO: Settings menu when mini-map is right-clicked.
+TODO: Disable print messages.
+TODO: Save shrouding window positioning
+TODO: Promote Class Leaders to the promote button
+TODO: Whisper command !pdkp that will send back the player's DKP totals.
+
 Table Filters:
 	- Show Pugs
 
