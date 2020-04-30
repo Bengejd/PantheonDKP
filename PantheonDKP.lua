@@ -202,11 +202,14 @@ function PDKP:HandlePrioCommands(itemLink)
     if itemLink ~= nil and itemLink ~= '' then
         local prio = item:GetPriority(itemLink)
 
-        if prio == 'Undefined' then -- Possibly we have an item link.
-            local status, itemName = pcall(item:GetItemInfo(itemLink))
-            prio = item:GetPriority(itemName)
+        if prio == nil then -- Possibly we have an item link.
+            local itemName = item:GetItemInfo(itemLink)
+            if itemName then
+                prio = item:GetPriority(itemName)
+            end
         end
-        print(itemLink .. ' PRIO: ' .. prio)
+
+        if prio then print(itemLink .. ' PRIO: ' .. prio) end
     else
     end
 end
@@ -368,6 +371,8 @@ function PDKP:Show()
     if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
         GUI.pdkp_frame:SetFrameStrata('HIGH')
     end
+
+    Raid:GetLockedInfo()
 
 end
 
