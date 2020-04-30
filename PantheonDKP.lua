@@ -161,14 +161,16 @@ function PDKP:InitializeGuildData()
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
-    if Shroud.shroudPhrases[string.lower(msg)] and (
-    Raid:isMasterLooter()
 
-    -- Check if masterLooter if raid.dkpOfficer is nil
-    ) then
+    if Shroud.shroudPhrases[string.lower(msg)] and Raid:IsAssist() then
         -- This should send the list to everyone in the raid, so that it just automatically pops up.
-        Util:Debug('Updating shrouders with ' .. name)
-        Shroud:UpdateShrouders(name)
+        if Raid.dkpOfficer and Raid:IsDkpOfficer() then -- We have the DKP officer established
+            Util:Debug('Updating shrouders with ' .. name)
+            Shroud:UpdateShrouders(name)
+        elseif Raid:isMasterLooter() then
+            Util:Debug('Updating shrouders with ' .. name)
+            Shroud:UpdateShrouders(name)
+        end
     elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
         if not Raid:IsInRaid() then
             ConvertToRaid()
