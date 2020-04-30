@@ -56,6 +56,7 @@ function Member:GetDKP(raidName, variableName)
     elseif not acceptableDKPVariables[variableName] then
         return Util:ThrowError('Invalid dkpVariable ' .. variableName)
     end
+    if raidName == 'Onyxia\'s Lair' then raidName = 'Molten Core'; end
     if variableName == 'all' then return self.dkp[raidName] end
     return self.dkp[raidName][variableName]
 end
