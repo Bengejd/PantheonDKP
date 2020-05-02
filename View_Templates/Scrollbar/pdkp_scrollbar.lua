@@ -140,8 +140,9 @@ function pdkp_dkp_scrollbar_Update(forceHide)
                 if col == 2 then
                     entryCol:SetText(charObj.coloredClass)
                 elseif col == 3 then
-                    if charObj.dkp then
-                        entryCol:SetText(charObj.dkp[currentRaid].total)
+                    local member = Guild.members[charObj.name]
+                    if member and member.dkp then
+                        entryCol:SetText(member.dkp[currentRaid].total)
                     else
                         entryCol:SetText(0)
                     end
@@ -252,6 +253,10 @@ function GUI:UpdateOnlineStatus(status)
           char.online = false;
        end
     end
+end
+
+function GUI:UpdateScrollValues()
+
 end
 
 -- Generic catch all for the filter functions.

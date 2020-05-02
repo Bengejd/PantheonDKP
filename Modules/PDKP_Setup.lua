@@ -693,8 +693,6 @@ function Setup:OfficerWindow()
         mainFrame:Show()
     end)
 
-
-
     GUI.OfficerFrame = mainFrame
 
     mainFrame:Show()
