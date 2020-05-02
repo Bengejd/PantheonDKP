@@ -679,7 +679,7 @@ function Setup:OfficerWindow()
     mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
     mainFrame.title:SetFontObject("GameFontHighlight")
     mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
-    mainFrame.title:SetText('PDKP Officer Interface')
+    mainFrame.title:SetText('PDKP Raid Interface')
     mainFrame:SetFrameStrata('FULLSCREEN');
     mainFrame:SetFrameLevel(1);
     mainFrame:SetToplevel(true)

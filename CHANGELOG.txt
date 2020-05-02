@@ -1,11 +1,11 @@
 ====== Version 2.3.1 ======
 
 [Features]:
-    - Added raid/instance lockout timers to minimap button
+    - Added raid lockout timers to minimap button
     - Added notification letting you know when your addon is out of date.
     - Added item prio to tooltips.
     - Changed Promote Officers to also give Assist to Class Leaders.
-
+    - Added ability to close Raid Tools, re-open by clicking the "Raid Tools" button to the right now.
 
 [Bug Fixes]:
     - Fixed Mish'undare, Circlet of the Mind Flayer prio link
