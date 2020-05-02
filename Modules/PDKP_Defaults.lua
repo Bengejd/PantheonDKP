@@ -43,7 +43,7 @@ core.defaults = {
     addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version"),
     checked_addion_version = false,
 
-    debug = true,
+    debug = false,
     no_broadcast = false,
     debug_dkp = false;
     migrate = false, -- whether this version requires a migration or not.
