@@ -13,6 +13,8 @@ local Defaults = core.defaults;
 
 item.linkedItem = nil;
 
+local previousItemID = -1
+
 function PDKP:InitItemDB()
     core.itemHistory = LibStub("AceDB-3.0"):New("pdkp_itemHistory").char
 end
@@ -59,6 +61,23 @@ function item:GetItemInfo(itemLink)
     itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID,
     isCraftingReagent = GetItemInfo(itemLink)
     return itemName;
+end
+
+function item:ToolTipInit()
+    GameTooltip:HookScript( "OnTooltipSetItem", SetToolTipPrio)
+end
+
+function SetToolTipPrio(tt)
+    local itemName, itemLink = tt:GetItem()
+    if not itemName then return end
+
+    local prio = item:GetPriority(itemName)
+
+    if prio ~= nil then
+        tt:AddLine(' ')
+        tt:AddLine(Util:FormatFontTextColor('ffff00', 'Pantheon Prio'))
+        tt:AddLine(prio)
+    end
 end
 
 item.priority = {
