@@ -3,9 +3,13 @@
 [Features]:
     - Added raid/instance lockout timers to minimap button
     - Added notification letting you know when your addon is out of date.
+    - Added item prio to tooltips.
+    - Changed Promote Officers to also give Assist to Class Leaders.
+
 
 [Bug Fixes]:
     - Fixed Mish'undare, Circlet of the Mind Flayer prio link
+    - Fixed DKP being visually out of date when using the boss kill popup on the DKP Officer's screen.
 
 ====== Version 2.2.6 ======
 [Bug Fixes]:

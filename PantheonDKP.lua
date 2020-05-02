@@ -83,7 +83,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return Raid:GetRaidInfo()
         end,
         ['LOOT_OPENED']=function()  -- when the loot bag is opened.
-            return Raid:AnnounceLoot()
+--            return Raid:AnnounceLoot()
         end,
         ['OPEN_MASTER_LOOT_LIST']=function()  -- when the master loot list is opened.
             return
@@ -147,7 +147,6 @@ function PDKP:OnInitialize(event, name)
     -----------------------------
 
     Setup:dkpOfficer()
-
     item:ToolTipInit()
 end
 
