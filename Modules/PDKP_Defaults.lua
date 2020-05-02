@@ -39,11 +39,15 @@ core.defaults = {
     addon_version = GetAddOnMetadata('PantheonDKP', "Version"),
     addon_name = 'PantheonDKP',
     bank_name = 'Pantheonbank',
+    silent = false,
+    addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version"),
+    checked_addion_version = false,
+
     debug = true,
     no_broadcast = false,
     debug_dkp = false;
     migrate = false, -- whether this version requires a migration or not.
-    silent = true,
+
 
     -- PLAYER INFO
     playerUID = UnitGUID("PLAYER"), -- Unique Blizzard Player ID

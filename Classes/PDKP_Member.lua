@@ -28,6 +28,8 @@ function Member:new(guildIndex)
 
     self.canEdit = self.rankIndex <= 3;
 
+    self.isClassLeader = self.rankIndex == 4;
+
     self.isOfficer = self.canEdit;
     self.isBank = self.name == Defaults.bank_name
 
@@ -38,7 +40,7 @@ function Member:new(guildIndex)
     self.dkp = {};
 
     for key, raid in pairs(raids) do
-        if key > 1 then
+        if raid ~= 'Onyxia\'s Lair' then
             self.dkp[raid] = {
                 previousTotal = 0,
                 total = 0,
@@ -146,7 +148,7 @@ function Member:Save()
     }
 
     for key, raid in pairs(raids) do
-        if key > 1 then
+        if raid ~= 'Onyxia\'s Lair' then
             dbMember.dkp[raid] = {
                 previousTotal = self.dkp[raid].previousTotal,
                 total = self.dkp[raid].total,

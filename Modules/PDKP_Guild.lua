@@ -18,6 +18,7 @@ Guild.officers = {};
 Guild.bankIndex = 0;
 Guild.online = {};
 Guild.members = {};
+Guild.classLeaders = {}
 
 
 local guildDBDefaults = {
@@ -74,6 +75,8 @@ function Guild:GetGuildData(onlineOnly)
             end
             if member.isOfficer then table.insert(Guild.officers, member) end
             member.isDkpOfficer = false
+
+            if member.isClassLeader then table.insert(Guild.classLeaders, member) end
 
             if member.name == nil then
                 member.name = ''

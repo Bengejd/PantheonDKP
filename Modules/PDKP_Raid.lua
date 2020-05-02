@@ -241,7 +241,8 @@ function Raid:AcceptBossKillDKPUpdate(bossInfo)
         ['edited']=false
     }
 
-    for _, member in pairs(charObjs) do
+    for _, charMember in pairs(charObjs) do
+        local member = Guild.members[charMember.name];
         local dkp = member.dkp[raid];
 
         if dkp.entries == nil then member.dkp[raid].entries = {} end

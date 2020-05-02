@@ -92,7 +92,15 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             PDKP:Print('BOSS KILL: ', self, event, arg1, arg2)
             Raid:BossKill(arg1, arg2)
         end,
-        ['']=function() end,
+        ['CHAT_MSG_SYSTEM']=function() -- Fired when yellow system text is presented.
+            if Defaults.debug then
+                Util:Debug('event name' .. tostring(event) .. 'arg1' .. tostring(arg1))
+
+                if arg1 and string.find(arg1, 'has been reset') ~= nil then
+                    print('Found a reset, boss!')
+                end
+            end
+        end,
         ['']=function() end,
     }
 
@@ -135,20 +143,10 @@ function PDKP:OnInitialize(event, name)
     PDKP:InitializeDatabases();
 
     -----------------------------
-    -- Register Communications --
-    -----------------------------
-
---    Comms:RegisterCommCommands()
-
-    -----------------------------
     --  Officer Raid Control   --
     -----------------------------
 
     Setup:dkpOfficer()
-end
-
-function PDKP:InitializeMinimap()
-    Minimap:Register("pdkpMinimapDB", myLDB, savedVarTable)
 end
 
 function PDKP:InitializeGuildData()
@@ -161,6 +159,10 @@ function PDKP:InitializeGuildData()
 
     if not Comms.commsRegistered then
         Comms:RegisterCommCommands()
+    end
+
+    if not Defaults.checked_addon_version then
+        return Comms:SendCommsMessage('pdkpVersion', 'GUILD', Defaults.addon_version, nil, 'BULK', nil)
     end
 end
 
@@ -229,30 +231,34 @@ function PDKP:HandleSlashCommands(msg, item)
     -- pdkp hide - Hides the GUI
 
     if string.len(msg) == 0 then
-        if GUI.shown then
-        return GUI:Hide()
-        else PDKP:Show()
+        if GUI.shown then return GUI:Hide()
+        else return PDKP:Show()
         end
-    elseif msg == 'show' then
-        return PDKP:Show()
-    elseif msg == 'hide' then
-        return GUI:Hide()
-    end
-
-    if msg == 'shroud' then
-        return PDKP:MessageRecieved('shroud', Util:GetMyName())
     end
 
     local splitMsg, name = strsplit(' ', msg)
 
-    if splitMsg == 'report' then
-        local dkp = DKP:GetPlayerDKP(name)
-        if dkp == 0 then
-            PDKP:Print(name .. ' has 0 dkp or was not found')
-        else
-            PDKP:Print(name .. ' has: ' .. dkp .. ' DKP')
-        end
-    end
+    local safeFuncs = {
+        ['show']=function() return PDKP:Show() end,
+        ['hide']=function() return GUI:Hide() end,
+        ['shroud']=function() return PDKP:MessageRecieved('shroud', Util:GetMyName()) end,
+        ['']=function() end,
+    }
+
+    local splitFuncs = {
+        ['report']=function()
+            local dkp = DKP:GetPlayerDKP(name)
+            if dkp == 0 then
+                PDKP:Print(name .. ' has 0 dkp or was not found')
+            else
+                PDKP:Print(name .. ' has: ' .. dkp .. ' DKP')
+            end
+        end,
+    }
+
+    if safeFuncs[msg] then return safeFuncs[msg]() end
+    if splitFuncs[splitMsg] then return splitMsg[msg]() end
+
 
     if msg == 'pdkpTestWho' then
         SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
@@ -296,7 +302,7 @@ function PDKP:HandleSlashCommands(msg, item)
     end
 
     if msg == 'bossKill' then
-        return Raid:BossKill(663, 'Lucifron');
+        return Raid:BossKill(669, 'Sulfuron Harbinger');
     end
 
     if msg == 'classes' then
@@ -380,6 +386,21 @@ function PDKP:Show()
 
     Raid:GetLockedInfo()
 
+end
+
+function PDKP:CheckForUpdate(version)
+    local myMajor, myMinor, myPatch = strsplit('.',Defaults.addon_latest_version);
+    local theirMajor, theirMinor, theirPatch = strsplit('.', version)
+    myMajor, myMinor, myPatch = tonumber(myMajor), tonumber(myMinor), tonumber(myPatch)
+    theirMajor, theirMinor, theirPatch = tonumber(theirMajor), tonumber(theirMinor), tonumber(theirPatch)
+    local hasUpdate = theirMajor > myMajor or theirMinor > myMinor or theirPatch > myPatch
+    if hasUpdate then
+        Defaults.addon_latest_version = version;
+        if not Defaults.checked_addion_version then
+            Defaults.checked_addion_version = true
+            PDKP:Print("Your version of PantheonDKP is out-of-date.\n The newest version is available for download through CurseForge or the Twitch app.")
+        end
+    end
 end
 
 -----------------------------

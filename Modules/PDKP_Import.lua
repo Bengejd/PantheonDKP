@@ -125,7 +125,6 @@ function Import:AcceptData(reqData)
        pdkp_dkp_scrollbar_Update()
        pdkp_dkp_table_filter()
        GUI:pdkp_dkp_table_sort('dkpTotal')
-       GUI.pushFrame:Hide()
    end
 
     PDKP:Print("A DKP push has completed")

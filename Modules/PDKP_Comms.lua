@@ -33,7 +33,8 @@ local GUILD_COMMS = {
     ['pdkp_placeholder']=true,
     ['pdkpPushReceive'] = true, -- Officer check
     ['pdkpEntryDelete'] = true, -- Officer check
-    ['pdkpSyncRes']=true
+    ['pdkpSyncRes']=true,
+    ['pdkpVersion']=true,
 }
 
 Comms.commsRegistered = false
@@ -180,6 +181,7 @@ function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
             PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
             Import:AcceptData(message)
         end,
+        ['pdkpVersion']= function () return PDKP:CheckForUpdate(message) end
     }
     local func = guildFunc[prefix]
     if func then return func() end

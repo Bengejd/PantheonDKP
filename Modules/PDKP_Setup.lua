@@ -653,19 +653,22 @@ function Setup:dkpOfficer()
 end
 
 function Setup:OfficerWindow()
-    if core.canEdit == false or not Raid:IsInRaid() or not Raid:IsAssist() then
+    if not Raid:IsInRaid() or not Raid:IsAssist() then
         return Util:Debug(
             'Not creating officer window:' ..
-            ' Edit: ' .. tostring(core.canEdit) ..
             ' InRaid: ' .. tostring(Raid:IsInRaid()) ..
             ' IsAssist: ' .. tostring(Raid:IsAssist())
         )
     end
 
-    if _G['pdkpOfficerFrame'] then return end;
+    local officerFrame = _G['pdkpOfficerFrame']
+
+    if officerFrame then
+        if not officerFrame:IsShown() then officerFrame:Show() end
+        return
+    end; -- we've initialized it already
 
     if not GUI.pdkp_frame then -- We haven't initialized the frame yet.
-
         PDKP:Show()
         GUI:Hide()
     end
@@ -681,8 +684,16 @@ function Setup:OfficerWindow()
     mainFrame:SetFrameLevel(1);
     mainFrame:SetToplevel(true)
 
-    local closeButton = mainFrame.CloseButton
-    closeButton:SetEnabled(false)
+    local officerButton = CreateFrame("Button", 'pdkpOfficerButton', RaidFrame, 'UIPanelButtonTemplate')
+    officerButton:SetHeight(30);
+    officerButton:SetWidth(80);
+    officerButton:SetText('Raid Tools')
+    officerButton:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+    officerButton:SetScript('OnClick', function()
+        mainFrame:Show()
+    end)
+
+
 
     GUI.OfficerFrame = mainFrame
 
@@ -714,6 +725,9 @@ function Setup:OfficerWindow()
             for key, rMember in pairs(raidRoster) do
                 for _, officer in pairs(Guild.officers) do
                     if officer.name == rMember.name then PromoteToAssistant('raid' .. key) end
+                end
+                for _, ClassLead in pairs(Guild.classLeaders) do
+                    if ClassLead.name == rMember.name then PromoteToAssistant('raid' .. key) end
                 end
             end
         end
@@ -845,7 +859,8 @@ function Setup:OfficerWindow()
     end
 
     mainFrame:SetScript('OnHide', function() toggleKids(false) end)
-    mainFrame:SetScript('OnShow', function() toggleKids(true) end)
+    mainFrame:SetScript('OnShow', function()
+        toggleKids(true) end)
 
     GUI.officerInterfaceFrame = mainFrame;
 end
