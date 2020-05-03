@@ -212,7 +212,7 @@ function Util:displayTime(timeInSeconds)
     local hours = math.floor(math.fmod(timeInSeconds, 86400)/3600)
     local minutes = math.floor(math.fmod(timeInSeconds,3600)/60)
     local seconds = math.floor(math.fmod(timeInSeconds,60))
-    return format("%dD%2d Hr %2d Min",days,hours,minutes)
+    return format("%dD:%2dHr:%2dMin",days,hours,minutes)
 end
 
 --[[
