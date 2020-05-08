@@ -381,6 +381,10 @@ end
 function DKP:ChangeDKPSheets(raid, noUpdate)
     if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
 
+    if dkpDB.currentDB ~= raid then
+        print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
+    end
+
     dkpDB.currentDB = raid;
 
     GUI:GetTableDisplayData()
@@ -391,8 +395,6 @@ function DKP:ChangeDKPSheets(raid, noUpdate)
     end
 
     GUI:ClearSelected()
-
-    print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
 end
 
 function DKP:GetPlayerDKP(name)

@@ -129,6 +129,9 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
+    if Util:GetMyName() == 'Karenbaskins' then return end  -- Disable messages from Karen during development
+
+
     local transmitData = Comms:DataEncoder(data)
 
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
@@ -194,7 +197,7 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
-            if Defaults:SyncInRaid() == false then return end  -- Make sure we can sync while in the raid
+            if Defaults:SyncInRaid() == false or Util:GetMyName() == 'Karenbaskins' then return end  -- Make sure we can sync while in the raid
             Guild:UpdateLastSync(message) -- message contains the lastSync time.
             PDKP:Print(sender .. ' has sent a DKP sync request. Preparing sync data now, this may take a few minutes...')
             Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
