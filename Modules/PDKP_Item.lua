@@ -92,7 +92,7 @@ item.priority = {
     ['Helm of the Lifegiver'] =  'MS > OS',
     ['Manastorm Leggings'] =  'MS > OS',
     ['Ring of Spell Power'] =  'Mage = Warlock = Druid (Boom) = Shadow Priest > MS > OS',
-    ['Robe of Volatile Power'] = 'Mage = Warlock = Druid (Boom) > Paladin',
+    ['Robe of Volatile Power'] = 'Mage = Warlock = Druid (Boom) = Paladin',
     ['Salamander Scale Pants'] =  'Druid (Resto) = Paladin',
     ['Sorcerous Dagger'] =  'MS > OS',
     ['Wristguards of Stability'] =  'Druid (Feral) = Warrior (DPS)',
