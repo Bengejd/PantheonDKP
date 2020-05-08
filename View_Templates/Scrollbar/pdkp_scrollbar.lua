@@ -168,7 +168,6 @@ end
 
 -- Runs all of the initializing methods for the scroll bar
 function pdkp_init_scrollbar()
-
     GUI:GetTableDisplayData()
     pdkp_setup_scrollbar_cols()
     pdkp_dkp_scrollbar:Show()

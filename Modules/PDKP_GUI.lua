@@ -593,7 +593,7 @@ function GUI:UpdateEasyStats()
 
     local charInfoText = charName .. " | " .. char_dkp .. " DKP"
 
-    if (core.defaults.debug) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
+    if (Defaults:IsDebug()) then charInfoText = "Pamplemousse" .. " | " .. '9999' .. " DKP" end
 
     getglobal("pdkp_charInfo"):SetText(charInfoText);
 
@@ -674,7 +674,7 @@ function UpdatePushBar(arg, sent, total)
     local statusbar = GUI.pushbar
     local currVal = statusbar:GetValue()
 
-    if Defaults.debug then
+    if Defaults:IsDebug() then
         if currVal ~= percentage then
             local _, _, server_time, _ = Util:GetDateTimes()
             Util:Debug('Time elapsed: ' .. Util:CalculateTimeDifference(DKP.lastSync, server_time))
