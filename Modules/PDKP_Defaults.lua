@@ -8,6 +8,7 @@ local Item = core.Item;
 local Util = core.Util;
 local PDKP = core.PDKP;
 local Guild = core.Guild;
+local Raid = core.Raid;
 local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.import;
@@ -21,7 +22,8 @@ local pdkpSettingsDefaults = {
         silent = false,
         debug = false,
         sortBy = nil,
-        sortDir = nil
+        sortDir = nil,
+        syncInRaid = false,
     }
 }
 
@@ -88,7 +90,16 @@ function core.defaults:ToggleDebugging()
     PDKP:Print('Debugging Enabled: ' .. tostring(SettingsDB.debug))
 end
 
+function core.defaults:SyncInRaid()
+    local syncInRaid = SettingsDB.syncInRaid
+    local isInInstance = Raid:IsInInstance()
 
+    if isInInstance then -- We're in an instance, do what they have it set to.
+        return syncInRaid -- (Defaults to false)
+    else -- Not in an instance, don't care about their preference.
+        return true
+    end
+end
 
 core.GUI = {
     shown = false;

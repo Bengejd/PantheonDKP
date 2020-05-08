@@ -296,6 +296,10 @@ function PDKP:HandleSlashCommands(msg, item)
         Officer:Show()
     end
 
+    if msg == 'raidChecker' then
+        Raid:IsInInstance()
+    end
+
     if msg == 'sortHistory' then
         DKP:SortHistory()
     end

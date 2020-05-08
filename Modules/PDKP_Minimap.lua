@@ -29,6 +29,8 @@ local clickText = Util:FormatFontTextColor(info, 'Click') .. ' to open PDKP. '
 local shiftClickText = Util:FormatFontTextColor(info, 'Shift-Click') ..  ' to request a push.'
 local altShiftText = Util:FormatFontTextColor(info, 'Alt-Shift-Click') .. ' to wipe your tables.'
 local shiftRightClickText = Util:FormatFontTextColor(info, 'Right-Shift-Click') .. ' to open Officer push'
+local rightClickText = Util:FormatFontTextColor(info, 'Right-Click') .. '  to open settings'
+local disableSyncInRaidText = Util:FormatFontTextColor(warning, 'Push requests disabled in instances')
 
 local minimapDBDefaults = {
     profile = {
@@ -55,16 +57,18 @@ function Minimap:InitMapDB()
             tooltip:AddLine('Sync Status: '..Minimap:GetDKPState(), 1, 1, 1, 1)  -- text, r, g, b, flag to wrap text.
             tooltip:AddLine(' ', 1, 1, 1, 1)
             tooltip:AddLine(clickText, 1, 1, 1)
+            tooltip:AddLine(rightClickText, 1,1,1)
 
             Raid:GetLockedInfo()
 
             local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
 
-            if canRequestSync then
+            if Defaults:SyncInRaid() == false then
+                tooltip:AddLine(disableSyncInRaidText, 1, 1, 1)
+            elseif canRequestSync then
                 tooltip:AddLine(shiftClickText, 1, 1, 1)
             else
-                local nextSyncText = 'Next ' ..
-                        Util:FormatFontTextColor(info, 'Sync') ..
+                local nextSyncText = 'Next ' .. Util:FormatFontTextColor(info, 'Sync') ..
                         ' available in: ' .. tostring(nextSyncAvailable) .. ' min(s).'
                 tooltip:AddLine(nextSyncText, 1, 1, 1)
             end
@@ -129,9 +133,12 @@ function Minimap:HandleIconClicks(buttonType)
             Util:Debug('ShiftAlt click')
         elseif hasShift then
             local canRequestSync, minsSinceSync, nextSyncAvailable = DKP:CanRequestSync()
-            if canRequestSync then
+            if canRequestSync and Defaults:SyncInRaid() then
                 local _, _, server_time, _ = Util:GetDateTimes()
+                DKP.lastSync = server_time -- Will prevent people from sending multiple requests accidentally.
                 Comms:SendCommsMessage('pdkpSyncReq', server_time, 'GUILD', nil, 'BULK', nil)
+            elseif Defaults:SyncInRaid() == false then
+                PDKP:Print('Syncing in raids is currently disabled. You can change this in the PDKP settings.')
             else
                 PDKP:Print('Next sync available in: ' .. tostring(nextSyncAvailable) .. ' mins')
             end
@@ -142,8 +149,12 @@ function Minimap:HandleIconClicks(buttonType)
                 PDKP:Show()
             end
         end
-    elseif buttonType == 'RightButton' and hasShift and core.canEdit then
-        StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
+    elseif buttonType == 'RightButton' then
+        if hasShift and core.canEdit then
+            StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
+        else -- No modifiers
+            print('Opening PDKP Settings')
+        end
     end
 end
 

@@ -13,6 +13,9 @@ TRY TO FIX:
     TODO: Throttle the shrouding window updates, so that people don't get lost / overwritten.
     TODO: Fix Shrouding window so that it doesn't fuck with the size of the window.
     TODO: Re-grab DKP info when reloading the Scroll-bar info, cause it's not updating the value visually on officer side.
+    TODO: Allow the Raid-Invite interface to be visible to users when they are outside of a raid.
+    TODO: Lock down debugging mode for officers only.
+    TODO: Allow blowing of sync in raids to be a setting.
 
 NICE TO HAVES:
     TODO: Whisper command !pdkp that will send back the player's DKP totals.
@@ -21,6 +24,10 @@ NICE TO HAVES:
     TODO: Options table for changing Raid DKP amounts.
     TODO: Add an edit box in the settings window, that takes you to the issue tracker.
     TODO: Roster list in addon screen.
+    TODO: List the amounts of each class that are currently in the raid (for easier deduction about who is missing).
+        TODO: Make this a tab within the Raid Interface.
+    TODO: Allow people to turn off pushes (if they are experiencing a large amount of errors).
+
 
 MAKING IT MORE PUBLIC:
     TODO: Enable PUGS

@@ -2,12 +2,8 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
-local DKP = core.DKP;
-local GUI = core.GUI;
 local Util = core.Util;
 local PDKP = core.PDKP;
-local Guild = core.Guild;
-local Shroud = core.Shroud;
 local Defaults = core.defaults;
 
 local classes = {
@@ -34,6 +30,7 @@ function Util:GetMyName()
     return pName;
 end
 
+-- Returns the player's class
 function Util:GetMyClass()
     return UnitClass("PLAYER");
 end
@@ -51,16 +48,18 @@ function Util:RemoveColorFromname(name)
     return fName
 end
 
--- Returns all classes in WoW Classic.
+-- Returns all Alliance classes in WoW Classic.
 function Util:GetAllClasses()
     return classes;
 end
 
+-- Pauses execution while this is waiting the appropriate amount of seconds.
 function Util:Wait(seconds)
     local start = tonumber(date('%S'))
     repeat until tonumber(date('%S')) > start + seconds
 end
 
+-- Generic print function that colors message as red
 function Util:ThrowError(msg, debug)
     local warning = 'E71D36'
     local errorMsg = Util:FormatFontTextColor(warning, 'Error!!! ' .. msg)
@@ -68,15 +67,18 @@ function Util:ThrowError(msg, debug)
     if debug then Util:Debug(errorMsg) else PDKP:Print(errorMsg) end
 end
 
+-- Utility function to return a particular classes class color.
 function Util:GetClassColor(class)
     return class_colors[class]
 end
 
+-- Utility function to color a players name based on their class.
 function Util:GetClassColoredName(name, class)
     local classColor = Util:GetClassColor(class)
     return Util:FormatFontTextColor(classColor, name)
 end
 
+-- Utility function to color your name based on your class.
 function Util:GetMyNameColored()
     local name = Util:GetMyName();
     local class = Util:GetMyClass();
@@ -87,20 +89,21 @@ end
 -- Utility function that removes the server name from a characters string.
 function Util:RemoveServerName(name)
     if Util:IsEmpty(name) then return nil end;
-    -- Names come in with server attached e.g: ValhallaBank-Blaumeux (We gotta remove the server name)
+    -- Names come in with server attached e.g: XYZ-Blaumeux (We gotta remove the server name)
     local newName, _ = string.split('-', name)
     return newName
 end
 
+-- Utility function that provides all date & time variations that LUA & WoW have.
 function Util:GetDateTimes()
     local dDate = date("%m/%d/%y"); -- LUA implementation of date.
     local tTime = date('%r'); -- LUA implementation of time.
     local server_time = GetServerTime() -- WoW API of the server time.
     local datetime = time() -- LUA implementation of local machine time.
-    return dDate, tTime, server_time, datetime
+    return lDate, lTime, server_time, datetime
 end
 
--- Utility function to help determine if the string is empty or not.
+-- Utility function to help determine if the string is empty or nil.
 function Util:IsEmpty(string)
     return string == nil or string == '';
 end
@@ -152,6 +155,7 @@ function Util:FormatFontTextColor(color_hex, text)
     return "|cff" .. color_hex .. text .. "|r"
 end
 
+-- Returns the tableIndex of a table key.
 function Util:FindTableIndex(table, key)
     for k, v in ipairs(table) do
         if v == key then return k end
@@ -172,6 +176,7 @@ function Util:Debug(string)
     end
 end
 
+-- Calculates the difference in timestamps, and returns it to you in minutes and seconds.
 function Util:CalculateTimeDifference(startTime, endTime)
     local difference = endTime - startTime -- in seconds
     local mins = math.floor(difference / 60) -- mins
@@ -206,6 +211,7 @@ function Util:PrintTable(tt, indent)
     end
 end
 
+-- Displays timestamps in D:H:M format.
 function Util:displayTime(timeInSeconds)
     local math = math
     local days = math.floor(timeInSeconds/86400)
@@ -215,12 +221,7 @@ function Util:displayTime(timeInSeconds)
     return format("%dD:%2dHr:%2dMin",days,hours,minutes)
 end
 
---[[
-Ordered table iterator, allow to iterate on the natural order of the keys of a
-table.
-
-Example:
-]]
+-- OrderedNext helper function
 function __genOrderedIndex( t )
     local orderedIndex = {}
     for key, _ in pairs(t) do
@@ -234,6 +235,7 @@ function __genOrderedIndex( t )
     return orderedIndex
 end
 
+-- OrderedPairs helper function
 function orderedNext(t, state)
     -- Equivalent of the next function, but returns the keys in the alphabetic
     -- order. We use a temporary ordered key table that is stored in the
@@ -263,8 +265,8 @@ function orderedNext(t, state)
     return
 end
 
+-- Equivalent of the pairs() function on tables. But this allows you to iterate in order.
 function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
-    -- in order
+
     return orderedNext, t, nil
 end

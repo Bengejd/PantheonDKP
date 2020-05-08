@@ -127,6 +127,9 @@ function Import:AcceptData(reqData)
        GUI:pdkp_dkp_table_sort('dkpTotal')
    end
 
+    if reqData.syncFrom then
+        return PDKP:Print("A DKP push from " .. reqData.syncFrom .. ' has completed')
+    end
     PDKP:Print("A DKP push has completed")
 end
 
