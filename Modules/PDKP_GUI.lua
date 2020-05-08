@@ -581,7 +581,8 @@ end
 
 -- Type can be 'shroud' or 'roll'
 function GUI:QuickCalculate(type)
-    local member = GUI.selected[GUI.selected[1]]; -- Ugly way of doing this...
+    local selectMember = GUI.selected[GUI.selected[1]]; -- Ugly way of doing this...
+    local member = Guild.members[selectMember.name];
     GUI.pdkp_dkp_amount_box:SetText('-' .. member:QuickCalculate(type, DKP.dkpDB.currentDB));
 end
 
