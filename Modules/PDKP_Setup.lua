@@ -119,10 +119,19 @@ end
 
 function Setup:ShroudingWindow()
     local sf = getglobal('pdkp_shrouding_window');
-    sf:SetPoint('BOTTOMLEFT', 0, 0);
+
+
+    sf:SetClampedToScreen(true)
+
+    sf:RegisterForDrag("LeftButton")
+
+    sf:SetResizable(true)
 
     sf:SetWidth(200);
     sf:SetHeight(200);
+
+    sf:SetMinResize(200,200);
+    sf:SetMaxResize(200,200);
 
     sf:SetScale(1) -- Just incase. This might fix the scaling issue that Mozz has?
 
@@ -157,6 +166,8 @@ function Setup:ShroudingWindow()
     scrollcontainer.frame:Hide()
     Shroud.window = sf;
     Shroud.window.scroll = scroll;
+
+    Shroud:SetWindowPosition()
 end
 
 function Setup:PrioList()

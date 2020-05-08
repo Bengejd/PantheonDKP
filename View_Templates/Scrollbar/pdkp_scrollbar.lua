@@ -53,19 +53,18 @@ end
 -- Sorts the table based on name[1], class[2] or dkp[3] values.
 -- Seems to be an issue with displaying class & dkp, some values are duplicated in the list...
 function GUI:pdkp_dkp_table_sort(sortBy)
-
-    if core.sortBy == sortBy then
-        core.sortDir = 'DESC';
-        core.sortBy = nil;
+    if core.defaults.db.sortBy == sortBy then
+        core.defaults.db.sortDir = 'DESC';
+        core.defaults.db.sortBy = nil;
     else
-        core.sortDir = 'ASC';
-        core.sortBy = sortBy;
+        core.defaults.db.sortBy = sortBy;
+        core.defaults.db.sortDir = 'ASC';
     end
 
     local function compare(a,b)
         if a == 0 and b == 0 then return end
 
-        if core.sortDir == 'ASC' then
+        if core.defaults.db.sortDir == 'ASC' then
             return a[sortBy] > b[sortBy]
         else
             return a[sortBy] < b[sortBy]
@@ -75,7 +74,7 @@ function GUI:pdkp_dkp_table_sort(sortBy)
     local currentRaid = DKP:GetCurrentDatabase()
 
     local function compareDKP(a,b)
-        if core.sortDir == 'DESC' then
+        if core.defaults.db.sortDir == 'DESC' then
             return a.dkp[currentRaid].total > b.dkp[currentRaid].total
         else
             return a.dkp[currentRaid].total < b.dkp[currentRaid].total
@@ -87,7 +86,6 @@ function GUI:pdkp_dkp_table_sort(sortBy)
     else
         table.sort(tableData, compare) -- call the compare function on table PDKP.data
     end
-
 
     pdkp_dkp_scrollbar_Update()
 end
@@ -172,10 +170,7 @@ end
 function pdkp_init_scrollbar()
 
     GUI:GetTableDisplayData()
-
     pdkp_setup_scrollbar_cols()
-
-    GUI:pdkp_dkp_table_sort('dkpTotal')
     pdkp_dkp_scrollbar:Show()
     pdkp_dkp_scrollbar_Update()
     pdkp_dkp_table_filter()

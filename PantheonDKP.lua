@@ -93,7 +93,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             Raid:BossKill(arg1, arg2)
         end,
         ['CHAT_MSG_SYSTEM']=function() -- Fired when yellow system text is presented.
-            if Defaults.debug then
+            if Defaults:IsDebug() then
                 Util:Debug('event name' .. tostring(event) .. 'arg1' .. tostring(arg1))
 
                 if arg1 and string.find(arg1, 'has been reset') ~= nil then
@@ -148,6 +148,7 @@ function PDKP:OnInitialize(event, name)
 
     Setup:dkpOfficer()
     item:ToolTipInit()
+
 end
 
 function PDKP:InitializeGuildData()
@@ -156,6 +157,7 @@ function PDKP:InitializeGuildData()
     Guild:GetGuildData(false);
     DKP:VerifyTables()
     PDKP:BuildAllData();
+    core.defaults:InitDB();
     core.initialized = true
 
     if not Comms.commsRegistered then
@@ -314,13 +316,13 @@ function PDKP:HandleSlashCommands(msg, item)
         return GUI:CreateTimer()
     end
 
-    if msg == 'pdkp_reset_all_db' and core.defaults.debug then
+    if msg == 'pdkp_reset_all_db' and core.Defaults:IsDebug() then
         DKP:ResetDB()
         Guild:ResetDB()
     end
 
     if msg == 'enableDebugging' then
-        core.defaults.debug = true
+        core.defaults:ToggleDebugging()
     end
 
     if msg == 'validateTables' then

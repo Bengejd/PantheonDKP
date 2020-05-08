@@ -344,7 +344,7 @@ end
 function Raid:AnnounceLoot()
     local shouldContinue = false
 
-    if Defaults.debug then shouldContinue = true
+    if Defaults:IsDebug() then shouldContinue = true
     elseif Raid:isMasterLooter() and Raid:IsInRaid() then
         shouldContinue = true
     else

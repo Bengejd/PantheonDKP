@@ -12,8 +12,18 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.import;
 
-
 local englishFaction, _ = UnitFactionGroup("PLAYER");
+
+local SettingsDB;
+
+local pdkpSettingsDefaults = {
+    profile = {
+        silent = false,
+        debug = false,
+        sortBy = nil,
+        sortDir = nil
+    }
+}
 
 PDKP.data = {}
 PDKP.raidData = {}
@@ -24,44 +34,21 @@ core.filterOffline = nil
 core.pdkp_frame = nil;
 core.canEdit = false;
 
-core.GUI = {
-    shown = false;
-    sortBy = nil;
-    sortDir = 'ASC';
-    pdkp_frame = nil;
-    lastEntryClicked = nil;
-    sliderVal = 1;
-    hasTimer = false;
-}
-
 core.defaults = {
     -- ADDON INFO
     addon_version = GetAddOnMetadata('PantheonDKP', "Version"),
     addon_name = 'PantheonDKP',
     bank_name = 'Pantheonbank',
-    silent = false,
     addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version"),
     checked_addion_version = false,
 
-    debug = false,
+    debug = true,
     no_broadcast = false,
-    debug_dkp = false;
-    migrate = false, -- whether this version requires a migration or not.
-
 
     -- PLAYER INFO
     playerUID = UnitGUID("PLAYER"), -- Unique Blizzard Player ID
     isInGuild = IsInGuild(), -- Boolean
     faction = englishFaction, -- Alliance or Horde
-
-    -- VIEW TABLE INFO
-    displayTable = { -- Data that is currently being displayed to the user.
-        data = {}, -- name, class, dkp
-        activeFilters = {},
-        sortDir = 'ASC',
-        sortBy = 'name',
-    },
-
 
     -- UTILTIY INFO
     classes = { -- Utility table of the available classes for that player's faction.
@@ -77,6 +64,43 @@ core.defaults = {
         ["Warrior"] = { r = 0.78, g = 0.61, b = 0.43, hex = "C79C6E" }
     }
 }
+
+-- Creates and assigns the Guild Database.
+function core.defaults:InitDB()
+    Util:Debug('DefaultsDB init');
+
+    core.defaults.db = LibStub("AceDB-3.0"):New("pdkp_settingsDB", pdkpSettingsDefaults, true);
+    SettingsDB = core.defaults.db.profile;
+    core.defaults.db = SettingsDB;
+    core.defaults.SettingsDB = SettingsDB
+end
+
+function core.defaults:IsDebug()
+    if SettingsDB then
+       return SettingsDB.debug;
+    end
+    return false;
+end
+
+function core.defaults:ToggleDebugging()
+    SettingsDB.debug = not SettingsDB.debug
+
+    PDKP:Print('Debugging Enabled: ' .. tostring(SettingsDB.debug))
+end
+
+
+
+core.GUI = {
+    shown = false;
+    sortBy = nil;
+    sortDir = 'ASC';
+    pdkp_frame = nil;
+    lastEntryClicked = nil;
+    sliderVal = 1;
+    hasTimer = false;
+}
+
+
 
 core.raids = {
     'Onyxia\'s Lair',

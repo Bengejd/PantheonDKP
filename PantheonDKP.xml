@@ -616,8 +616,6 @@
 						local amountVal = amountBox:GetText();
 						if amountVal == nil or amountVal == 0 or amountVal == '' then return end;
 						pdkp_template_function_call('pdkp_dkp_update');
-
---						amountBox:SetText('');
 					</OnClick>
 				</Scripts>
 			</Button>

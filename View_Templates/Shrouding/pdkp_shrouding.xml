@@ -13,7 +13,7 @@
         <Size><AbsDimension x="200" y="200"/></Size>
         <Anchors>
             <Anchor point="CENTER"/>
-            <Offset><AbsDimension x="300" y="0"/></Offset>
+            <Offset><AbsDimension x="200" y="200"/></Offset>
         </Anchors>
         <Backdrop name="$parentBackdrop" bgFile="Interface\TutorialFrame\TutorialFrameBackground"
                   edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
@@ -109,7 +109,10 @@
         <Scripts>
             <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>
             <OnDragStart>self:StartMoving()</OnDragStart>
-            <OnDragStop>self:StopMovingOrSizing()</OnDragStop>
+            <OnDragStop>
+                self:StopMovingOrSizing()
+                ShroudWindowPosChanged()
+            </OnDragStop>
         </Scripts>
     </Frame>
 

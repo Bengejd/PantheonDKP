@@ -90,6 +90,8 @@
             <OnShow>
                     pdkp_dkp_scrollbar_Update();
             </OnShow>
+            <OnLoad>
+            </OnLoad>
         </Scripts>
     </ScrollFrame>
 

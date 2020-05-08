@@ -432,7 +432,7 @@ function DKP:GetHighestDKP()
            end
        end
     end
-    if maxDKP == 0 and Defaults.debug then return 50 end;
+    if maxDKP == 0 and Defaults:IsDebug() then return 50 end;
     return maxDKP;
 end
 

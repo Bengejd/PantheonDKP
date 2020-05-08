@@ -166,7 +166,7 @@ end
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
 function Util:Debug(string)
-    if core.defaults.debug and not Defaults.silent then
+    if Defaults:IsDebug() and not Defaults.silent then
         local info = 'F4A460'
         PDKP:Print(Util:FormatFontTextColor(info, string))
     end
@@ -181,7 +181,7 @@ end
 
 -- Debugging utility function that prints what's inside of a table.
 function Util:PrintTable(tt, indent)
-    if not Defaults.debug then return end;
+    if not Defaults:IsDebug() then return end;
 
     local done = {}
     indent = 0 or 0

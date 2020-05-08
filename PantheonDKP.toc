@@ -5,7 +5,7 @@
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap
+## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap, pdkp_settingsDB
 
 #@no-lib-strip@
 embed.xml
@@ -39,8 +39,6 @@ Modules\PDKP_Minimap.lua
 
 View_Templates\Shrouding\pdkp_shrouding.xml
 View_Templates\Scrollbar\pdkp_scrollbar.xml
-View_Templates\Invites\pdkp_invites.xml
-View_Templates\DKP-adjustments\adjustments.xml
 
 ## This should be last in the file, so that the previous modules had time to load first.
 PantheonDKP.xml

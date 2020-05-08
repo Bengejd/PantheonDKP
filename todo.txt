@@ -1,35 +1,41 @@
-OOP:
-    - Entries should be singular objects.
-    - Members should be an object with associated functions attached as well.
+ESSENTIALS:
+    TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
+    TODO: Settings menu when mini-map is right-clicked.
+        TODO: Allow Disable print messages.
+    TODO: Disable pushes when you are in an instance / raid group.
+    TODO: Disable requests while you are in an instance / raid group.
+    TODO: Save positioning of the shrouding window through states.
+    TODO: BUG: Fix the visual issue with dkp updates on boss kills not updating the underlying values of the scroll table.
+    TODO: Save shrouding window positioning
+    TODO: Change Officer Interface to say that Class Leaders get promoted too.
 
-TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
-TODO: Enable PUGS
-TODO: Options table for changing Raid DKP amounts.
-TODO: Decay (No call / no-show: 20%)
-TODO: Excused absence: 15%
+TRY TO FIX:
+    TODO: Throttle the shrouding window updates, so that people don't get lost / overwritten.
+    TODO: Fix Shrouding window so that it doesn't fuck with the size of the window.
+    TODO: Re-grab DKP info when reloading the Scroll-bar info, cause it's not updating the value visually on officer side.
 
-TODO: Settings menu when mini-map is right-clicked.
-TODO: Disable print messages.
-TODO: Save shrouding window positioning
-TODO: Promote Class Leaders to the promote button
-TODO: Whisper command !pdkp that will send back the player's DKP totals.
-TODO: Make PDKP More Generic, so that other guilds can use it.
-    - Change command to bring it up (GM Only)
-    - Change Name
-    - Change Logo
-    - Change bank stuff
+NICE TO HAVES:
+    TODO: Whisper command !pdkp that will send back the player's DKP totals.
+    TODO: Decay (No call / no-show: 20%)
+    TODO: Excused absence: 15%
+    TODO: Options table for changing Raid DKP amounts.
+    TODO: Add an edit box in the settings window, that takes you to the issue tracker.
+    TODO: Roster list in addon screen.
 
-Table Filters:
-	- Show Pugs
-
-- Options
-	- On time bonus DKP: 10 (int or %)
-	- Signup bonus DKP: 10(int or %)
-	- Boss kill DKP 10(int or %)
-	- Benched DKP: (int or %)
-
-- Decay
-	- Item Win: 10% (int or %)
-	- Shroud: 50% (int or %)
-	- No call / No show: 20% (int or %)
-	- Absence (Excuse): 15%
+MAKING IT MORE PUBLIC:
+    TODO: Enable PUGS
+    TODO: Make PDKP More Generic, so that other guilds can use it.
+    TODO: Allow name change
+    TODO: Allow logo change
+    TODO: Change who the bank alt is
+    TODO: Setup screen for new guilds.
+    TODO: Change command to bring it up (GM ONLY)
+    TODO: Show Pugs in table filters
+    TODO: On time bonus DKP: 10 (int or %)
+    TODO: Signup bonus DKP: 10(int or %)
+    TODO: Boss kill DKP 10(int or %)
+    TODO: Benched DKP: (int or %)
+    TODO: Item Win: 10% (int or %)
+    TODO: Shroud: 50% (int or %)
+    TODO: No call / No show: 20% (int or %)
+    TODO: Absence (Excuse): 15%

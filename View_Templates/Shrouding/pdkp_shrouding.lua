@@ -17,6 +17,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 Shroud.window = nil;
 
+Shroud.windowPosition = nil
+
 Shroud.shrouders = {
     names={},
     table={},
@@ -117,13 +119,14 @@ function Shroud:UpdateWindow()
         AddChildren(loserLabel, losers)
     end
 
-    Shroud.window:Show()
+    Shroud:SetWindowPosition()
 
+    Shroud.window:Show()
 end
 
 -- Updates the shrouding table to reflect the ML's DKP totals.
 function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to access this, ideally.
---    if Defaults.debug then Shroud.shrouders = testShrouders end
+--    if core.Defaults:IsDebug() then Shroud.shrouders = testShrouders end
     local shrouders = Shroud.shrouders
 
     local player = { name=playerName, dkpTotal=DKP:GetPlayerDKP(playerName) }
@@ -153,6 +156,25 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
         end
 
         core.Comms:SendShroudTable()
+    end
+end
+
+function ShroudWindowPosChanged()
+    Shroud.windowPosition = {
+        bottom=math.floor(Shroud.window:GetBottom() + 0.5),
+        left=math.floor(Shroud.window:GetLeft() + 0.5),
+    }
+end
+
+function Shroud:SetWindowPosition()
+    -- Might fix the shrouding window being huge?
+    if Shroud.windowPosition == nil then
+        Shroud.window:SetHeight(200);
+        Shroud.window:SetHeight(200);
+        Shroud.window:SetPoint('BOTTOMLEFT', 0, 0);
+    else
+        print('Found positioning set')
+        Shroud.window:SetPoint("BOTTOMLEFT", Shroud.windowPosition.left, Shroud.windowPosition.bottom)
     end
 end
 
