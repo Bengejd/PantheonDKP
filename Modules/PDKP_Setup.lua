@@ -120,7 +120,6 @@ end
 function Setup:ShroudingWindow()
     local sf = getglobal('pdkp_shrouding_window');
 
-
     sf:SetClampedToScreen(true)
 
     sf:RegisterForDrag("LeftButton")
@@ -875,6 +874,7 @@ function Setup:OfficerWindow()
 end
 
 function Setup:InterfaceOptions()
+
     local AceConfig = LibStub("AceConfig-3.0")
     local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
@@ -908,28 +908,77 @@ function Setup:InterfaceOptions()
         type = "group",
         args = {
             notificationGroup={
-                name="Notifications",
+                name="1. Notifications",
                 type="group",
                 inline= true,
                 args = {
                     Silent = {
-                        name = "Addon Messages",
+                        name = "Silent Messages",
                         type = "toggle",
                         desc="Enables / Disables all messages from the addon. Requires a reload when re-enabling",
-                        set = function(info,val) Defaults.SettingsDB.silent = val end,
+                        set = function(info,val) Defaults:TogglePrinting(val) end,
                         get = function(info) return Defaults.SettingsDB.silent end
                     },
                 }
             },
-            syncInRaid = {
-                name = "Sync In Raids",
-                desc = "When checked, you will receive merge and overwrite pushes within ",
-                type = "toggle",
-                set = function(info,val) Defaults.SettingsDB.syncInRaid = val end,
-                get = function(info) return Defaults.SettingsDB.syncInRaid end
+            SyncGroup={
+                name="2. Allow DKP syncs to occur in:",
+                type="group",
+                desc='This only controls merge / overwrite syncing. This will not affect DKP updates that occur during a raid.',
+                descStyle='inline',
+                inline= true,
+                args = {
+                    syncInPvP = {
+                        name = "Battlegrounds",
+                        desc = "Enable / Disable sync while in Battlegrounds",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.pvp = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.pvp end
+                    },
+                    syncInRaid = {
+                        name = "Raids",
+                        desc = "Enable / Disable sync while in Raid Instances",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.raids = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.raids end
+                    },
+                    syncInDungeons = {
+                        name = "Dungeons",
+                        desc = "Enable / Disable sync while in Dungeon Instances",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.dungeons = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.dungeons end
+                    },
+                    syncDesc = {
+                        name="These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.",
+                        type='description',
+                        fontSize ='medium'
+                    }
+                }
             },
+            adminGroup = nil,
         }
     }
+
+    if core.canEdit then
+       options.args.adminGroup = {
+           name='3. Officer',
+           type="group",
+           inline= true,
+           args = {
+               debugging = {
+                   name = "Addon Debugging",
+                   type = "toggle",
+                   desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
+                   set = function(info,val) Defaults:TogglePrinting(val) end,
+                   get = function(info) return Defaults.SettingsDB.debug end
+               },
+           }
+       }
+    end
+
     LibStub('AceConfigRegistry-3.0'):RegisterOptionsTable("PantheonDKP", options)
     AceConfigDialog:AddToBlizOptions('PantheonDKP')
+
+    Defaults.settings_complete = true
 end

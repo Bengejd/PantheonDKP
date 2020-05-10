@@ -174,7 +174,6 @@ end
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
     local guildFunc = {
         ['pdkpSyncRes'] = function()
-            if Defaults:SyncInRaid() == false then return end -- Make sure we can sync while in the raid
             Import:AcceptData(message)
         end,
         ['pdkpEntryDelete'] = function()
@@ -196,7 +195,9 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
-            if Defaults:SyncInRaid() == false or Util:GetMyName() == 'Karenbaskins' then return end  -- Make sure we can sync while in the raid
+            if Defaults:AllowSync() == false or Util:GetMyName() == 'Karenbaskins' then
+                return PDKP:Print('Ignoring Sync request while busy')
+            end  -- Make sure we can sync while in the raid
             Guild:UpdateLastSync(message) -- message contains the lastSync time.
             PDKP:Print(sender .. ' has sent a DKP sync request. Preparing sync data now, this may take a few minutes...')
             Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)

@@ -19,6 +19,8 @@ core.defaults = {
     bank_name = 'Pantheonbank',
     addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version"),
     checked_addion_version = false,
+    print_name = '|cff33ff99PDKP|r:',
+    settings_complete = false,
 
     debug = true,
     no_broadcast = false,
@@ -54,11 +56,10 @@ local pdkpSettingsDefaults = {
         debug = false,
         sortBy = nil,
         sortDir = nil,
-        syncInRaid = false,
         errors = false,
-        syncTypes = {
-            battlegrounds = false,
-            instances = false,
+        sync = {
+            pvp = false,
+            dungeons = false,
             raids = false
         }
     }
@@ -93,22 +94,31 @@ end
 
 function Defaults:ToggleDebugging()
     SettingsDB.debug = not SettingsDB.debug
-    PDKP:Print('Debugging Enabled: ' .. tostring(SettingsDB.debug))
+    print(Defaults.print_name .. ' Debugging Enabled: ' .. tostring(SettingsDB.debug))
 end
 
-function Defaults:SyncInRaid()
-    local syncInRaid = SettingsDB.syncInRaid
-    local isInInstance = Raid:IsInInstance()
-
-    if isInInstance then -- We're in an instance, do what they have it set to.
-        return syncInRaid -- (Defaults to false)
-    else -- Not in an instance, don't care about their preference.
-        return true
+function Defaults:AllowSync()
+    local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
+    if type == 'party' then
+        return SettingsDB.sync.dungeons
+    elseif type == 'raid' then
+        return SettingsDB.sync.raid
+    elseif type == 'pvp' then
+        return SettingsDB.sync.pvp
     end
+    return true;
 end
 
-function Defaults:DisablePrinting()
-    PDKP.Print = function() end
+function Defaults:TogglePrinting(val)
+    if val ~= nil then
+        if val then
+            PDKP.Print = function() end;
+        elseif Defaults.SettingsDB.silent ~= val and not val then
+            print('|cff33ff99PDKP|r: A reload is required for printing to be re-enabled');
+        end
+    end
+
+    Defaults.SettingsDB.silent = val
 end
 
 core.GUI = {

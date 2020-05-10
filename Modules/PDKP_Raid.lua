@@ -283,18 +283,27 @@ function Raid:MemberIsInRaid(name)
     return false
 end
 
+function Raid:IsInRaidInstance()
+    local _, type, difficultyIndex, maxPlayers = Raid:GetInstanceInfo()
+    return type ~= 'raid' and difficultyIndex >= 1;
+end
+
+function Raid:IsInBattleGrounds()
+    local _, type, _, _ = Raid:GetInstanceInfo()
+    return type ~= 'pvp'
+end
+
 function Raid:IsInInstance()
-    local _, type, difficultyIndex, _, _, _, _, _, _ = GetInstanceInfo()
-    return type ~= 'none' and difficultyIndex >= 1;
+    local _, type, difficultyIndex, maxPlayers = Raid:GetInstanceInfo()
+    return type ~= 'party' and difficultyIndex >= 1;
 end
 
 function Raid:GetInstanceInfo()
-
     local name, type, difficultyIndex, difficultyName, maxPlayers,
     dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
 
     -- if difficultyIndex is >= 1 then you're in an instance (5, 10 or 40 man)
-    print(name, type, difficultyIndex, difficultyName)
+    return name, type, difficultyIndex, maxPlayers
 end
 
 function Raid:GetLockedInfo()

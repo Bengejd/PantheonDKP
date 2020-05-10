@@ -30,7 +30,7 @@ local shiftClickText = Util:FormatFontTextColor(info, 'Shift-Click') ..  ' to re
 local altShiftText = Util:FormatFontTextColor(info, 'Alt-Shift-Click') .. ' to wipe your tables.'
 local shiftRightClickText = Util:FormatFontTextColor(info, 'Right-Shift-Click') .. ' to open Officer push'
 local rightClickText = Util:FormatFontTextColor(info, 'Right-Click') .. ' to open settings'
-local disableSyncInRaidText = Util:FormatFontTextColor(warning, 'Push requests disabled in instances')
+local disableSyncInRaidText = Util:FormatFontTextColor(warning, 'Push requests disabled')
 
 local AceConfig = LibStub('AceConfigRegistry-3.0')
 
@@ -65,7 +65,7 @@ function Minimap:InitMapDB()
 
             local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
 
-            if Defaults:SyncInRaid() == false then
+            if Defaults:AllowSync() == false then
                 tooltip:AddLine(disableSyncInRaidText, 1, 1, 1)
             elseif canRequestSync then
                 tooltip:AddLine(shiftClickText, 1, 1, 1)
@@ -135,11 +135,11 @@ function Minimap:HandleIconClicks(buttonType)
             Util:Debug('ShiftAlt click')
         elseif hasShift then
             local canRequestSync, minsSinceSync, nextSyncAvailable = DKP:CanRequestSync()
-            if canRequestSync and Defaults:SyncInRaid() then
+            if canRequestSync and Defaults:AllowSync() then
                 local _, _, server_time, _ = Util:GetDateTimes()
                 DKP.lastSync = server_time -- Will prevent people from sending multiple requests accidentally.
                 Comms:SendCommsMessage('pdkpSyncReq', server_time, 'GUILD', nil, 'BULK', nil)
-            elseif Defaults:SyncInRaid() == false then
+            elseif Defaults:AllowSync() == false then
                 PDKP:Print('Syncing in raids is currently disabled. You can change this in the PDKP settings.')
             else
                 PDKP:Print('Next sync available in: ' .. tostring(nextSyncAvailable) .. ' mins')

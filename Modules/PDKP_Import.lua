@@ -32,6 +32,9 @@ function Import:AcceptData(reqData)
         Import:AcceptFullDatabase(reqData)
         PDKP:Print('Full database overwrite in progress')
     else -- THIS IS A MERGE
+
+        if Defaults:AllowSync() == false then return PDKP:Print('Ignoring PDKP Sync while you\'re busy') end
+
         Util:Debug('Merging data...')
 
         local reqDKP = reqData.dkpDB;
@@ -137,11 +140,15 @@ function Import:AcceptFullDatabase(data)
     local guildData = data.guildDB
     local dkpData = data.dkpDB
 
-    Guild.db.members = guildData.members
+    if guildData then
+        Guild.db.members = guildData.members
+    end
 
-    DKP.dkpDB.lastEdit = dkpData.lastEdit;
-    DKP.dkpDB.history = dkpData.history;
-    DKP.dkpDB.members = dkpData.members;
+    if dkpData then
+        DKP.dkpDB.lastEdit = dkpData.lastEdit;
+        DKP.dkpDB.history = dkpData.history;
+        DKP.dkpDB.members = dkpData.members;
+    end
 
     PDKP:InitializeGuildData() -- Re-initialize the guild data.
     pdkp_init_scrollbar() -- re-setup the scroll section, if necessary.

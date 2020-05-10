@@ -124,7 +124,7 @@ end
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 
-    if Defaults.silent then Defaults:DisablePrinting() end
+    if Defaults.silent then Defaults:DisablePrinting(Defaults.silent) end
 
     PDKP:Print("Welcome,", Util:GetMyName(), "to:", core.defaults.addon_name .. ': v' .. Defaults.addon_version)
 
@@ -146,9 +146,6 @@ function PDKP:OnInitialize(event, name)
 
     Setup:dkpOfficer()
     item:ToolTipInit()
-
-    Setup:InterfaceOptions()
-
 end
 
 function PDKP:InitializeGuildData()
@@ -160,13 +157,11 @@ function PDKP:InitializeGuildData()
     core.defaults:InitDB();
     core.initialized = true
 
-    if not Comms.commsRegistered then
-        Comms:RegisterCommCommands()
-    end
-
+    if not Comms.commsRegistered then Comms:RegisterCommCommands() end
     if not Defaults.checked_addon_version then
-        return Comms:SendCommsMessage('pdkpVersion', 'GUILD', Defaults.addon_version, nil, 'BULK', nil)
+        Comms:SendCommsMessage('pdkpVersion', 'GUILD', Defaults.addon_version, nil, 'BULK', nil)
     end
+    if not Defaults.settings_complete then Setup:InterfaceOptions() end
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
