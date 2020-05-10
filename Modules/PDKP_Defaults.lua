@@ -10,31 +10,7 @@ local PDKP = core.PDKP;
 local Guild = core.Guild;
 local Raid = core.Raid;
 local Shroud = core.Shroud;
-local Defaults = core.defaults;
 local Import = core.import;
-
-local englishFaction, _ = UnitFactionGroup("PLAYER");
-
-local SettingsDB;
-
-local pdkpSettingsDefaults = {
-    profile = {
-        silent = false,
-        debug = false,
-        sortBy = nil,
-        sortDir = nil,
-        syncInRaid = false,
-    }
-}
-
-PDKP.data = {}
-PDKP.raidData = {}
-core.initialized = false
-core.sortBy = nil
-core.sortDir = nil
-core.filterOffline = nil
-core.pdkp_frame = nil;
-core.canEdit = false;
 
 core.defaults = {
     -- ADDON INFO
@@ -66,31 +42,61 @@ core.defaults = {
         ["Warrior"] = { r = 0.78, g = 0.61, b = 0.43, hex = "C79C6E" }
     }
 }
+local Defaults = core.defaults;
+
+local englishFaction, _ = UnitFactionGroup("PLAYER");
+
+local SettingsDB;
+
+local pdkpSettingsDefaults = {
+    profile = {
+        silent = false,
+        debug = false,
+        sortBy = nil,
+        sortDir = nil,
+        syncInRaid = false,
+        errors = false,
+        syncTypes = {
+            battlegrounds = false,
+            instances = false,
+            raids = false
+        }
+    }
+}
+
+PDKP.data = {}
+PDKP.raidData = {}
+core.initialized = false
+core.sortBy = nil
+core.sortDir = nil
+core.filterOffline = nil
+core.pdkp_frame = nil;
+core.canEdit = false;
 
 -- Creates and assigns the Guild Database.
-function core.defaults:InitDB()
+function Defaults:InitDB()
     Util:Debug('DefaultsDB init');
 
     core.defaults.db = LibStub("AceDB-3.0"):New("pdkp_settingsDB", pdkpSettingsDefaults, true);
     SettingsDB = core.defaults.db.profile;
     core.defaults.db = SettingsDB;
     core.defaults.SettingsDB = SettingsDB
+    Defaults.SettingsDB = SettingsDB;
 end
 
-function core.defaults:IsDebug()
+function Defaults:IsDebug()
     if SettingsDB then
        return SettingsDB.debug;
     end
     return false;
 end
 
-function core.defaults:ToggleDebugging()
+function Defaults:ToggleDebugging()
     SettingsDB.debug = not SettingsDB.debug
-
     PDKP:Print('Debugging Enabled: ' .. tostring(SettingsDB.debug))
 end
 
-function core.defaults:SyncInRaid()
+function Defaults:SyncInRaid()
     local syncInRaid = SettingsDB.syncInRaid
     local isInInstance = Raid:IsInInstance()
 
@@ -99,6 +105,10 @@ function core.defaults:SyncInRaid()
     else -- Not in an instance, don't care about their preference.
         return true
     end
+end
+
+function Defaults:DisablePrinting()
+    PDKP.Print = function() end
 end
 
 core.GUI = {
@@ -110,8 +120,6 @@ core.GUI = {
     sliderVal = 1;
     hasTimer = false;
 }
-
-
 
 core.raids = {
     'Onyxia\'s Lair',

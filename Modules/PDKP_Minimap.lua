@@ -18,8 +18,6 @@ local Minimap = core.Minimap;
 
 Minimap.db = nil;
 
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-
 local miniDB;
 
 local success = '22bb33'
@@ -33,6 +31,8 @@ local altShiftText = Util:FormatFontTextColor(info, 'Alt-Shift-Click') .. ' to w
 local shiftRightClickText = Util:FormatFontTextColor(info, 'Right-Shift-Click') .. ' to open Officer push'
 local rightClickText = Util:FormatFontTextColor(info, 'Right-Click') .. ' to open settings'
 local disableSyncInRaidText = Util:FormatFontTextColor(warning, 'Push requests disabled in instances')
+
+local AceConfig = LibStub('AceConfigRegistry-3.0')
 
 local minimapDBDefaults = {
     profile = {
@@ -156,8 +156,8 @@ function Minimap:HandleIconClicks(buttonType)
             StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
         else -- No modifiers
             -- This has to be called twice in order to properly work. Bug with Blizzard's code.
-            InterfaceOptionsFrame_OpenToCategory("pdkp_options_interface");
-            InterfaceOptionsFrame_OpenToCategory("pdkp_options_interface");
+            InterfaceOptionsFrame_OpenToCategory("PantheonDKP");
+            InterfaceOptionsFrame_OpenToCategory("PantheonDKP");
         end
     end
 end

@@ -9,6 +9,12 @@ ESSENTIALS:
     TODO: Save shrouding window positioning
     TODO: Change Officer Interface to say that Class Leaders get promoted too.
 
+LOCAL DESKTOP APP:
+    TODO: Figure out how to create a desktop app.
+    TODO: Allow edits to be checked within your local game files.
+    TODO: Allow additions to be marked.
+    TODO:
+
 TRY TO FIX:
     TODO: Throttle the shrouding window updates, so that people don't get lost / overwritten.
     TODO: Fix Shrouding window so that it doesn't fuck with the size of the window.

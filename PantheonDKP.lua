@@ -124,9 +124,7 @@ end
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 
-    if Defaults.silent then
-       PDKP.Print = function() end
-    end
+    if Defaults.silent then Defaults:DisablePrinting() end
 
     PDKP:Print("Welcome,", Util:GetMyName(), "to:", core.defaults.addon_name .. ': v' .. Defaults.addon_version)
 

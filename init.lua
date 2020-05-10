@@ -21,6 +21,7 @@ core.Item = {};
 core.Invites = {};
 core.Raid = {};
 core.Comms = {};
+core.defaults = {};
 core.Defaults = {};
 core.Import = {};
 core.Setup = {}; -- Creates the UI for us.
