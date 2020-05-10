@@ -16,7 +16,8 @@ TRY TO FIX:
     TODO: Allow the Raid-Invite interface to be visible to users when they are outside of a raid.
     TODO: Lock down debugging mode for officers only.
     TODO: Allow blowing of sync in raids to be a setting.
-    TODO: Disable KarenBaskins from responding to Sync responses.
+    TODO: Allow people to be selected by shift-clicking the people in the raid.
+    TODO: Allow edits of entries.
 
 NICE TO HAVES:
     TODO: Whisper command !pdkp that will send back the player's DKP totals.

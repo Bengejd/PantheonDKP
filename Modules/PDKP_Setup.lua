@@ -874,3 +874,66 @@ function Setup:OfficerWindow()
     GUI.officerInterfaceFrame = mainFrame;
 end
 
+function Setup:InterfaceOptions()
+    local AceConfig = LibStub("AceConfig-3.0")
+    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+
+    local options = {
+        type = "group",
+        args = {
+            enable = {
+                name = "Enable",
+                desc = "Enables / disables the addon",
+                type = "toggle",
+                set = function(info,val) PDKP.enabled = val end,
+                get = function(info) return PDKP.enabled end
+            },
+            moreoptions={
+                name = "More Options",
+                type = "group",
+                args={
+                    enable = {
+                        name = "Enable",
+                        desc = "Enables / disables the addon",
+                        type = "toggle",
+                        set = function(info,val) PDKP.enabled = val end,
+                        get = function(info) return PDKP.enabled end
+                    },
+                }
+            },
+            moreoption2={
+                name = "More Options2",
+                type = "group",
+                args={
+                    -- more options go here
+                }
+            }
+        }
+    }
+
+    LibStub('AceConfigRegistry-3.0'):RegisterOptionsTable("PantheonDKP", options)
+    AceConfigDialog:AddToBlizOptions('PantheonDKP', 'pdkp_options_interface', UIParent)
+
+
+
+--    GUI.optionsPanel = CreateFrame( "Frame", "pdkp_options_frame", UIParent );
+--    -- Register in the Interface Addon Options GUI
+--    -- Set the name for the Category for the Options Panel
+--    GUI.optionsPanel.name = "PantheonDKP";
+--
+--    GUI.optionsPanel.okay = function()
+--        print('Okay was clicked')
+--    end
+--
+--    GUI.optionsPanel.cancel = function()
+--        print('Cancel was clicked')
+--    end
+--
+--    GUI.optionsPanel.default = function()
+--        print('Default was clicked')
+--    end
+--
+--    InterfaceOptions_AddCategory(GUI.optionsPanel);
+
+
+end

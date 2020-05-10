@@ -131,7 +131,6 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
     if Util:GetMyName() == 'Karenbaskins' then return end  -- Disable messages from Karen during development
 
-
     local transmitData = Comms:DataEncoder(data)
 
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)

@@ -149,6 +149,8 @@ function PDKP:OnInitialize(event, name)
     Setup:dkpOfficer()
     item:ToolTipInit()
 
+    Setup:InterfaceOptions()
+
 end
 
 function PDKP:InitializeGuildData()

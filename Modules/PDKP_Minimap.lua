@@ -18,6 +18,8 @@ local Minimap = core.Minimap;
 
 Minimap.db = nil;
 
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+
 local miniDB;
 
 local success = '22bb33'
@@ -29,7 +31,7 @@ local clickText = Util:FormatFontTextColor(info, 'Click') .. ' to open PDKP. '
 local shiftClickText = Util:FormatFontTextColor(info, 'Shift-Click') ..  ' to request a push.'
 local altShiftText = Util:FormatFontTextColor(info, 'Alt-Shift-Click') .. ' to wipe your tables.'
 local shiftRightClickText = Util:FormatFontTextColor(info, 'Right-Shift-Click') .. ' to open Officer push'
-local rightClickText = Util:FormatFontTextColor(info, 'Right-Click') .. '  to open settings'
+local rightClickText = Util:FormatFontTextColor(info, 'Right-Click') .. ' to open settings'
 local disableSyncInRaidText = Util:FormatFontTextColor(warning, 'Push requests disabled in instances')
 
 local minimapDBDefaults = {
@@ -153,7 +155,9 @@ function Minimap:HandleIconClicks(buttonType)
         if hasShift and core.canEdit then
             StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM')
         else -- No modifiers
-            print('Opening PDKP Settings')
+            -- This has to be called twice in order to properly work. Bug with Blizzard's code.
+            InterfaceOptionsFrame_OpenToCategory("pdkp_options_interface");
+            InterfaceOptionsFrame_OpenToCategory("pdkp_options_interface");
         end
     end
 end
