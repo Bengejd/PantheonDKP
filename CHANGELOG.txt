@@ -1,3 +1,24 @@
+====== Version 2.4.2 ======
+[Features]:
+    - [Settings] - added PDKP settings to Addon Interface (right click mini-map for shortcut).
+        - Disable Notifications setting
+        - Sync scenario settings
+    -
+
+[Item-Prio]:
+    - Changed Robes of the Exalted to be equal prio for Paladin's.
+
+[Bug Fixes]:
+    [Raid tools]
+        - Usable by anyone, not just officers or assistants.
+        - Resets spam message if it's empty and the window is closed.
+    [Lockout Timers]
+        - Now are formatted better with colons in between the timestamps.
+    [Syncing]
+        - Sync allowances is now handled by addon interface settings. This will prevent syncs from occurring in the middle of raids.
+    [Shrouding Window]
+        - I believe I fixed the shrouding window sizing issue. TBD though as it's hard to reproduce.
+
 ====== Version 2.3.2 ======
 
 [Features]:

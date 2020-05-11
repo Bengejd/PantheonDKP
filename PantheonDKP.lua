@@ -390,19 +390,31 @@ function PDKP:Show()
 
 end
 
-function PDKP:CheckForUpdate(version)
+function PDKP:CheckForUpdate(version, silent)
     local myMajor, myMinor, myPatch = strsplit('.',Defaults.addon_latest_version);
     local theirMajor, theirMinor, theirPatch = strsplit('.', version)
     myMajor, myMinor, myPatch = tonumber(myMajor), tonumber(myMinor), tonumber(myPatch)
     theirMajor, theirMinor, theirPatch = tonumber(theirMajor), tonumber(theirMinor), tonumber(theirPatch)
-    local hasUpdate = theirMajor > myMajor or theirMinor > myMinor or theirPatch > myPatch
+
+    local hasUpdate = false
+    local majorMatch = theirMajor == myMajor
+    local minorMatch = theirMinor == myMinor
+
+    if theirMajor > myMajor then hasUpdate = true;
+    elseif majorMatch and theirMinor > myMinor then hasUpdate = true
+    elseif majorMatch and minorMatch and theirPatch > myPatch then hasUpdate = true
+    end
+
     if hasUpdate then
         Defaults.addon_latest_version = version;
         if not Defaults.checked_addion_version then
             Defaults.checked_addion_version = true
-            PDKP:Print("Your version of PantheonDKP is out-of-date.\n The newest version is available for download through CurseForge or the Twitch app.")
+            if silent == nil then
+                PDKP:Print("Your version of PantheonDKP is out-of-date.\n The newest version is available for download through CurseForge or the Twitch app.")
+            end
         end
     end
+    return hasUpdate
 end
 
 -----------------------------

@@ -67,6 +67,8 @@ function Setup:MainUI()
         GUI:CheckOutOfDate()
 
         Setup:ShroudingWindow()
+
+        Setup:Changelog()
     end
 end
 
@@ -611,7 +613,7 @@ function Setup:dkpOfficer()
             local dkpOfficerText
 
             if isDkpOfficer then dkpOfficerText = 'Demote from DKP Officer' else
-               dkpOfficerText = 'Promote to DKP Officer'
+                dkpOfficerText = 'Promote to DKP Officer'
             end
 
             _G['UIDropDownMenu_AddSeparator'](1)
@@ -652,7 +654,6 @@ function Setup:dkpOfficer()
                     else
                         Raid.dkpOfficer = charName;
                         PDKP:Print(charName .. ' is now the DKP Officer')
---                        self:SetText('Demote from DKP Officer')
                     end
                     Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
                 end
@@ -663,20 +664,11 @@ function Setup:dkpOfficer()
 end
 
 function Setup:OfficerWindow()
-    if not Raid:IsInRaid() or not Raid:IsAssist() then
-        return Util:Debug(
-            'Not creating officer window:' ..
-            ' InRaid: ' .. tostring(Raid:IsInRaid()) ..
-            ' IsAssist: ' .. tostring(Raid:IsAssist())
-        )
-    end
-
     local officerFrame = _G['pdkpOfficerFrame']
 
-    if officerFrame then
-        if not officerFrame:IsShown() then officerFrame:Show() end
-        return
-    end; -- we've initialized it already
+    if officerFrame then return end; -- we've initialized it already
+
+    local raidSpamTime;
 
     if not GUI.pdkp_frame then -- We haven't initialized the frame yet.
         PDKP:Show()
@@ -701,11 +693,14 @@ function Setup:OfficerWindow()
     officerButton:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
     officerButton:SetScript('OnClick', function()
         mainFrame:Show()
+
+        if Raid.spamText == nil and raidSpamTime ~= nil then
+            raidSpamTime:SetText("[TIME] [RAID] invites going out. Pst for invite")
+            Raid.spamText = raidSpamTime:GetText()
+        end
     end)
 
     GUI.OfficerFrame = mainFrame
-
-    mainFrame:Show()
 
     local mainFrameKids = {}
 
@@ -913,11 +908,11 @@ function Setup:InterfaceOptions()
                 inline= true,
                 args = {
                     Silent = {
-                        name = "Silent Messages",
+                        name = "Enabled",
                         type = "toggle",
                         desc="Enables / Disables all messages from the addon. Requires a reload when re-enabling",
-                        set = function(info,val) Defaults:TogglePrinting(val) end,
-                        get = function(info) return Defaults.SettingsDB.silent end
+                        set = function(info,val) Defaults:TogglePrinting(not val) end,
+                        get = function(info) return not Defaults.SettingsDB.silent end
                     },
                 }
             },
@@ -970,7 +965,7 @@ function Setup:InterfaceOptions()
                    name = "Addon Debugging",
                    type = "toggle",
                    desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
-                   set = function(info,val) Defaults:TogglePrinting(val) end,
+                   set = function(info,val) Defaults:ToggleDebugging() end,
                    get = function(info) return Defaults.SettingsDB.debug end
                },
            }
@@ -981,4 +976,172 @@ function Setup:InterfaceOptions()
     AceConfigDialog:AddToBlizOptions('PantheonDKP')
 
     Defaults.settings_complete = true
+end
+
+function Setup:UniqueFrame(fName, fTitle)
+--    Util:Debug('Setting up changelog')
+--
+--    local mainFrameKids = {};
+--
+--    local mainFrame = CreateFrame("Frame", "pdkpChangelog", UIParent, "BasicFrameTemplateWithInset")
+--    mainFrame:SetSize(300, 425) -- Width, Height
+--    mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+--    mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
+--    mainFrame.title:SetFontObject("GameFontHighlight")
+--    mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
+--    mainFrame.title:SetText('PDKP Change Log')
+--    mainFrame:SetFrameStrata('MEDIUM');
+--    mainFrame:SetFrameLevel(1);
+--    mainFrame:EnableMouse(true)
+--    mainFrame:SetMovable(true)
+--    mainFrame:RegisterForDrag("LeftButton")
+--    mainFrame:SetScript("OnDragStart", mainFrame.StartMoving)
+--    mainFrame:SetScript("OnDragStop", mainFrame.StopMovingOrSizing)
+--
+--    local scrollcontainer = AceGUI:Create("SimpleGroup")
+--    scrollcontainer:SetFullWidth(false)
+--    scrollcontainer:SetFullHeight(true)
+--    scrollcontainer:SetHeight(350)
+--    scrollcontainer:SetWidth(250)
+--    scrollcontainer:SetLayout("Fill")
+--
+--    scrollcontainer:SetParent(mainFrame)
+--    scrollcontainer.frame:SetFrameStrata('HIGH');
+--    scrollcontainer:SetPoint("CENTER", mainFrame, "CENTER", 0, -11);
+--
+--    local scroll = AceGUI:Create("ScrollFrame")
+--    scroll:SetLayout("Flow") -- probably?
+--    scrollcontainer:AddChild(scroll)
+--
+--    local promoteOfficer = AceGUI:Create("Button")
+--    promoteOfficer:SetText("Promote Officers")
+--    promoteOfficer:SetWidth(140)
+--
+--    local raidGroup = AceGUI:Create("InlineGroup")
+--    raidGroup:SetTitle('Raid Control')
+--    raidGroup:SetParent(scroll)
+--    raidGroup.frame:SetFrameStrata('HIGH');
+--
+--    local label = AceGUI:Create("Label")
+--    label:SetText("This will give all officers in the raid the 'Assist' role.")
+--    raidGroup:AddChild(promoteOfficer)
+--    raidGroup:AddChild(label)
+--
+--    raidGroup.frame:Hide()
+--
+--    scroll:AddChild(raidGroup)
+--
+--    scroll.frame:SetFrameLevel(1);
+--    table.insert(mainFrameKids, scrollcontainer)
+--
+--    local function toggleKids(show)
+--        for _, child in pairs(mainFrameKids) do
+--            if show then child.frame:Show() else child.frame:Hide() end
+--        end
+--    end
+--
+--    mainFrame:SetScript('OnHide', function() toggleKids(false) end)
+--    mainFrame:SetScript('OnShow', function()
+--        print('Showing')
+--        toggleKids(true) end)
+--
+--    mainFrame:Show()
+--    scrollcontainer.frame:Show()
+--    toggleKids(true)
+end
+
+function Setup:Changelog()
+    Util:Debug('Setting up changelog')
+
+    local mainFrameKids = {};
+
+    local cl = Defaults.changelog;
+
+    local mainFrame = CreateFrame("Frame", "pdkpChangelog", UIParent, "BasicFrameTemplateWithInset")
+    mainFrame:SetSize(300, 425) -- Width, Height
+    mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+    mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
+    mainFrame.title:SetFontObject("GameFontHighlight")
+    mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
+    mainFrame.title:SetText('PDKP ' .. cl.version .. ' Change Log')
+    mainFrame:SetFrameStrata('MEDIUM');
+    mainFrame:SetFrameLevel(1);
+    mainFrame:EnableMouse(true)
+    mainFrame:SetMovable(true)
+    mainFrame:RegisterForDrag("LeftButton")
+    mainFrame:SetScript("OnDragStart", mainFrame.StartMoving)
+    mainFrame:SetScript("OnDragStop", mainFrame.StopMovingOrSizing)
+
+    local scrollcontainer = AceGUI:Create("SimpleGroup")
+    scrollcontainer:SetFullWidth(false)
+    scrollcontainer:SetFullHeight(true)
+    scrollcontainer:SetHeight(350)
+    scrollcontainer:SetWidth(250)
+    scrollcontainer:SetLayout("Fill")
+
+    scrollcontainer:SetParent(mainFrame)
+    scrollcontainer.frame:SetFrameStrata('HIGH');
+    scrollcontainer:SetPoint("CENTER", mainFrame, "CENTER", 0, -11);
+
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("Flow") -- probably?
+    scrollcontainer:AddChild(scroll)
+
+    local createGroup = function(title, parent, type)
+        local g = AceGUI:Create(type)
+        if type == "InlineGroup" then g:SetTitle(title) end
+        if type == 'SimpleGroup' then
+            g:SetWidth(200)
+            g:SetLayout('Flow')
+        else
+            g:SetWidth(250)
+            g:SetLayout("Flow")
+        end
+        g:SetParent(parent)
+
+        g.frame:SetFrameStrata('HIGH');
+        parent:AddChild(g)
+        return g
+    end
+    local createLabel = function(text, parent)
+        local l = AceGUI:Create("Label")
+        l:SetText(text)
+        parent:AddChild(l)
+        return l
+    end
+
+    local features = cl.features;
+    local bugs = cl.bugFixes
+    local items = cl.itemPrio;
+
+    local changes = {features, items, bugs }
+
+    for _, changeType in pairs(changes) do
+        local g = createGroup(changeType.name, scroll, "InlineGroup")
+        for changeKey, change in pairs(changeType.changes) do
+            change.colored_name =  Util:FormatFontTextColor('22bb33',  '[' .. change.name .. ']:')
+            change.label = createLabel(change.colored_name, g)
+            for key, text in pairs(change.list) do
+                local changeText = createLabel(tostring(key) .. '. '.. text, g)
+                changeText.label:SetIndentedWordWrap(true)
+            end
+        end
+    end
+
+    scroll.frame:SetFrameLevel(1);
+    table.insert(mainFrameKids, scrollcontainer)
+
+    local function toggleKids(show)
+        for _, child in pairs(mainFrameKids) do
+            if show then child.frame:Show() else child.frame:Hide() end
+        end
+    end
+
+    mainFrame:SetScript('OnHide', function() toggleKids(false) end)
+    mainFrame:SetScript('OnShow', function()
+        print('Showing')
+        toggleKids(true) end)
+
+    GUI.changeLog = mainFrame;
+    Defaults:CheckChangelog()
 end

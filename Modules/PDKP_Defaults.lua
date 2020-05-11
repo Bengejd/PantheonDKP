@@ -57,6 +57,8 @@ local pdkpSettingsDefaults = {
         sortBy = nil,
         sortDir = nil,
         errors = false,
+        previous_version = '2.3.2',
+        changelog_shown = false,
         sync = {
             pvp = false,
             dungeons = false,
@@ -73,6 +75,14 @@ core.sortDir = nil
 core.filterOffline = nil
 core.pdkp_frame = nil;
 core.canEdit = false;
+
+function Defaults:CheckChangelog()
+    local shownChange = SettingsDB.changelog_shown and PDKP:CheckForUpdate(SettingsDB.last_version, true);
+    if SettingsDB.debug then shownChange = false end
+    if not shownChange and GUI ~= nil and GUI.changeLog ~= nil then
+        GUI.changeLog:Show()
+    end
+end
 
 -- Creates and assigns the Guild Database.
 function Defaults:InitDB()
@@ -248,5 +258,49 @@ core.bossIDS = {
         [1119] = 'Sapphiron',
         [1120] = 'Thaddius',
         [1121] = 'The Four Horsemen',
+    },
+}
+
+Defaults.changelog = {
+    version='2.4.2',
+    features= {
+        name='New Features',
+        changes = {
+            {
+                name="Addon Settings Interface",
+                list = {
+                    'Right click the minimap icon to open settings interface',
+                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds',
+                }
+            },
+            {
+                name="Addon Settings Interface",
+                list = {
+                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds',
+                }
+            }
+        }
+    },
+    bugFixes= {
+        name='Bug Fixes',
+        changes =  {
+            {
+                name="Addon Settings",
+                list = {
+                    'Added ability to Enable / Disable notifications', 'Added control over when Syncing is allowed to happen'
+                }
+            }
+        }
+    },
+    itemPrio= {
+        name='Prio Changes',
+        changes =  {
+            {
+                name="Robes of the Exaulted",
+                list = {
+                    'Added ability to Enable / Disable notifications', 'Added control over when Syncing is allowed to happen'
+                }
+            }
+        }
     },
 }
