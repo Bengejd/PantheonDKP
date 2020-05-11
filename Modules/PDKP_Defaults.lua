@@ -77,10 +77,11 @@ core.pdkp_frame = nil;
 core.canEdit = false;
 
 function Defaults:CheckChangelog()
-    local shownChange = SettingsDB.changelog_shown and PDKP:CheckForUpdate(SettingsDB.last_version, true);
-    if SettingsDB.debug then shownChange = false end
-    if not shownChange and GUI ~= nil and GUI.changeLog ~= nil then
-        GUI.changeLog:Show()
+    local shownChange = not SettingsDB.changelog_shown and PDKP:CheckForUpdate(SettingsDB.previous_version, true);
+    if (shownChange or SettingsDB.debug) and PDKP.changeLog ~= nil then
+        PDKP.changeLog:Show()
+        SettingsDB.changelog_shown = true
+        SettingsDB.previous_version = GetAddOnMetadata('PantheonDKP', "Version")
     end
 end
 
@@ -270,13 +271,13 @@ Defaults.changelog = {
                 name="Addon Settings Interface",
                 list = {
                     'Right click the minimap icon to open settings interface',
-                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds',
+                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds.',
                 }
             },
             {
                 name="Addon Settings Interface",
                 list = {
-                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds',
+                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds.',
                 }
             }
         }
@@ -284,21 +285,31 @@ Defaults.changelog = {
     bugFixes= {
         name='Bug Fixes',
         changes =  {
-            {
-                name="Addon Settings",
-                list = {
-                    'Added ability to Enable / Disable notifications', 'Added control over when Syncing is allowed to happen'
-                }
-            }
+            { name="Raid Tools", list = {
+                    'Now usable by anyone, not just officers or assistants.', 'Spam text resets if it\'s empty when the raid-tools window is closed.',
+                },
+            },
+            { name="Lockout Timers", list = {
+                    'Timer format has been changed to be more readable.',
+                },
+            },
+            { name="Syncing", list = {
+                    'Sync allowances is now handled by addon infterface settings. This will prevent syncs from occurring in the middle of raids.',
+                },
+            },
+            { name="Shrouding Window", list = {
+                    'I believe I fixed the shrouding window sizing issue. TBD though as it is hard to consistently reproduce.',
+                },
+            },
         }
     },
     itemPrio= {
         name='Prio Changes',
         changes =  {
             {
-                name="Robes of the Exaulted",
+                name="Robes of Volatile Power",
                 list = {
-                    'Added ability to Enable / Disable notifications', 'Added control over when Syncing is allowed to happen'
+                    'Fixed Robes of Volatile Power. Paladins are now equal.'
                 }
             }
         }

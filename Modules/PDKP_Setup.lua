@@ -52,7 +52,6 @@ function Setup:MainUI()
         Setup:ClassFilterCheckboxes()
         Setup:DkpSlideFilter()
 
-        -- GUI:CreateTestMenuDropdown()
         Setup:AdjustmentDropdowns()
 
         GUI:SelectedEntriesUpdated()
@@ -1073,11 +1072,9 @@ function Setup:Changelog()
     mainFrame:SetScript("OnDragStop", mainFrame.StopMovingOrSizing)
 
     local scrollcontainer = AceGUI:Create("SimpleGroup")
-    scrollcontainer:SetFullWidth(false)
-    scrollcontainer:SetFullHeight(true)
     scrollcontainer:SetHeight(350)
     scrollcontainer:SetWidth(250)
-    scrollcontainer:SetLayout("Fill")
+    scrollcontainer:SetLayout("Fill") -- important!
 
     scrollcontainer:SetParent(mainFrame)
     scrollcontainer.frame:SetFrameStrata('HIGH');
@@ -1085,27 +1082,22 @@ function Setup:Changelog()
 
     local scroll = AceGUI:Create("ScrollFrame")
     scroll:SetLayout("Flow") -- probably?
+    scroll.frame:SetFrameStrata("HIGH")
     scrollcontainer:AddChild(scroll)
 
     local createGroup = function(title, parent, type)
         local g = AceGUI:Create(type)
-        if type == "InlineGroup" then g:SetTitle(title) end
-        if type == 'SimpleGroup' then
-            g:SetWidth(200)
-            g:SetLayout('Flow')
-        else
-            g:SetWidth(250)
-            g:SetLayout("Flow")
-        end
-        g:SetParent(parent)
-
-        g.frame:SetFrameStrata('HIGH');
-        parent:AddChild(g)
+        g:SetTitle(title)
+        g:SetWidth(250)
+        g:SetParent(scroll)
+        g:SetFullHeight(false)
+        g:SetLayout("Flow")
         return g
     end
     local createLabel = function(text, parent)
         local l = AceGUI:Create("Label")
         l:SetText(text)
+        l:SetParent(parent)
         parent:AddChild(l)
         return l
     end
@@ -1126,6 +1118,7 @@ function Setup:Changelog()
                 changeText.label:SetIndentedWordWrap(true)
             end
         end
+        scroll:AddChild(g)
     end
 
     scroll.frame:SetFrameLevel(1);
@@ -1139,9 +1132,9 @@ function Setup:Changelog()
 
     mainFrame:SetScript('OnHide', function() toggleKids(false) end)
     mainFrame:SetScript('OnShow', function()
-        print('Showing')
         toggleKids(true) end)
 
-    GUI.changeLog = mainFrame;
+    PDKP.changeLog = mainFrame;
+    mainFrame:Hide()
     Defaults:CheckChangelog()
 end

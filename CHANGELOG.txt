@@ -6,7 +6,7 @@
     -
 
 [Item-Prio]:
-    - Changed Robes of the Exalted to be equal prio for Paladin's.
+    - Fixed Robes of Volatile Power to be equal prio for Paladin's.
 
 [Bug Fixes]:
     [Raid tools]
