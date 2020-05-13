@@ -456,7 +456,18 @@ function Setup:HistoryFrame()
     hf:EnableMouse(true)
     hf:RegisterForDrag("LeftButton")
 
-    local itemWinCheck = AceGUI:Create("Checkbox")
+    local itemWinCheck = AceGUI:Create("CheckBox")
+    itemWinCheck:SetParent(hf)
+    itemWinCheck:SetLabel("Item Wins")
+    itemWinCheck:SetPoint("TOPRIGHT", hf, "TOPRIGHT", 100, -30)
+    itemWinCheck.frame:SetFrameStrata('DIALOG');
+    itemWinCheck:SetValue(false)
+
+    itemWinCheck:SetCallback("OnValueChanged", function()
+        GUI:ShowSelectedHistory(nil)
+    end)
+
+    GUI.itemWinsCheck = itemWinCheck
 
     local scrollcontainer = AceGUI:Create("InlineGroup")
     scrollcontainer:SetFullWidth(false)
@@ -480,11 +491,13 @@ function Setup:HistoryFrame()
         GUI.HistoryShown = true
         GUI:HideAdjustmentReasons()
         GUI:ShowSelectedHistory(nil)
+        itemWinCheck.frame:Show()
     end)
     hf:SetScript("OnHide", function()
         scrollcontainer.frame:Hide()
         GUI.reasonDropdown.frame:Show()
         GUI.HistoryShown = false
+        itemWinCheck.frame:Hide()
     end)
 
     local scroll = AceGUI:Create("ScrollFrame")

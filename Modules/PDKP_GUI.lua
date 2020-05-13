@@ -29,6 +29,7 @@ GUI.hasTimer = false;
 GUI.adjustDropdowns = nil;
 GUI.raidDropdown = nil;
 GUI.classGroup = nil;
+GUI.itemWinsCheck = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -403,7 +404,19 @@ function GUI:ShowSelectedHistory(charObj)
                     local lineText = entry['text']
                     lineText = lineText:gsub('%None', 'Not Linked')
 
-                    if raid ~= nil and raid == DKP:GetCurrentDB() then -- Only show the history for the sheet we're on.
+                    local hasRaid = raid ~= nil and raid == DKP:GetCurrentDB();
+                    local hasItem = strfind(lineText, 'Item Win') ~= nil
+                    local itemWinChecked = GUI.itemWinsCheck:GetValue()
+                    local onlyShowItems = itemWinChecked and hasItem;
+
+                    local shouldShow;
+
+                    if itemWinChecked and hasItem and entry['dkpChange'] < 0 and hasRaid then shouldShow = true;
+                    elseif not itemWinChecked and hasRaid then shouldShow = true;
+                    else shouldShow = false;
+                    end
+
+                    if shouldShow then -- Only show the history for the sheet we're on.
 
                         local dkpChangeLabel = AceGUI:Create("Label")
                         dkpChangeLabel:SetWidth(300)
