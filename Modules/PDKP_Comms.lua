@@ -125,7 +125,6 @@ function OnCommReceived(prefix, message, distribution, sender)
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 

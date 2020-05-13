@@ -80,7 +80,8 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         ['GROUP_ROSTER_UPDATE']=function()
             Util:Debug('Group_roster_update')
             GUI:ToggleOfficerInterface()
-            return Raid:GetRaidInfo()
+            Raid:GetRaidInfo()
+            return GUI:UpdateRaidClasses()
         end,
         ['LOOT_OPENED']=function()  -- when the loot bag is opened.
 --            return Raid:AnnounceLoot()

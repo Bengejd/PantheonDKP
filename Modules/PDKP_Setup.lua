@@ -665,7 +665,9 @@ end
 function Setup:OfficerWindow()
     local officerFrame = _G['pdkpOfficerFrame']
 
-    if officerFrame then return end; -- we've initialized it already
+    if officerFrame then
+        return GUI:UpdateRaidClasses()
+    end; -- we've initialized it already
 
     local raidSpamTime;
 
@@ -804,6 +806,22 @@ function Setup:OfficerWindow()
         end
     end)
 
+    local classGroup = AceGUI:Create("InlineGroup")
+    classGroup:SetTitle('Raid Breakdown')
+    classGroup:SetParent(scroll)
+    classGroup.frame:SetFrameStrata("HIGH")
+    classGroup:SetFullWidth(false)
+    classGroup:SetFullHeight(false)
+    classGroup:SetLayout("Flow")
+
+    GUI.classGroup = classGroup;
+    GUI.classGroup.kids = {};
+
+    Setup:ClassIcons()
+    GUI:UpdateRaidClasses()
+
+    scroll:AddChild(classGroup)
+
     local raidGroup = AceGUI:Create("InlineGroup")
     raidGroup:SetTitle('Raid Control')
     raidGroup:SetParent(scroll)
@@ -862,6 +880,7 @@ function Setup:OfficerWindow()
 
     mainFrame:SetScript('OnHide', function() toggleKids(false) end)
     mainFrame:SetScript('OnShow', function()
+        GUI:UpdateRaidClasses()
         toggleKids(true) end)
 
     GUI.officerInterfaceFrame = mainFrame;
@@ -1137,4 +1156,44 @@ function Setup:Changelog()
     PDKP.changeLog = mainFrame;
     mainFrame:Hide()
     Defaults:CheckChangelog()
+end
+
+function Setup:ClassIcons()
+    local classGroup = GUI.classGroup;
+    local classTexture = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
+    for _, class in pairs(Defaults.classes) do
+        local icon = AceGUI:Create("Icon");
+        local coords = CLASS_ICON_TCOORDS[strupper(class)]; -- get the coordinates of the class icon we want
+        icon:SetImage(classTexture, unpack(coords))
+        icon:SetImageSize(25, 25);
+        icon:SetHeight(50);
+        icon:SetWidth(50);
+        icon:SetFullWidth(false)
+        icon:SetFullHeight(false)
+        icon:SetLabel('0')
+        icon.className = class;
+
+        icon:SetCallback("OnEnter", function()
+            if not Raid.ClassInfo[class] then return end
+
+            GameTooltip:SetOwner(icon.frame, "ANCHOR_BOTTOM")
+            GameTooltip:ClearLines()
+
+            local names = '';
+            for _, name in pairs(Raid.ClassInfo[class].names) do
+               names = names .. name .. ', '
+            end
+
+            GameTooltip:AddLine(names)
+            GameTooltip:Show()
+        end)
+
+        icon:SetCallback("OnLeave", function()
+            GameTooltip:ClearLines()
+            GameTooltip:Hide();
+        end)
+
+        classGroup:AddChild(icon)
+        table.insert(GUI.classGroup.kids, icon)
+    end
 end

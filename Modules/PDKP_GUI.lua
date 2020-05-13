@@ -28,6 +28,7 @@ GUI.sliderVal = 0;
 GUI.hasTimer = false;
 GUI.adjustDropdowns = nil;
 GUI.raidDropdown = nil;
+GUI.classGroup = nil;
 
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -49,6 +50,8 @@ GUI.adjustmentReasons = {
     "Item Win",
     "Other"
 }
+
+GUI.raidClasses = {};
 
 GUI.adjustDropdowns = {}
 GUI.pushFrame = nil
@@ -602,6 +605,23 @@ function GUI:UpdateEasyStats()
     local borderX = borderWidths[textLen] or 240;
 
     _G['pdkp_easy_stats_border']:SetSize(borderX, 72);
+end
+
+function GUI:UpdateRaidClasses()
+    Raid:GetRaidInfo()
+    local classGroup = GUI.classGroup
+
+    if classGroup == nil then return end;
+
+    for _, child in pairs(GUI.classGroup.kids) do
+        for class, classObj in pairs(Raid.ClassInfo) do
+            child:SetLabel(0)
+            if strlower(child.className) == strlower(class) then
+               child:SetLabel(classObj.count)
+               break;
+            end
+        end
+    end
 end
 
 ---------------------------

@@ -3,7 +3,8 @@
     - [Settings] - added PDKP settings to Addon Interface (right click mini-map for shortcut).
         - Disable Notifications setting
         - Sync scenario settings
-    -
+    - [Raid Breakdown]
+        - Now shows what classes are in the raid.
 
 [Item-Prio]:
     - Fixed Robes of Volatile Power to be equal prio for Paladin's.

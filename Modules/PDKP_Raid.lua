@@ -16,6 +16,7 @@ local Comms = core.Comms;
 local raidHistory;
 
 Raid.RaidInfo = {};
+Raid.ClassInfo = {};
 
 -- Start raid, select a time for the raid on-time bonus to go out.
 -- Auto pop up raid boss kills when they occur
@@ -78,6 +79,7 @@ end
 
 function Raid:GetRaidInfo()
     local raidInfo = {}
+    local classInfo = {};
     for i = 1, 40 do
         local name,
         rank, --2 for Raid leader, 1 for assistant, 0 otherwise.
@@ -112,8 +114,16 @@ function Raid:GetRaidInfo()
             if rank == 2 then
                Raid.RaidLeader = name;
             end
+            if classInfo[class] == nil then
+                classInfo[class] = {};
+                classInfo[class].count = 0;
+                classInfo[class].names = {};
+            end
+            classInfo[class].count = classInfo[class].count + 1;
+            table.insert(classInfo[class].names, name)
         end
     end
+    Raid.ClassInfo = classInfo;
     Raid.RaidInfo = raidInfo;
     return raidInfo;
 end
