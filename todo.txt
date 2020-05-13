@@ -25,7 +25,6 @@ NICE TO HAVES:
     TODO: Excused absence: 15%
     TODO: Add an edit box in the settings window, that takes you to the issue tracker.
     TODO: Roster list in addon screen.
-    TODO: Filter history to show item wins.
 
 MAKING IT MORE PUBLIC:
     TODO: Enable PUGS

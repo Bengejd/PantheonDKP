@@ -282,6 +282,12 @@ Defaults.changelog = {
                 }
             },
             {
+                name="History Item-Wins Filter",
+                list = {
+                    'You can now filter the history by item-wins, instead of having load-finding them',
+                }
+            },
+            {
                 name="History members selection",
                 list = {
                     'You can now Shift-Click the members from a history entry to select all members from that entry.',
