@@ -197,7 +197,7 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
-            if Defaults:AllowSync() == false then
+            if Defaults:AllowSync() == false or Util:GetMyName() == 'Karenbaskins' then
                 return PDKP:Print('Ignoring Sync request while busy')
             end  -- Make sure we can sync while in the raid
             Guild:UpdateLastSync(message) -- message contains the lastSync time.

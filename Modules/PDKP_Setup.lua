@@ -1180,8 +1180,11 @@ function Setup:ClassIcons()
             GameTooltip:ClearLines()
 
             local names = '';
-            for _, name in pairs(Raid.ClassInfo[class].names) do
-               names = names .. name .. ', '
+            for key, name in pairs(Raid.ClassInfo[class].names) do
+                names = names .. name
+                if key < Raid.ClassInfo[class].count then
+                   names = names .. ', '
+                end
             end
 
             GameTooltip:AddLine(names)

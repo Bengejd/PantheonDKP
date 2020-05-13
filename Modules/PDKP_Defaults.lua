@@ -275,9 +275,10 @@ Defaults.changelog = {
                 }
             },
             {
-                name="Addon Settings Interface",
+                name="Raid Class Breakdown",
                 list = {
-                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds.',
+                    'In the Raid Interface tools, you\'ll now see how many of each class is in the raid',
+                    'Hovering over a class will bring up a tooltip with their names.'
                 }
             }
         }
