@@ -132,7 +132,7 @@ item.priority = {
 
     -- Sulfuron Harbinger Loot --
 
-    ['Shadowstrike'] =  'Vendor',
+    ['Shadowstrike'] =  'MS > OS',
 
     -- Golemagg The Incinerator Loot --
 
@@ -161,7 +161,7 @@ item.priority = {
     ['Band of Sulfuras'] =  'MS > OS',
     ['Bonereaver\'s Edge'] =  'Warrior PvP Rank 7 > MS>OS',
     ['Choker of the Fire Lord'] =  'Mage = Warlock = Shadow Priest = Druid (Boom)',
-    ['Cloak of the Shrouded Mists'] =  'Hunter > Rogue = Warrior (Tank) > MS>OS',
+    ['Cloak of the Shrouded Mists'] =  'Hunter = Warrior (Tank) > Rogue > MS>OS',
     ['Crown of Destruction'] =  'Hunter = Warrior (DPS) = Paladin (Ret)',
     ['Dragon\'s Blood Cape'] =  'Warrior (Tank) = Druid (Feral) > MS>OS',
     ['Essence of the Pure Flame'] =  'Warrior (Tank) > MS>OS',
@@ -248,7 +248,7 @@ item.priority = {
     ['Ashjre\'thul, Crossbow of Smiting'] =  'Hunter > MS>OS',
     ['Chromatically Tempered Sword'] =  'Warrior (DPS) = Rogue (Sword)',
     ['Elementium Reinforced Bulwark'] =  'Warrior (Tank) > MS>OS',
-    ['Ashkandi, Greatsword of the Brotherhood'] =  'Warrior PvP Rank 7 > Hunter PvP Rank 7 > MS>OS',
+    ['Ashkandi, Greatsword of the Brotherhood'] =  'Warrior PvP Rank 7 = Hunter PvP Rank 7 > MS>OS',
     ['Archimtiros\' Ring of Reckoning'] =  'Druid (Feral) > Warrior (Tank) > MS>OS',
     ['Boots of the Shadow Flame'] =  'Druid (Feral) = Rogue > Warrior (DPS) > MS>OS',
     ['Cloak of the Brood Lord'] =  'Caster DPS > MS>OS',

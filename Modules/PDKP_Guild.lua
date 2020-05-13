@@ -234,6 +234,7 @@ end
 function Guild:UpdateBankNote(lastEdit, lastSync)
     if not core.canEdit then return end; -- We can't edit the note anyway.
     Guild:GetGuildData() -- retrieve the bank info.
+    if Util:GetMyName() == 'Karenbaskins' then return end  -- Disabled changes from Karenbaskins as well.
     lastEdit = lastEdit or DKP.dkpDB.lastEdit;
     lastSync = lastSync or DKP.lastSync
     GuildRosterSetOfficerNote(Guild.bankIndex, Guild:FormatNewBankNote(lastEdit, lastSync))

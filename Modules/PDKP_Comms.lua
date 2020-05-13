@@ -129,7 +129,9 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
-    if Util:GetMyName() == 'Karenbaskins' then return end  -- Disable messages from Karen during development
+    if prefix == 'pdkpSyncReq' and Util:GetMyName() == 'Karenbaskins' then -- Testing logic.
+        distro, sendTo = 'WHISPER', 'Neekio'
+    elseif Util:GetMyName() == 'Karenbaskins' then return end  -- Disable messages from Karen during development
 
     local transmitData = Comms:DataEncoder(data)
 
@@ -174,6 +176,7 @@ end
 function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
     local guildFunc = {
         ['pdkpSyncRes'] = function()
+            if Defaults:AllowSync() == false or Util:GetMyName() == 'Karenbaskins' then return end
             Import:AcceptData(message)
         end,
         ['pdkpEntryDelete'] = function()
@@ -195,7 +198,7 @@ end
 function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
     local officerFunc = {
         ['pdkpSyncReq'] = function() -- Send the data to the guild
-            if Defaults:AllowSync() == false or Util:GetMyName() == 'Karenbaskins' then
+            if Defaults:AllowSync() == false then
                 return PDKP:Print('Ignoring Sync request while busy')
             end  -- Make sure we can sync while in the raid
             Guild:UpdateLastSync(message) -- message contains the lastSync time.

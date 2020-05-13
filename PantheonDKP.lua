@@ -89,7 +89,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return
         end,
         ['BOSS_KILL']=function()
-            PDKP:Print('BOSS KILL: ', self, event, arg1, arg2)
+--            PDKP:Print('BOSS KILL: ', self, event, arg1, arg2)
             Raid:BossKill(arg1, arg2)
         end,
         ['CHAT_MSG_SYSTEM']=function() -- Fired when yellow system text is presented.
@@ -328,7 +328,20 @@ function PDKP:HandleSlashCommands(msg, item)
         DKP:ValidateTables()
     end
 
-
+    if msg == 'professionTracking' then
+        if not _G['THO'] then local f, t ,c = CreateFrame("Frame", "THO"), 2383,0
+            f:SetScript("OnUpdate", function(_, e)
+                c=c+e
+                if c>3 then
+                    c=0
+                    CastSpellByID(t)
+                    if t == 2383 then t= 2580 else t=2383 end
+                end
+            end)
+            _G['THO']:Hide()
+        end
+        if _G['THO']:IsVisible() then _G['THO']:Hide() else _G['THO']:Show() end
+    end
 end
 
 function PDKP:BuildAllData()

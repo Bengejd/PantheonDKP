@@ -263,7 +263,7 @@ core.bossIDS = {
 }
 
 Defaults.changelog = {
-    version='2.4.2',
+    version='2.4.4',
     features= {
         name='New Features',
         changes = {
@@ -301,6 +301,11 @@ Defaults.changelog = {
                     'I believe I fixed the shrouding window sizing issue. TBD though as it is hard to consistently reproduce.',
                 },
             },
+            { name="Visual DKP Calculation Bug", list = {
+                'For the DKP Officer, items subtractions following a boss-kill popup were visually incorrect.',
+                'This did not affect the real DKP calculation in PDKP, just visually.'
+            },
+            },
         }
     },
     itemPrio= {
@@ -311,7 +316,25 @@ Defaults.changelog = {
                 list = {
                     'Fixed Robes of Volatile Power. Paladins are now equal.'
                 }
-            }
+            },
+            {
+                name="Ashkandi",
+                list = {
+                    'Fixed Ashkandi to be equal prio for Warriors & Hunters that are Rank 7.'
+                }
+            },
+            {
+                name="Cloak of the Shrouded Mists",
+                list = {
+                    'Fixed Shrouded Mists to be equal prio for Tanks & Hunters'
+                }
+            },
+            {
+                name="Shadowstrike",
+                list = {
+                    'Changed from "Vendor" prio to "MS > OS"'
+                }
+            },
         }
     },
 }

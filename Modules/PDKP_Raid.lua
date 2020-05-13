@@ -240,6 +240,8 @@ function Raid:AcceptBossKillDKPUpdate(bossInfo)
             dkpText:SetText(dkp.total)
         end
         member:Save() -- Update the database locally.
+
+        GUI:UpdateVisualDKP(member, raid)
     end
 
     local dkpDB = DKP.dkpDB;
