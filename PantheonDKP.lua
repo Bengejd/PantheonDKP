@@ -276,6 +276,10 @@ function PDKP:HandleSlashCommands(msg, item)
         return Item:LinkItem();
     end
 
+    if msg == 'historyEdit' then
+        Setup:HistoryEdit()
+    end
+
     if msg == 'invite' then
         return Invites:Show();
         --        local tempInvites = {'Sparklenips', 'Annaliese'}

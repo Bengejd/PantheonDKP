@@ -456,6 +456,8 @@ function Setup:HistoryFrame()
     hf:EnableMouse(true)
     hf:RegisterForDrag("LeftButton")
 
+    local itemWinCheck = AceGUI:Create("Checkbox")
+
     local scrollcontainer = AceGUI:Create("InlineGroup")
     scrollcontainer:SetFullWidth(false)
     scrollcontainer:SetFullHeight(true)
@@ -1199,4 +1201,18 @@ function Setup:ClassIcons()
         classGroup:AddChild(icon)
         table.insert(GUI.classGroup.kids, icon)
     end
+end
+
+function Setup:HistoryEdit()
+--    local mainFrame = CreateFrame("Frame", "pdkpHistoryEdit", RaidFrame, "BasicFrameTemplateWithInset")
+--    mainFrame:SetSize(300, 425) -- Width, Height
+--    mainFrame:SetPoint("CENTER", UIParent, "CENTER", 300, 0) -- Point, relativeFrame, relativePoint, xOffset, yOffset
+--    mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
+--    mainFrame.title:SetFontObject("GameFontHighlight")
+--    mainFrame.title:SetPoint("CENTER", mainFrame.TitleBg, "CENTER", 11, 0)
+--    mainFrame.title:SetText('Edit Entry')
+--    mainFrame:SetFrameStrata('FULLSCREEN');
+--    mainFrame:SetFrameLevel(1);
+--    mainFrame:SetToplevel(true)
+
 end

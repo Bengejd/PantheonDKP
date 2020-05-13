@@ -280,7 +280,14 @@ Defaults.changelog = {
                     'In the Raid Interface tools, you\'ll now see how many of each class is in the raid',
                     'Hovering over a class will bring up a tooltip with their names.'
                 }
-            }
+            },
+            {
+                name="History members selection",
+                list = {
+                    'You can now Shift-Click the members from a history entry to select all members from that entry.',
+                }
+            },
+
         }
     },
     bugFixes= {

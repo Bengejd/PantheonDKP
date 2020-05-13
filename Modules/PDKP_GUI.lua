@@ -478,7 +478,20 @@ function GUI:ShowSelectedHistory(charObj)
                         if charObj == nil then -- List all entries, with the people affected.
                             local names = entry['names'];
                             local sg3 = AceGUI:Create("SimpleGroup")
-                            local namesLabel = AceGUI:Create("Label")
+                            local namesLabel = AceGUI:Create("InteractiveLabel")
+                            namesLabel:SetCallback("OnClick", function(self, _, buttonType)
+                                if IsShiftKeyDown() and buttonType == "LeftButton" then
+                                    local tableData = GUI:GetTableDisplayData(true)
+                                    for key, charObj in pairs(tableData) do
+                                        for key, name in pairs(entry['members']) do
+                                            if name == charObj.name then
+                                                GUI:AddToSelected(charObj)
+                                                break;
+                                            end
+                                        end
+                                    end
+                                end
+                            end)
                             namesLabel:SetText('Members: ' .. names)
                             sg3:AddChild(namesLabel)
                             sg3:SetFullWidth(true)
@@ -490,7 +503,6 @@ function GUI:ShowSelectedHistory(charObj)
                         scroll:AddChild(ig)
                     end
                 else
-                    print(key)
                 end
             end
         end
