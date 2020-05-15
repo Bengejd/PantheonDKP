@@ -297,7 +297,7 @@ end
 
 function Raid:IsInRaidInstance()
     local _, type, difficultyIndex, maxPlayers = Raid:GetInstanceInfo()
-    return type ~= 'raid' and difficultyIndex >= 1;
+    return type == 'raid' and difficultyIndex >= 1;
 end
 
 function Raid:IsInBattleGrounds()
@@ -307,7 +307,7 @@ end
 
 function Raid:IsInInstance()
     local _, type, difficultyIndex, maxPlayers = Raid:GetInstanceInfo()
-    return type ~= 'party' and difficultyIndex >= 1;
+    return type == 'party' and difficultyIndex >= 1;
 end
 
 function Raid:GetInstanceInfo()

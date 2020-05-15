@@ -1,3 +1,7 @@
+====== Version 2.5.0 ======
+[Features]:
+    - [Combat Logging] - auto enable combat logging when entering a raid instance.
+
 ====== Version 2.4.2 ======
 [Features]:
     - [Settings] - added PDKP settings to Addon Interface (right click mini-map for shortcut).

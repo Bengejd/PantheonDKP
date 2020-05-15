@@ -62,14 +62,14 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return UnregisterEvent(self, event)
         end,
         ['ZONE_CHANGED_NEW_AREA']=function() -- This allows us to detect if the GuildInfo() event is available yet.
-            PDKP:InitializeGuildData()
-            return UnregisterEvent(self, event)
+            PDKP:CheckCombatLogging()
         end,
         ['PLAYER_ENTERING_WORLD']=function()
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin
             if uiReload then PDKP:InitializeGuildData() end
             Setup:OfficerWindow()
+            PDKP:CheckCombatLogging()
         end,
         ['WORLD_MAP_UPDATE']=function()
             return UnregisterEvent(self, event)
@@ -347,6 +347,13 @@ function PDKP:HandleSlashCommands(msg, item)
         end
         if _G['THO']:IsVisible() then _G['THO']:Hide() else _G['THO']:Show() end
     end
+end
+
+function PDKP:CheckCombatLogging()
+    local isInRaid = Raid:IsInRaidInstance()
+    if not isInRaid then return end;
+    local isLoggingCombat = LoggingCombat(true)
+    PDKP:Print("Combat logging is now " .. tostring(isLoggingCombat and "ON" or "OFF"));
 end
 
 function PDKP:BuildAllData()
