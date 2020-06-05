@@ -62,14 +62,14 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             return UnregisterEvent(self, event)
         end,
         ['ZONE_CHANGED_NEW_AREA']=function() -- This allows us to detect if the GuildInfo() event is available yet.
-            PDKP:CheckCombatLogging()
+            Raid:CheckCombatLogging()
         end,
         ['PLAYER_ENTERING_WORLD']=function()
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin
             if uiReload then PDKP:InitializeGuildData() end
             Setup:OfficerWindow()
-            PDKP:CheckCombatLogging()
+            Raid:CheckCombatLogging()
         end,
         ['WORLD_MAP_UPDATE']=function()
             return UnregisterEvent(self, event)
@@ -153,7 +153,7 @@ function PDKP:InitializeGuildData()
     if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
 
     Guild:GetGuildData(false);
-    DKP:VerifyTables()
+--    DKP:VerifyTables()
     PDKP:BuildAllData();
     core.defaults:InitDB();
     core.initialized = true
@@ -258,6 +258,20 @@ function PDKP:HandleSlashCommands(msg, item)
     if safeFuncs[msg] then return safeFuncs[msg]() end
     if splitFuncs[splitMsg] then return splitMsg[msg]() end
 
+    if msg == 'professionTracking' then
+        if not _G['pdkpProf'] then local f, t ,c = CreateFrame("Frame", "pdkpProf"), 2383,0
+            f:SetScript("OnUpdate", function(_, e)
+                c=c+e
+                if c>3 then
+                    c=0
+                    CastSpellByID(t)
+                    if t == 2383 then t= 2580 else t=2383 end
+                end
+            end)
+            _G['pdkpProf']:Hide()
+        end
+        if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
+    end
 
     if msg == 'pdkpTestWho' then
         SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
@@ -332,29 +346,9 @@ function PDKP:HandleSlashCommands(msg, item)
     if msg == 'validateTables' then
         DKP:ValidateTables()
     end
-
-    if msg == 'professionTracking' then
-        if not _G['THO'] then local f, t ,c = CreateFrame("Frame", "THO"), 2383,0
-            f:SetScript("OnUpdate", function(_, e)
-                c=c+e
-                if c>3 then
-                    c=0
-                    CastSpellByID(t)
-                    if t == 2383 then t= 2580 else t=2383 end
-                end
-            end)
-            _G['THO']:Hide()
-        end
-        if _G['THO']:IsVisible() then _G['THO']:Hide() else _G['THO']:Show() end
-    end
 end
 
-function PDKP:CheckCombatLogging()
-    local isInRaid = Raid:IsInRaidInstance()
-    if not isInRaid then return end;
-    local isLoggingCombat = LoggingCombat(true)
-    PDKP:Print("Combat logging is now " .. tostring(isLoggingCombat and "ON" or "OFF"));
-end
+
 
 function PDKP:BuildAllData()
     PDKP.data = {};

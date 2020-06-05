@@ -345,6 +345,13 @@ function Raid:GetLockedInfo()
     end
 end
 
+function Raid:CheckCombatLogging()
+    local isInRaid = Raid:IsInRaidInstance()
+    if not isInRaid then return end;
+    local isLoggingCombat = LoggingCombat(true)
+    PDKP:Print("Combat logging is now " .. tostring(isLoggingCombat and "ON" or "OFF"));
+end
+
 function Raid:IsDkpOfficer()
     if Raid.dkpOfficer then -- We have established who the DKP officer is.
         return Raid.dkpOfficer == Util:GetMyName()
