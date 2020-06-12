@@ -309,7 +309,6 @@ end
 
 --~ --For the professionTracking slash command.
  function professionTrackingFunction()
-	print("Called professionTracking function...")
 	if not _G['pdkpProf'] then
         local HERBALISM, MINING = 2383, 2580
         --~ local FIND_TREASURE, SENSE_UNDEAD = 2481, 5502
