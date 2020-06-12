@@ -235,17 +235,19 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
-    local splitMsg, name = strsplit(' ', msg)
 
     local safeFuncs = {
         ['show']=function() return PDKP:Show() end,
         ['hide']=function() return GUI:Hide() end,
         ['shroud']=function() return PDKP:MessageRecieved('shroud', Util:GetMyName()) end,
-        ['']=function() end,
+        ["gameversion"] = function ()
+			print("Current game version: " .. select(4, GetBuildInfo() ) )
+		end,
+        ['professionTracking'] = professionTrackingFunction,
     }
 
     local splitFuncs = {
-        ['report']=function()
+        ['report'] = function (name)
             local dkp = DKP:GetPlayerDKP(name)
             if dkp == 0 then
                 PDKP:Print(name .. ' has 0 dkp or was not found')
@@ -255,100 +257,81 @@ function PDKP:HandleSlashCommands(msg, item)
         end,
     }
 
+    local officerFunctions = {
+        ['pdkpTestAutoSync'] = function () Comms:DatabaseSyncRequest() end,
+        ['item'] = function ()
+            if item then return Item:LinkItem() end
+        end,
+        ['historyEdit'] = function () Setup:HistoryEdit() end,
+        ['invite'] = function ()
+            --[[ put a third hyphen in front to uncomment block comments in Lua
+            local tempInvites = {'Sparklenips', 'Annaliese'}
+            for i=1, #tempInvites do
+                InviteUnit(tempInvites[i]);
+            end
+            --]]
+            return Invites:Show()
+        end,
+        ['pdkpPrioWindow'] = function ()
+            --Setup:PrioList()
+        end,
+        ['officer'] = function () Officer:Show() end,
+        ['raidChecker'] = function () Raid:IsInInstance() end,
+        ['sortHistory'] = function () DKP:SortHistory() end,
+        ['pdkpExportDKP'] = function () Setup:dkpExport() end,
+        ['bossKill'] = function () return Raid:BossKill(669, 'Sulfuron Harbinger') end,
+        ['classes'] = function () return Guild:GetClassBreakdown() end,
+        ['timer'] = function () return GUI:CreateTimer() end,
+        ['pdkp_reset_all_db'] = function ()
+            if core.Defaults:IsDebug() then
+                DKP:ResetDB()
+                Guild:ResetDB()
+            end
+        end,
+        ['enableDebugging'] = function () core.defaults:ToggleDebugging() end,
+        ['validateTables'] = function () DKP:ValidateTables() end,
+        --['pdkpTestWho'] = function () SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15') end,
+        --SendWho() is a protected function now
+    }
+
+	-- Run member commands
     if safeFuncs[msg] then return safeFuncs[msg]() end
-    if splitFuncs[splitMsg] then return splitMsg[msg]() end
-
-    if msg == 'professionTracking' then
-        if not _G['pdkpProf'] then local f, t ,c = CreateFrame("Frame", "pdkpProf"), 2383,0
-            f:SetScript("OnUpdate", function(_, e)
-                c=c+e
-                if c>3 then
-                    c=0
-                    CastSpellByID(t)
-                    if t == 2383 then t= 2580 else t=2383 end
-                end
-            end)
-            _G['pdkpProf']:Hide()
-        end
-        if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
-    end
-
-    if msg == 'pdkpTestWho' then
-        SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
-    end
-
+    local splitMsg, name = strsplit(' ', msg)
+    if splitFuncs[splitMsg] then return splitFuncs[splitMsg](name) end
+	
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then
         return Util:Debug('Cannot process this command because you are not an officer')
-    end;
-
-    if msg == 'pdkpTestAutoSync' then
-        Comms:DatabaseSyncRequest()
-    end
-
-    if msg == 'item' and item then
-        return Item:LinkItem();
-    end
-
-    if msg == 'historyEdit' then
-        Setup:HistoryEdit()
-    end
-
-    if msg == 'invite' then
-        return Invites:Show();
-        --        local tempInvites = {'Sparklenips', 'Annaliese'}
-        --        for i=1, #tempInvites do
-        --            InviteUnit(tempInvites[i]);
-        --        end
-    end
-
-    if msg == 'pdkpPrioWindow' then
---        Setup:PrioList()
-    end
-
-    if msg == 'officer' then
-        Officer:Show()
-    end
-
-    if msg == 'raidChecker' then
-        Raid:IsInInstance()
-    end
-
-    if msg == 'sortHistory' then
-        DKP:SortHistory()
-    end
-
-    if msg == 'pdkpExportDKP' then
-        Setup:dkpExport()
-    end
-
-    if msg == 'bossKill' then
-        return Raid:BossKill(669, 'Sulfuron Harbinger');
-    end
-
-    if msg == 'classes' then
-        return Guild:GetClassBreakdown();
-    end
-
-    if msg == 'timer' then
-        return GUI:CreateTimer()
-    end
-
-    if msg == 'pdkp_reset_all_db' and core.Defaults:IsDebug() then
-        DKP:ResetDB()
-        Guild:ResetDB()
-    end
-
-    if msg == 'enableDebugging' then
-        core.defaults:ToggleDebugging()
-    end
-
-    if msg == 'validateTables' then
-        DKP:ValidateTables()
+    else
+        if officerFunctions[msg] then return officerFunctions[msg]() end
     end
 end
 
-
+--~ --For the professionTracking slash command.
+ function professionTrackingFunction()
+	print("Called professionTracking function...")
+	if not _G['pdkpProf'] then
+        local HERBALISM, MINING = 2383, 2580
+        --~ local FIND_TREASURE, SENSE_UNDEAD = 2481, 5502
+		local c, tracking = 0, HERBALISM
+		--~ local c, tracking = 0, FIND_TREASURE
+		local f = CreateFrame("Frame", "pdkpProf")
+		f:SetScript("OnUpdate", function(_, e)
+			c = c + e
+			if c > 3 then
+				c = 0
+				CastSpellByID(tracking)
+				if tracking == HERBALISM then tracking = MINING
+				else tracking = HERBALISM
+				--~ if tracking == FIND_TREASURE then tracking = SENSE_UNDEAD
+				--~ else tracking = FIND_TREASURE
+				end
+			end
+		end)
+		_G['pdkpProf']:Hide()
+	end
+	if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
+end
 
 function PDKP:BuildAllData()
     PDKP.data = {};
