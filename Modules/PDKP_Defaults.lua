@@ -63,7 +63,7 @@ local pdkpSettingsDefaults = {
             pvp = false,
             dungeons = false,
             raids = false
-        }
+        },
     }
 }
 

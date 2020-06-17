@@ -574,9 +574,12 @@ function Setup:ClassFilterCheckboxes()
     end
 end
 
-function Setup:dkpExport()
+function Setup:dkpExport(dkpExport)
     local frame = AceGUI:Create('Frame')
-    local eb = AceGUI:Create("EditBox")
+    local eb = AceGUI:Create("MultiLineEditBox")
+
+    eb:SetNumLines(10)
+    eb:SetMaxLetters(0)
 
     frame:SetHeight(500)
     frame:SetWidth(500)
@@ -587,29 +590,7 @@ function Setup:dkpExport()
     eb.frame:SetHeight(400)
     eb.frame:SetWidth(400)
 
-    local text = '';
-
-    local members = Guild.members
-    local memberNames = {}
-    for key, member in pairs(members) do
-        table.insert(memberNames, key)
-    end
-
-    local function compare(a, b)
-        return a < b;
-    end
-
-    table.sort(memberNames, compare)
-
-    for i = 1, #memberNames do
-        local member = members[memberNames[i]];
-        local dkp = member:GetDKP('Blackwing Lair', 'total')
-        if dkp > 0 then
-            text = text .. member.name .. ':' .. dkp .. ', '
-        end
-    end
-
-    eb:SetText(text)
+    eb:SetText(dkpExport)
 
     eb.frame:Show()
     frame:Show()

@@ -63,13 +63,17 @@ local raidDBDefaults = {
         raids = {},
         lastRaidID = nil,
         lastRaidDate = nil,
+        lockouts = {
+            resets = nil,
+            count = 0
+        },
     }
 }
 
 function PDKP:InitRaidDB()
     Util:Debug('RaidDB init');
-    core.raidHistory = LibStub("AceDB-3.0"):New("pdkp_raidHistory", raidDBDefaults, true);
-    raidHistory = core.raidHistory.db.profile;
+    core.Raid.db = LibStub("AceDB-3.0"):New("pdkp_raidHistory", raidDBDefaults, true);
+    raidHistory = core.Raid.db.profile;
 end
 
 -- Boolean to check if we're in a raid group or not.
@@ -395,5 +399,31 @@ function Raid:AnnounceLoot()
             SendChatMessage(lootItem.link .. ' PRIO: ' .. lootItem.prio, 'RAID', 'Common')
         end
     end
+end
+
+function Raid:GetLockoutTimers(reset)
+    local lockouts = raidHistory.lockouts
+    local _, _, server_time, _ = Util:GetDateTimes() -- Grab the current server time.
+    local minsInDay = 1440
+    local lockoutTime = lockouts.reset or server_time
+    local minsSinceFirstReset = Util:SubtractTime(lockoutTime, server_time)
+
+    if reset then
+        if lockoutTime == nil then
+            lockouts.reset = server_time
+        end
+    end
+
+    if minsSinceFirstReset > minsInDay then -- it's been more than 24 hours.
+        lockouts.reset = nil
+        lockouts.count = 0
+    end
+
+    if reset then
+        lockouts.count = lockouts.count + 1
+    end
+
+    local timeToReset = minsInDay - minsSinceFirstReset;
+    PDKP:Print(tostring(lockouts.count) .. '/30 instance resets. Count resets in ' .. timeToReset .. ' mins.')
 end
 

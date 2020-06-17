@@ -94,13 +94,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             Raid:BossKill(arg1, arg2)
         end,
         ['CHAT_MSG_SYSTEM']=function() -- Fired when yellow system text is presented.
-            if Defaults:IsDebug() then
-                Util:Debug('event name' .. tostring(event) .. 'arg1' .. tostring(arg1))
-
-                if arg1 and string.find(arg1, 'has been reset') ~= nil then
-                    print('Found a reset, boss!')
-                end
-            end
+            if arg1 and string.find(arg1, 'has been reset') ~= nil then Raid:GetLockoutTimers(true) end
         end,
         ['']=function() end,
     }
@@ -163,6 +157,8 @@ function PDKP:InitializeGuildData()
         Comms:SendCommsMessage('pdkpVersion', 'GUILD', Defaults.addon_version, nil, 'BULK', nil)
     end
     if not Defaults.settings_complete then Setup:InterfaceOptions() end
+
+    DKP:DeleteOldEntries()
 end
 
 function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
@@ -189,6 +185,7 @@ function PDKP:InitializeDatabases()
     Guild:InitGuildDB()
     DKP:InitDKPDB()
     Minimap:InitMapDB()
+    PDKP:InitRaidDB()
     core.databasesInitialized = true
 end
 
@@ -318,8 +315,8 @@ function PDKP:HandleSlashCommands(msg, item)
         DKP:SortHistory()
     end
 
-    if msg == 'pdkpExportDKP' then
-        Setup:dkpExport()
+    if msg == 'exportDKP' then
+        DKP:ExportCSV()
     end
 
     if msg == 'bossKill' then

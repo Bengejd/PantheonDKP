@@ -59,6 +59,21 @@ function Util:Wait(seconds)
     repeat until tonumber(date('%S')) > start + seconds
 end
 
+function Util:SubtractTime(baseTime, subTime)
+    local secondsSinceSync = (subTime - baseTime) -- the seconds since our last sync
+    local minsSinceFirstReset = math.floor(secondsSinceSync / 60) -- Minutes since last sync.
+    return minsSinceFirstReset
+end
+
+function Util:AddTime(base, seconds)
+    return base + seconds
+end
+
+function Util:SecondsToDays(days)
+    local secondsInDay = 86400
+    return secondsInDay * days
+end
+
 -- Generic print function that colors message as red
 function Util:ThrowError(msg, debug)
     local warning = 'E71D36'

@@ -12,6 +12,7 @@ local Shroud = core.Shroud;
 local Defaults = core.defaults;
 local Import = core.import;
 local Comms = core.Comms;
+local Setup = core.Setup;
 
 local dkpDB;
 
@@ -525,4 +526,55 @@ end
 function DKP:SyncReqAndLastSyncEqual(syncRequest)
     Guild:GetGuildData() -- Regrab the guild data, just incase.
     return DKP.lastSync == syncRequest
+end
+
+function DKP:ExportCSV()
+    local exportString = "Name, Class, Molten Core, Blackwing Lair\n"
+    local members = Guild.members
+    local memberNames = {}
+    for key, member in pairs(members) do
+        table.insert(memberNames, key)
+    end
+
+    local function compare(a, b) return a < b; end
+
+    table.sort(memberNames, compare)
+
+    for i = 1, #memberNames do
+        local member = members[memberNames[i]];
+        exportString = exportString .. member.name .. ',' .. member.class .. ','
+        for _, raid in pairs(core.raids) do
+            if raid ~= 'Onyxia\'s Lair' then
+                exportString = exportString .. member:GetDKP(raid, 'total') .. ','
+            end
+        end
+        exportString = exportString:sub(1, -2) .. '\n'
+    end
+
+    Setup:dkpExport(exportString)
+end
+
+function DKP:DeleteOldEntries()
+    local daysSince = Util:SecondsToDays(21)
+    local _, _, serverTime, _ = Util:GetDateTimes()
+
+    local afterCount = 0
+    local timeToSearch = serverTime - daysSince
+    local removeEntries = {}
+
+    for time, entry in pairs(dkpDB.history.all) do
+        if timeToSearch > time then
+            table.insert(removeEntries, time)
+        else
+            afterCount = afterCount + 1
+        end
+    end
+
+    for _, entryID in pairs(removeEntries) do
+      dkpDB.history.all[entryID] = nil
+    end
+
+    if #removeEntries > 0 then
+        PDKP:Print('Deleted ' .. #removeEntries .. ' Old Entries')
+    end
 end
