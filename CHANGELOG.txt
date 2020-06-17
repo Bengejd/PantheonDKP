@@ -2,6 +2,8 @@
 [Features]:
     - [Combat Logging] - auto enable combat logging when entering a raid instance.
     - [Herb / Mining Switcher] - will swap between Track Herbs & Track Mining every few seconds.
+    - [DKP Cleanup] - now deletes entries that are older than 15 days from the history. Should cut back on merge times.
+    - [DKP Export command] - /pdkp exportDKP now exports the DKP tables to a editBox that is able to be copied.
 
 ====== Version 2.4.2 ======
 [Features]:

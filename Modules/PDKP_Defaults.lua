@@ -263,34 +263,26 @@ core.bossIDS = {
 }
 
 Defaults.changelog = {
-    version='2.4.4',
+    version='2.5.0',
     features= {
         name='New Features',
         changes = {
             {
-                name="Addon Settings Interface",
+                name="Automatic Combat Logging",
                 list = {
-                    'Right click the minimap icon to open settings interface',
-                    'Enable / Disable Notifications', 'Enable / Disable DKP syncing in \n Instances, Raids or Battlegrounds.',
+                    'Combat logging will now automatically be enabled when joining a raid instance',
                 }
             },
             {
-                name="Raid Class Breakdown",
+                name="DKP Entries Cleanup",
                 list = {
-                    'In the Raid Interface tools, you\'ll now see how many of each class is in the raid',
-                    'Hovering over a class will bring up a tooltip with their names.'
+                    'DKP Entries older than 15 days will be deleted to improve merge / overwrite times.',
                 }
             },
             {
-                name="History Item-Wins Filter",
+                name="DKP Export",
                 list = {
-                    'You can now filter the history by item-wins, instead of having load-finding them',
-                }
-            },
-            {
-                name="History members selection",
-                list = {
-                    'You can now Shift-Click the members from a history entry to select all members from that entry.',
+                    'DKP Can not be exported to a CSV format that is copyable.',
                 }
             },
 
@@ -299,54 +291,15 @@ Defaults.changelog = {
     bugFixes= {
         name='Bug Fixes',
         changes =  {
-            { name="Raid Tools", list = {
-                    'Now usable by anyone, not just officers or assistants.', 'Spam text resets if it\'s empty when the raid-tools window is closed.',
-                },
-            },
-            { name="Lockout Timers", list = {
-                    'Timer format has been changed to be more readable.',
-                },
-            },
-            { name="Syncing", list = {
-                    'Sync allowances is now handled by addon infterface settings. This will prevent syncs from occurring in the middle of raids.',
-                },
-            },
-            { name="Shrouding Window", list = {
-                    'I believe I fixed the shrouding window sizing issue. TBD though as it is hard to consistently reproduce.',
-                },
-            },
-            { name="Visual DKP Calculation Bug", list = {
-                'For the DKP Officer, items subtractions following a boss-kill popup were visually incorrect.',
-                'This did not affect the real DKP calculation in PDKP, just visually.'
-            },
-            },
         }
     },
     itemPrio= {
         name='Prio Changes',
         changes =  {
             {
-                name="Robes of Volatile Power",
+                name="Mageblade",
                 list = {
-                    'Fixed Robes of Volatile Power. Paladins are now equal.'
-                }
-            },
-            {
-                name="Ashkandi",
-                list = {
-                    'Fixed Ashkandi to be equal prio for Warriors & Hunters that are Rank 7.'
-                }
-            },
-            {
-                name="Cloak of the Shrouded Mists",
-                list = {
-                    'Fixed Shrouded Mists to be equal prio for Tanks & Hunters'
-                }
-            },
-            {
-                name="Shadowstrike",
-                list = {
-                    'Changed from "Vendor" prio to "MS > OS"'
+                    'Changed to include Paladins as equal prio'
                 }
             },
         }
