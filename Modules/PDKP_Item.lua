@@ -136,7 +136,7 @@ item.priority = {
 
     -- Golemagg The Incinerator Loot --
 
-    ['Azuresong Mageblade'] =  'Mage = Warlock = MS>OS',
+    ['Azuresong Mageblade'] =  'Mage = Warlock = Paladin > MS>OS',
     ['Blastershot Launcher'] =  'Warrior (Tank) = Warrior (DPS) > Rogue > Hunter',
     ['Staff of Dominance'] =  'Mage = Warlock = Druid (Boom)',
 

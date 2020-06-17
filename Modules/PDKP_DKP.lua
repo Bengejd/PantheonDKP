@@ -577,4 +577,5 @@ function DKP:DeleteOldEntries()
     if #removeEntries > 0 then
         PDKP:Print('Deleted ' .. #removeEntries .. ' Old Entries')
     end
+    PDKP:Print(afterCount .. ' Entries Found')
 end
