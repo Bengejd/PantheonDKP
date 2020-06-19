@@ -148,7 +148,6 @@ function PDKP:InitializeGuildData()
 
     Guild:GetGuildData(false);
     PDKP:BuildAllData();
-    core.defaults:InitDB();
     core.initialized = true
 
     if not Comms.commsRegistered then Comms:RegisterCommCommands() end
@@ -181,6 +180,7 @@ end
 
 -- Initializes the PDKP Databases.
 function PDKP:InitializeDatabases()
+    core.defaults:InitDB();
     Guild:InitGuildDB()
     DKP:InitDKPDB()
     Minimap:InitMapDB()
