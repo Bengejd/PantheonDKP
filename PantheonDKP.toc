@@ -1,11 +1,11 @@
 ## Interface: 11302
 ## Title: PantheonDKP
 ## Author: Neekio
-## Version: 2.5.1
+## Version: 3.0.0
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap, pdkp_settingsDB
+## SavedVariables:
 
 #@no-lib-strip@
 embed.xml
@@ -16,29 +16,10 @@ embed.xml
 init.lua
 
 # Module files
-Modules\PDKP_Defaults.lua
-Modules\Util.lua
-Modules\PDKP_Comms.lua
 
 ## Classes
-Classes\PDKP_Member.lua
 
 ## Database files
-Modules\PDKP_GUI.lua
-Modules\PDKP_Character.lua
-Modules\PDKP_DKP.lua
-Modules\PDKP_Edit.lua
-Modules\PDKP_Guild.lua
-Modules\PDKP_Item.lua
-Modules\PDKP_Raid.lua
-Modules\PDKP_Import.lua
-Modules\PDKP_Setup.lua
-Modules\PDKP_Officer.lua
-Modules\PDKP_Minimap.lua
-
-
-View_Templates\Shrouding\pdkp_shrouding.xml
-View_Templates\Scrollbar\pdkp_scrollbar.xml
 
 ## This should be last in the file, so that the previous modules had time to load first.
 PantheonDKP.xml

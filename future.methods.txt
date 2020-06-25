@@ -1,0 +1,2 @@
+SetLootMethod("master", "name");
+lootmethod, masterlooterPartyID, masterlooterRaidID = GetLootMethod()

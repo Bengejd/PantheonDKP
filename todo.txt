@@ -1,5 +1,4 @@
 ESSENTIALS:
-    TODO: Fix initialization error on login. Not sure why this is happening.
     TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
     TODO: Settings menu when mini-map is right-clicked.
         TODO: Allow Disable print messages.
