@@ -8,6 +8,8 @@ local _G = _G;
 local L = core.L;
 
 core.PDKP = {}; -- global addon object
+core.Settings = {};
+core.Guild = {};
 
 core.PDKP = LibStub("AceAddon-3.0"):NewAddon("PDKP", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0");
 
