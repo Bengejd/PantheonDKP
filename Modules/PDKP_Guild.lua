@@ -40,55 +40,35 @@ function Guild:InitGuildDB()
     Guild.db = GuildDB;
 end
 
--- Gets & Sets the guildDB's data.
-function Guild:GetGuildData(onlineOnly)
-    if IsInGuild() == false then return end;
+function Guild:IsNewMemberObject(member)
+    return next(Guild.members[member.name]) == nil
+end
 
-    --	name—Name of the member (string)
-    --	rank—Name of the member’s rank (string)
-    --	rankIndex—Numeric rank of the member (0 = guild leader; higher numbers
-    --	for lower ranks) (number)
-    --	level—Character level of the member (number)
-    --	class—Localized name of the member’s class (string)
-    --	zone—Zone in which the member was last seen (string)
-    --	note—Public note text for the member (string)
-    --	officernote—Officer note text for the member, or the empty string
-    --  if the player is not allowed to view officer notes (string)
-    --	online—1 if the member is currently online; otherwise nil (1nil)
-    --	status—Status text for the member (string)
-    --		<AFK>—Is away from keyboard
-    --		<DND>—Does not want to be disturbed
-    --  classFileName—Non-localized token representing the member’s class
-    --		(string)
-
+function Guild:GetMembers()
     GuildRoster()
-    Guild.officers = {}; -- Clear out the old array, just incase.
-    local gMemberCount, _, _ = GetNumGuildMembers();
-    if gMemberCount > 0 then GuildDB.numOfMembers = gMemberCount else gMemberCount = GuildDB.numOfMembers; end
-    for i=1, gMemberCount do
+    Guild.classLeaders, Guild.officers = {}, {};
+    Guild.online = {};
+    Guild.numOfMembers, _, _ = GetNumGuildMembers();
+    if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
+    for i=1, Guild.numOfMembers do
         local member = Member:new(i)
+        local isNew = Guild:IsNewMemberObject(member)
+
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
-            if member.online then Guild.online[member.name]=member;  end
-            if member.isBank then
-                Guild.bankIndex = i
-                DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)
-            end
-            if member.isOfficer then table.insert(Guild.officers, member) end
-            member.isDkpOfficer = false
-
-            if member.isClassLeader then table.insert(Guild.classLeaders, member) end
-
-            if member.name == nil then
-                member.name = ''
-            else
+            if member.name == nil then member.name = '' end;
+            if member.isBank then Guild:InitBankInfo(i, member) end -- Init bank info.
+            if member.isOfficer then insert(Guild.officers, member) end -- Init Officers
+            if member.isClassLeader then insert(Guild.classLeaders, member) end; -- Init class classLeaders
+            -- Add member to the table only if it's new, to allow object persistence.
+            if isNew then
                 member:MigrateAndLocate()
                 member:Save()
                 Guild.members[member.name] = member;
             end
+
+            if member.online then Guild.online[member.name] = member end
         end
     end
-
-    Guild:VerifyGuildData()
     return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
