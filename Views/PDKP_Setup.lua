@@ -24,6 +24,41 @@ local AceGUI = LibStub("AceGUI-3.0")
 local PlaySound = PlaySound
 
 function Setup:MainInterface()
+    local sortBy, sortDir;
+
+    local toggleSortDir = function(sortDir)
+        if sortDir == 'ASC' then return 'DESC' end
+        return 'ASC';
+    end
+
+    local sortFunc = function(currentSort, currentDir, sortBy)
+        local sortDir;
+        if currentSort == sortBy then
+            sortDir = toggleSortDir(currentDir)
+        else
+            sortDir = currentDir or 'ASC';
+        end
+
+        local function compare(a,b)
+            if a == 0 and b == 0 then return end;
+            if sortDir == 'ASC' then return a[sortBy] > b[sortBy] end
+            return a[sortBy] < b[sortBy];
+        end
+
+        local function compareDKP(a,b)
+            if sortDir == 'DES' then return a.dkp['Molten Core'].total > b.dkp['Molten Core'].total end
+            return a.dkp['Molten Core'].total < b.dkp['Molten Core'].total
+        end
+
+        if sortBy == 'dkp' then
+            table.sort(Guild.members, compareDKP)
+        else
+            table.sort(Guild.members, compare)
+        end
+
+        return sortBy, sortDir
+    end
+
     local AceGUI = LibStub("AceGUI-3.0")
     -- Create a container frame
     local f = AceGUI:Create("Frame")
@@ -33,36 +68,16 @@ function Setup:MainInterface()
     f:SetLayout("Flow")
 
     local tg = AceGUI:Create("TabGroup")
+    tg:SetFullWidth(true)
     local tabs = {
         {value = "name", text = "Name" },
         {value = "class", text = "Class" },
         {value = "dkp", text = "DKP" },
     }
     tg:SetTabs(tabs)
+    tg.content:Hide()
+    tg.content:ClearAllPoints()
     f:AddChild(tg);
-
-    for _, tab in pairs(tg.tabs) do
-        tab:SetScript("OnClick", function()
-            PlaySound(841) -- SOUNDKIT.IG_CHARACTER_INFO_TAB
-            tab.obj:SelectTab(tab.value)
-        end)
-    end
-
-    tg:SetCallback("OnGroupSelected", function(self, _, value)
-        print(value)
-    end)
-
---    local sg = AceGUI:Create("SimpleGroup")
---    sg:Set
-
-    -- Add in the labels
---    for _, text in pairs({'Name', 'Class', 'DKP' }) do
---        local label = AceGUI:Create("Label")
---        label:SetText(text)
---        sg:AddChild(label)
---    end
---
---    f:AddChild(sg)
 
 
     local scrollcontainer = AceGUI:Create("SimpleGroup") -- "InlineGroup" is also good
@@ -72,21 +87,62 @@ function Setup:MainInterface()
 
     f:AddChild(scrollcontainer)
 
-    local scroll = AceGUI:Create("ScrollFrame")
-    scroll:SetLayout("Flow") -- probably?
-    scrollcontainer:AddChild(scroll)
+    local function addScroll()
+        local scroll = AceGUI:Create("ScrollFrame")
+        scroll:SetLayout("Flow") -- probably?
+        scrollcontainer:AddChild(scroll)
+        scroll:SetFullWidth(true)
 
+        local function addChildren()
+            scroll:PauseLayout()
+            for _, member in pairs(Guild.members) do
+                local ig = AceGUI:Create("SimpleGroup")
+                ig:SetFullWidth(true)
 
+                local label = AceGUI:Create("Label")
+                label:SetText(member.name)
+                label:SetFullWidth(false)
+                label:SetWidth(200)
+                label.frame:ClearAllPoints()
+                label.frame:SetPoint("TOPRIGHT", -300, -300)
+                print(label.frame:GetNumPoints())
+                label:SetFullWidth(false)
+                ig:AddChild(label)
 
+--                local label2 = AceGUI:Create("Label")
+--                label2:SetText(member.class)
+--                label2:SetFullWidth(true)
+--
+--                label:SetPoint("LEFT", 60, 10)
+--                ig:AddChild(label2)
+----                label2:SetWidth(50)
+--
+--                local label3 = AceGUI:Create("Label")
+--                label3:SetText(member.dkp['Molten Core'].total)
+--                label3:SetFullWidth(true)
+--                label3.frame:ClearAllPoints()
+--                label.frame:SetPoint("LEFT", 120, 0)
+--                ig:AddChild(label3)
 
-    for _, member in pairs(Guild.members) do
-        local label = AceGUI:Create("Label")
-        label:SetText(member.name)
-        scroll:AddChild(label)
+--                label3:SetWidth(50)
+
+                scroll:AddChild(ig)
+            end
+            scroll:ResumeLayout()
+        end
+        addChildren()
     end
 
-    -- ... add your widgets to "scroll"
-
-
+    for _, tab in pairs(tg.tabs) do
+        tab:SetScript("OnClick", function()
+            PlaySound(841) -- SOUNDKIT.IG_CHARACTER_INFO_TAB
+            tab.obj:SelectTab(tab.value)
+            tab:SetSelected(false)
+            sortBy, sortDir = sortFunc(sortBy, sortDir, tab.value)
+            scrollcontainer:ReleaseChildren()
+            addScroll()
+        end)
+    end
+    addScroll()
 end
 
