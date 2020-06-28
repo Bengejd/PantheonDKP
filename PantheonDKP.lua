@@ -29,7 +29,8 @@ end
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 
-    core.guild = Guild:new();
+    Guild:new();
+
 end
 
 function UnregisterEvent(self, event)

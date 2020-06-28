@@ -2,15 +2,30 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
-local Guild = core.Classes.Guild;
-local GuildDB;
+local DKP = core.DKP;
+local GUI = core.GUI;
+local Item = core.Item;
+local PDKP = core.PDKP;
+local Raid = core.Raid;
+local Util = core.Util;
+local Comms = core.Comms;
+local Setup = core.Setup;
+local Guild = core.Guild;
+local Shroud = core.Shroud;
 local Member = core.Member;
+local Import = core.Import;
+local Officer = core.Officer;
+local Invites = core.Invites;
+local Minimap = core.Minimap;
+local Defaults = core.Defaults;
+
+local GuildDB;
 
 local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
 local strsplit, tonumber, tostring, pairs, type, next = strsplit, tonumber, tostring, pairs, type, next -- Global lua functions.
-local setmetatable, insert = setmetatable, table.insert
+local insert = setmetatable, table.insert
 
-Guild.__index = Guild; -- Set the __index parameter to reference Character
+Guild.initiated = false;
 
 -- Init the Databse.
 local function initDB()
@@ -28,23 +43,22 @@ end
 
 -- Init the Guild object.
 function Guild:new()
-    if IsInGuild() == false then return end
+    if (IsInGuild() == false) or (Guild.initiated) then return end
 
-    local self = {};
-    setmetatable(self, Guild); -- Set the metatable so we used Members's __index
+    Guild.db = initDB()
 
-    self.db = initDB()
+    Guild.officers = {};
+    Guild.members = {};
+    Guild.classLeaders = {};
+    Guild.bankIndex = nil;
+    Guild.online = {};
+    Guild.numOfMembers = nil;
 
-    self.officers = {};
-    self.members = {};
-    self.classLeaders = {};
-    self.bankIndex = nil;
-    self.online = {};
-    self.numOfMembers = nil;
+    Guild.initiated = true;
 
-    -- Variables / Attributes.
+    PDKP:Print('Guild Initiated')
 
-    return self
+    return Guild
 end
 
 function Guild:IsNewMemberObject(member)
@@ -53,33 +67,33 @@ end
 
 function Guild:GetMembers()
     GuildRoster()
-    self.classLeaders, self.officers = {}, {};
-    self.online = {};
-    self.numOfMembers, _, _ = GetNumGuildMembers();
-    if self.numOfMembers > 0 then GuildDB.numOfMembers = self.numOfMembers else self.numOfMembers = GuildDB.numOfMembers; end
-    for i=1, self.numOfMembers do
+    Guild.classLeaders, Guild.officers = {}, {};
+    Guild.online = {};
+    Guild.numOfMembers, _, _ = GetNumGuildMembers();
+    if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
+    for i=1, Guild.numOfMembers do
         local member = Member:new(i)
         local isNew = Guild:IsNewMemberObject(member)
 
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
             if member.name == nil then member.name = '' end;
-            if member.isBank then self:InitBankInfo(i, member) end -- Init bank info.
-            if member.isOfficer then insert(self.officers, member) end -- Init Officers
-            if member.isClassLeader then insert(self.classLeaders, member) end; -- Init class classLeaders
+            if member.isBank then Guild:InitBankInfo(i, member) end -- Init bank info.
+            if member.isOfficer then insert(Guild.officers, member) end -- Init Officers
+            if member.isClassLeader then insert(Guild.classLeaders, member) end; -- Init class classLeaders
             -- Add member to the table only if it's new, to allow object persistence.
             if isNew then
                 member:MigrateAndLocate()
                 member:Save()
-                self.members[member.name] = member;
+                Guild.members[member.name] = member;
             end
 
-            if member.online then self.online[member.name] = member end
+            if member.online then Guild.online[member.name] = member end
         end
     end
-    return self.online, self.members; -- Always return, even if it's empty.
+    return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
 function Guild:InitBankInfo(index, member)
-    self.bankIndex = i
+    Guild.bankIndex = i
     DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)
 end
