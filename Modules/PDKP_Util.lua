@@ -18,6 +18,7 @@ local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
+local Character = core.Character;
 
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
 local replace, format, tostring, gsub = string.rep, string.format, tostring, string.gsub
@@ -65,6 +66,20 @@ function Util:RemoveColorFromText(name)
     fName = gsub(fName, "%s+", "")
     return fName
 end
+
+-- Returns all Alliance classes in WoW Classic.
+--function Defaults:GetAllClasses()
+--    return Defaults.classes;
+--end
+
+--function Defaults:GetClassColor(class)
+--    return class_colors[class]
+--end
+--
+--function Defaults:GetClassColoredName(name, class)
+--    local classColor = Util:GetClassColor(class)
+--    return Util:FormatFontTextColor(classColor, name)
+--end
 
 -----------------------------
 --     Time Functions      --
@@ -163,7 +178,13 @@ function Util:RemoveNonNumerics(str)
 end
 
 -----------------------------
---     String Functions    --
+--      Class Functions    --
+-----------------------------
+
+
+
+-----------------------------
+--      Table Functions    --
 -----------------------------
 
 -- Returns the tableIndex of a table key.
@@ -183,7 +204,7 @@ end
 
 -- Debugging utility function that prints what's inside of a table.
 function Util:PrintTable(tt, indent)
-    if not Defaults:IsDebug() then return end;
+--    if not Defaults:IsDebug() then return end;
 
     local done = {}
     indent = 0 or 0

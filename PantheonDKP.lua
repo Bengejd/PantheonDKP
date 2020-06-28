@@ -21,9 +21,20 @@ local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 
 
-
 local function PDKP_OnEvent(self, event, arg1, ...)
+    local ADDON_EVENTS = {
+        ['ADDON_LOADED']=PDKP:OnInitialize(event, arg1),
+        ['PLAYER_ENTERING_WORLD']=function()
+--            Guild:GetMembers();
 
+            print('Non guild event')
+
+            PDKP:Print(#Guild.members .. ' members found')
+            Setup:MainInterface()
+        end
+    }
+
+    if ADDON_EVENTS[event] then ADDON_EVENTS[event]() end
 end
 
 function PDKP:OnInitialize(event, name)
@@ -49,5 +60,4 @@ for _, eventName in pairs(eventNames) do
     events:RegisterEvent(eventName);
 end
 events:SetScript("OnEvent", PDKP_OnEvent); -- calls the above MonDKP_OnEvent function to determine what to do with the event
-
 
