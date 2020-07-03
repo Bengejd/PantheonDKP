@@ -95,7 +95,7 @@ function GUI:UpdateVisualDKP(sentMember, raid)
     local dkp = sentMember:GetDKP(raid, 'total') -- Get the new DKP totals.
     for i=1, #tableData do
         local charObj = tableData[i]
-        if charObj['name'] == member.name then
+        if charObj['name'] == sentMember.name then
             charObj.dkp[raid].total = dkp
             break;
         end
