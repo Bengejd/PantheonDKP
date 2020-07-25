@@ -95,34 +95,28 @@ function Setup:MainInterface()
 
         local function addChildren()
             scroll:PauseLayout()
+
+            local function addLabel(text)
+                local label = AceGUI:Create("Label")
+                label:SetFullWidth(false)
+                label:SetWidth(200)
+                label:SetText(text)
+
+                label.frame:ClearAllPoints()
+                label.frame:SetPoint("TOPRIGHT", -300, -300)
+                return label
+            end
+
             for _, member in pairs(Guild.members) do
                 local ig = AceGUI:Create("SimpleGroup")
                 ig:SetFullWidth(true)
+                ig:SetLayout("Flow") -- probably?
 
-                local label = AceGUI:Create("Label")
-                label:SetText(member.name)
-                label:SetFullWidth(false)
-                label:SetWidth(200)
-                label.frame:ClearAllPoints()
-                label.frame:SetPoint("TOPRIGHT", -300, -300)
-                print(label.frame:GetNumPoints())
-                label:SetFullWidth(false)
-                ig:AddChild(label)
+                local l1, l2, l3 = addLabel(member.name), addLabel(member.coloredClass), addLabel(member.dkp['Molten Core'].total)
 
---                local label2 = AceGUI:Create("Label")
---                label2:SetText(member.class)
---                label2:SetFullWidth(true)
---
---                label:SetPoint("LEFT", 60, 10)
---                ig:AddChild(label2)
-----                label2:SetWidth(50)
---
---                local label3 = AceGUI:Create("Label")
---                label3:SetText(member.dkp['Molten Core'].total)
---                label3:SetFullWidth(true)
---                label3.frame:ClearAllPoints()
---                label.frame:SetPoint("LEFT", 120, 0)
---                ig:AddChild(label3)
+                ig:AddChild(l1)
+                ig:AddChild(l2)
+                ig:AddChild(l3)
 
 --                label3:SetWidth(50)
 
