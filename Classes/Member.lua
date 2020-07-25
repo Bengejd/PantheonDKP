@@ -8,6 +8,8 @@ local bank_name = Defaults.bank_name;
 
 local setmetatable, strsplit, pairs = setmetatable, strsplit, pairs
 
+local GetGuildRosterInfo = GetGuildRosterInfo
+
 local Member = core.Member;
 Member.__index = Member; -- Set the __index parameter to reference Character
 

@@ -117,7 +117,7 @@ local function Guild_OnEvent(self, event, arg1, ...)
     }
 
     if ADDON_EVENTS[event] then
-        print('Guild Event!')
+--        print('Guild Event!')
         return ADDON_EVENTS[event]()
     end
 
