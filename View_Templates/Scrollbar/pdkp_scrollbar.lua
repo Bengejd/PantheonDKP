@@ -91,7 +91,7 @@ function GUI:pdkp_dkp_table_sort(sortBy)
 end
 
 function GUI:UpdateVisualDKP(sentMember, raid)
---    local member = Guild.members[sentMember.name];
+    --    local member = Guild.members[sentMember.name];
     local dkp = sentMember:GetDKP(raid, 'total') -- Get the new DKP totals.
     for i=1, #tableData do
         local charObj = tableData[i]
