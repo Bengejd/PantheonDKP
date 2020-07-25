@@ -27,6 +27,11 @@ Modules\Character.lua
 Modules\Defaults.lua
 Modules\PDKP_Util.lua
 Modules\Settings.lua
+Modules\Minimap.lua
+Modules\Comms.lua
+Modules\Loot.lua
+Modules\Shroud.lua
+Modules\GUI.lua
 
 ## Views
 Views\PDKP_Setup.lua

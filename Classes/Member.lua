@@ -43,6 +43,11 @@ function Member:new(guildIndex)
     return self
 end
 
+function Member:Changed(event, name, key, value, dataobj)
+    --    print('LDB Changed', event, name, key, tostring(value))
+    print("LDB: "..name.. ".".. key.. " was changed to ".. tostring(value))
+end
+
 function Member:Save()
 
 end

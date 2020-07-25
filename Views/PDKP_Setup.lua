@@ -63,8 +63,8 @@ function Setup:MainInterface()
     -- Create a container frame
     local f = AceGUI:Create("Frame")
     f:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
-    f:SetTitle("AceGUI-3.0 Example")
-    f:SetStatusText("Status Bar")
+--    f:SetTitle("AceGUI-3.0 Example")
+--    f:SetStatusText("Status Bar")
     f:SetLayout("Flow")
 
     local tg = AceGUI:Create("TabGroup")
@@ -97,13 +97,57 @@ function Setup:MainInterface()
             scroll:PauseLayout()
 
             local function addLabel(text)
-                local label = AceGUI:Create("Label")
+                local label = AceGUI:Create("InteractiveLabel")
                 label:SetFullWidth(false)
                 label:SetWidth(200)
+                label:SetHeight(100)
                 label:SetText(text)
 
                 label.frame:ClearAllPoints()
                 label.frame:SetPoint("TOPRIGHT", -300, -300)
+
+                label:SetCallback('OnClick', function(self, _, clickType)
+                    local group = label.parent;
+                    local children = group.children
+
+                    local name = children[1].label:GetText()
+                    local class = children[2].label:GetText()
+                    local viewDKP = children[3].label:GetText()
+
+                    local member = Guild.members[name]
+
+                    local dkp = member.dkp['Molten Core'].total
+
+                    if clickType == 'LeftButton' then
+                        member.dkp['Molten Core'].total = member.dkp['Molten Core'].total + 1
+                    end
+
+                    if clickType == 'RightButton' then
+                        member.dkp['Molten Core'].total = member.dkp['Molten Core'].total - 1
+                    end
+
+                    children[3].label:SetText(dkp)
+
+                    children[1]:SetHighlight(1,1,1,1)
+
+                    local keyset={}
+                    local n=0
+
+                    for k,v in pairs(children[1]) do
+                        n=n+1
+                        keyset[n]=k
+
+                        print(n, k)
+                    end
+
+--                    children[1].highlight
+                    children[2]:SetHighlight(1,1,1,1)
+                    children[3]:SetHighlight(1,1,1,1)
+
+--                    print(member.dkp['Molten Core'].total)
+
+                end)
+
                 return label
             end
 
@@ -117,8 +161,6 @@ function Setup:MainInterface()
                 ig:AddChild(l1)
                 ig:AddChild(l2)
                 ig:AddChild(l3)
-
---                label3:SetWidth(50)
 
                 scroll:AddChild(ig)
             end
@@ -138,5 +180,7 @@ function Setup:MainInterface()
         end)
     end
     addScroll()
+
+
 end
 

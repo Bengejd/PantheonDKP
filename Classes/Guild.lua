@@ -27,6 +27,8 @@ local insert = table.insert
 
 Guild.initiated = false;
 
+
+
 -- Init the Databse.
 local function initDB()
     local guildDBDefaults = {
@@ -69,6 +71,7 @@ function Guild:IsNewMemberObject(member)
 end
 
 function Guild:GetMembers()
+
     GuildRoster()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
@@ -90,7 +93,6 @@ function Guild:GetMembers()
 --                member:Save()
                 table.insert(Guild.members, member)
                 Guild.members[member.name] = member;
-
             end
 
             if member.online then Guild.online[member.name] = member end
