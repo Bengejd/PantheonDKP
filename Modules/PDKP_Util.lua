@@ -67,20 +67,6 @@ function Util:RemoveColorFromText(name)
     return fName
 end
 
--- Returns all Alliance classes in WoW Classic.
---function Defaults:GetAllClasses()
---    return Defaults.classes;
---end
-
---function Defaults:GetClassColor(class)
---    return class_colors[class]
---end
---
---function Defaults:GetClassColoredName(name, class)
---    local classColor = Util:GetClassColor(class)
---    return Util:FormatFontTextColor(classColor, name)
---end
-
 -----------------------------
 --     Time Functions      --
 -----------------------------
@@ -197,7 +183,7 @@ end
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
 function Util:Debug(string)
-    if Defaults:IsDebug() and not Defaults.silent then
+    if Defaults.debug and not Defaults.silent then
         PDKP:Print(Util:FormatFontTextColor(Util.info, string))
     end
 end

@@ -8,6 +8,7 @@ local _G = _G;
 local L = core.L;
 
 core.PDKP = {}; -- global addon object
+core.GUI = {};
 core.Settings = {};
 core.Guild = {};
 core.Util = {};

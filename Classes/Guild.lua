@@ -125,12 +125,12 @@ local function Guild_OnEvent(self, event, arg1, ...)
 
 end
 
-local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");
-local eventNames = { 'GUILD_ROSTER_UPDATE', 'PLAYER_ENTERING_WORLD', 'CHAT_MSG_GUILD' }
-for _, event in pairs(eventNames) do
-   events:RegisterEvent(event)
-end
-events:SetScript("OnEvent", Guild_OnEvent)
+--local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");
+--local eventNames = { 'GUILD_ROSTER_UPDATE', 'PLAYER_ENTERING_WORLD', 'CHAT_MSG_GUILD' }
+--for _, event in pairs(eventNames) do
+--   events:RegisterEvent(event)
+--end
+--events:SetScript("OnEvent", Guild_OnEvent)
 
 --
 --local eventNames = {

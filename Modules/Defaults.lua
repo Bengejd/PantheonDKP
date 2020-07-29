@@ -11,6 +11,7 @@ Defaults.addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version")
 Defaults.print_name = '|cff33ff99PDKP|r:'
 
 Defaults.debug = true
+Defaults.silent = false
 Defaults.no_broadcast = false
 
 -- PLAYER INFO

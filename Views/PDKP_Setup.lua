@@ -184,3 +184,40 @@ function Setup:MainInterface()
 
 end
 
+function Setup:MainUI()
+    local f = CreateFrame("Frame", nil, UIParent)
+    f:SetFrameStrata("BACKGROUND")
+    f:SetWidth(742) -- Set these to whatever height/width is needed
+    f:SetHeight(682) -- for your Texture
+
+    local basePath = "Interface\\Addons\\PantheonDKP\\Media\\Main_UI\\PDKPFrame-"
+
+    local function createTextures(tex)
+        local x = tex['x'] or 0
+        local y = tex['y'] or 0
+
+        local t = f:CreateTexture(nil, "BACKGROUND")
+        t:SetTexture(basePath .. tex['file'])
+        t:SetPoint(tex['dir'], f, x, y)
+        f.texture = t
+    end
+
+    local textures = {
+        { ['dir'] = 'BOTTOMLEFT', ['file'] = 'BotLeft.tga', },
+        { ['dir'] = 'BOTTOM', ['file'] = 'BotMid.tga', ['y']=1.5},
+        { ['dir'] = 'BOTTOMRIGHT', ['file'] = 'BotRight.tga', },
+        { ['dir'] = 'CENTER', ['file'] = 'Middle.tga', },
+        { ['dir'] = 'LEFT', ['file'] = 'MidLeft.tga', ['y']=-42},
+        { ['dir'] = 'RIGHT', ['file'] = 'MidRight.tga', ['x']=2.35},
+        { ['dir'] = 'TOPLEFT', ['file'] = 'TopLeft.tga', ['x']=-8},
+        { ['dir'] = 'TOP', ['file'] = 'Top.blp', },
+        { ['dir'] = 'TOPRIGHT', ['file'] = 'TopRight.blp', },
+    }
+
+    for _, t in pairs(textures) do createTextures(t) end
+
+    f:SetPoint("TOP",0,0)
+    f:Show()
+
+end
+

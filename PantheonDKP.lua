@@ -27,10 +27,10 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         ['PLAYER_ENTERING_WORLD']=function()
 --            Guild:GetMembers();
 
-            print('Non guild event')
+            GUI:Init()
 
             PDKP:Print(#Guild.members .. ' members found')
-            Setup:MainInterface()
+
         end
     }
 
