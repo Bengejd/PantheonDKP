@@ -23,6 +23,25 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local PlaySound = PlaySound
 
+local closeButtonText = "|TInterface\\Buttons\\UI-StopButton:0|t"
+
+local function setMovable(f)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag('LeftButton')
+    f:SetScript("OnDragStart", f.StartMoving)
+    f:SetScript("OnDragStop", f.StopMovingOrSizing)
+end
+
+local function createButton(f)
+    local b = CreateFrame("Button", nil,  f, "UIPanelButtonTemplate")
+    b:SetSize(25 ,25) -- width, height
+    b:SetText(closeButtonText)
+    b:SetParent(f)
+    b:SetPoint("Center")
+    return b
+end
+
 function Setup:MainInterface()
     local sortBy, sortDir;
 
@@ -184,9 +203,12 @@ function Setup:MainInterface()
 
 end
 
+
+
 function Setup:MainUI()
-    local f = CreateFrame("Frame", nil, UIParent)
-    f:SetFrameStrata("BACKGROUND")
+    local f = CreateFrame("Frame", "pdkp_frame", UIParent)
+    f:SetFrameStrata("LOW")
+
     f:SetWidth(742) -- Set these to whatever height/width is needed
     f:SetHeight(682) -- for your Texture
 
@@ -218,6 +240,27 @@ function Setup:MainUI()
 
     f:SetPoint("TOP",0,0)
     f:Show()
+
+    setMovable(f)
+
+    -- Close button
+
+    local b = CreateFrame("Button", nil,  f, "UIPanelButtonTemplate")
+    b:SetSize(22, 25) -- width, height
+    b:SetText(closeButtonText)
+    b:SetParent(f)
+    b:SetPoint("TOPRIGHT", -2, -10)
+    b:SetScript("OnClick", function() f:Hide() end)
+
+    -- Submit Button
+
+    local bc = CreateFrame("Button")
+    bc:SetScript("OnClick", function(self, arg1)
+        print(arg1)
+    end)
+    bc:Click("foo bar") -- will print "foo bar" in the chat frame.
+    bc:Click("blah blah") -- will print "blah blah" in the chat frame.
+
 
 end
 
