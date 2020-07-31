@@ -17,6 +17,7 @@ core.Raid = {};
 core.Defaults = {};
 core.Member = {};
 core.Setup = {};
+core.Loot = {};
 
 core.PDKP = LibStub("AceAddon-3.0"):NewAddon("PDKP", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0");
 core.PDKP.ldb = LibStub:GetLibrary("LibDataBroker-1.1")
