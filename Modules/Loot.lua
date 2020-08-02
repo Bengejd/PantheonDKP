@@ -6,10 +6,9 @@ local Loot = core.Loot;
 
 Loot.timer = 8
 
--local UnitGUID = UnitGUID
+local UnitGUID = UnitGUID
 
-local Loot = core.Loot;
-
+-- Report the loot, only if you're the master looter, if the master looter is dead, the raid leader reports.
 
 function Loot:Report()
     local guid = UnitGUID("target")

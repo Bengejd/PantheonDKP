@@ -1,0 +1,9 @@
+ESSENTIALS:
+    TODO: Get a scrollable list of members in the guild.
+    TODO: be able to select that list of members.
+
+FUNCTIONS:
+    TODO: tContains - Searches a table for a value.
+    TODO: wipe - wipes tables
+
+RemoveChatWindowChannel

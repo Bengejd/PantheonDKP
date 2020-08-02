@@ -2,6 +2,8 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
+local GetGuildInfo = GetGuildInfo
+
 local Character = core.Character;
 local Util = core.Util;
 
@@ -13,6 +15,12 @@ end
 -- Returns the player's class
 function Character:GetMyClass()
     return UnitClass("PLAYER");
+end
+
+-- Returns the player's guild info
+function Character:GetGuildInfo()
+    guildName, guildRankName, guildRankIndex, realmName = GetGuildInfo('PLAYER');
+    return guildName, guildRankName, guildRankIndex, realmName;
 end
 
 -- Utility function to color your name based on your class.

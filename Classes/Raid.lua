@@ -23,7 +23,6 @@ function Raid:new()
     self.dkpOfficer = nil;
     self.members = {};
 
-
     return self
 end
 
