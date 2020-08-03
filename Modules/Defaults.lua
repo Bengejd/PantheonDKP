@@ -28,7 +28,7 @@ Defaults.raids = {
     'Onyxia\'s Lair',
     'Molten Core',
     'Blackwing Lair',
-        'Ahn\'Qiraj',
+    'Ahn\'Qiraj',
     --    'Naxxramas',
 };
 Defaults.raidBosses = {

@@ -1,6 +1,10 @@
 ====== Version 3.0.0 ======
 [Rework]:
-    -
+
+[Features]:
+    - Sorting by class will now also sort the names in alphabetical order.
+[Bug Fixes]:
+    - Visual data getting out of sync when updating DKP after item wins.
 
 ====== Version 2.5.1 ======
 [Bug Fixes]:

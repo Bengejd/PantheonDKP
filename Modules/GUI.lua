@@ -21,9 +21,12 @@ local Defaults = core.Defaults;
 local Character = core.Character;
 
 GUI.pdkp_frame = nil;
+GUI.sortBy = 'name'
+GUI.sortDir = 'ASC'
 
 function GUI:Init()
     Util:Debug('Initializing GUI')
 
     GUI.pdkp_frame = Setup:MainUI()
+    Shroud:Setup()
 end

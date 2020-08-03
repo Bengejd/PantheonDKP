@@ -25,9 +25,11 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     local ADDON_EVENTS = {
         ['ADDON_LOADED']=PDKP:OnInitialize(event, arg1),
         ['PLAYER_ENTERING_WORLD']=function()
---            Guild:GetMembers();
+
+            Guild:new();
 
             GUI:Init()
+            --Raid:GetInstanceInfo()
 
             PDKP:Print(#Guild.members .. ' members found')
 
@@ -39,8 +41,6 @@ end
 
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
-
-    Guild:new();
 
 end
 

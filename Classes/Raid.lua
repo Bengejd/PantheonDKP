@@ -65,5 +65,22 @@ function Raid:BossKill()
     StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
+function Raid:GetCurrentRaid()
+    name, instance_type, difficultyIndex, difficultyName, maxPlayers,
+    dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
+
+    if tContains(Defaults.raids, name) then
+        return name
+    else
+        return 'Molten Core'
+    end
+end
+
+function Raid:GetInstanceInfo()
+    name, instance_type, difficultyIndex, difficultyName, maxPlayers,
+    dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
+
+end
+
 -- Events: PLAYER_ENTERING_WORLD, ZONE_CHANGED_NEW_AREA, GROUP_ROSTER_UPDATE,
 -- -- CHAT_MSG_ADDON -- This might allow us to unregister from non-wanted events when in raid?

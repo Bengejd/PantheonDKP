@@ -215,6 +215,19 @@ function Util:PrintTable(tt, indent)
     end
 end
 
+--- Converts a hex value to RGBA components.
+-- The values returned are floats between 0 and 1 inclusive. The alpha channel is option and set to 1 if not specified.
+-- @tparam string hex The hex color string
+-- @treturn number The red value
+-- @treturn number The green value
+-- @treturn number The blue value
+-- @treturn number The alpha value
+function Util:HexToRGBA(hex)
+    local a, r, g, b = strmatch(strlower(hex), "^#([0-9a-f]?[0-9a-f]?)([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])$")
+    assert(a and r and g and b, format("Invalid color (%s)!", hex))
+    return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, (a ~= "") and (tonumber(a, 16) / 255) or 1
+end
+
 -- OrderedNext helper function
 function __genOrderedIndex( t )
 

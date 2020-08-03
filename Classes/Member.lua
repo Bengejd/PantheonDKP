@@ -13,6 +13,9 @@ local GetGuildRosterInfo = GetGuildRosterInfo
 local Member = core.Member;
 Member.__index = Member; -- Set the __index parameter to reference Character
 
+local DKPVariables = { 'previousTotal', 'total', 'entries', 'deleted'}
+local raidNames = {'Molten Core', 'Blackwing Lair'}
+
 function Member:new(guildIndex)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
@@ -26,6 +29,7 @@ function Member:new(guildIndex)
     self.formattedName, self.coloredClass = Util:ColorTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == bank_name
     if self.name == Character:GetMyName() then core.canEdit = self.canEdit end
+    self.visible = true
 
     self.dkp = {};
     self.isDkpOfficer = false
@@ -40,12 +44,41 @@ function Member:new(guildIndex)
             }
         end
     end
+
+    if self.name == 'Neekio' or self.name == 'Athico' then
+        self.dkp['Molten Core'].total = math.random(100)
+    end
+
     return self
+end
+
+function Member:GetDKP(raidName, variableName)
+    raidName = raidName and tContains(raidNames, raidName) or 'Molten Core'
+    if tContains(DKPVariables, variableName) then
+        return self.dkp[raidName][variableName]
+    elseif variableName == 'all' then
+        return self.dkp[raidName]
+    end
+
+    --if Util:IsEmpty(raidName) then
+    --    return Util:ThrowError('No raid provided to GetDKP')
+    --elseif not acceptableDKPVariables[variableName] then
+    --    return Util:ThrowError('Invalid dkpVariable ' .. variableName)
+    --end
+    --if raidName == 'Onyxia\'s Lair' then raidName = 'Molten Core'; end
+    --if variableName == 'all' then return self.dkp[raidName] end
+    --return self.dkp[raidName][variableName]
 end
 
 function Member:Changed(event, name, key, value, dataobj)
     --    print('LDB Changed', event, name, key, tostring(value))
     print("LDB: "..name.. ".".. key.. " was changed to ".. tostring(value))
+end
+
+function Member:ShouldShow()
+    local dkp = self:GetDKP(nil, 'total')
+    self.visible = dkp > 0
+    return self.visible
 end
 
 function Member:Save()

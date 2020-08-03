@@ -23,7 +23,7 @@ local GuildDB;
 
 local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
 local strsplit, tonumber, tostring, pairs, type, next = strsplit, tonumber, tostring, pairs, type, next -- Global lua functions.
-local insert = table.insert
+local insert, sort = table.insert, table.sort
 
 Guild.initiated = false;
 Guild.sortDir = nil;
@@ -55,9 +55,7 @@ function Guild:new()
     Guild.members = {};
     Guild.classLeaders = {};
     Guild.bankIndex = nil;
-    Guild.online = {};
-    Guild.numOfMembers = nil;
-
+    Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
 
     PDKP:Print('Guild Initiated')
@@ -101,6 +99,7 @@ function Guild:GetMembers()
     GuildRoster()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
+    Guild.memberNames = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();
 
     if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
@@ -115,10 +114,9 @@ function Guild:GetMembers()
             if member.isClassLeader then insert(Guild.classLeaders, member) end; -- Init class classLeaders
             -- Add member to the table only if it's new, to allow object persistence.
             if isNew then
---                member:MigrateAndLocate()
---                member:Save()
                 table.insert(Guild.members, member)
                 Guild.members[member.name] = member;
+                Guild.memberNames[#Guild.memberNames + 1] = member.name
             end
 
             if member.online then Guild.online[member.name] = member end
@@ -131,6 +129,44 @@ end
 function Guild:InitBankInfo(index, member)
     Guild.bankIndex = index
     DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)
+end
+
+function Guild:GetMemberByName(name)
+    local hasMember = tContains(Guild.memberNames, name)
+    if hasMember then return Guild.members[name]
+    else return nil
+    end
+end
+
+function Guild:SortBy(sortBy, dir, onlyVisible)
+    onlyVisible = onlyVisible or false
+
+    sort(Guild.memberNames, function(a, b)
+        a = Guild:GetMemberByName(a)
+        b = Guild:GetMemberByName(b)
+        --
+        --if onlyVisible then
+        --    a = a.visible and 1 or 0
+        --    b = b.visible and 1 or 0
+        --end
+
+        if GUI.sortBy == 'name' then
+            a = a['name']
+            b = b['name']
+        elseif GUI.sortBy == 'class' then
+            if a['class'] == b['class'] then
+                return a['name'] < b['name']
+            else
+                a = a['class']
+                b = b['class']
+            end
+        elseif GUI.sortBy == 'dkp' then
+            a = a:GetDKP(nil, 'total')
+            b = b:GetDKP(nil, 'total')
+        end
+
+        if GUI.sortDir == 'ASC' then return a > b else return a < b end
+    end)
 end
 
 --['PLAYER_ENTERING_WORLD']=function()
