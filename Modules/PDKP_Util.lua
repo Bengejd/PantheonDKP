@@ -233,11 +233,11 @@ function ttoggle(table, item)
 end
 
 -- Custom function for finding table index.
-function tfind(table, item)
-    table = table or {};
+function tfind(t, item)
+    t = t or {};
     local index = 1;
-    while table[index] do
-        if ( item == table[index] ) then
+    while t[index] do
+        if ( item == t[index] ) then
             return true, index;
         end
         index = index + 1;

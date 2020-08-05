@@ -33,35 +33,44 @@ function ScrollTable:HighlightRow(row, shouldHighlight)
     if shouldHighlight then row:LockHighlight() else row:UnlockHighlight() end
 end
 
+function ScrollTable:ClearSelected()
+    wipe(self.selected)
+    self.lastSelect = nil
+end
+
+function ScrollTable:RowClicked(row, name)
+    local isSelected, selectIndex = tfind(self.selected, objIndex)
+end
+
+function ScrollTable:RowShiftClicked()
+
+end
+
+function ScrollTable:RowControlClicked()
+
+end
+
 function ScrollTable:CheckSelect(row, clickType)
     local selectOn = row.selectOn
     local objIndex = row.dataObj[selectOn]
-    local isSelected, selectIndex = tfind(self.selected, objIndex)
-    local shouldHighlight = false
-
-    local hasCtrl = IsControlKeyDown()
-    local hasShift = IsShiftKeyDown()
-    local hasAlt = IsAltKeyDown()
 
     if clickType == 'LeftButton' then
-        -- Handle adding or removing from selected here.
-        if not (hasCtrl or hasShift or hasAlt) then -- Regular left click.
-            wipe(self.selected)
-            tinsert(self.selected, objIndex)
-            self.lastSelect = objIndex
-            return self.frame:Update()
+        local hasCtrl = IsControlKeyDown()
+        local hasShift = IsShiftKeyDown()
+
+        if hasShift and hasCtrl then -- Do nothing here.
+        elseif hasShift then
+            self:RowShiftClicked()
+        elseif hasCtrl then
+            self:RowControlClicked()
+        else
+            self:RowClicked()
         end
 
-        if not isSelected then
-            tinsert(self.selected, objIndex)
-            shouldHighlight = true
-        else
-            tremove(self.selected, selectIndex)
-        end
+        return self.frame:Update()
     end
 
-    isSelected, selectIndex = tfind(self.selected, objIndex)
-
+    local isSelected, selectIndex = tfind(self.selected, objIndex)
     self:HighlightRow(row, isSelected)
 end
 
@@ -172,20 +181,13 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
                 -- two table lookups:
                 local row = s.rows[i]
                 row.realIndex = realIndex
+                row.dataObj = s.displayData[realIndex]
 
                 for k=1, #s.HEADERS do
                     local col = row.cols[k]
                     local label = s.HEADERS[k]['label']
-                    local val = nil;
-                    local getValueFunc = s.HEADERS[k]['getValueFunc']
-                    local obj = s.displayData[realIndex]
-                    row.dataObj = obj;
-
-                    if getValueFunc ~= nil and obj ~= nil then
-                        val = getValueFunc(obj)
-                    else
-                        val = obj[label]
-                    end
+                    local getVal = s.HEADERS[k]['getValueFunc']
+                    local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
 
                     if type(val) == type(0) and val > 9999 then
                         col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letterSpacing.
@@ -354,6 +356,7 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         row.cols = {};
         row.index = i
         row.selectOn = self.ROW_SELECT_ON
+        row.dataObj = nil;
 
         if i == 0 then
             row:SetPoint("TOPLEFT", self.frame, 10, -16)
