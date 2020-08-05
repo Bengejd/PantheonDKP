@@ -144,262 +144,89 @@ end
 function Setup:ScrollTable()
     local st = {};
 
+    local function compare(a,b)
+        local sortDir = st.sortDir;
+        local sortBy = st.sortBy;
+
+        if sortBy == 'name' then
+            a = a['name']
+            b = b['name']
+        elseif sortBy == 'class' then
+            if a['class'] == b['class'] then
+                return a['name'] < b['name']
+            else
+                a = a['class']
+                b = b['class']
+            end
+        elseif sortBy == 'dkp' then
+            a = a:GetDKP(nil, 'total')
+            b = b:GetDKP(nil, 'total')
+        end
+
+        if sortDir == 'ASC' then return a > b else return a < b end
+    end
+
     local table_settings = {
         ['name']= 'ScrollTable',
         ['parent']=pdkp_frame,
         ['height']=540,
-        ['width']=350,
+        ['width']=330,
         ['movable']=true,
         ['enableMouse']=true,
+        ['retrieveDataFunc']=function()
+            Guild:GetMembers()
+            return Guild.memberNames
+        end,
+        ['retrieveDisplayDataFunc']=function(self, name)
+            return Guild:GetMemberByName(name)
+        end,
         ['anchor']={
             ['point']='TOPLEFT',
             ['rel_point_x']=20,
             ['rel_point_y']=-100,
         }
     }
-    local row_settings = {
-        ['height']=20,
-        ['width']=300,
-        ['max_rows']=25,
-        ['max_values'] = 425
-    }
     local col_settings = {
         ['height']=14,
-        ['width']=100,
+        ['width']=90,
+        ['firstSort']=1, -- Denotes the header we want to sort by originally.
         ['headers'] = {
             [1] = {
-              ['label']='name',
-              ['sortable']=true,
-              ['point']='LEFT',
-              ['showSortDirection'] = true,
-              ['compareFunc']=function(a,b)
-                  if st.sortDir == 'ASC' then return a['name'] < b['name']
-                  else return a['name'] > b['name']
-                  end
-              end
+                ['label']='name',
+                ['sortable']=true,
+                ['point']='LEFT',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare
             },
             [2] = {
-              ['label']='class',
-              ['sortable']=true,
-              ['point']='CENTER',
-              ['showSortDirection'] = true,
-              ['compareFunc']=function(a,b)
-
-              end
+                ['label']='class',
+                ['sortable']=true,
+                ['point']='CENTER',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare
             },
             [3] = {
-              ['label']='dkp',
-              ['sortable']=true,
-              ['point']='RIGHT',
-              ['showSortDirection'] = true,
-              ['compareFunc']=function(a,b)
-
-              end
+                ['label']='dkp',
+                ['sortable']=true,
+                ['point']='RIGHT',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare,
+                ['getValueFunc']= function (member)
+                    return member:GetDKP(nil, 'total')
+                end,
             },
         }
+    }
+    local row_settings = {
+        ['height']=20,
+        ['width']=285,
+        ['max_rows']=25,
+        ['max_values'] = 425,
+        ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
     st = ScrollTable:new(table_settings, col_settings, row_settings)
+    st:Refresh()
 end
 
-function Setup:Scrollbar()
-
-
-    ----------------------------------------------------------------
-    -- Set up some constants (really just variables, except we call
-    -- them "constants" because we will never change their values,
-    -- only read them) to keep track of values we'll use repeatedly:
-
-    local ROW_HEIGHT = 20   -- How tall is each row?
-    local ROW_WIDTH = 300
-    local MAX_ROWS = 25      -- How many rows can be shown at once?
-    local REL_POINT_Y = -100 -- relative point for the col y offset
-    local REL_POINT_X = 20; -- relative point for the col x offset
-    local MAX_VALUE = #Guild.members
-
-    local COL_CONSTANTS = {
-        COL_HEIGHT = 14,
-        COL_WIDTH = 100,
-
-        [1]= {
-            label='name',
-            point='LEFT'
-        },
-        [2] = {
-            label='class',
-            point='CENTER',
-        },
-        [3] = {
-            label='dkp.Molten Core.total',
-            point='RIGHT',
-        }
-    }
-
-    local FRAME_HEIGHT = 540
-    local FRAME_WIDTH = 350
-
-    -- Create the frame:
-    local frame = CreateFrame("Frame", "pdkp_scrollbar", pdkp_frame)
-    frame:EnableMouse(true)
-    frame:SetMovable(true)
-    frame:SetSize(FRAME_WIDTH, FRAME_HEIGHT)
-    frame:SetPoint("TOPLEFT", REL_POINT_X, REL_POINT_Y)
-
-    -- Give the frame a visible background and border:
-    frame:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
-
-    ----------------------------------------------------------------
-    -- Define a function that we'll call later to update the datum
-    -- displayed in each row:
-
-    function frame:Update()
-        --local visible_rows = 0;
-        --for i=1, #Guild.memberNames do
-        --    local member = Guild.members[Guild.memberNames[i]]
-        --    if member:ShouldShow() then visible_rows = visible_rows + 1 end
-        --end
-
-        -- Using method notation (object:function) means that the
-        -- object (in this case, our frame) is available within the
-        -- function's scope via the variable "self".
-
-        -- Call the FauxScrollFrame template's Update function, with
-        -- the relevant parameters:
-        FauxScrollFrame_Update(self.scrollBar, MAX_VALUE, MAX_ROWS, ROW_HEIGHT)
-        -- #1 is a reference to the scroll bar frame.
-        -- #2 is the total number of data available to be shown.
-        -- #3 is how many rows of data can be displayed at once.
-        -- #4 is the height of each row.
-
-        -- Now figure out which datum to show in each row,
-        -- and show it:
-        local offset = FauxScrollFrame_GetOffset(self.scrollBar)
-        --local max_rows = visible_rows
-        --if max_rows > MAX_ROWS then max_rows = MAX_ROWS end
-
-        for i = 1, MAX_ROWS do
-            local value = i + offset
-
-            if value <= MAX_VALUE then
-                -- There is a datum available to show.
-
-                -- Get a local reference to the row to save
-                -- two table lookups:
-                local row = self.rows[i]
-                -- Fill in the row with the datum:
-                local memberName = Guild.memberNames[value]
-                local charObj = Guild.members[memberName]
-
-                if charObj:ShouldShow() then
-                    for k=1, 3 do
-                        local col = row.cols[k]
-                        local label = COL_CONSTANTS[k]['label']
-                        local val = charObj[label]
-                        if k == 3 then val = charObj:GetDKP(nil, 'total') end
-                        col:SetText(val)
-                    end
-                    row:Show()
-                else
-                    row:Hide()
-                end
-            else
-                -- We've reached the end of the data.
-                -- Hide the row:
-                self.rows[i]:Hide()
-            end
-        end
-    end
-
-
-    ----------------------------------------------------------------
-    -- Create the scroll bar:
-
-    local bar = CreateFrame("ScrollFrame", "$parentScrollBar", frame, "FauxScrollFrameTemplate")
-    bar:SetPoint("TOPLEFT", 0, -8)
-    bar:SetPoint("BOTTOMRIGHT", -30, 8)
-
-    -- Tell the scroll bar what to do when it's scrolled:
-    bar:SetScript("OnVerticalScroll", function(self, offset)
-        print(offset)
-        -- These first two lines replace a call to the global
-        -- FauxScrollFrame_OnVerticalScroll function, saving a
-        -- global lookup and a function call.
-        local scrollbar = getglobal(self:GetName().."ScrollBar");
-        scrollbar:SetValue(offset)
-        self.offset = math.floor(offset / ROW_HEIGHT + .5)
-
-        -- FauxScrollFrame_OnVerticalScroll can also call an update
-        -- function if we pass it one, but since we aren't using it,
-        -- we should just call the function ourselves:
-        frame:Update()
-    end)
-
-    bar:SetScript("OnShow", function()
-        frame:Update()
-    end)
-
-    frame.scrollBar = bar
-
-    ----------------------------------------------------------------
-    -- Create the individual rows:
-
-    -- I'm using a metatable here for efficiency (rows are not created
-    -- until they are needed) and convenience (I don't have
-    -- to check if a row exists yet and create one manually).
-
-    -- I don't feel like writing out a long explanation of how this
-    -- works right now; feel free to look at the "How to localize an
-    -- addon" page on my author portal for a more detailed explanation
-    -- of how a metatable like this works. If you don't care how it
-    -- works, feel free to use it anyway. :)
-
-    local rows = setmetatable({}, { __index = function(t, i)
-        local row = CreateFrame("Button", "$parentRow"..i, frame)
-        row:SetSize(ROW_WIDTH, ROW_HEIGHT)
-
-        row.cols = {};
-        row.charObj = nil;
-        row.index = i
-        row.selected = false
-
-        for k=1, 3 do
-            local col = row:CreateFontString(row, 'OVERLAY', 'GameFontHighlightLeft')
-            col:SetSize(COL_CONSTANTS['COL_WIDTH'], COL_CONSTANTS['COL_HEIGHT'])
-            col:SetPoint(COL_CONSTANTS[k]['point'])
-            row.cols[k] = col;
-        end
-
-        if i == 0 then
-            row:SetPoint("TOPLEFT", frame, 8, -16)
-        else
-            row:SetPoint("TOPLEFT", frame.rows[i-1], "BOTTOMLEFT")
-            row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
-            row:SetPushedTexture(HIGHLIGHT_TEXTURE)
-            row:SetScript('OnClick', function(self)
-                print(self.index)
-
-                local charObj = Guild:GetMemberByName(row.charObj['name'])
-                row.selected = not row.selected
-                print(row.selected)
-            end)
-        end
-
-        rawset(t, i, row)
-        return row
-    end })
-
-    frame.rows = rows
-    frame.headers = headers
-
-    frame:setupHeaders()
-    frame:Update()
-end
-
-function Setup:ScrollHeaders()
-
-end
 

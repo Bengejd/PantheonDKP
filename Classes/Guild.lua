@@ -55,6 +55,7 @@ function Guild:new()
     Guild.members = {};
     Guild.classLeaders = {};
     Guild.bankIndex = nil;
+    Guild.memberNames = {};
     Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
 
@@ -88,10 +89,12 @@ function Guild:Sort(sortBy)
     end
 end
 
-function Guild:IsNewMemberObject(member)
-    local tableObj = Guild.members[member.name];
-
-    return true;
+function Guild:IsNewMemberObject(name)
+    if tContains(Guild.memberNames, name) then
+        return false
+    else
+        return true
+    end
 end
 
 function Guild:GetMembers()
@@ -99,13 +102,12 @@ function Guild:GetMembers()
     GuildRoster()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
-    Guild.memberNames = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();
 
     if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
     for i=1, Guild.numOfMembers do
         local member = Member:new(i)
-        local isNew = Guild:IsNewMemberObject(member)
+        local isNew = Guild:IsNewMemberObject(member['name'])
 
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
             if member.name == nil then member.name = '' end;
@@ -136,37 +138,6 @@ function Guild:GetMemberByName(name)
     if hasMember then return Guild.members[name]
     else return nil
     end
-end
-
-function Guild:SortBy(sortBy, dir, onlyVisible)
-    onlyVisible = onlyVisible or false
-
-    sort(Guild.memberNames, function(a, b)
-        a = Guild:GetMemberByName(a)
-        b = Guild:GetMemberByName(b)
-        --
-        --if onlyVisible then
-        --    a = a.visible and 1 or 0
-        --    b = b.visible and 1 or 0
-        --end
-
-        if GUI.sortBy == 'name' then
-            a = a['name']
-            b = b['name']
-        elseif GUI.sortBy == 'class' then
-            if a['class'] == b['class'] then
-                return a['name'] < b['name']
-            else
-                a = a['class']
-                b = b['class']
-            end
-        elseif GUI.sortBy == 'dkp' then
-            a = a:GetDKP(nil, 'total')
-            b = b:GetDKP(nil, 'total')
-        end
-
-        if GUI.sortDir == 'ASC' then return a > b else return a < b end
-    end)
 end
 
 --['PLAYER_ENTERING_WORLD']=function()

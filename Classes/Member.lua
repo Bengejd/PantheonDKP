@@ -2,6 +2,8 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
+local Raid = core.Raid;
+
 local Defaults, Util = core.Defaults, core.Util;
 local Character = core.Character;
 local bank_name = Defaults.bank_name;
@@ -14,7 +16,6 @@ local Member = core.Member;
 Member.__index = Member; -- Set the __index parameter to reference Character
 
 local DKPVariables = { 'previousTotal', 'total', 'entries', 'deleted'}
-local raidNames = {'Molten Core', 'Blackwing Lair'}
 
 function Member:new(guildIndex)
     local self = {};
@@ -46,14 +47,14 @@ function Member:new(guildIndex)
     end
 
     if self.name == 'Neekio' or self.name == 'Athico' then
-        self.dkp['Molten Core'].total = math.random(100)
+        self.dkp['Molten Core'].total = math.random(100000)
     end
 
     return self
 end
 
 function Member:GetDKP(raidName, variableName)
-    raidName = raidName and tContains(raidNames, raidName) or 'Molten Core'
+    raidName = raidName and tContains(Defaults.raids, raidName) or Raid:GetCurrentRaid()
     if tContains(DKPVariables, variableName) then
         return self.dkp[raidName][variableName]
     elseif variableName == 'all' then

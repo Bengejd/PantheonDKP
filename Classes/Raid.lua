@@ -2,6 +2,8 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
+local Defaults = core.Defaults;
+
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
 local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
@@ -10,8 +12,10 @@ local StaticPopupDialogs, StaticPopup_Show = StaticPopupDialogs, StaticPopup_Sho
 local tostring, print, setmetatable, pairs = tostring, print, setmetatable, pairs
 local canEdit, bossIDS = core.canEdit, core.bossIDS;
 
+local currentRaid = nil;
+
 local Raid = core.Raid;
-Raid.__index = Raid; -- Set the __index parameter to reference Character
+Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
 function Raid:new()
     local self = {};
@@ -22,6 +26,7 @@ function Raid:new()
     self.MasterLooter = nil;
     self.dkpOfficer = nil;
     self.members = {};
+    self.CurrentRaid = nil;
 
     return self
 end
@@ -68,9 +73,10 @@ end
 function Raid:GetCurrentRaid()
     name, instance_type, difficultyIndex, difficultyName, maxPlayers,
     dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
-
     if tContains(Defaults.raids, name) then
         return name
+    elseif currentRaid ~= nil and tContains(Defaults.raids, currentRaid) then
+        return currentRaid
     else
         return 'Molten Core'
     end

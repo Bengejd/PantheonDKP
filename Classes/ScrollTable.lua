@@ -9,12 +9,11 @@ ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
 local type, floor, strupper, pi = type, math.floor, strupper, math.pi
 
-local CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
-local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
-local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
+local ROW_HIGHLIGHT = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
+local BAR_TEXTURE = 'Interface\\Artifacts\\ArtifactsVertical'
 
 local rotate_up = (pi / 180) * 270
 local rotate_down = (pi / 180) * 90
@@ -30,12 +29,56 @@ function ScrollTable:SetParent(parent)
     end
 end
 
-local function randomLetters(numLetters)
-    local totTxt = ""
-    for i = 1,numLetters do
-        totTxt = totTxt..string.char(math.random(97,122))
+function ScrollTable:HighlightRow(row, shouldHighlight)
+    if shouldHighlight then row:LockHighlight() else row:UnlockHighlight() end
+end
+
+function ScrollTable:CheckSelect(row, clickType)
+    local selectOn = row.selectOn
+    local objIndex = row.dataObj[selectOn]
+    local isSelected, selectIndex = tfind(self.selected, objIndex)
+    local shouldHighlight = false
+
+    local hasCtrl = IsControlKeyDown()
+    local hasShift = IsShiftKeyDown()
+    local hasAlt = IsAltKeyDown()
+
+    if clickType == 'LeftButton' then
+        -- Handle adding or removing from selected here.
+        if not (hasCtrl or hasShift or hasAlt) then -- Regular left click.
+            wipe(self.selected)
+            tinsert(self.selected, objIndex)
+            self.lastSelect = objIndex
+            return self.frame:Update()
+        end
+
+        if not isSelected then
+            tinsert(self.selected, objIndex)
+            shouldHighlight = true
+        else
+            tremove(self.selected, selectIndex)
+        end
     end
-    return totTxt;
+
+    isSelected, selectIndex = tfind(self.selected, objIndex)
+
+    self:HighlightRow(row, isSelected)
+end
+
+-- Refreshes the data that we are utilizing.
+function ScrollTable:Refresh()
+    self.data = self.retrieveDataFunc();
+    self.displayData = {};
+
+    for i=1, #self.data do
+        self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+    end
+
+    if not self.firstSortRan then
+        self.cols[self.firstSort]:Click()
+    end
+
+    self.frame:Update()
 end
 
 function ScrollTable:new(table_settings, col_settings, row_settings)
@@ -54,11 +97,14 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         ['rel_point_x']=0,
         ['rel_point_y']=0
     }
+    self.retrieveDataFunc = table_settings['retrieveDataFunc']
+    self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
 
     self.ROW_HEIGHT = row_settings['height'] or 20
     self.ROW_WIDTH = row_settings['width'] or 300
     self.MAX_ROWS = row_settings['max_rows'] or 25
     self.ROW_MULTI_SELECT = row_settings['multiSelect'] or false
+    self.ROW_SELECT_ON = row_settings['indexOn'] or nil
 
     self.COL_HEIGHT = col_settings['height'] or 14
     self.COL_WIDTH = col_settings['width'] or 100
@@ -66,11 +112,16 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
 
     self.displayData = {};
 
+    self.selected = {};
+    self.lastSelect = nil;
+
     self.cols = {};
     self.data = {};
 
     self.sortBy = nil;
     self.sortDir = nil;
+    self.firstSort = col_settings['firstSort'] or nil;
+    self.firstSortRan = false;
 
     -- Create our base frame.
     self.frame = CreateFrame("Frame", self.name, self.parent)
@@ -112,21 +163,38 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         local offset = FauxScrollFrame_GetOffset(s.frame.scrollBar)
 
         for i = 1, s.MAX_ROWS do
-            local value = i + offset
+            local realIndex = i + offset
 
-            if value <= #s.displayData then
+            if realIndex <= #s.displayData then
                 -- There is a datum available to show.
 
                 -- Get a local reference to the row to save
                 -- two table lookups:
                 local row = s.rows[i]
+                row.realIndex = realIndex
 
                 for k=1, #s.HEADERS do
                     local col = row.cols[k]
                     local label = s.HEADERS[k]['label']
-                    local val = s.displayData[value][label]
+                    local val = nil;
+                    local getValueFunc = s.HEADERS[k]['getValueFunc']
+                    local obj = s.displayData[realIndex]
+                    row.dataObj = obj;
+
+                    if getValueFunc ~= nil and obj ~= nil then
+                        val = getValueFunc(obj)
+                    else
+                        val = obj[label]
+                    end
+
+                    if type(val) == type(0) and val > 9999 then
+                        col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letterSpacing.
+                    end
+
                     col:SetText(val)
                 end
+                s:CheckSelect(row, nil)
+
                 row:Show()
             else
                 -- We've reached the end of the data.
@@ -136,21 +204,16 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         end
     end
 
-      Refresh()
-        for i=1, 100 do
-            self.displayData[i] = {
-                ['name']=randomLetters(math.random(10)),
-                ['class']='Druid',
-                ['dkp']=math.random(10000)
-            }
-        end
-    end
-
-    Refresh()
-
     ----------------------------------------------------------------
     -- Create the scroll bar:
     local bar = CreateFrame("ScrollFrame", "$parentScrollBar", self.frame, "FauxScrollFrameTemplate")
+
+    -- Create a right hand divider for the table & the bar. Aesthetics mostly.
+    local rightBorder = bar:CreateTexture(nil, 'BACKGROUND')
+    rightBorder:SetTexture(BAR_TEXTURE)
+    rightBorder:SetWidth(6)
+    rightBorder:SetPoint('TOPRIGHT', bar, 'TOPRIGHT', 0, -29)
+    rightBorder:SetPoint('BOTTOMRIGHT', bar, 'BOTTOMRIGHT', 0, -5)
 
     self.frame.scrollBar = bar
     self.frame.scrollBar.parent = self
@@ -169,8 +232,6 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         --scrollbar:SetValue(offset)
 
         sb.offset = floor(offset / self.ROW_HEIGHT + .5)
-
-        print(sb.offset)
 
         -- FauxScrollFrame_OnVerticalScroll can also call an update
         -- function if we pass it one, but since we aren't using it,
@@ -197,25 +258,33 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         local sortable = header['sortable'] or false
         local point = header['point'] or 'LEFT'
         local showSortDirection = header['showSortDirection'] or false
-        local compare = header['compareFunc'] or function(a,b) return a < b end
+        local compare = header['compareFunc'];
+        local font = header['font'] or "AchievementPointsFont"
 
         local col = CreateFrame("Button", "$parent_Col_" .. label, self.frame)
-        col:SetSize(self.COL_WIDTH, self.COL_WIDTH)
+
+        local width = header['width'] or self.COL_WIDTH;
+
+        col:SetHeight(self.COL_HEIGHT)
+        col:SetWidth(width)
 
         if i == 1 then
-            col:SetPoint("TOPLEFT", 0, -10)
+            col:SetPoint("TOPLEFT", -6, -10)
         else
-            col:SetPoint("TOPLEFT", self.cols[i-1], "TOPRIGHT", 35, 0)
+            col:SetPoint("TOPLEFT", self.cols[i-1], "TOPRIGHT", 20, 0)
         end
 
-        local fs = col:CreateFontString(col, "OVERLAY", "AchievementPointsFont")
+        local fs = col:CreateFontString(col, "OVERLAY", font)
         fs:SetText(strupper(label))
         fs:SetPoint("CENTER")
+
+        local fsLength = fs:GetWidth()
 
         col.arrow = nil;
         col.dir = nil;
         col.label = label
         col.compare = compare
+        col.fontString = fs
 
         function col:ToggleArrow(show)
             if col.arrow ~= nil and show then
@@ -254,9 +323,14 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
                     local deg = col.dir == 'DESC' and rotate_down or rotate_up
                     point = col.dir == 'DESC' and -3 or 2
 
+                    -- Gives us uniform arrow spacing, based on label length.
+                    -- Base is based off of length of "Name" and "Class" when they are uppercase.
+                    local baseLength = 55
+                    local arrow_x = floor((fsLength - baseLength) / 2 - 1)
+
                     if col.arrow ~= nil then
                         col.arrow:SetRotation(deg)
-                        col.arrow:SetPoint('RIGHT', col, 0, point)
+                        col.arrow:SetPoint('TOPRIGHT', col, 'TOPRIGHT', arrow_x, point)
                     end
 
                     self.sortDir = col.dir
@@ -273,34 +347,56 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         end})
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Button", "$parent_Row"..i, self.frame)
-        row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
+        row:SetHeight(self.ROW_HEIGHT)
+        row:SetWidth(self.ROW_WIDTH)
+        row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
 
         row.cols = {};
-        row.dataObj = self.displayData[i];
         row.index = i
-        row.selected = false
+        row.selectOn = self.ROW_SELECT_ON
+
+        if i == 0 then
+            row:SetPoint("TOPLEFT", self.frame, 10, -16)
+        else
+            row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+            row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
+            row:SetPushedTexture(HIGHLIGHT_TEXTURE)
+            row:SetScript("OnClick", function(r, clickType)
+                row.dataObj = self.displayData[i];
+                self:CheckSelect(r, clickType) end)
+
+            local sep = row:CreateTexture(nil, 'BACKGROUND')
+            sep:SetTexture(ROW_HIGHLIGHT)
+            sep:SetPoint("BOTTOMLEFT", row, 0, -1, self.rows[i-1], "BOTTOMRIGHT")
+            sep:SetHeight(3)
+            sep:SetWidth(self.ROW_WIDTH)
+
+            if i == 1 then
+                local topSep = row:CreateTexture(nil, 'BACKGROUND')
+                topSep:SetTexture(ROW_HIGHLIGHT)
+                topSep:SetPoint("TOPLEFT", row, 0, 0, row, "TOPRIGHT")
+                topSep:SetHeight(3)
+                topSep:SetWidth(self.ROW_WIDTH)
+            end
+        end
 
         for key, header in pairs(self.HEADERS) do
             local col = row:CreateFontString(row, 'OVERLAY', 'GameFontHighlightLeft')
             col:SetSize(self.COL_WIDTH, self.COL_HEIGHT)
             local point = header['point'] or 'LEFT'
-            col:SetPoint(point)
-            row.cols[key] = col;
-        end
+            col:SetJustifyH(point)
 
-        if i == 0 then
-            row:SetPoint("TOPLEFT", self.frame, 8, -16)
-        else
-            row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
-            row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
-            row:SetPushedTexture(HIGHLIGHT_TEXTURE)
-            row:SetScript("OnClick", function(r)
-                --print(self.index)
-                --
-                --local charObj = Guild:GetMemberByName(row.charObj['name'])
-                --row.selected = not row.selected
-                --print(row.selected)
-            end)
+            if key == 1 then
+                col:SetPoint(point, row)
+            else
+                col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", 0, 0)
+
+                if key == #self.HEADERS and point == 'RIGHT' then
+                    col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
+                end
+            end
+
+            row.cols[key] = col;
         end
 
         rawset(t, i, row)
@@ -314,9 +410,6 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         local col = self.cols[i]
         col:Show()
     end
-
-    Refresh()
-    self.frame:Update()
 
     return self
 end

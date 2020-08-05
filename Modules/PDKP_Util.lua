@@ -228,6 +228,23 @@ function Util:HexToRGBA(hex)
     return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, (a ~= "") and (tonumber(a, 16) / 255) or 1
 end
 
+function ttoggle(table, item)
+
+end
+
+-- Custom function for finding table index.
+function tfind(table, item)
+    table = table or {};
+    local index = 1;
+    while table[index] do
+        if ( item == table[index] ) then
+            return true, index;
+        end
+        index = index + 1;
+    end
+    return nil, nil;
+end
+
 -- OrderedNext helper function
 function __genOrderedIndex( t )
 
