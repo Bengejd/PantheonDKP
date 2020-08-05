@@ -18,6 +18,7 @@ local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
+local ScrollTable = core.ScrollTable
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -101,9 +102,14 @@ function Setup:MainUI()
 
     pdkp_frame = f
 
-    Setup:ShroudingBox()
-    Setup:Scrollbar()
-    Setup:ScrollHeaders()
+    --Setup:ShroudingBox()
+
+
+
+    Setup:ScrollTable()
+
+    --Setup:Scrollbar()
+    --Setup:ScrollHeaders()
 end
 
 function Setup:ShroudingBox()
@@ -135,7 +141,70 @@ function Setup:ShroudingBox()
     f:Show()
 end
 
+function Setup:ScrollTable()
+    local st = {};
+
+    local table_settings = {
+        ['name']= 'ScrollTable',
+        ['parent']=pdkp_frame,
+        ['height']=540,
+        ['width']=350,
+        ['movable']=true,
+        ['enableMouse']=true,
+        ['anchor']={
+            ['point']='TOPLEFT',
+            ['rel_point_x']=20,
+            ['rel_point_y']=-100,
+        }
+    }
+    local row_settings = {
+        ['height']=20,
+        ['width']=300,
+        ['max_rows']=25,
+        ['max_values'] = 425
+    }
+    local col_settings = {
+        ['height']=14,
+        ['width']=100,
+        ['headers'] = {
+            [1] = {
+              ['label']='name',
+              ['sortable']=true,
+              ['point']='LEFT',
+              ['showSortDirection'] = true,
+              ['compareFunc']=function(a,b)
+                  if st.sortDir == 'ASC' then return a['name'] < b['name']
+                  else return a['name'] > b['name']
+                  end
+              end
+            },
+            [2] = {
+              ['label']='class',
+              ['sortable']=true,
+              ['point']='CENTER',
+              ['showSortDirection'] = true,
+              ['compareFunc']=function(a,b)
+
+              end
+            },
+            [3] = {
+              ['label']='dkp',
+              ['sortable']=true,
+              ['point']='RIGHT',
+              ['showSortDirection'] = true,
+              ['compareFunc']=function(a,b)
+
+              end
+            },
+        }
+    }
+
+    st = ScrollTable:new(table_settings, col_settings, row_settings)
+end
+
 function Setup:Scrollbar()
+
+
     ----------------------------------------------------------------
     -- Set up some constants (really just variables, except we call
     -- them "constants" because we will never change their values,
@@ -245,9 +314,6 @@ function Setup:Scrollbar()
         end
     end
 
-    function frame:FilterTable()
-
-    end
 
     ----------------------------------------------------------------
     -- Create the scroll bar:
@@ -290,73 +356,6 @@ function Setup:Scrollbar()
     -- addon" page on my author portal for a more detailed explanation
     -- of how a metatable like this works. If you don't care how it
     -- works, feel free to use it anyway. :)
-    local header_names = {'name', 'class', 'dkp'}
-
-    local headers = setmetatable({}, { __index = function(t, i)
-        local col = CreateFrame("Button", "$parentCol"..i, frame)
-        col:SetSize(75, 14)
-
-        if i == 1 then
-            col:SetPoint("TOPLEFT", 0, -10)
-        else
-            col:SetPoint("TOPLEFT", frame.headers[i-1], "TOPRIGHT", 35, 0)
-        end
-
-        local fs = col:CreateFontString(col, 'OVERLAY', 'AchievementPointsFont')
-        fs:SetText(strupper(header_names[i]))
-        fs:SetPoint("CENTER")
-
-        col.dir = nil
-
-        local arrow = col:CreateTexture(nil, 'BACKGROUND')
-
-        arrow:SetTexture(ARROW_TEXTURE)
-        arrow:SetPoint('RIGHT', col, 5, -3)
-        col.arrow = arrow
-
-        local rotate_up = (math.pi / 180) * 270
-        local rotate_down = (math.pi / 180) * 90
-
-        arrow:Hide()
-
-        arrow:SetRotation(rotate_down)
-
-        col:SetScript('OnClick', function(self)
-            if self:GetParent():IsVisible() then
-                local cols = self:GetParent().headers
-
-                for key, c in pairs(cols) do
-                    if key ~= i then
-                        c.dir = nil
-                        c.arrow:Hide()
-                    else
-                        c.arrow:Show()
-                        GUI.sortBy = header_names[key]
-                    end
-                end
-
-                col.dir = (col.dir == nil or col.dir == 'ASC') and 'DESC' or 'ASC' -- Tenary
-                local deg = col.dir == 'DESC' and rotate_down or rotate_up
-                local point = col.dir == 'DESC' and -3 or 2
-                self.arrow:SetRotation(deg)
-                arrow:SetPoint('RIGHT', col, 5, point)
-
-                GUI.sortDir = col.dir
-
-                Guild:SortBy(header_names[i], col.dir)
-                frame:Update()
-            end
-        end)
-        rawset(t, i, col)
-        return col
-    end})
-
-    function frame:setupHeaders()
-        for i=1, 3 do
-            local header = self.headers[i]
-            header:Show()
-        end
-    end
 
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Button", "$parentRow"..i, frame)

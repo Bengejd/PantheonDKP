@@ -31,7 +31,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             GUI:Init()
             --Raid:GetInstanceInfo()
 
-            PDKP:Print(#Guild.members .. ' members found')
+            --PDKP:Print(#Guild.members .. ' members found')
 
         end
     }

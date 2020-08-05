@@ -6,4 +6,7 @@ FUNCTIONS:
     TODO: tContains - Searches a table for a value.
     TODO: wipe - wipes tables
 
+REMOVE:
+    - Lib.st -- Doesn't work.
+
 RemoveChatWindowChannel

@@ -21,6 +21,7 @@ init.lua
 Classes\Member.lua
 Classes\Guild.lua
 Classes\Raid.lua
+Classes\ScrollTable.lua
 
 ## Database files
 Modules\Character.lua
@@ -34,7 +35,7 @@ Modules\Shroud.lua
 Modules\GUI.lua
 
 ## Views
-Views\PDKP_Setup.lua
+Views\Setup.lua
 Views\Scrollbar.lua
 
 ## This should be last in the file, so that the previous modules had time to load first.
