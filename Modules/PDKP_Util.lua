@@ -193,20 +193,18 @@ function Util:PrintTable(tt, indent)
 --    if not Defaults:IsDebug() then return end;
 
     local done = {}
-    indent = 0 or 0
+    indent = indent or 0
     if type(tt) == "table" then
         for key, value in pairs (tt) do
             print(replace (" ", indent)) -- indent it
             if type (value) == "table" and not done [value] then
                 done [value] = true
-                print(format("[%s] => table\n", tostring (key)));
-                print(replace (" ", indent+4)) -- indent it
-                print("(\n");
-                Util:PrintTable (value, indent + 7, done)
-                print(replace (" ", indent+4)) -- indent it
-                print(")\n");
+                print(format("[%s] => table", tostring (key)));
+                print(replace (" ", indent+2)) -- indent it
+                Util:PrintTable (value, indent + 4, done)
+                print(replace (" ", indent+2)) -- indent it
             else
-                print(format("[%s] => %s\n",
+                print(format("[%s] => %s",
                         tostring (key), tostring(value)))
             end
         end
@@ -228,8 +226,31 @@ function Util:HexToRGBA(hex)
     return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, (a ~= "") and (tonumber(a, 16) / 255) or 1
 end
 
-function ttoggle(table, item)
+function dumpTable(tbl, indent, depth, currentDepth)
+    indent = indent or 0;
+    depth = depth or 1
+    currentDepth = currentDepth or 0;
 
+    local toprint = string.rep(" ", indent) .. "\r\n"
+    indent = indent + 2
+    if type(tbl) == 'table' then
+        for key, value in pairs(tbl) do
+            value = value or 'nil'
+            toprint = toprint .. string.rep(" ", indent)
+            if type(value) == 'table' then
+                currentDepth = currentDepth + 1
+                toprint = toprint .. format("[%s] => table \n", tostring(key))
+                if currentDepth < depth then
+                    toprint = toprint .. dumpTable(value, indent, depth, currentDepth)
+                end
+            else
+                toprint = toprint .. format("[%s] => %s \n", tostring(key), tostring(value))
+            end
+        end
+    else
+        print(tbl .. "\n")
+    end
+    return toprint
 end
 
 -- Custom function for finding table index.

@@ -3,12 +3,12 @@ local _G = _G;
 local L = core.L;
 
 local ScrollTable = core.ScrollTable;
-local Row = core.ScrollTable.Row;
+local Util = core.Util;
 
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
 local type, floor, strupper, pi = type, math.floor, strupper, math.pi
-local tinsert = tinsert
+local tinsert, tremove = tinsert, tremove
 
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
@@ -39,15 +39,28 @@ function ScrollTable:ClearSelected()
     self.lastSelect = nil
 end
 
-function ScrollTable:RowClicked(row, objIndex)
+function ScrollTable:GetNewLastSelect(row, objIndex)
     local isSelected, selectIndex = tfind(self.selected, objIndex)
+    local previousLastSelect = self.lastSelect
 
-    if isSelected then -- De-select this row.
-        self:ClearSelected()
-        self:HighlightRow(row, false)
+    if #self.selected == 0 then -- Nothing is selected anymore.
+        self.lastSelect = nil;
+        return
     else
-        self:ClearSelected()
-        self:HighlightRow(row, true)
+        self.lastSelect = objIndex;
+    end
+
+    print('Setting new lastSelect')
+
+    if self.lastSelect == row.realIndex and #self.selected >= 1 then
+
+    end
+end
+
+function ScrollTable:RowClicked(row, objIndex)
+    local isSelected, _ = tfind(self.selected, objIndex)
+    self:ClearSelected()
+    if not isSelected then
         tinsert(self.selected, objIndex)
     end
 end
@@ -56,8 +69,17 @@ function ScrollTable:RowShiftClicked()
 
 end
 
-function ScrollTable:RowControlClicked()
+function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear)
+    clear = clear or false
+    if clear then
+        self:ClearSelected()
+    end
 
+    if isSelected then
+        tremove(self.selected, selectIndex)
+    else
+        tinsert(self.selected, objIndex)
+    end
 end
 
 function ScrollTable:CheckSelect(row, clickType)
@@ -67,18 +89,16 @@ function ScrollTable:CheckSelect(row, clickType)
     if clickType == 'LeftButton' then
         local hasCtrl = IsControlKeyDown()
         local hasShift = IsShiftKeyDown()
-
-        print(objIndex, row.dataObj['dkp']['Molten Core'].total, row.realIndex)
+        local isSelected, selectIndex = tfind(self.selected, objIndex)
 
         if hasShift and hasCtrl then -- Do nothing here.
-        elseif hasShift then
+            return
+        elseif hasShift then -- Shift click
             self:RowShiftClicked()
-        elseif hasCtrl then
-            self:RowControlClicked()
-        else
-            self:RowClicked(row, objIndex)
+        else -- Control or Regular Click.
+            self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
         end
-
+        self:GetNewLastSelect(row, objIndex)
         return self.frame:Update()
     end
 
@@ -139,10 +159,14 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
     self.cols = {};
     self.data = {};
 
+    -- Sort vars
     self.sortBy = nil;
     self.sortDir = nil;
     self.firstSort = col_settings['firstSort'] or nil;
     self.firstSortRan = false;
+
+    -- Drag vars
+    self.isDragging = false
 
     -- Create our base frame.
     self.frame = CreateFrame("Frame", self.name, self.parent)
@@ -240,10 +264,6 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         -- These first two lines replace a call to the global
         -- FauxScrollFrame_OnVerticalScroll function, saving a
         -- global lookup and a function call.
-
-        local scrollbar = getglobal(sb:GetName());
-
-        --scrollbar:SetValue(offset)
 
         sb.offset = floor(offset / self.ROW_HEIGHT + .5)
 
@@ -364,6 +384,26 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
         row:SetHeight(self.ROW_HEIGHT)
         row:SetWidth(self.ROW_WIDTH)
         row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+        row:RegisterForDrag("LeftButton")
+
+        row:SetScript("OnDragStart", function(r, ...)
+            self.isDragging = true
+            self:CheckSelect(r, 'LeftButton')
+        end)
+
+        row:SetScript("OnDragStop", function(r, ...)
+            self.isDragging = false
+        end)
+
+        row:SetScript("OnReceiveDrag", function(r)
+            print(r.dataObj['name'])
+        end)
+
+        row:SetScript("OnEnter", function(r)
+            if not self.isDragging then return end
+
+            print(r.dataObj['name'])
+        end)
 
         row.cols = {};
         row.index = i
