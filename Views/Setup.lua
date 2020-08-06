@@ -225,8 +225,12 @@ function Setup:ScrollTable()
         ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
-    st = ScrollTable:new(table_settings, col_settings, row_settings)
-    st:Refresh()
+    st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+
+    --pdkp_frame.scrollChild = f
+    --HybridScrollFrame_CreateButtons(pdkp_frame, 'pdkp_dkp_entryTemplate', 5, 0)
+
+    --st:Refresh()
 end
 
 

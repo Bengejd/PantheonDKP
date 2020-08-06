@@ -469,3 +469,133 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
 
     return self
 end
+
+function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+    local self = {};
+    setmetatable(self, ScrollTable); -- Set the metatable so we use ScrollTable's __index
+
+    -- Set all of the important settings or default if they were not provided.
+    self.parent = self:SetParent(table_settings['parent'])
+    self.name = self.parent and self.parent:GetName() .. '_' .. table_settings['name'] or table_settings['name']
+    self.height = table_settings['height'] or 300
+    self.width = table_settings['width'] or 300
+    self.movable = table_settings['movable'] or false
+    self.enableMouse = table_settings['enableMouse'] or false
+    self.anchor = table_settings['anchor'] or {
+        ['point']='CENTER',
+        ['rel_point_x']=0,
+        ['rel_point_y']=0
+    }
+
+    self.ROW_HEIGHT = row_settings['height'] or 20
+    self.ROW_WIDTH = row_settings['width'] or 300
+    self.MAX_ROWS = row_settings['max_rows'] or 25
+    self.ROW_MULTI_SELECT = row_settings['multiSelect'] or false
+    self.ROW_SELECT_ON = row_settings['indexOn'] or nil
+
+    self.COL_HEIGHT = col_settings['height'] or 14
+    self.COL_WIDTH = col_settings['width'] or 100
+    self.HEADERS = col_settings['headers']
+
+    self.displayData = {};
+
+    self.selected = {};
+    self.lastSelect = nil;
+
+    self.cols = {};
+    self.data = {};
+
+    -- Sort vars
+    self.sortBy = nil;
+    self.sortDir = nil;
+    self.firstSort = col_settings['firstSort'] or nil;
+    self.firstSortRan = false;
+
+    -- Drag vars
+    self.isDragging = false
+
+
+    local function CreateDemoModel(numItems)
+        local listModel = {};
+
+        for index = 1, numItems do
+            table.insert(listModel, {
+                text = string.format("List Item %1$d", index),
+                icon = string.format([[Interface\Icons\INV_Sword_%1$d]],
+                        30 + (index % 30)),
+            });
+        end
+
+        return listModel;
+    end
+
+    HybridScrollDemoMixin = {};
+
+    function HybridScrollDemoMixin:OnLoad()
+        -- Create the item model that we'll be displaying.
+        self.items = CreateDemoModel(50);
+
+        -- Bind the update field on the scrollframe to a function that'll update
+        -- the displayed contents. This is called when the frame is scrolled.
+        self.ListScrollFrame.update = function() self:RefreshLayout(); end
+
+        -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
+        HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
+    end
+
+    function HybridScrollDemoMixin:OnShow()
+        -- Create the buttons for the scrollframe when we initially show. This
+        -- can be done OnLoad, but we might as well wait until the UI is in use.
+        --
+        -- If the frame size ever changes, you'll generally want to re-call this.
+        HybridScrollFrame_CreateButtons(self.ListScrollFrame,
+                "HybridScrollDemoListItemTemplate");
+        self:RefreshLayout();
+    end
+
+    function HybridScrollDemoMixin:RemoveItem(index)
+        table.remove(self.items, index);
+        self:RefreshLayout();
+    end
+
+    function HybridScrollDemoMixin:RefreshLayout()
+        local items = self.items;
+        local buttons = HybridScrollFrame_GetButtons(self.ListScrollFrame);
+        local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
+
+        for buttonIndex = 1, #buttons do
+            local button = buttons[buttonIndex];
+            local itemIndex = buttonIndex + offset;
+
+            -- Usually the check you'd want to apply here is that if itemIndex
+            -- is greater than the size of your model contents, you'll hide the
+            -- button. Otherwise, update it visually and show it.
+            if itemIndex <= #items then
+                local item = items[itemIndex];
+                button:SetID(itemIndex);
+                button.Icon:SetTexture(item.icon or nil);
+                button.Text:SetText(item.text or "");
+
+                -- One caveat is buttons are only anchored below one another with
+                -- one point, so an explicit width is needed on each row or you
+                -- need to add the second point manually.
+                button:SetWidth(self.ListScrollFrame.scrollChild:GetWidth());
+                button:Show();
+            else
+                button:Hide();
+            end
+        end
+
+        -- The last step is to ensure the scroll range is updated appropriately.
+        -- Calculate the total height of the scrollable region (using the model
+        -- size), and the displayed height based on the number of shown buttons.
+        local buttonHeight = self.ListScrollFrame.buttonHeight;
+        local totalHeight = #items * buttonHeight;
+        local shownHeight = #buttons * buttonHeight;
+
+        HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
+    end
+
+
+    return self
+end
