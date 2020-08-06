@@ -8,6 +8,7 @@ local Row = core.ScrollTable.Row;
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
 local type, floor, strupper, pi = type, math.floor, strupper, math.pi
+local tinsert = tinsert
 
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
@@ -38,8 +39,17 @@ function ScrollTable:ClearSelected()
     self.lastSelect = nil
 end
 
-function ScrollTable:RowClicked(row, name)
+function ScrollTable:RowClicked(row, objIndex)
     local isSelected, selectIndex = tfind(self.selected, objIndex)
+
+    if isSelected then -- De-select this row.
+        self:ClearSelected()
+        self:HighlightRow(row, false)
+    else
+        self:ClearSelected()
+        self:HighlightRow(row, true)
+        tinsert(self.selected, objIndex)
+    end
 end
 
 function ScrollTable:RowShiftClicked()
@@ -58,13 +68,15 @@ function ScrollTable:CheckSelect(row, clickType)
         local hasCtrl = IsControlKeyDown()
         local hasShift = IsShiftKeyDown()
 
+        print(objIndex, row.dataObj['dkp']['Molten Core'].total, row.realIndex)
+
         if hasShift and hasCtrl then -- Do nothing here.
         elseif hasShift then
             self:RowShiftClicked()
         elseif hasCtrl then
             self:RowControlClicked()
         else
-            self:RowClicked()
+            self:RowClicked(row, objIndex)
         end
 
         return self.frame:Update()
@@ -195,7 +207,7 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
 
                     col:SetText(val)
                 end
-                s:CheckSelect(row, nil)
+                s:CheckSelect(row, nil, realIndex)
 
                 row:Show()
             else
@@ -355,6 +367,7 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
 
         row.cols = {};
         row.index = i
+        row.realIndex = nil;
         row.selectOn = self.ROW_SELECT_ON
         row.dataObj = nil;
 
@@ -365,8 +378,8 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
             row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
             row:SetPushedTexture(HIGHLIGHT_TEXTURE)
             row:SetScript("OnClick", function(r, clickType)
-                row.dataObj = self.displayData[i];
-                self:CheckSelect(r, clickType) end)
+                self:CheckSelect(r, clickType)
+            end)
 
             local sep = row:CreateTexture(nil, 'BACKGROUND')
             sep:SetTexture(ROW_HIGHLIGHT)

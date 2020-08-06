@@ -46,9 +46,11 @@ function Member:new(guildIndex)
         end
     end
 
-    if self.name == 'Neekio' or self.name == 'Athico' then
-        self.dkp['Molten Core'].total = math.random(100000)
-    end
+    self.dkp['Molten Core'].total = guildIndex;
+
+    --if self.name == 'Neekio' or self.name == 'Athico' then
+    --    self.dkp['Molten Core'].total = math.random(100000)
+    --end
 
     return self
 end
