@@ -60,4 +60,3 @@ for _, eventName in pairs(eventNames) do
     events:RegisterEvent(eventName);
 end
 events:SetScript("OnEvent", PDKP_OnEvent); -- calls the above MonDKP_OnEvent function to determine what to do with the event
-

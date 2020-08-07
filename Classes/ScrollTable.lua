@@ -115,11 +115,11 @@ function ScrollTable:Refresh()
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
 
-    if not self.firstSortRan then
-        self.cols[self.firstSort]:Click()
-    end
+    --if not self.firstSortRan then
+    --    self.cols[self.firstSort]:Click()
+    --end
 
-    self.frame:Update()
+    --self.frame:Update()
 end
 
 function ScrollTable:new(table_settings, col_settings, row_settings)
@@ -470,6 +470,12 @@ function ScrollTable:new(table_settings, col_settings, row_settings)
     return self
 end
 
+-----------------------------------------------------------------------------------------------------------------------
+--
+-- MIXIN STUFF
+--
+-----------------------------------------------------------------------------------------------------------------------
+
 function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     local self = {};
     setmetatable(self, ScrollTable); -- Set the metatable so we use ScrollTable's __index
@@ -489,9 +495,12 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.ROW_HEIGHT = row_settings['height'] or 20
     self.ROW_WIDTH = row_settings['width'] or 300
-    self.MAX_ROWS = row_settings['max_rows'] or 25
     self.ROW_MULTI_SELECT = row_settings['multiSelect'] or false
     self.ROW_SELECT_ON = row_settings['indexOn'] or nil
+    self.retrieveDataFunc = table_settings['retrieveDataFunc']
+    self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
+
+    self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
 
     self.COL_HEIGHT = col_settings['height'] or 14
     self.COL_WIDTH = col_settings['width'] or 100
@@ -514,88 +523,302 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     -- Drag vars
     self.isDragging = false
 
+    self:Refresh()
 
-    local function CreateDemoModel(numItems)
-        local listModel = {};
+    -------------------------
+    -- Setup the Frames
+    -------------------------
 
-        for index = 1, numItems do
-            table.insert(listModel, {
-                text = string.format("List Item %1$d", index),
-                icon = string.format([[Interface\Icons\INV_Sword_%1$d]],
-                        30 + (index % 30)),
-            });
-        end
+    -- Create our base frame.
+    self.frame = CreateFrame("Frame", self.name, self.parent)
+    self.frame:EnableMouse(self.enableMouse)
+    self.frame:SetMovable(self.movable)
+    self.frame:SetSize(self.width, self.height)
+    self.frame:SetHeight(self.height)
+    self.frame:SetWidth(self.width)
+    self.frame:SetPoint(self.anchor['point'], self.parent, self.anchor['rel_point_x'], self.anchor['rel_point_y'])
 
-        return listModel;
-    end
+    -- Give the frame a visible background and border:
+    --self.frame:SetBackdrop({
+    --    tile = true, tileSize = 0,
+    --    edgeFile = SCROLL_BORDER, edgeSize = 8,
+    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --})
 
-    HybridScrollDemoMixin = {};
+    self.frame.parent = self
 
-    function HybridScrollDemoMixin:OnLoad()
-        -- Create the item model that we'll be displaying.
-        self.items = CreateDemoModel(50);
+    -----------------
+    -- Create the ScrollFrame
 
-        -- Bind the update field on the scrollframe to a function that'll update
-        -- the displayed contents. This is called when the frame is scrolled.
-        self.ListScrollFrame.update = function() self:RefreshLayout(); end
+    local listScrollFrame = CreateFrame("ScrollFrame", "ListScrollFrame", self.frame, 'HybridScrollFrameTemplate')
 
-        -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
-        HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
-    end
+    listScrollFrame:SetPoint("TOPLEFT", 0, -8)
+    listScrollFrame:SetPoint("BOTTOMRIGHT", -30, 8)
 
-    function HybridScrollDemoMixin:OnShow()
-        -- Create the buttons for the scrollframe when we initially show. This
-        -- can be done OnLoad, but we might as well wait until the UI is in use.
-        --
-        -- If the frame size ever changes, you'll generally want to re-call this.
-        HybridScrollFrame_CreateButtons(self.ListScrollFrame,
-                "HybridScrollDemoListItemTemplate");
-        self:RefreshLayout();
-    end
+    ----------------
+    -- Create the slider
+    local scrollBar = CreateFrame("Slider", 'scrollBar', listScrollFrame, 'HybridScrollBarTemplate')
+    scrollBar:SetPoint("TOPLEFT", listScrollFrame, "TOPRIGHT", 1, -16)
+    scrollBar:SetPoint("BOTTOMLEFT", listScrollFrame, "BOTTOMRIGHT", 1, 12)
 
-    function HybridScrollDemoMixin:RemoveItem(index)
-        table.remove(self.items, index);
-        self:RefreshLayout();
-    end
+    self.ListScrollFrame = listScrollFrame
+    self.scrollChild = listScrollFrame.scrollChild;
 
-    function HybridScrollDemoMixin:RefreshLayout()
-        local items = self.items;
-        local buttons = HybridScrollFrame_GetButtons(self.ListScrollFrame);
-        local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
+    ----------------
+    -- Set the on_ functions
+    self:OnLoad()
 
-        for buttonIndex = 1, #buttons do
-            local button = buttons[buttonIndex];
-            local itemIndex = buttonIndex + offset;
+    self.ListScrollFrame.buttonHeight = self.ROW_HEIGHT;
 
-            -- Usually the check you'd want to apply here is that if itemIndex
-            -- is greater than the size of your model contents, you'll hide the
-            -- button. Otherwise, update it visually and show it.
-            if itemIndex <= #items then
-                local item = items[itemIndex];
-                button:SetID(itemIndex);
-                button.Icon:SetTexture(item.icon or nil);
-                button.Text:SetText(item.text or "");
+    self.scrollChild:SetWidth(self.ListScrollFrame:GetWidth())
 
-                -- One caveat is buttons are only anchored below one another with
-                -- one point, so an explicit width is needed on each row or you
-                -- need to add the second point manually.
-                button:SetWidth(self.ListScrollFrame.scrollChild:GetWidth());
-                button:Show();
-            else
-                button:Hide();
-            end
-        end
+    listScrollFrame:SetVerticalScroll(0);
+    listScrollFrame:UpdateScrollChildRect();
 
-        -- The last step is to ensure the scroll range is updated appropriately.
-        -- Calculate the total height of the scrollable region (using the model
-        -- size), and the displayed height based on the number of shown buttons.
-        local buttonHeight = self.ListScrollFrame.buttonHeight;
-        local totalHeight = #items * buttonHeight;
-        local shownHeight = #buttons * buttonHeight;
+    self.ListScrollFrame.buttons = self.rows;
+    scrollBar:SetMinMaxValues(1, (#self.data * self.ROW_HEIGHT))
 
-        HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
-    end
+    scrollBar.buttonHeight = self.ROW_HEIGHT;
+    scrollBar:SetValueStep(self.ROW_HEIGHT);
+    scrollBar:SetStepsPerPage(self.MAX_ROWS -2);
+    scrollBar:SetValue(1);
 
+    self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 0);
+
+    self:RefreshLayout();
 
     return self
 end
+
+
+-- OnLoad sets up the row & header structure for our hybridScroll. This should only be called once, ideally.
+function ScrollTable:OnLoad()
+    -- Create the item model that we'll be displaying.
+    local rows = setmetatable({}, { __index = function(t, i)
+
+        local row = CreateFrame("Button", "$parent_Row"..i, self.scrollChild)
+        row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
+        row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+        row:RegisterForDrag("LeftButton")
+
+        row.cols = {};
+        row.index = i
+        row.realIndex = nil;
+        row.selectOn = self.ROW_SELECT_ON
+        row.dataObj = self.displayData[i];
+        row:SetID(i)
+
+        if i == 1 then -- Anchor the first row relative to the frame.
+            row:SetPoint("TOPLEFT", self.scrollChild, 10, -16)
+        else
+            row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+        end
+
+        row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
+        row:SetPushedTexture(HIGHLIGHT_TEXTURE)
+        row:SetScript("OnClick", function(r, clickType)
+            self:CheckSelect(r, clickType)
+        end)
+
+        --local sep = row:CreateTexture(nil, 'BACKGROUND')
+        --sep:SetTexture(ROW_HIGHLIGHT)
+        --sep:SetPoint("BOTTOMLEFT", row, 0, -1, self.rows[i-1], "BOTTOMRIGHT")
+        --sep:SetHeight(3)
+        --sep:SetWidth(self.ROW_WIDTH)
+
+        if i == 1 then
+            local topSep = row:CreateTexture(nil, 'BACKGROUND')
+            topSep:SetTexture(ROW_HIGHLIGHT)
+            topSep:SetPoint("TOPLEFT", row, 0, 0, row, "TOPRIGHT")
+            topSep:SetHeight(3)
+            topSep:SetWidth(self.ROW_WIDTH)
+        end
+
+        for key, header in pairs(self.HEADERS) do
+            local label = header['label']
+            local col_name = '$parent' .. label
+            local col = row:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
+            local getVal = header['getValueFunc']
+            local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
+
+            col:SetJustifyH(header['point'])
+
+            col:SetSize(self.COL_WIDTH, self.COL_HEIGHT)
+            local col_point = header['point'] or 'LEFT'
+            col:SetJustifyH(col_point)
+
+            if type(val) == 'number' and val > 9999 then
+                col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letter spacing.
+            end
+
+            if key == 1 then
+                col:SetPoint(col_point, row)
+            else
+                col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", 0, 0)
+
+                if key == #self.HEADERS and col_point == 'RIGHT' then
+                    col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
+                    val = i;
+                end
+            end
+
+            col:SetText(val)
+
+            row.cols[key] = col;
+        end
+
+        rawset(t, i, row)
+        return row
+    end })
+    local cols = setmetatable({}, { __index = function(t, i)
+        local header = self.HEADERS[i] or {};
+        local label = header['label'] or 'Test'
+        local sortable = header['sortable'] or false
+        local point = header['point'] or 'LEFT'
+        local showSortDirection = header['showSortDirection'] or false
+        local compare = header['compareFunc'];
+        local font = header['font'] or "AchievementPointsFont"
+
+        local col = CreateFrame("Button", "$parent_Col_" .. label, self.ListScrollFrame)
+
+        local width = header['width'] or self.COL_WIDTH;
+
+        col:SetHeight(self.COL_HEIGHT)
+        col:SetWidth(width)
+
+        if i == 1 then
+            col:SetPoint("TOPLEFT", -6, 20)
+        else
+            col:SetPoint("TOPLEFT", self.cols[i-1], "TOPRIGHT", 20, 0)
+        end
+
+        local fs = col:CreateFontString(col, "OVERLAY", font)
+        fs:SetText(strupper(label))
+        fs:SetPoint("CENTER")
+
+        local fsLength = fs:GetWidth()
+
+        col.arrow = nil;
+        col.dir = nil;
+        col.label = label
+        col.compare = compare
+        col.fontString = fs
+
+        function col:ToggleArrow(show)
+            if col.arrow ~= nil and show then
+                col.arrow:Show()
+            elseif col.arrow ~= nil and not show then
+                col.arrow:Hide()
+            end
+        end
+
+        if showSortDirection then
+            local arrow = col:CreateTexture(nil, 'BACKGROUND')
+            arrow:SetTexture(ARROW_TEXTURE)
+            arrow:SetPoint('RIGHT', col, 0, -3)
+            col.arrow = arrow;
+
+            col:ToggleArrow(false)
+
+            arrow:SetRotation(rotate_down)
+        end
+
+        if sortable then
+            col:SetScript("OnClick", function()
+                if col:GetParent():IsVisible() then
+                    for key, column in pairs(self.cols) do
+                        if key ~= i then
+                            column.dir = nil;
+                            column:ToggleArrow(false)
+                        else
+                            column:ToggleArrow(true)
+                            self.sortBy = column.label
+                        end
+                    end
+
+                    col.dir = (col.dir == nil or col.dir == 'ASC') and 'DESC' or 'ASC' -- Tenary
+
+                    local deg = col.dir == 'DESC' and rotate_down or rotate_up
+                    point = col.dir == 'DESC' and -3 or 2
+
+                    -- Gives us uniform arrow spacing, based on label length.
+                    -- Base is based off of length of "Name" and "Class" when they are uppercase.
+                    local baseLength = 55
+                    local arrow_x = floor((fsLength - baseLength) / 2 - 1)
+
+                    if col.arrow ~= nil then
+                        col.arrow:SetRotation(deg)
+                        col.arrow:SetPoint('TOPRIGHT', col, 'TOPRIGHT', arrow_x, point)
+                    end
+
+                    self.sortDir = col.dir
+                    table.sort(self.rows, col.compare)
+                    self:RefreshLayout();
+                end
+            end)
+        end
+
+        col:Show()
+
+        rawset(t, i, col)
+        return col
+    end})
+
+    self.rows = rows
+    self.cols = cols
+
+    for i=1, #self.HEADERS do
+        local col = self.cols[i]
+        col:Show()
+    end
+
+    self.ListScrollFrame.buttons = self.rows;
+
+    -- Bind the update field on the scrollframe to a function that'll update
+    -- the displayed contents. This is called when the frame is scrolled.
+    self.ListScrollFrame.update = function() self:RefreshLayout(); end
+
+    -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
+    HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
+end
+
+function ScrollTable:RemoveItem(index)
+    table.remove(self.items, index);
+    self:RefreshLayout();
+end
+
+function ScrollTable:RefreshLayout()
+    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
+
+    print(offset + self.MAX_ROWS)
+
+    for i=1, #self.displayData do
+        local row = self.rows[i]
+
+        if i >= offset +1 and i <= offset + self.MAX_ROWS then
+            row:Show()
+            if i == offset + 1 then
+                row:SetPoint("TOPLEFT", self.scrollChild, 10, -18)
+            else
+                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+            end
+        else
+            row:Hide()
+        end
+    end
+
+    -- The last step is to ensure the scroll range is updated appropriately.
+    -- Calculate the total height of the scrollable region (using the model
+    -- size), and the displayed height based on the number of shown buttons.
+    local buttonHeight = self.ROW_HEIGHT;
+    local totalHeight = (#self.displayData * buttonHeight) + self.ROW_HEIGHT;
+    local shownHeight = self.MAX_ROWS * buttonHeight;
+
+    HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
+
+    --self.scrollChild:SetHeight(math.floor(self.MAX_ROWS * self.ROW_HEIGHT));
+    --self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 9);
+    --self.ListScrollFrame:UpdateScrollChildRect();
+end
+
+pdkp_ScrollTableMixin = core.ScrollTable;

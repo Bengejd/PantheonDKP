@@ -147,6 +147,11 @@ function Setup:ScrollTable()
     local function compare(a,b)
         local sortDir = st.sortDir;
         local sortBy = st.sortBy;
+        -- Set the data object explicitly here
+        -- Since this is pointing to a row
+        -- Not a member object.
+        a = a.dataObj;
+        b = b.dataObj;
 
         if sortBy == 'name' then
             a = a['name']
@@ -169,7 +174,7 @@ function Setup:ScrollTable()
     local table_settings = {
         ['name']= 'ScrollTable',
         ['parent']=pdkp_frame,
-        ['height']=540,
+        ['height']=500,
         ['width']=330,
         ['movable']=true,
         ['enableMouse']=true,
@@ -183,7 +188,7 @@ function Setup:ScrollTable()
         ['anchor']={
             ['point']='TOPLEFT',
             ['rel_point_x']=20,
-            ['rel_point_y']=-100,
+            ['rel_point_y']=-145,
         }
     }
     local col_settings = {
@@ -220,17 +225,11 @@ function Setup:ScrollTable()
     local row_settings = {
         ['height']=20,
         ['width']=285,
-        ['max_rows']=25,
         ['max_values'] = 425,
         ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
     st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
-
-    --pdkp_frame.scrollChild = f
-    --HybridScrollFrame_CreateButtons(pdkp_frame, 'pdkp_dkp_entryTemplate', 5, 0)
-
-    --st:Refresh()
 end
 
 
