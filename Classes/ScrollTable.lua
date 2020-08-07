@@ -587,6 +587,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self:RefreshLayout();
 
+    -- TODO: Fix scroll table moving after it reaches the bottom. Might have to listen for bottom_button disable event. 
+
     return self
 end
 
