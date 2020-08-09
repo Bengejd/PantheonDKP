@@ -46,11 +46,8 @@ function Member:new(guildIndex)
         end
     end
 
+    -- TODO: Save / Retrieve this data instead of using guildIndex
     self.dkp['Molten Core'].total = guildIndex;
-
-    --if self.name == 'Neekio' or self.name == 'Athico' then
-    --    self.dkp['Molten Core'].total = math.random(100000)
-    --end
 
     return self
 end
@@ -62,26 +59,12 @@ function Member:GetDKP(raidName, variableName)
     elseif variableName == 'all' then
         return self.dkp[raidName]
     end
-
-    --if Util:IsEmpty(raidName) then
-    --    return Util:ThrowError('No raid provided to GetDKP')
-    --elseif not acceptableDKPVariables[variableName] then
-    --    return Util:ThrowError('Invalid dkpVariable ' .. variableName)
-    --end
-    --if raidName == 'Onyxia\'s Lair' then raidName = 'Molten Core'; end
-    --if variableName == 'all' then return self.dkp[raidName] end
-    --return self.dkp[raidName][variableName]
 end
 
-function Member:Changed(event, name, key, value, dataobj)
-    --    print('LDB Changed', event, name, key, tostring(value))
-    print("LDB: "..name.. ".".. key.. " was changed to ".. tostring(value))
-end
-
-function Member:ShouldShow()
-    local dkp = self:GetDKP(nil, 'total')
-    self.visible = dkp > 0
-    return self.visible
+function Member:UpdateDKP(raid, entry)
+    raid = raid or Raid:GetCurrentRaid()
+    --entry = entry or {};
+    self.dkp[raid].total = self.dkp[raid].total + 10
 end
 
 function Member:Save()

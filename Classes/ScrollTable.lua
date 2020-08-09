@@ -13,8 +13,7 @@ local tinsert, tremove = tinsert, tremove
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
-local ROW_HIGHLIGHT = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
-local BAR_TEXTURE = 'Interface\\Artifacts\\ArtifactsVertical'
+local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
 local rotate_up = (pi / 180) * 270
 local rotate_down = (pi / 180) * 90
@@ -39,34 +38,41 @@ function ScrollTable:ClearSelected()
     self.lastSelect = nil
 end
 
-function ScrollTable:GetNewLastSelect(row, objIndex)
-    local isSelected, selectIndex = tfind(self.selected, objIndex)
-    local previousLastSelect = self.lastSelect
-
-    if #self.selected == 0 then -- Nothing is selected anymore.
-        self.lastSelect = nil;
-        return
-    else
+function ScrollTable:UpdateLastSelect(objIndex, isSelected)
+    if isSelected then
         self.lastSelect = objIndex;
-    end
-
-    print('Setting new lastSelect')
-
-    if self.lastSelect == row.realIndex and #self.selected >= 1 then
-
+    elseif #self.selected >= 1 then
+        self.lastSelect = self.selected[#self.selected]
+    else
+        self.lastSelect = nil;
     end
 end
 
-function ScrollTable:RowClicked(row, objIndex)
-    local isSelected, _ = tfind(self.selected, objIndex)
-    self:ClearSelected()
-    if not isSelected then
-        tinsert(self.selected, objIndex)
+function ScrollTable:RowShiftClicked(objIndex, selectIndex, isSelected)
+    local previousSelect = self.lastSelect
+
+    if previousSelect == objIndex then return end -- Do nothing if the same thing is clicked again.
+
+    -- Shift clicks always add to the lastSelect.
+    self:UpdateSelectStatus(objIndex, selectIndex, false, false)
+    if #self.selected <= 1 then return end -- Only one thing selected, do nothing.
+
+    local _, prevSelectIndex = tfind(self.rows, previousSelect, self.ROW_SELECT_ON)
+    local _, currSelectIndex = tfind(self.rows, self.lastSelect, self.ROW_SELECT_ON)
+
+    local startIndex = prevSelectIndex < currSelectIndex and prevSelectIndex or currSelectIndex
+    local endIndex = prevSelectIndex > currSelectIndex and prevSelectIndex or currSelectIndex
+
+    -- Grab the list items between startIndex and endIndex.
+    local betweenRows = { unpack( self.rows, startIndex, endIndex) }
+    for i=1, #betweenRows do
+        local rowObjIndex = betweenRows[i]['dataObj'][self.ROW_SELECT_ON]
+        local rowSelected = tfind(self.selected, rowObjIndex)
+        if not rowSelected then -- Add it to the list, if it is not already selected.
+            tinsert(self.selected, rowObjIndex)
+            self:HighlightRow(betweenRows[i], true)
+        end
     end
-end
-
-function ScrollTable:RowShiftClicked()
-
 end
 
 function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear)
@@ -80,8 +86,7 @@ function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear
     else
         tinsert(self.selected, objIndex)
     end
-
-    print(#self.selected)
+    self:UpdateLastSelect(objIndex, not isSelected)
 end
 
 function ScrollTable:CheckSelect(row, clickType)
@@ -96,11 +101,12 @@ function ScrollTable:CheckSelect(row, clickType)
         if hasShift and hasCtrl then -- Do nothing here.
             return
         elseif hasShift then -- Shift click
-            self:RowShiftClicked()
+            self:RowShiftClicked(objIndex, selectIndex, isSelected)
         else -- Control or Regular Click.
             self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
         end
-        --self:GetNewLastSelect(row, objIndex)
+
+        return self:RefreshLayout()
     end
 
     local isSelected, selectIndex = tfind(self.selected, objIndex)
@@ -108,7 +114,7 @@ function ScrollTable:CheckSelect(row, clickType)
 end
 
 -- Refreshes the data that we are utilizing.
-function ScrollTable:Refresh()
+function ScrollTable:RefreshData()
     self.data = self.retrieveDataFunc();
     self.displayData = {};
 
@@ -119,8 +125,6 @@ function ScrollTable:Refresh()
     --if not self.firstSortRan then
     --    self.cols[self.firstSort]:Click()
     --end
-
-    --self.frame:Update()
 end
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -153,6 +157,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.retrieveDataFunc = table_settings['retrieveDataFunc']
     self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
 
+
     self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
 
     self.COL_HEIGHT = col_settings['height'] or 14
@@ -176,7 +181,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     -- Drag vars
     self.isDragging = false
 
-    self:Refresh()
+    self:RefreshData()
 
     -------------------------
     -- Setup the Frames
@@ -240,17 +245,42 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self:RefreshLayout();
 
-    -- TODO: Fix scroll table moving after it reaches the bottom. Might have to listen for bottom_button disable event. 
-
     return self
 end
 
+function ScrollTable:RefreshLayout()
+    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
+
+    for i=1, #self.displayData do
+        local row = self.rows[i]
+
+        if i >= offset +1 and i <= offset + self.MAX_ROWS then
+            row:Show()
+            if i == offset + 1 then
+                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+            else
+                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+            end
+            self:CheckSelect(row, nil)
+        else
+            row:Hide()
+        end
+    end
+
+    -- The last step is to ensure the scroll range is updated appropriately.
+    -- Calculate the total height of the scrollable region (using the model
+    -- size), and the displayed height based on the number of shown buttons.
+    local buttonHeight = self.ROW_HEIGHT;
+    local totalHeight = (#self.displayData * buttonHeight) + self.ROW_HEIGHT;
+    local shownHeight = self.MAX_ROWS * buttonHeight;
+
+    HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
+end
 
 -- OnLoad sets up the row & header structure for our hybridScroll. This should only be called once, ideally.
 function ScrollTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
-
         local row = CreateFrame("Button", "$parent_Row"..i, self.scrollChild)
         row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
         row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
@@ -276,7 +306,7 @@ function ScrollTable:OnLoad()
         end)
 
         local sep = row:CreateTexture(nil, 'BACKGROUND')
-        sep:SetTexture(ROW_HIGHLIGHT)
+        sep:SetTexture(ROW_SEPARATOR)
         sep:SetHeight(3)
         sep:SetWidth(self.ROW_WIDTH)
 
@@ -286,6 +316,20 @@ function ScrollTable:OnLoad()
             sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
         else
             sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
+        end
+
+        row.super = self;
+
+        function row:UpdateRowValues()
+            for key, header in pairs(row.super['HEADERS']) do
+                local label = header['label']
+                local valFunc = header['getValueFunc']
+                if valFunc ~= nil then
+                    local val = (valFunc ~= nil and row.dataObj ~= nil) and valFunc(row.dataObj) or row.dataObj[label]
+                    row.cols[key]:SetText(val)
+                    print('Updating: ', row.dataObj['name'], 'to ', val)
+                end
+            end
         end
 
         for key, header in pairs(self.HEADERS) do
@@ -312,7 +356,6 @@ function ScrollTable:OnLoad()
 
                 if key == #self.HEADERS and col_point == 'RIGHT' then
                     col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
-                    val = i;
                 end
             end
 
@@ -439,38 +482,6 @@ end
 function ScrollTable:RemoveItem(index)
     table.remove(self.items, index);
     self:RefreshLayout();
-end
-
-function ScrollTable:RefreshLayout()
-    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
-
-    for i=1, #self.displayData do
-        local row = self.rows[i]
-
-        if i >= offset +1 and i <= offset + self.MAX_ROWS then
-            row:Show()
-            if i == offset + 1 then
-                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
-            else
-                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
-            end
-        else
-            row:Hide()
-        end
-    end
-
-    -- The last step is to ensure the scroll range is updated appropriately.
-    -- Calculate the total height of the scrollable region (using the model
-    -- size), and the displayed height based on the number of shown buttons.
-    local buttonHeight = self.ROW_HEIGHT;
-    local totalHeight = (#self.displayData * buttonHeight) + self.ROW_HEIGHT;
-    local shownHeight = self.MAX_ROWS * buttonHeight;
-
-    HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
-
-    --self.scrollChild:SetHeight(math.floor(self.MAX_ROWS * self.ROW_HEIGHT));
-    --self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 9);
-    --self.ListScrollFrame:UpdateScrollChildRect();
 end
 
 pdkp_ScrollTableMixin = core.ScrollTable;

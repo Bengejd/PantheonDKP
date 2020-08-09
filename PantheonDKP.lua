@@ -22,6 +22,8 @@ local Defaults = core.Defaults;
 
 core.firstLogin = nil;
 
+-- TODO: Fix Guild members not loading on the initial login.
+
 local function PDKP_OnEvent(self, event, arg1, ...)
 
     local arg2 = ...

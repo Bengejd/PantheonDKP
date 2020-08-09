@@ -64,31 +64,6 @@ function Guild:new()
     return Guild
 end
 
-function Guild:Sort(sortBy)
-    local newSortDir, newSortBy = nil, nil;
-
-    local function toggleSort()
-
-    end
-
-    local function compare(a, b)
-        if a == 0 and b == 0 then return end
-
-    end
-
-
-    local function compare(a,b)
-        if a == 0 and b == 0 then return end;
-        if sortDir == 'ASC' then return a[sortBy] > b[sortBy] end
-        return a[sortBy] < b[sortBy];
-    end
-
-    local function compareDKP(a,b)
-        if sortDir == 'DES' then return a.dkp['Molten Core'].total > b.dkp['Molten Core'].total end
-        return a.dkp['Molten Core'].total < b.dkp['Molten Core'].total
-    end
-end
-
 function Guild:IsNewMemberObject(name)
     if tContains(Guild.memberNames, name) then
         return false

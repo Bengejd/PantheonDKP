@@ -254,16 +254,31 @@ function dumpTable(tbl, indent, depth, currentDepth)
 end
 
 -- Custom function for finding table index.
-function tfind(t, item)
+function tfind(t, item, objIndex)
+    objIndex = objIndex or nil;
     t = t or {};
     local index = 1;
     while t[index] do
-        if ( item == t[index] ) then
-            return true, index;
+        if objIndex and (item == t[index]['dataObj'][objIndex]) then
+            return true, index
+        elseif (item == t[index]) then
+            return true, index
         end
         index = index + 1;
     end
     return nil, nil;
+end
+
+function tfindObj(t, item, objIndex)
+    t = t or {};
+    local index = 1;
+    while t[index] do
+        if (item == t[index][objIndex]) then
+            return true, index
+        end
+        index = index + 1
+    end
+    return nil, nil
 end
 
 -- OrderedNext helper function

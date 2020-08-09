@@ -31,6 +31,7 @@ local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
+local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
 local function setMovable(f)
     f:SetMovable(true)
@@ -93,23 +94,90 @@ function Setup:MainUI()
 
     -- Submit Button
 
-    local bc = CreateFrame("Button")
-    bc:SetScript("OnClick", function(self, arg1)
-        print(arg1)
+    local sb = CreateFrame("Button", "MyButton", f, "UIPanelButtonTemplate")
+    sb:SetSize(80 ,22) -- width, height
+    sb:SetText("Submit")
+    sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 12)
+    sb:SetScript("OnClick", function()
+        local st = PDKP.memberTable
+
+        if #st.selected >= 1 then
+            for _, name in pairs(st.selected) do
+                local _, rowIndex = tfind(st.rows, name, 'name')
+                if rowIndex then
+                    local row = st.rows[rowIndex]
+                    if row.dataObj['name'] == name then
+                        local member = Guild:GetMemberByName(name)
+                        member:UpdateDKP(nil, nil)
+                        row:UpdateRowValues()
+                    end
+                end
+            end
+        end
     end)
-    --bc:Click("foo bar") -- will print "foo bar" in the chat frame.
-    --bc:Click("blah blah") -- will print "blah blah" in the chat frame.
 
     pdkp_frame = f
 
+    Setup:RandomStuff()
+end
+
+function Setup:RandomStuff()
     --Setup:ShroudingBox()
 
-
-
     Setup:ScrollTable()
+    Setup:Filters()
+    --Setup:BossKillLoot()
+    --Setup:TabView()
+end
 
-    --Setup:Scrollbar()
-    --Setup:ScrollHeaders()
+function Setup:Filters()
+    local f = CreateFrame("Frame", "$parentFilterFrame", pdkp_frame)
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(300)
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
+    f:SetPoint("TOPRIGHT", pdkp_frame, "RIGHT", -10,0)
+    f:Show()
+end
+
+function Setup:TabView()
+    --PanelTemplates_SetNumTabs(myTabContainerFrame, 2);  -- 2 because there are 2 frames total.
+    --PanelTemplates_SetTab(myTabContainerFrame, 1);      -- 1 because we want tab 1 selected.
+    --myTabPage1:Show();  -- Show page 1.
+    --myTabPage2:Hide();  -- Hide all other pages (in this case only one).
+
+end
+
+function Setup:BossKillLoot()
+    local f = CreateFrame("Frame", "pdkp_bossLoot_frame", PDKP.memberTable.frame)
+    f:SetFrameStrata("HIGH")
+    f:SetPoint("BOTTOMRIGHT", PDKP.memberTable.frame, "BOTTOMRIGHT")
+    f:SetHeight(200)
+    f:SetWidth(200)
+
+    f:SetBackdrop( {
+        bgFile = TRANSPARENT_BACKGROUND,
+        edgeFile = SHROUD_BORDER, tile = true, tileSize = 64, edgeSize = 16,
+        insets = { left = 5, right = 5, top = 5, bottom = 5 }
+    });
+
+    setMovable(f)
+
+    -- mini close button
+    local b = createCloseButton(f, true)
+    b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
+
+    -- title
+    local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    t:SetPoint("TOPLEFT", 5, -10)
+    t:SetPoint("TOPRIGHT", -10, -30)
+    t:SetText("PDKP Shrouding")
+    t:SetParent(f)
+
+    f:Show()
 end
 
 function Setup:ShroudingBox()
@@ -231,6 +299,8 @@ function Setup:ScrollTable()
 
     st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     st.cols[1]:Click()
+
+    PDKP.memberTable = st;
 end
 
 
