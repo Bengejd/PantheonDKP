@@ -20,19 +20,27 @@ local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 
+core.firstLogin = nil;
 
 local function PDKP_OnEvent(self, event, arg1, ...)
+
+    local arg2 = ...
+
     local ADDON_EVENTS = {
         ['ADDON_LOADED']=PDKP:OnInitialize(event, arg1),
         ['PLAYER_ENTERING_WORLD']=function()
-
-            Guild:new();
-
-            GUI:Init()
-            --Raid:GetInstanceInfo()
-
-            --PDKP:Print(#Guild.members .. ' members found')
-
+            local initialLogin, uiReload = arg1, arg2
+            core.firstLogin = initialLogin;
+            if uiReload then
+                Guild:new();
+                GUI:Init()
+            end
+        end,
+        ['ZONE_CHANGED_NEW_AREA']=function()
+            if core.firstLogin then
+                Guild:new();
+                GUI:Init()
+            end
         end
     }
 

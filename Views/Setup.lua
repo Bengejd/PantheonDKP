@@ -187,8 +187,8 @@ function Setup:ScrollTable()
         end,
         ['anchor']={
             ['point']='TOPLEFT',
-            ['rel_point_x']=20,
-            ['rel_point_y']=-145,
+            ['rel_point_x']=12,
+            ['rel_point_y']=-120,
         }
     }
     local col_settings = {
@@ -230,6 +230,7 @@ function Setup:ScrollTable()
     }
 
     st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+    st.cols[1]:Click()
 end
 
 
