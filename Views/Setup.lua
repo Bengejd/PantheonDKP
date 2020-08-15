@@ -33,6 +33,8 @@ local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
 local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
+local filterButtons = {};
+
 local function setMovable(f)
     f:SetMovable(true)
     f:EnableMouse(true)
@@ -49,6 +51,27 @@ local function createCloseButton(f, mini)
     b:SetScript("OnClick", function(self) self:GetParent():Hide() end)
     return b
 end
+
+local function createCheckButton(parent, point, x, y, displayText, uniqueName, center, frame)
+    uniqueName = uniqueName or nil;
+    center = center or false;
+    frame = frame or nil;
+    local cb = CreateFrame("CheckButton", 'pdkp_filter_' ..uniqueName, parent, "ChatConfigCheckButtonTemplate")
+    _G[cb:GetName() .. 'Text']:SetText(displayText)
+
+    if center and frame then
+        local cbtw = _G[cb:GetName() .. 'Text']:GetWidth();
+        cb:SetPoint('TOPRIGHT', frame, 'CENTER', x - cbtw *0.25, y);
+    else
+        cb:SetPoint(point, x, y);
+    end
+
+
+    cb.filterOn = uniqueName;
+    return cb;
+end
+
+--------------------------------------------
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -140,7 +163,94 @@ function Setup:Filters()
     f:SetHeight(300)
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("TOPRIGHT", pdkp_frame, "RIGHT", -10,0)
+
     f:Show()
+
+    local fWidth = f:GetWidth();
+
+    local rows = { -- Our filter rows
+        { -- Row 1
+            { ['point']='TOPLEFT', ['x']=20, ['y']=-20, ['displayText']='Selected', ['filterOn']='selected', },
+            { ['point']='TOPLEFT', ['x']=85, ['y']=0, ['displayText']='Online', ['filterOn']='online' },
+            { ['point']='TOPLEFT', ['x']=85, ['y']=0, ['displayText']='In Raid', ['filterOn']='raid' },
+        },
+        { -- Row 2
+            { ['point']='TOPLEFT', ['x']=0, ['y']=-30, ['displayText']='Select All', ['filterOn']='Select_All' },
+        },
+        { -- Row 3
+            { ['x']=0, ['y']=70, ['displayText']='All Classes', ['filterOn']='All_Class',
+              ['center']=true,
+            },
+        },
+        {}, -- First Class Row
+        {}, -- Second Class Row
+    }
+
+    for key, class in pairs(Defaults.classes) do
+        local classBtn = { ['point']='TOPLEFT', ['x']=60, ['y']=0, ['displayText']=class, ['filterOn']=class }
+
+        if key == 1 then
+            --classBtn['x']=-200
+            --classBtn['y']=-30
+        elseif key == 5 then
+            --classBtn['y']=-40;
+            --classBtn['x']=-350
+        end
+
+        if key >= 1 and key <= 4 then
+            table.insert(rows[4], classBtn);
+        else
+            table.insert(rows[5], classBtn)
+        end
+    end
+
+    for rowKey, row in pairs(rows) do
+        for fKey, filter in pairs(row) do
+            local parent = f -- Default parent.
+            table.insert(filterButtons, {});
+
+            if fKey > 1 or rowKey > 1 then
+                local pcb = filterButtons[#filterButtons -1];
+                local pcbt = _G[pcb:GetName() .. 'Text']
+                parent = pcb;
+                if #row > 1 then -- To better space out the buttons.
+                    filter['x'] = filter['x'] + pcbt:GetWidth();
+                end
+            end
+
+            local cb = createCheckButton(parent, filter['point'], filter['x'], filter['y'], filter['displayText'],
+                    filter['filterOn'], filter['center'], f)
+
+            if rowKey == 4 or rowKey == 5 then
+                print(filter['displayText']);
+                cb:ClearAllPoints()
+                if fKey == 1 then
+                    cb:SetPoint("LEFT", f, "LEFT", 20, 30);
+                elseif fKey > 1 and fKey < 4 then
+                    cb:SetPoint("TOPRIGHT", filterButtons[#filterButtons-1], "TOPRIGHT", filter['x'], 0);
+                elseif fKey == 5 then
+
+                elseif fKey > 5 then
+
+                end
+            end
+
+            cb:SetScript("OnClick", function(b)
+                local cbw = b:GetWidth();
+                local cbtw = _G[b:GetName() .. 'Text']:GetWidth();
+                print(b.filterOn, cbw, cbtw);
+            end)
+
+            filterButtons[#filterButtons] = cb;
+        end
+    end
+
+    --local selectCheck = CreateFrame("CheckButton", nil, f, "ChatConfigCheckButtonTemplate");
+    --selectCheck:SetPoint("TOPLEFT", 0, 0);
+    --selectCheck:SetText("Selected")
+    --selectCheck:SetScript("OnClick", function()
+    --    print("Select Checked");
+    --end)
 end
 
 function Setup:TabView()
