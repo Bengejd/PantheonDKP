@@ -165,6 +165,7 @@ function ScrollTable:RefreshLayout()
     local displayRows = {};
     for i=1, #self.displayData do
         local row = self.rows[i];
+        row:Hide();
         if not row:ApplyFilters() then
             tinsert(displayRows, row);
             if i >= offset +1 and i <= offset + self.MAX_ROWS then
@@ -175,29 +176,25 @@ function ScrollTable:RefreshLayout()
                     row:SetPoint("TOPLEFT", displayRows[#displayRows-1], "BOTTOMLEFT")
                 end
                 self:CheckSelect(row, nil)
-            else
-                row:Hide()
             end
-        else
-            row:Hide();
         end
     end
 
-    local displayRows = self:GetDisplayRows();
-    for i=1, #self.displayRows do
-        local row = self.displayRows[i];
-        if i >= offset +1 and i <= offset + self.MAX_ROWS then
-            row:Show()
-            if i == offset + 1 then
-                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
-            else
-                row:SetPoint("TOPLEFT", self.displayRows[i-1], "BOTTOMLEFT")
-            end
-            self:CheckSelect(row, nil)
-        else
-            row:Hide()
-        end
-    end
+    --local displayRows = self:GetDisplayRows();
+    --for i=1, #self.displayRows do
+    --    local row = self.displayRows[i];
+    --    if i >= offset +1 and i <= offset + self.MAX_ROWS then
+    --        row:Show()
+    --        if i == offset + 1 then
+    --            row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+    --        else
+    --            row:SetPoint("TOPLEFT", self.displayRows[i-1], "BOTTOMLEFT")
+    --        end
+    --        self:CheckSelect(row, nil)
+    --    else
+    --        row:Hide()
+    --    end
+    --end
 
     --for i=1, #self.displayData do
     --    local row = self.rows[i]
