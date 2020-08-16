@@ -118,6 +118,7 @@ end
 function ScrollTable:RefreshData()
     self.data = self.retrieveDataFunc();
     self.displayData = {};
+    self.allDisplayData = {};
 
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
@@ -125,18 +126,52 @@ function ScrollTable:RefreshData()
 end
 
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    local filters = {
-
-    }
-
-    --if tContains(self.appliedFilters, filterOn) and not checkedStatus then
-
     self.appliedFilters[filterOn] = checkedStatus;
 
+    -- TODO: Figure out how to set the new row in self.rows without triggering the creation methods...
+
+    self.displayedRows = {};
     for i=1, #self.displayData do
         local row = self.rows[i];
-        row:ApplyFilters();
+        if not row:ApplyFilters() then
+            table.insert(self.displayedRows, i);
+        end
     end
+
+    self:RefreshTableSize();
+    self:RefreshLayout();
+end
+
+function ScrollTable:RefreshTableSize()
+    -- The last step is to ensure the scroll range is updated appropriately.
+    -- Calculate the total height of the scrollable region (using the model
+    -- size), and the displayed height based on the number of shown buttons.
+    local buttonHeight = self.ROW_HEIGHT;
+    local totalHeight = (#self.displayData * buttonHeight) + self.ROW_HEIGHT;
+    local shownHeight = self.MAX_ROWS * buttonHeight;
+
+    HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
+end
+
+function ScrollTable:RefreshLayout()
+    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
+
+    for i=1, #self.displayData do
+        local row = self.rows[i]
+
+        if i >= offset +1 and i <= offset + self.MAX_ROWS then
+            row:Show()
+            if i == offset + 1 then
+                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+            else
+                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+            end
+            self:CheckSelect(row, nil)
+        else
+            row:Hide()
+        end
+    end
+    self:RefreshTableSize();
 end
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -177,6 +212,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.HEADERS = col_settings['headers']
 
     self.displayData = {};
+    self.filteredData = {};
+    self.displayedRows = {};
 
     self.selected = {};
     self.lastSelect = nil;
@@ -262,40 +299,12 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     return self
 end
 
-function ScrollTable:RefreshLayout()
-    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
-
-    for i=1, #self.displayData do
-        local row = self.rows[i]
-
-        if i >= offset +1 and i <= offset + self.MAX_ROWS and not row.isFiltered then
-            row:Show()
-            if i == offset + 1 then
-                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
-            else
-                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
-            end
-            self:CheckSelect(row, nil)
-        else
-            row:Hide()
-        end
-    end
-
-    -- The last step is to ensure the scroll range is updated appropriately.
-    -- Calculate the total height of the scrollable region (using the model
-    -- size), and the displayed height based on the number of shown buttons.
-    local buttonHeight = self.ROW_HEIGHT;
-    local totalHeight = (#self.displayData * buttonHeight) + self.ROW_HEIGHT;
-    local shownHeight = self.MAX_ROWS * buttonHeight;
-
-    HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
-end
 
 -- OnLoad sets up the row & header structure for our hybridScroll. This should only be called once, ideally.
 function ScrollTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
-        local row = CreateFrame("Button", "$parent_Row"..i, self.scrollChild)
+        local row = CreateFrame("Button", nil, self.scrollChild)
         row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
         row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
         row:RegisterForDrag("LeftButton")
@@ -354,6 +363,7 @@ function ScrollTable:OnLoad()
                 else
                     row.isFiltered = false;
                 end
+                return row.isFiltered;
             end
         end
 

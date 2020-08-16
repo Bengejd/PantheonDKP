@@ -251,7 +251,8 @@ function Setup:Filters()
                     _G['pdkp_filter_Class_All']:SetChecked(all_checked);
                 end
 
-                PDKP.memberTable:ApplyFilter(b.filterOn, b:GetChecked());
+                local st = PDKP.memberTable;
+                st:ApplyFilter(b.filterOn, b:GetChecked());
             end)
 
             filterButtons[#filterButtons] = cb;
