@@ -178,7 +178,7 @@ function Setup:Filters()
             { ['point']='TOPLEFT', ['x']=0, ['y']=-30, ['displayText']='Select All', ['filterOn']='Select_All' },
         },
         { -- Row 3
-            { ['x']=0, ['y']=70, ['displayText']='All Classes', ['filterOn']='All_Class',
+            { ['x']=0, ['y']=70, ['displayText']='All Classes', ['filterOn']='Class_All',
               ['center']=true,
             },
         },
@@ -187,15 +187,7 @@ function Setup:Filters()
     }
 
     for key, class in pairs(Defaults.classes) do
-        local classBtn = { ['point']='TOPLEFT', ['x']=60, ['y']=0, ['displayText']=class, ['filterOn']=class }
-
-        if key == 1 then
-            --classBtn['x']=-200
-            --classBtn['y']=-30
-        elseif key == 5 then
-            --classBtn['y']=-40;
-            --classBtn['x']=-350
-        end
+        local classBtn = { ['point']='TOPLEFT', ['x']=60, ['y']=0, ['displayText']=class, ['filterOn']='Class_'..class}
 
         if key >= 1 and key <= 4 then
             table.insert(rows[4], classBtn);
@@ -222,35 +214,49 @@ function Setup:Filters()
                     filter['filterOn'], filter['center'], f)
 
             if rowKey == 4 or rowKey == 5 then
-                print(filter['displayText']);
-                cb:ClearAllPoints()
-                if fKey == 1 then
-                    cb:SetPoint("LEFT", f, "LEFT", 20, 30);
-                elseif fKey > 1 and fKey < 4 then
-                    cb:SetPoint("TOPRIGHT", filterButtons[#filterButtons-1], "TOPRIGHT", filter['x'], 0);
-                elseif fKey == 5 then
-
-                elseif fKey > 5 then
-
+                cb:ClearAllPoints();
+                if rowKey == 4 then
+                    if fKey == 1 then
+                        cb:SetPoint("LEFT", f, "LEFT", 20, 30);
+                    else
+                        cb:SetPoint("TOPRIGHT", filterButtons[#filterButtons-1], "TOPRIGHT", filter['x'], 0);
+                    end
+                elseif rowKey == 5 then
+                    cb:SetPoint("TOPLEFT", filterButtons[#filterButtons-4], "TOPLEFT", 0, -20);
                 end
             end
 
+            if rowKey >= 3 and rowKey <=5 then
+                cb:SetChecked(true);
+            end
+
             cb:SetScript("OnClick", function(b)
-                local cbw = b:GetWidth();
-                local cbtw = _G[b:GetName() .. 'Text']:GetWidth();
-                print(b.filterOn, cbw, cbtw);
+                local function loop_all_class(setStatus)
+                    local all_checked = true;
+                    for i=1, #Defaults.classes do
+                        local button = _G['pdkp_filter_Class_' .. Defaults.classes[i]];
+                        if setStatus ~= nil then
+                            button:SetChecked(setStatus);
+                        end
+                        if not button:GetChecked() then
+                            all_checked = false
+                        end
+                    end
+                    return all_checked
+                end
+                if rowKey == 3 then -- All Classes
+                    loop_all_class(b:GetChecked());
+                elseif rowKey == 4 or rowKey == 5 then
+                    local all_checked = loop_all_class();
+                    _G['pdkp_filter_Class_All']:SetChecked(all_checked);
+                end
+
+                PDKP.memberTable:ApplyFilter(b.filterOn, b:GetChecked());
             end)
 
             filterButtons[#filterButtons] = cb;
         end
     end
-
-    --local selectCheck = CreateFrame("CheckButton", nil, f, "ChatConfigCheckButtonTemplate");
-    --selectCheck:SetPoint("TOPLEFT", 0, 0);
-    --selectCheck:SetText("Selected")
-    --selectCheck:SetScript("OnClick", function()
-    --    print("Select Checked");
-    --end)
 end
 
 function Setup:TabView()

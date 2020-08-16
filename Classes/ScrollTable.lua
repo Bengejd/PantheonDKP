@@ -4,10 +4,11 @@ local L = core.L;
 
 local ScrollTable = core.ScrollTable;
 local Util = core.Util;
+local Defaults = core.Defaults;
 
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
-local type, floor, strupper, pi = type, math.floor, strupper, math.pi
+local type, floor, strupper, pi, substr = type, math.floor, strupper, math.pi, string.match
 local tinsert, tremove = tinsert, tremove
 
 local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
@@ -121,10 +122,21 @@ function ScrollTable:RefreshData()
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
+end
 
-    --if not self.firstSortRan then
-    --    self.cols[self.firstSort]:Click()
-    --end
+function ScrollTable:ApplyFilter(filterOn, checkedStatus)
+    local filters = {
+
+    }
+
+    --if tContains(self.appliedFilters, filterOn) and not checkedStatus then
+
+    self.appliedFilters[filterOn] = checkedStatus;
+
+    for i=1, #self.displayData do
+        local row = self.rows[i];
+        row:ApplyFilters();
+    end
 end
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -180,6 +192,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     -- Drag vars
     self.isDragging = false
+
+    self.appliedFilters = {};
 
     self:RefreshData()
 
@@ -254,7 +268,7 @@ function ScrollTable:RefreshLayout()
     for i=1, #self.displayData do
         local row = self.rows[i]
 
-        if i >= offset +1 and i <= offset + self.MAX_ROWS then
+        if i >= offset +1 and i <= offset + self.MAX_ROWS and not row.isFiltered then
             row:Show()
             if i == offset + 1 then
                 row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
@@ -292,6 +306,7 @@ function ScrollTable:OnLoad()
         row.selectOn = self.ROW_SELECT_ON
         row.dataObj = self.displayData[i];
         row:SetID(i)
+        row.isFiltered = false;
 
         if i == 1 then -- Anchor the first row relative to the frame.
             row:SetPoint("TOPLEFT", self.ListScrollFrame, 16, 0)
@@ -327,7 +342,17 @@ function ScrollTable:OnLoad()
                 if valFunc ~= nil then
                     local val = (valFunc ~= nil and row.dataObj ~= nil) and valFunc(row.dataObj) or row.dataObj[label]
                     row.cols[key]:SetText(val)
-                    print('Updating: ', row.dataObj['name'], 'to ', val)
+                end
+            end
+        end
+
+        function row:ApplyFilters()
+            if row.dataObj then
+                local dataObj = row.dataObj;
+                if dataObj['class'] == 'Hunter' then
+                    row.isFiltered = true;
+                else
+                    row.isFiltered = false;
                 end
             end
         end
