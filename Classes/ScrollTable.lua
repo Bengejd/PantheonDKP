@@ -19,6 +19,8 @@ local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 local rotate_up = (pi / 180) * 270
 local rotate_down = (pi / 180) * 90
 
+----- MISC FUNCTIONS -----
+
 function ScrollTable:SetParent(parent)
     if parent == nil then error('ScrollTable parent is nil'); end
     if type(parent) == type({}) then
@@ -30,9 +32,13 @@ function ScrollTable:SetParent(parent)
     end
 end
 
+----- HIGHLIGHT FUNCTIONS -----
+
 function ScrollTable:HighlightRow(row, shouldHighlight)
     if shouldHighlight then row:LockHighlight() else row:UnlockHighlight() end
 end
+
+----- SELECT FUNCTIONS -----
 
 function ScrollTable:ClearSelected()
     wipe(self.selected)
@@ -114,6 +120,8 @@ function ScrollTable:CheckSelect(row, clickType)
     self:HighlightRow(row, isSelected)
 end
 
+----- REFRESH FUNCTIONS -----
+
 -- Refreshes the data that we are utilizing.
 function ScrollTable:RefreshData()
     self.data = self.retrieveDataFunc();
@@ -123,23 +131,6 @@ function ScrollTable:RefreshData()
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
-end
-
-function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    self.appliedFilters[filterOn] = checkedStatus;
-
-    -- TODO: Figure out how to set the new row in self.rows without triggering the creation methods...
-
-    self.displayedRows = {};
-    for i=1, #self.displayData do
-        local row = self.rows[i];
-        if not row:ApplyFilters() then
-            table.insert(self.displayedRows, i);
-        end
-    end
-
-    self:RefreshTableSize();
-    self:RefreshLayout();
 end
 
 function ScrollTable:RefreshTableSize()
@@ -174,11 +165,26 @@ function ScrollTable:RefreshLayout()
     self:RefreshTableSize();
 end
 
------------------------------------------------------------------------------------------------------------------------
---
--- MIXIN STUFF
---
------------------------------------------------------------------------------------------------------------------------
+----- FILTER FUNCTIONS -----
+
+function ScrollTable:ApplyFilter(filterOn, checkedStatus)
+    self.appliedFilters[filterOn] = checkedStatus;
+
+    -- TODO: Figure out how to set the new row in self.rows without triggering the creation methods...
+
+    self.displayedRows = {};
+    for i=1, #self.displayData do
+        local row = self.rows[i];
+        if not row:ApplyFilters() then
+            table.insert(self.displayedRows, i);
+        end
+    end
+
+    self:RefreshTableSize();
+    self:RefreshLayout();
+end
+
+----- INITIALIZATION FUNCTIONS -----
 
 function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     local self = {};
@@ -299,8 +305,6 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     return self
 end
 
-
--- OnLoad sets up the row & header structure for our hybridScroll. This should only be called once, ideally.
 function ScrollTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
@@ -512,11 +516,6 @@ function ScrollTable:OnLoad()
 
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
     HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
-end
-
-function ScrollTable:RemoveItem(index)
-    table.remove(self.items, index);
-    self:RefreshLayout();
 end
 
 pdkp_ScrollTableMixin = core.ScrollTable;
