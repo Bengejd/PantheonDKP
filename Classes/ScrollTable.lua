@@ -35,7 +35,11 @@ end
 ----- HIGHLIGHT FUNCTIONS -----
 
 function ScrollTable:HighlightRow(row, shouldHighlight)
-    if shouldHighlight then row:LockHighlight() else row:UnlockHighlight() end
+    if shouldHighlight then
+        row:LockHighlight()
+    else
+        row:UnlockHighlight()
+    end
 end
 
 ----- SELECT FUNCTIONS -----
@@ -126,11 +130,22 @@ end
 function ScrollTable:RefreshData()
     self.data = self.retrieveDataFunc();
     self.displayData = {};
-    self.allDisplayData = {};
 
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
+end
+
+function ScrollTable:GetDisplayRows()
+    local displayRows = {};
+    for i=1, #self.rows do
+        local row = self.rows[i];
+        row:Hide();
+        if not row:ApplyFilters() then
+            tinsert(displayRows, row);
+        end
+    end
+    return displayRows;
 end
 
 function ScrollTable:RefreshTableSize()
@@ -147,21 +162,58 @@ end
 function ScrollTable:RefreshLayout()
     local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
 
+    local displayRows = {};
     for i=1, #self.displayData do
-        local row = self.rows[i]
+        local row = self.rows[i];
+        if not row:ApplyFilters() then
+            tinsert(displayRows, row);
+            if i >= offset +1 and i <= offset + self.MAX_ROWS then
+                row:Show()
+                if i == offset + 1 then
+                    row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+                else
+                    row:SetPoint("TOPLEFT", displayRows[#displayRows-1], "BOTTOMLEFT")
+                end
+                self:CheckSelect(row, nil)
+            else
+                row:Hide()
+            end
+        else
+            row:Hide();
+        end
+    end
 
+    local displayRows = self:GetDisplayRows();
+    for i=1, #self.displayRows do
+        local row = self.displayRows[i];
         if i >= offset +1 and i <= offset + self.MAX_ROWS then
             row:Show()
             if i == offset + 1 then
                 row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
             else
-                row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+                row:SetPoint("TOPLEFT", self.displayRows[i-1], "BOTTOMLEFT")
             end
             self:CheckSelect(row, nil)
         else
             row:Hide()
         end
     end
+
+    --for i=1, #self.displayData do
+    --    local row = self.rows[i]
+    --
+    --    if i >= offset +1 and i <= offset + self.MAX_ROWS then
+    --        row:Show()
+    --        if i == offset + 1 then
+    --            row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+    --        else
+    --            row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
+    --        end
+    --        self:CheckSelect(row, nil)
+    --    else
+    --        row:Hide()
+    --    end
+    --end
     self:RefreshTableSize();
 end
 
@@ -210,7 +262,6 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.retrieveDataFunc = table_settings['retrieveDataFunc']
     self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
 
-
     self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
 
     self.COL_HEIGHT = col_settings['height'] or 14
@@ -218,8 +269,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.HEADERS = col_settings['headers']
 
     self.displayData = {};
-    self.filteredData = {};
     self.displayedRows = {};
+    self.appliedFilters = {};
 
     self.selected = {};
     self.lastSelect = nil;
@@ -235,8 +286,6 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     -- Drag vars
     self.isDragging = false
-
-    self.appliedFilters = {};
 
     self:RefreshData()
 
