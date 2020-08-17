@@ -189,6 +189,13 @@ end
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     self.appliedFilters[filterOn] = checkedStatus;
 
+    if filterOn == 'Class_All' and checkedStatus then -- Reset all class filters if this gets checked.
+        for _, class in pairs(Defaults.classes) do
+            local fClass = 'Class_' .. class;
+            self.appliedFilters[fClass] = true;
+        end
+    end
+
     self.displayedRows = {};
     for i=1, #self.displayData do
         local row = self.rows[i];
@@ -374,15 +381,25 @@ function ScrollTable:OnLoad()
         end
 
         function row:ApplyFilters()
-            if row.dataObj then
-                local dataObj = row.dataObj;
-                if dataObj['class'] == 'Hunter' then
+            local dataObj = row.dataObj;
+            row.isFiltered = false;
+            local super = row.super;
+
+            for filter, value in pairs(super.appliedFilters or {}) do
+                -- It's one of the classes, not all.
+                if substr(filter, 'Class_') and not substr(filter, '_All') and not value then
+                    local _, class = strsplit('_', filter);
+                    if dataObj['class'] == class then
+                        row.isFiltered = true
+                        break; -- We don't need to continue running checks, if it's filtered.
+                    end
+                elseif filter == 'Class_All' and not value then
                     row.isFiltered = true;
-                else
-                    row.isFiltered = false;
+                    break;
                 end
-                return row.isFiltered;
             end
+
+            return row.isFiltered;
         end
 
         for key, header in pairs(self.HEADERS) do
