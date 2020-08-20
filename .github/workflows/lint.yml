@@ -12,6 +12,6 @@ jobs:
           fetch-depth: 2
           run: git checkout HEAD^
       - name: wow-lint
-        uses: davidcraig/action-wow-lint@1.0.0
+        uses: davidcraig/action-wow-lint@v1.0.1
         with:
           path-to-files: 'src/*'
