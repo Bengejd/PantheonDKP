@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a4dd46c2-62e2-4d06-b96b-da12174d2418" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/lint.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.github/.gitattributes" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.github/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CHANGELOG.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Classes/DKP_Entry.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/DKP_Entry.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Classes/Guild.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/Guild.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Classes/Member.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/Member.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Classes/Raid.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/Raid.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Classes/ScrollTable.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/ScrollTable.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Character.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Character.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Comms.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Comms.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/DKP.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/DKP.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Defaults.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Defaults.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/GUI.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/GUI.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Loot.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Loot.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/PDKP_Util.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/PDKP_Util.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Settings.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Settings.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/Shroud.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/Shroud.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modules/minimap.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Modules/minimap.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Character.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Character.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Comms.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Comms.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_DKP.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_DKP.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Defaults.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Defaults.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Edit.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Edit.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_GUI.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_GUI.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Guild.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Guild.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Import.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Import.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Item.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Item.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Member.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Member.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Minimap.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Minimap.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Officer.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Officer.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Raid.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Raid.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/PDKP_Setup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/PDKP_Setup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/classic_events.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/classic_events.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/future.methods.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/_OLD_Modules/future.methods.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantheonDKP.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/PantheonDKP.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantheonDKP.toc" beforeDir="false" afterPath="$PROJECT_DIR$/PantheonDKP.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantheonDKP.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/PantheonDKP.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rework-TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rework-TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Views/Scrollbar.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Views/Scrollbar.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Views/Setup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/Views/Setup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/embed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/embed.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/init.lua" beforeDir="false" afterPath="$PROJECT_DIR$/src/init.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceAddon-3.0/AceAddon-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceAddon-3.0/AceAddon-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceAddon-3.0/AceAddon-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceAddon-3.0/AceAddon-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceBucket-3.0/AceBucket-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceBucket-3.0/AceBucket-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceBucket-3.0/AceBucket-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceBucket-3.0/AceBucket-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceComm-3.0/AceComm-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceComm-3.0/AceComm-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceComm-3.0/AceComm-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceComm-3.0/AceComm-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceComm-3.0/ChatThrottleLib.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceComm-3.0/ChatThrottleLib.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfig-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfig-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfig-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfig-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConsole-3.0/AceConsole-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConsole-3.0/AceConsole-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceConsole-3.0/AceConsole-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceConsole-3.0/AceConsole-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceDB-3.0/AceDB-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceDB-3.0/AceDB-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceDB-3.0/AceDB-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceDB-3.0/AceDB-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceDBOptions-3.0/AceDBOptions-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceDBOptions-3.0/AceDBOptions-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceDBOptions-3.0/AceDBOptions-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceDBOptions-3.0/AceDBOptions-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceEvent-3.0/AceEvent-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceEvent-3.0/AceEvent-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceEvent-3.0/AceEvent-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceEvent-3.0/AceEvent-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/AceGUI-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/AceGUI-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/AceGUI-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/AceGUI-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-BlizOptionsGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-BlizOptionsGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-DropDownGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-DropDownGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-InlineGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-InlineGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-ScrollFrame.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-ScrollFrame.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-SimpleGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-SimpleGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIContainer-Window.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIContainer-Window.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Button.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Button.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-ColorPicker.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-ColorPicker.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown-Items.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown-Items.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Heading.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Heading.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Icon.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Icon.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-InteractiveLabel.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-InteractiveLabel.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Keybinding.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Keybinding.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Label.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Label.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-MultiLineEditBox.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-MultiLineEditBox.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceHook-3.0/AceHook-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceHook-3.0/AceHook-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceHook-3.0/AceHook-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceHook-3.0/AceHook-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceLocale-3.0/AceLocale-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceLocale-3.0/AceLocale-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceLocale-3.0/AceLocale-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceLocale-3.0/AceLocale-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceSerializer-3.0/AceSerializer-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceSerializer-3.0/AceSerializer-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceSerializer-3.0/AceSerializer-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceSerializer-3.0/AceSerializer-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceTab-3.0/AceTab-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceTab-3.0/AceTab-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceTab-3.0/AceTab-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceTab-3.0/AceTab-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceTimer-3.0/AceTimer-3.0.lua" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceTimer-3.0/AceTimer-3.0.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/AceTimer-3.0/AceTimer-3.0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Ace-libs/AceTimer-3.0/AceTimer-3.0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/todo.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1doix6r2Z4PVGrBTsTA2gXTvOky" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="false" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="jdk.selected.JAVA_MODULE" value="1.8" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/libs/Ace-libs" />
+      <recent name="$PROJECT_DIR$/git" />
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a4dd46c2-62e2-4d06-b96b-da12174d2418" name="Default Changelist" comment="" />
+      <created>1593098090394</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1593098090394</updated>
+      <workItem from="1593098096946" duration="37000" />
+      <workItem from="1593098149231" duration="5467000" />
+      <workItem from="1593270338306" duration="7431000" />
+      <workItem from="1596133759347" duration="3290000" />
+      <workItem from="1596386365305" duration="4347000" />
+      <workItem from="1597599395070" duration="12000" />
+      <workItem from="1597599425607" duration="2699000" />
+      <workItem from="1597963283605" duration="239000" />
+      <workItem from="1597963547778" duration="1528000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="228" y="127" key="IDE.errors.dialog" timestamp="1593098121807">
+      <screen x="0" y="23" width="1280" height="708" />
+    </state>
+    <state x="228" y="127" key="IDE.errors.dialog/0.23.1280.708@0.23.1280.708" timestamp="1593098121806" />
+    <state x="11" y="23" key="new project wizard" timestamp="1597964608232">
+      <screen x="0" y="23" width="1280" height="706" />
+    </state>
+    <state x="11" y="23" key="new project wizard/0.23.1280.706@0.23.1280.706" timestamp="1597964608232" />
+  </component>
+</project>

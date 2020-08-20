@@ -8,35 +8,35 @@
 ## SavedVariables:
 
 #@no-lib-strip@
-embed.xml
+src\embed.xml
 #@end-no-lib-strip@
 
-## Init file
+# Init file
 
-init.lua
+src\init.lua
 
 # Module files
 
-## Classes
-Classes\Member.lua
-Classes\Guild.lua
-Classes\Raid.lua
-Classes\ScrollTable.lua
+# Classes
+src\Classes\Member.lua
+src\Classes\Guild.lua
+src\Classes\Raid.lua
+src\Classes\ScrollTable.lua
 
-## Database files
-Modules\Character.lua
-Modules\Defaults.lua
-Modules\PDKP_Util.lua
-Modules\Settings.lua
-Modules\Minimap.lua
-Modules\Comms.lua
-Modules\Loot.lua
-Modules\Shroud.lua
-Modules\GUI.lua
+# Database files
+src\Modules\Character.lua
+src\Modules\Defaults.lua
+src\Modules\PDKP_Util.lua
+src\Modules\Settings.lua
+src\Modules\minimap.lua
+src\Modules\Comms.lua
+src\Modules\Loot.lua
+src\Modules\Shroud.lua
+src\Modules\GUI.lua
 
-## Views
-Views\Setup.lua
-Views\Scrollbar.lua
+# Views
+src\Views\Setup.lua
+src\Views\Scrollbar.lua
 
-## This should be last in the file, so that the previous modules had time to load first.
-PantheonDKP.xml
+# This should be last in the file, so that the previous modules had time to load first.
+src\PantheonDKP.xml
