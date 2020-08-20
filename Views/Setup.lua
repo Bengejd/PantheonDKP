@@ -166,8 +166,6 @@ function Setup:Filters()
 
     f:Show()
 
-    local fWidth = f:GetWidth();
-
     local rows = { -- Our filter rows
         { -- Row 1
             { ['point']='TOPLEFT', ['x']=20, ['y']=-20, ['displayText']='Selected', ['filterOn']='selected', },
@@ -254,9 +252,13 @@ function Setup:Filters()
                 local st = PDKP.memberTable;
                 st:ApplyFilter(b.filterOn, b:GetChecked());
             end)
-
             filterButtons[#filterButtons] = cb;
         end
+    end
+
+    local st = PDKP.memberTable;
+    for _, b in pairs(filterButtons) do
+        st:ApplyFilter(b.filterOn, b:GetChecked());
     end
 end
 

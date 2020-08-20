@@ -6,6 +6,8 @@ local ScrollTable = core.ScrollTable;
 local Util = core.Util;
 local Defaults = core.Defaults;
 
+local debuggingSet = false;
+
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
 local type, floor, strupper, pi, substr = type, math.floor, strupper, math.pi, string.match
@@ -50,10 +52,12 @@ function ScrollTable:ClearSelected()
 end
 
 function ScrollTable:UpdateLastSelect(objIndex, isSelected)
+    local selectCount = #self.selected;
+
     if isSelected then
         self.lastSelect = objIndex;
-    elseif #self.selected >= 1 then
-        self.lastSelect = self.selected[#self.selected]
+    elseif selectCount >= 1 then
+        self.lastSelect = self.selected[selectCount]
     else
         self.lastSelect = nil;
     end
@@ -120,7 +124,7 @@ function ScrollTable:CheckSelect(row, clickType)
         return self:RefreshLayout()
     end
 
-    local isSelected, selectIndex = tfind(self.selected, objIndex)
+    local isSelected, _ = tfind(self.selected, objIndex)
     self:HighlightRow(row, isSelected)
 end
 
@@ -177,6 +181,8 @@ function ScrollTable:RefreshLayout()
             else
                 row:SetPoint("TOPLEFT", self.displayedRows[i-1], "BOTTOMLEFT")
             end
+            local isSelected, _ = tfind(self.selected, row.dataObj[row.selectOn])
+            self:HighlightRow(row, isSelected)
         else
             row:Hide();
         end
@@ -187,13 +193,24 @@ end
 ----- FILTER FUNCTIONS -----
 
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    self.appliedFilters[filterOn] = checkedStatus;
+    if not debuggingSet then
+        debuggingSet = true
+        ViragDevTool_AddData(self.appliedFilters, "AppliedFilters")
+    end
 
-    if filterOn == 'Class_All' and checkedStatus then -- Reset all class filters if this gets checked.
+    local special_filters = {['Select_All']= true, ['online']=true, ['raid']=true, ['selected']=true};
+
+    if filterOn == 'Class_All' then -- Reset all class filters if this gets checked.
         for _, class in pairs(Defaults.classes) do
             local fClass = 'Class_' .. class;
-            self.appliedFilters[fClass] = true;
+            self.appliedFilters[fClass] = checkedStatus;
         end
+    else
+        self.appliedFilters[filterOn] = checkedStatus;
+    end
+
+    if special_filters[filterOn] and checkedStatus then
+        print('Special Filter', filterOn, 'toggled!');
     end
 
     self.displayedRows = {};
@@ -385,17 +402,24 @@ function ScrollTable:OnLoad()
             row.isFiltered = false;
             local super = row.super;
 
-            for filter, value in pairs(super.appliedFilters or {}) do
+            local filterPrio = {'Class_', 'online', 'raid', 'selected'}
+
+            for filter, checkedStatus in pairs(super.appliedFilters or {}) do
                 -- It's one of the classes, not all.
-                if substr(filter, 'Class_') and not substr(filter, '_All') and not value then
+
+                if substr(filter, 'Class_') and not substr(filter, '_All') and not checkedStatus then
+                    --print(filter, 'First called');
                     local _, class = strsplit('_', filter);
                     if dataObj['class'] == class then
                         row.isFiltered = true
                         break; -- We don't need to continue running checks, if it's filtered.
                     end
-                elseif filter == 'Class_All' and not value then
+                elseif filter == 'Class_All' and not checkedStatus then
+                    --print(filter, 'Second called');
                     row.isFiltered = true;
                     break;
+                else
+                    --print(filter, 'Third called');
                 end
             end
 
@@ -548,5 +572,7 @@ function ScrollTable:OnLoad()
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
     HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
 end
+
+
 
 pdkp_ScrollTableMixin = core.ScrollTable;
