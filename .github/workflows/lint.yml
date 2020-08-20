@@ -9,5 +9,5 @@ jobs:
       - name: WoW Lua Lint
         uses: davidcraig/action-wow-lint@v1.0.1
         with:
-          path-to-files: 'src/init.lua'
+          path-to-files: '../../src/init.lua'
 
