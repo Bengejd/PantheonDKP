@@ -6,10 +6,5 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-          run: git checkout HEAD^
       - name: WoW Lua Lint
         uses: davidcraig/action-wow-lint@v1.0.1
