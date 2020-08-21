@@ -6,8 +6,12 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+          uses: actions/checkout@v2
+          with:
+            repository: 'ps-wow/action-test-repo'
       - name: WoW Lua Lint
         uses: davidcraig/action-wow-lint@v1.0.1
         with:
-          path-to-files: '../../src/init.lua'
+          path-to-files: 'src/init.lua'
 
