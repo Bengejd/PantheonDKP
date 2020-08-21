@@ -200,10 +200,7 @@ end
 ----- FILTER FUNCTIONS -----
 
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    if not debuggingSet then
-        debuggingSet = true
-        ViragDevTool_AddData(self.appliedFilters, "AppliedFilters")
-    end
+    Util:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
 
     local special_filters = {['Select_All']= true, ['online']=true, ['raid']=true, ['selected']=true};
 
