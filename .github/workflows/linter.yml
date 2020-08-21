@@ -49,3 +49,4 @@ jobs:
           DEFAULT_BRANCH: release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_LUA: true
+          DEFAULT_WORKSPACE: /src
