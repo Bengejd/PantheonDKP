@@ -13,6 +13,3 @@ jobs:
 
       - name: WoW Lua Lint
           uses: davidcraig/action-wow-lint@v1.0.1
-#        with:
-#          github_token: ${{ secrets.github_token }}
-#          # Enable your linters here
