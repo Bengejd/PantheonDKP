@@ -3,6 +3,7 @@ local _G = _G;
 local L = core.L;
 
 local Defaults = core.Defaults;
+local Settings = core.Settings;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
@@ -78,7 +79,7 @@ function Raid:GetCurrentRaid()
     elseif currentRaid ~= nil and tContains(Defaults.raids, currentRaid) then
         return currentRaid
     else
-        return 'Molten Core'
+        return Settings.current_raid;
     end
 end
 

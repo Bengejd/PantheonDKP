@@ -34,6 +34,16 @@ Util.info = 'F4A460';
 local class_colors = Defaults.class_colors;
 
 -----------------------------
+--     Debug Functions     --
+-----------------------------
+
+function Util:WatchVar(tData, strName)
+    if ViragDevTool_AddData and Defaults.debug then
+        ViragDevTool_AddData(tData, strName)
+    end
+end
+
+-----------------------------
 --     Color Functions     --
 -----------------------------
 

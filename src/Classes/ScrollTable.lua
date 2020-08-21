@@ -152,6 +152,13 @@ function ScrollTable:GetDisplayRows()
     end
 end
 
+function ScrollTable:RaidChanged()
+    for i=1, #self.displayData do
+        local row = self.rows[i];
+        row:UpdateRowValues();
+    end
+end
+
 function ScrollTable:RefreshTableSize()
     -- The last step is to ensure the scroll range is updated appropriately.
     -- Calculate the total height of the scrollable region (using the model

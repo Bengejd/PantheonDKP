@@ -18,7 +18,8 @@ local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
-local ScrollTable = core.ScrollTable
+local ScrollTable = core.ScrollTable;
+local Settings = core.Settings;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -149,6 +150,7 @@ function Setup:RandomStuff()
 
     Setup:ScrollTable()
     Setup:Filters()
+    Setup:RaidDropdown()
     --Setup:BossKillLoot()
     --Setup:TabView()
 end
@@ -260,6 +262,48 @@ function Setup:Filters()
     for _, b in pairs(filterButtons) do
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
+end
+
+function Setup:RaidDropdown()
+
+    local dropdown = CreateFrame("FRAME", 'pdkp_raid_dropdown', _G['pdkp_frameFilterFrame'], 'UIDropDownMenuTemplate');
+    dropdown:SetPoint("TOPRIGHT", _G['pdkp_frameFilterFrame'], "TOPRIGHT", 15, 75);
+    UIDropDownMenu_SetWidth(dropdown, 100);
+    UIDropDownMenu_SetText(dropdown, Settings.current_raid)
+
+    UIDropDownMenu_Initialize(dropdown, function(self, level, _)
+        local info = UIDropDownMenu_CreateInfo();
+        for key, raid in pairs(Defaults.raids) do
+            info.text = raid;
+            info.checked = false;
+            info.menuList = key;
+            info.hasArrow = false;
+            info.func = function(b)
+                UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value);
+                UIDropDownMenu_SetText(dropdown, b.value);
+                b.checked = true;
+
+                Settings:ChangeCurrentRaid(b.value);
+                PDKP.memberTable:RaidChanged()
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+    end)
+
+    UIDropDownMenu_SetSelectedValue(dropdown, Settings.current_raid, Settings.current_raid);
+
+    -- Implement the function to change the favoriteNumber
+    function dropdown:SetValue(self, arg1, arg2, checked)
+        raidName = newValue
+        print(self, arg1, arg2, checked);
+        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
+        --UIDropDownMenu_SetText(dropdown, raidName)
+        ---- Because this is called from a sub-menu, only that menu level is closed by default.
+        ---- Close the entire menu with this next call
+        --CloseDropDownMenus()
+    end
+
+    Util:WatchVar(dropdown, 'Raid_Dropdown');
 end
 
 function Setup:TabView()

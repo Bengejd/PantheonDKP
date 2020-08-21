@@ -29,19 +29,27 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     local arg2 = ...
 
     local ADDON_EVENTS = {
-        ['ADDON_LOADED']=PDKP:OnInitialize(event, arg1),
+        ['ADDON_LOADED']=function()
+            PDKP:OnInitialize(event, arg1)
+        end,
         ['PLAYER_ENTERING_WORLD']=function()
+            Util:WatchVar(core, 'PDKP');
+
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin;
             if uiReload then
                 Guild:new();
                 GUI:Init()
+            else
+                Guild:new();
+                GUI:Init();
             end
         end,
         ['ZONE_CHANGED_NEW_AREA']=function()
             if core.firstLogin then
                 Guild:new();
                 GUI:Init()
+                core.firstLogin = false;
             end
         end
     }
@@ -51,7 +59,6 @@ end
 
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
-
 end
 
 function UnregisterEvent(self, event)

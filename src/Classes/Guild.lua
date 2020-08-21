@@ -59,8 +59,6 @@ function Guild:new()
     Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
 
-    PDKP:Print('Guild Initiated')
-
     return Guild
 end
 
