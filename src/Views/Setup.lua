@@ -36,6 +36,10 @@ local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
 local filterButtons = {};
 
+--------------------------
+-- Local      Functions --
+--------------------------
+
 local function setMovable(f)
     f:SetMovable(true)
     f:EnableMouse(true)
@@ -72,7 +76,9 @@ local function createCheckButton(parent, point, x, y, displayText, uniqueName, c
     return cb;
 end
 
---------------------------------------------
+--------------------------
+-- Setup      Functions --
+--------------------------
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -262,6 +268,52 @@ function Setup:Filters()
     for _, b in pairs(filterButtons) do
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
+end
+
+function Setup:RaidReasons()
+    local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(300)
+    f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+
+    f:Show()
+
+
+end
+
+local function createDropdown(name, parent, options, defaultVal)
+    defaultVal = defaultVal or '';
+    local dropdown = CreateFrame("FRAME", '$parentDropdown_' .. name, parent, 'UIDropDownMenuTemplate');
+    dropdown:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 15, 75);
+    dropdown.SetWidth = UIDropDownMenu_SetWidth;
+    dropdown.Init = UIDropDownMenu_Initialize;
+    dropdown.CreateInfo = UIDropDownMenu_CreateInfo;
+    dropdown.SetValue = UIDropDownMenu_SetSelectedValue;
+    dropdown.SetText = UIDropDownMenu_SetText;
+    dropdown.buttons = {};
+
+    dropdown:SetWidth(dropdown, 100);
+    dropdown:Init(dropdown, function()
+        local info = dropdown:CreateInfo();
+        for key, option in pairs(options) do
+            info.text = option;
+            info.checked = false;
+            info.menuList = key
+            info.hasArrow = false;
+            info.func = function(b)
+                UIDropdownMenu_SetSelectedValue(dropdown, b.value, b.value);
+                UIDropdownMenu_SetText(dropdown, b.value);
+                b.checked = true;
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+    end)
+    UIDropDownMenu_SetSelectedValue(dropdown, defaultVal, defaultVal);
 end
 
 function Setup:RaidDropdown()
