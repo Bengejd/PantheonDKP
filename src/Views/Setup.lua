@@ -194,6 +194,7 @@ function Setup:RandomStuff()
     Setup:ScrollTable()
     Setup:Filters()
     Setup:RaidDropdown()
+    Setup:RaidReasons()
     --Setup:BossKillLoot()
     --Setup:TabView()
 end
@@ -332,7 +333,7 @@ function Setup:RaidReasons()
     local favoriteNumber = 42 -- A user-configurable setting
 
     -- Create the dropdown, and configure its appearance
-    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", UIParent, "UIDropDownMenuTemplate")
+    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", f, "UIDropDownMenuTemplate")
     dropDown:SetPoint("CENTER")
     UIDropDownMenu_SetWidth(dropDown, 200)
     UIDropDownMenu_SetText(dropDown, "Favorite number: " .. favoriteNumber)
@@ -367,8 +368,6 @@ function Setup:RaidReasons()
         -- Close the entire menu with this next call
         CloseDropDownMenus()
     end
-
-
 end
 
 function Setup:RaidDropdown()
