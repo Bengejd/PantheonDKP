@@ -38,6 +38,8 @@ local GUILD_COMMS = {
     ['pdkpVersion']=true,
 }
 
+local testers = {'Neekio', 'Pantheonbank', 'Karenbaskins'};
+
 Comms.commsRegistered = false
 
 local pdkpPushDatabase = {
@@ -64,14 +66,10 @@ local skipBroadcastMsg = 'Skipping broadcast because '
 function Comms:RegisterCommCommands()
     Comms.commsRegistered = true -- Check to make sure we don't re-register the comms.
 
-    for key, _ in pairs(GUILD_COMMS) do
-        Util:Debug('Register Guild Comms')
-        PDKP:RegisterComm(key, OnCommReceived)
-    end -- General guild comms
-    for key, _ in pairs(RAID_COMMS) do
-        Util:Debug('Register Raid Comms')
-        PDKP:RegisterComm(key, OnCommReceived)
-    end -- General Raid comms
+    for key, _ in pairs(GUILD_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General guild comms
+    Util:Debug('Register Guild Comms')
+    for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
+    Util:Debug('Register Raid Comms')
 
     if core.canEdit then -- Only register officers to the officer_comms.
         Util:Debug('Register Officer Comms')
@@ -135,15 +133,22 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
     if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
 
-    if prefix == 'pdkpSyncReq' and Util:GetMyName() == 'Karenbaskins' then -- Testing logic.
-        distro, sendTo = 'WHISPER', 'Neekio'
-    elseif Util:GetMyName() == 'Karenbaskins' then
-        --return
-    end  -- Disable messages from Karen during development
+    if Defaults:IsDebug() then
+        local my_name = Util:GetMyName();
+        if tContains(testers, my_name) then
+            for _, name in pairs(testers) do
+                local m = Guild:GetMemberByName(name);
+                if m['name'] ~= my_name and m['online'] then
+                    distro, sendTo = 'WHISPER', m['name']
+                    Util:Debug('Sending ' .. prefix .. ' to ' .. m['name'] .. ' distro: ' .. distro);
+                end
+            end
+        end
+    end
 
     local transmitData = Comms:DataEncoder(data)
 
-    if prefix == 'pdkpPushReceive' then return end;
+    if prefix == 'pdkpPushReceive' and distro ~= 'WHISPER' then return end;
 
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
@@ -159,7 +164,7 @@ end
 ---------------------------
 function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
     -- This shouldn't ever happen, but who knows.
-    if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
+    if distribution ~= 'RAID' and not tContains(testers, sender) then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
     if not Guild:CanMemberEdit(sender) and prefix ~= 'DKPOfficerReq' then return Comms:ThrowError(prefix, sender) end
 
     local raidFuncs = {
@@ -175,7 +180,7 @@ function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
             Raid.dkpOfficer = message
         end,
         ['DKPOfficerReq']= function()
-            if Guild:CanEdit() then
+            if Guild:CanEdit() and Raid.dkpOfficer ~= nil then
                 Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, nil, nil)
             end
         end,
