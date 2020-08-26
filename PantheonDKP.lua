@@ -160,8 +160,7 @@ function PDKP:OnInitialize(event, name)
 end
 
 function PDKP:InitializeGuildData()
-    if IsInGuild() == false then return end; -- Fix for players not being in guild error message.
-
+    if IsInGuild() == false or core.initialized then return end; -- Fix for players not being in guild error message.
     Guild:GetGuildData(false);
     PDKP:BuildAllData();
     core.initialized = true

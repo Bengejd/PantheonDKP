@@ -98,9 +98,11 @@ function Guild:HasMembers()
 end
 
 function Guild:GetMemberByName(name)
-    local tempMember = Guild.members[name]
+    local tempMember = rawget(Guild.members, name);
+    --local tempMember = Guild.members[name]
     if tempMember == nil then
-        return GuildDB.members[name]
+        return rawget(GuildDB.members, name);
+        --return GuildDB.members[name]
     end
     return tempMember
 end

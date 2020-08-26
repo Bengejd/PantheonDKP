@@ -41,14 +41,17 @@ function Member:new(guildIndex)
 
     for key, raid in pairs(raids) do
         if raid ~= 'Onyxia\'s Lair' then
+
             self.dkp[raid] = {
                 previousTotal = 0,
                 total = 0,
                 entries = {},
                 deleted = {}
             }
+            self:MigrateAndLocate()
         end
     end
+
     return self
 end
 

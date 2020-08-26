@@ -217,6 +217,7 @@ function Raid:AcceptBossKillDKPUpdate(bossInfo)
         charNames = charNames..member['formattedName']
         if key < #raidRoster then charNames = charNames .. ', ' end
         charObjs[member.name] = member;
+        Util:WatchVar(member.dkp['Molten Core'], 'DKP_' .. member['name']);
     end
 
     local historyEntry = {
@@ -241,6 +242,7 @@ function Raid:AcceptBossKillDKPUpdate(bossInfo)
 
     for _, charMember in pairs(charObjs) do
         local member = Guild.members[charMember.name];
+        Util:WatchVar(member.dkp['Molten Core'], 'Accept_DKP_' .. member['name']);
         local dkp = member.dkp[raid];
 
         if dkp.entries == nil then member.dkp[raid].entries = {} end
