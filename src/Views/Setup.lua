@@ -113,13 +113,12 @@ function Setup:DropdownValueChanged(dropdown, b)
     b.selected = true;
     UIDropdownMenu_SetSelectedValue(dropdown, b.value, b.value);
     UIDropdownMenu_SetText(dropdown, b.value);
-
-
 end
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
-    f:SetFrameStrata("LOW")
+    f:SetFrameStrata("HIGH");
+    f:SetClampedToScreen(true);
 
     f:SetWidth(742) -- Set these to whatever height/width is needed
     f:SetHeight(682) -- for your Texture
@@ -206,7 +205,7 @@ function Setup:Filters()
         edgeFile = SCROLL_BORDER, edgeSize = 8,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetHeight(300)
+    f:SetHeight(150)
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("TOPRIGHT", pdkp_frame, "RIGHT", -10,0)
 
@@ -222,7 +221,7 @@ function Setup:Filters()
             { ['point']='TOPLEFT', ['x']=0, ['y']=-30, ['displayText']='Select All', ['filterOn']='Select_All' },
         },
         { -- Row 3
-            { ['x']=0, ['y']=70, ['displayText']='All Classes', ['filterOn']='Class_All',
+            { ['x']=0, ['y']=0, ['displayText']='All Classes', ['filterOn']='Class_All',
               ['center']=true,
             },
         },
@@ -231,7 +230,7 @@ function Setup:Filters()
     }
 
     for key, class in pairs(Defaults.classes) do
-        local classBtn = { ['point']='TOPLEFT', ['x']=60, ['y']=0, ['displayText']=class, ['filterOn']='Class_'..class}
+        local classBtn = { ['point']='TOPLEFT', ['x']=60, ['y']=50, ['displayText']=class, ['filterOn']='Class_'..class}
 
         if key >= 1 and key <= 4 then
             table.insert(rows[4], classBtn);
@@ -261,7 +260,7 @@ function Setup:Filters()
                 cb:ClearAllPoints();
                 if rowKey == 4 then
                     if fKey == 1 then
-                        cb:SetPoint("LEFT", f, "LEFT", 20, 30);
+                        cb:SetPoint("LEFT", f, "LEFT", 20, -40);
                     else
                         cb:SetPoint("TOPRIGHT", filterButtons[#filterButtons-1], "TOPRIGHT", filter['x'], 0);
                     end
@@ -308,6 +307,8 @@ function Setup:Filters()
     end
 end
 
+
+
 function Setup:RaidReasons()
     local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
     f:SetBackdrop({
@@ -315,59 +316,77 @@ function Setup:RaidReasons()
         edgeFile = SCROLL_BORDER, edgeSize = 8,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetHeight(300)
+    f:SetHeight(225);
     f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
     f:Show()
 
     GUI.adjustmentReasons = {
-        "On Time Bonus",
-        "Completion Bonus",
-        "Benched",
-        "Boss Kill",
-        "Unexcused Absence",
-        "Item Win",
-        "Other"
+        {
+            ['title']='On Time Bonus',
+            ['menu']={
+                'Molten Core',
+                'Blackwing Lair',
+                'Ahn\'Qiraj'
+            }
+        },
+        {
+            ['title']='Completion Bonus',
+            ['menu']={
+
+            }
+
+        },
+        {
+            ['title']='Benched',
+            ['menu']={
+
+            }
+        },
+        {
+            ['title']='Boss Kill',
+            ['menu']={
+
+            }
+        },
+        {
+            ['title']='Unexcused Absence',
+            ['menu']={
+
+            }
+        },
+        {
+            ['title']='Item Win'
+        },
+        {
+            ['title']='Other'
+        },
     }
 
-    local favoriteNumber = 42 -- A user-configurable setting
+    local menuList = {
+        { text = "Select an Option", isTitle = true},
+        { text = "Option 1", func = function() print("You've chosen option 1"); end,
+          menuList = {
+            { text = "Option 3", func = function() print("You've chosen option 3"); end }
+        } },
+        { text = "Option 2", func = function() print("You've chosen option 2"); end,
+          menuList = {
+              { text = "Option 3", func = function() print("You've chosen option 3"); end }
+          }
+        },
+        { text = "More Options", hasArrow = true,
+          menuList = {
+              { text = "Option 3", func = function() print("You've chosen option 3"); end }
+          }
+        }
+    }
+    local menuFrame = CreateFrame("Frame", "Omen_TitleDropDownMenu", f, "UIDropDownMenuTemplate")
+    menuFrame.menuList = menuList
+    menuFrame:SetParent(f)
 
-    -- Create the dropdown, and configure its appearance
-    local dropDown = CreateFrame("FRAME", "WPDemoDropDown", f, "UIDropDownMenuTemplate")
-    dropDown:SetPoint("CENTER")
-    UIDropDownMenu_SetWidth(dropDown, 200)
-    UIDropDownMenu_SetText(dropDown, "Favorite number: " .. favoriteNumber)
-
-    -- Create and bind the initialization function to the dropdown menu
-    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
-        local info = UIDropDownMenu_CreateInfo()
-        if (level or 1) == 1 then
-            -- Display the 0-9, 10-19, ... groups
-            for i=0,4 do
-                info.text, info.checked = i*10 .. " - " .. (i*10+9), favoriteNumber >= i*10 and favoriteNumber <= (i*10+9)
-                info.menuList, info.hasArrow = i, true
-                UIDropDownMenu_AddButton(info)
-            end
-
-        else
-            -- Display a nested group of 10 favorite number options
-            info.func = self.SetValue
-            for i=menuList*10, menuList*10+9 do
-                info.text, info.arg1, info.checked = i, i, i == favoriteNumber
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
-    end)
-
-    -- Implement the function to change the favoriteNumber
-    function dropDown:SetValue(newValue)
-        favoriteNumber = newValue
-        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
-        UIDropDownMenu_SetText(dropDown, "Favorite number: " .. favoriteNumber)
-        -- Because this is called from a sub-menu, only that menu level is closed by default.
-        -- Close the entire menu with this next call
-        CloseDropDownMenus()
-    end
+    -- Or make the menu appear at the frame:
+    menuFrame:SetPoint("Center", f, "Center")
+    EasyMenu(menuList, menuFrame, menuFrame, 0, 10, nil)
 end
 
 function Setup:RaidDropdown()
@@ -421,19 +440,16 @@ function Setup:TabView()
 end
 
 function Setup:BossKillLoot()
-    local f = CreateFrame("Frame", "pdkp_bossLoot_frame", PDKP.memberTable.frame)
-    f:SetFrameStrata("HIGH")
-    f:SetPoint("BOTTOMRIGHT", PDKP.memberTable.frame, "BOTTOMRIGHT")
-    f:SetHeight(200)
-    f:SetWidth(200)
-
-    f:SetBackdrop( {
-        bgFile = TRANSPARENT_BACKGROUND,
-        edgeFile = SHROUD_BORDER, tile = true, tileSize = 64, edgeSize = 16,
-        insets = { left = 5, right = 5, top = 5, bottom = 5 }
-    });
-
-    setMovable(f)
+    local f = CreateFrame("Frame", "$parentBossLoot", pdkp_frame)
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(225);
+    f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+    f:Show()
 
     -- mini close button
     local b = createCloseButton(f, true)

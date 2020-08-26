@@ -333,12 +333,15 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     listScrollFrame:UpdateScrollChildRect();
 
     self.ListScrollFrame.buttons = self.rows;
+
     scrollBar:SetMinMaxValues(1, (#self.data * self.ROW_HEIGHT))
 
     scrollBar.buttonHeight = self.ROW_HEIGHT;
     scrollBar:SetValueStep(self.ROW_HEIGHT);
     scrollBar:SetStepsPerPage(self.MAX_ROWS -2);
     scrollBar:SetValue(1);
+
+    self.scrollBar = scrollBar;
 
     self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 0);
 

@@ -26,6 +26,7 @@ local strsplit, tonumber, tostring, pairs, type, next = strsplit, tonumber, tost
 local insert, sort = table.insert, table.sort
 
 Guild.initiated = false;
+Guild.updateCalled = false;
 Guild.sortDir = nil;
 Guild.sortBy = nil;
 Guild.currentRaid = 'Molten Core';
@@ -45,9 +46,16 @@ local function initDB()
     return db.profile;
 end
 
+function Guild:HasMembers()
+    local guild_member_count = GetNumGuildMembers(true)
+    return guild_member_count > 0
+end
+
 -- Init the Guild object.
 function Guild:new()
-    if (IsInGuild() == false) or (Guild.initiated) then return end
+    if (IsInGuild() == false or Guild.initiated) then
+        return
+    end
 
     Guild.db = initDB()
 
@@ -58,7 +66,6 @@ function Guild:new()
     Guild.memberNames = {};
     Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
-
     return Guild
 end
 

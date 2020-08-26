@@ -29,29 +29,30 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     local arg2 = ...
 
     local ADDON_EVENTS = {
-        ['ADDON_LOADED']=function()
-            PDKP:OnInitialize(event, arg1)
+        ['GUILD_ROSTER_UPDATE']=function()
+            if Guild:HasMembers() then
+                PDKP_UnregisterEvent(events, event);
+                Guild:new();
+                GUI:Init();
+            else
+                GuildRoster();
+            end
+        end,
+        ['PLAYER_LOGIN']=function()
+            if IsInGuild() then
+                GuildRoster();
+            end
         end,
         ['PLAYER_ENTERING_WORLD']=function()
             Util:WatchVar(core, 'PDKP');
-
-            local initialLogin, uiReload = arg1, arg2
-            core.firstLogin = initialLogin;
-            if uiReload then
-                Guild:new();
-                GUI:Init()
-            else
-                Guild:new();
-                GUI:Init();
-            end
+            Guild.updateCalled = false;
         end,
         ['ZONE_CHANGED_NEW_AREA']=function()
-            if core.firstLogin then
-                Guild:new();
-                GUI:Init()
-                core.firstLogin = false;
-            end
-        end
+
+        end,
+        ['ADDON_LOADED']=function()
+            PDKP:OnInitialize(event, arg1)
+        end,
     }
 
     if ADDON_EVENTS[event] then ADDON_EVENTS[event]() end
@@ -61,14 +62,14 @@ function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 end
 
-function UnregisterEvent(self, event)
-    self:UnregisterEvent(event);
-end
-
 local events = CreateFrame("Frame", "EventsFrame");
 
+function PDKP_UnregisterEvent(self, event)
+    events:UnregisterEvent(event);
+end
+
 local eventNames = {
-    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START",
+    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START", "PLAYER_GUILD_UPDATE",
     "COMBAT_LOG_EVENT_UNFILTERED", "LOOT_OPENED", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_WHISPER",
     "CHAT_MSG_GUILD", "CHAT_MSG_LOOT", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA","BOSS_KILL", "CHAT_MSG_SYSTEM"
 }
