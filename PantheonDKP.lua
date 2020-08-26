@@ -55,6 +55,19 @@ local function PDKP_OnEvent(self, event, arg1, ...)
     local arg2 = ...
 
     local PDKP_SIMPLE_EVENT_FUNCS = {
+        ['GUILD_ROSTER_UPDATE']=function()
+            if Guild:HasMembers() then
+                UnregisterEvent(self, event);
+                PDKP:InitializeGuildData()
+            else
+                GuildRoster();
+            end
+        end,
+        ['PLAYER_LOGIN']=function()
+            if IsInGuild() then
+                GuildRoster();
+            end
+        end,
         ['ADDON_LOADED']=function() -- The addon finished loading, most things should be available.
             Util:Debug('Addon loaded')
 
@@ -63,22 +76,21 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         end,
         ['ZONE_CHANGED_NEW_AREA']=function() -- This allows us to detect if the GuildInfo() event is available yet.
             Raid:CheckCombatLogging()
-
-            if core.firstLogin then
-                PDKP:InitializeGuildData()
-            end
         end,
         ['PLAYER_ENTERING_WORLD']=function()
             local initialLogin, uiReload = arg1, arg2
             core.firstLogin = initialLogin
-            if uiReload then PDKP:InitializeGuildData() end
+            if uiReload then
+                Util:Debug('UIReload Detected');
+                PDKP:InitializeGuildData()
+                if Raid:IsInRaid() then
+                    Comms:SendCommsMessage('DKPOfficerReq', {}, 'RAID', nil, 'BULK', nil)
+                end
+            end
             Setup:OfficerWindow()
             Raid:CheckCombatLogging()
         end,
         ['WORLD_MAP_UPDATE']=function()
-            return UnregisterEvent(self, event)
-        end,
-        ['GUILD_ROSTER_UPDATE']=function()
             return UnregisterEvent(self, event)
         end,
         ['GROUP_ROSTER_UPDATE']=function()

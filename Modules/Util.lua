@@ -24,6 +24,12 @@ local class_colors = {
 Util.warning = 'E71D36'
 Util.success = '22bb33'
 
+function Util:WatchVar(tData, strName)
+    if ViragDevTool_AddData and Defaults:IsDebug() then
+        ViragDevTool_AddData(tData, strName)
+    end
+end
+
 -- Returns the current player's name.
 function Util:GetMyName()
     local pName, _ = UnitName("PLAYER")

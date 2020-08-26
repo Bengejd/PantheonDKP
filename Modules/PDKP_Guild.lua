@@ -92,6 +92,11 @@ function Guild:GetGuildData(onlineOnly)
     return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
+function Guild:HasMembers()
+    local guild_member_count = GetNumGuildMembers(true)
+    return guild_member_count > 0
+end
+
 function Guild:GetMemberByName(name)
     local tempMember = Guild.members[name]
     if tempMember == nil then

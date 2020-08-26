@@ -13,7 +13,6 @@ local Defaults = core.defaults;
 local Import = core.import;
 local Setup = core.Setup;
 local Comms = core.Comms;
-local Shroud = core.Shroud;
 local Raid = core.Raid;
 
 local AceGUI = LibStub("AceGUI-3.0")
@@ -58,7 +57,6 @@ function Setup:MainUI()
 
         Setup:RaidDkpDropdown()
         Setup:HistoryFrame()
-        Setup:ShroudingWindow()
         Setup:PrioList()
 
         Setup:PushTimer()
@@ -304,9 +302,10 @@ function Setup:AdjustmentDropdowns()
                 secondaryDropdown:SetLabel('Raid');
                 otherBox:Hide();
             elseif index == 6 then
+                otherBox:Hide()
                 local itemButtonText = _G['pdkp_item_link_text'];
                 if Util:IsEmpty(itemButtonText:GetText()) then
-                    otherBox:Show();
+                    --otherBox:Show();
                     GUI.pdkp_submit_button:SetEnabled(false);
                 else
                     GUI.pdkp_dropdown_enables_submit = true;

@@ -17,6 +17,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 Shroud.window = nil;
 
+local Minimum_Shroud = 0 -- TODO: Update this before the 1st to be 100
+
 Shroud.windowPosition = nil
 
 Shroud.shrouders = {
@@ -37,6 +39,8 @@ function Shroud:UpdateWindow()
         Util:Debug('Setting up shrouding window')
         Setup:ShroudingWindow()
     end
+
+    Util:WatchVar(Shroud.shrouders, 'ShroudingTable');
 
     local scroll = Shroud.window.scroll
 
@@ -74,7 +78,7 @@ function Shroud:UpdateWindow()
 
     for i=1, #shrouders do
         local member = shrouders[i]
-        if member.dkpTotal > 0 then -- Ignore people with 0 DKP. They can't shroud on anything anyway.
+        if member.dkpTotal > Minimum_Shroud then -- Ignore people with 0 DKP. They can't shroud on anything anyway.
             local sg, nameLabel, dkpLabel = AceGUI:Create("SimpleGroup"), AceGUI:Create("Label"), AceGUI:Create("Label")
             sg:SetLayout("Flow")
             sg:SetFullWidth(true)
@@ -131,7 +135,7 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
 
     local player = { name=playerName, dkpTotal=DKP:GetPlayerDKP(playerName) }
     if shrouders.names[playerName] == nil then -- player isn't in the table yet.
-        if player.dkpTotal > 0 then
+        if player.dkpTotal > Minimum_Shroud then
             Util:Debug('Adding shrouder!');
             table.insert(shrouders.names, playerName)
             table.insert(shrouders.table, player);
@@ -145,7 +149,7 @@ function Shroud:UpdateShrouders(playerName) -- Only the ML should be able to acc
         end
     end
 
-    if player.dkpTotal > 0 then
+    if player.dkpTotal > Minimum_Shroud then
         shrouders.names[playerName] = true;
         Shroud.shrouders.database_name = DKP.dkpDB.currentDB;
 
@@ -171,10 +175,10 @@ function Shroud:SetWindowPosition()
     if Shroud.windowPosition == nil then
         Shroud.window:SetHeight(200);
         Shroud.window:SetHeight(200);
-        Shroud.window:SetPoint('BOTTOMLEFT', 0, 0);
+        Shroud.window:SetPoint('BOTTOMLEFT', UIParent, "BottomLEFT");
     else
-        print('Found positioning set')
-        Shroud.window:SetPoint("BOTTOMLEFT", Shroud.windowPosition.left, Shroud.windowPosition.bottom)
+        --print('Found positioning set')
+        --Shroud.window:SetPoint("BOTTOMLEFT", Shroud.windowPosition.left, Shroud.windowPosition.bottom)
     end
 end
 

@@ -27,6 +27,7 @@ local RAID_COMMS = {
     ['pdkpClearShrouds']=true, -- Officer check
     ['pdkpNewShrouds']=true, -- Officer check
     ['pdkpDkpOfficer']=true, -- Officer check
+    ['DKPOfficerReq']=true,
 }
 
 local GUILD_COMMS = {
@@ -63,8 +64,14 @@ local skipBroadcastMsg = 'Skipping broadcast because '
 function Comms:RegisterCommCommands()
     Comms.commsRegistered = true -- Check to make sure we don't re-register the comms.
 
-    for key, _ in pairs(GUILD_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General guild comms
-    for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
+    for key, _ in pairs(GUILD_COMMS) do
+        Util:Debug('Register Guild Comms')
+        PDKP:RegisterComm(key, OnCommReceived)
+    end -- General guild comms
+    for key, _ in pairs(RAID_COMMS) do
+        Util:Debug('Register Raid Comms')
+        PDKP:RegisterComm(key, OnCommReceived)
+    end -- General Raid comms
 
     if core.canEdit then -- Only register officers to the officer_comms.
         Util:Debug('Register Officer Comms')
@@ -130,9 +137,13 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
 
     if prefix == 'pdkpSyncReq' and Util:GetMyName() == 'Karenbaskins' then -- Testing logic.
         distro, sendTo = 'WHISPER', 'Neekio'
-    elseif Util:GetMyName() == 'Karenbaskins' then return end  -- Disable messages from Karen during development
+    elseif Util:GetMyName() == 'Karenbaskins' then
+        --return
+    end  -- Disable messages from Karen during development
 
     local transmitData = Comms:DataEncoder(data)
+
+    if prefix == 'pdkpPushReceive' then return end;
 
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
@@ -149,7 +160,7 @@ end
 function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
     -- This shouldn't ever happen, but who knows.
     if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
-    if not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
+    if not Guild:CanMemberEdit(sender) and prefix ~= 'DKPOfficerReq' then return Comms:ThrowError(prefix, sender) end
 
     local raidFuncs = {
         ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
@@ -162,7 +173,12 @@ function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
                 PDKP:Print(message .. ' is now the DKP Officer')
             end
             Raid.dkpOfficer = message
-        end
+        end,
+        ['DKPOfficerReq']= function()
+            if Guild:CanEdit() then
+                Comms:SendCommsMessage('pdkpDkpOfficer', Raid.dkpOfficer, 'RAID', nil, nil, nil)
+            end
+        end,
     }
 
     local func = raidFuncs[prefix]

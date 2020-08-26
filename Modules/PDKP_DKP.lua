@@ -205,6 +205,17 @@ function DKP:DeleteEntry(entry, noBroacast)
 
     table.insert(dkpDB.history['deleted'], entryKey)
 
+    -- To be safe, re-check this box, so that the item doesn't disappear.
+    local in_raid_cb = _G['pdkp_in_raid_checkbox'];
+    local selected_cb = _G['pdkp_selected_checkbox'];
+
+    if selected_cb:GetChecked() then
+        selected_cb:SetChecked(false);
+    end
+
+    in_raid_cb:Click();
+    in_raid_cb:Click();
+
     DKP:ChangeDKPSheets(raid, true)
     GUI:UpdateEasyStats();
 
