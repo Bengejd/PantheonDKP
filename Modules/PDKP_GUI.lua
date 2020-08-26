@@ -53,6 +53,7 @@ GUI.adjustmentReasons = {
 }
 
 GUI.raidClasses = {};
+GUI.pushInProgress = false
 
 GUI.adjustDropdowns = {}
 GUI.pushFrame = nil
@@ -708,7 +709,16 @@ end
 ---------------------------
 -- TIMER Functions    --
 ---------------------------
-function UpdatePushBar(arg, sent, total)
+function PDKP_UpdatePushBar(arg, sent, total)
+
+    local start_time = 0
+    if GUI.pushInProgress then
+        start_time = DKP.lastSync
+    else
+        local _, _, server_time, _ = Util:GetDateTimes()
+        DKP.lastSync = server_time
+    end
+
     if GUI.pushbar == nil then
         Setup:PushTimer()
     end
@@ -738,6 +748,9 @@ function UpdatePushBar(arg, sent, total)
         percentage = 0
         statusbar.value:SetText(statusText .. percentage .. '%');
         statusbar:SetValue(percentage)
+        GUI.pushInProgress = false
+    else
+        GUI.pushInProgress = true
     end
 end
 

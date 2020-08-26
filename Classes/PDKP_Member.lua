@@ -55,6 +55,10 @@ function Member:new(guildIndex)
     return self
 end
 
+function Member:DeleteOldEntries(raid, timeToSearch)
+
+end
+
 function Member:GetDKP(raidName, variableName)
     if Util:IsEmpty(raidName) then
         return Util:ThrowError('No raid provided to GetDKP')
@@ -164,7 +168,7 @@ function Member:Save()
 end
 
 function Member:MigrateAndLocate()
-    local db = DKP.dkpDB.members
+    local db = DKP.dkpDB.members or {}
     local hist = DKP.dkpDB.history;
     local dkp = self.dkp
 

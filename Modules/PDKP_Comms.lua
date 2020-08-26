@@ -147,9 +147,7 @@ function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     end
 
     local transmitData = Comms:DataEncoder(data)
-
-    if prefix == 'pdkpPushReceive' and distro ~= 'WHISPER' then return end;
-
+    Util:Debug("Data encoding finished, sending message now!");
     PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
 end
 
@@ -223,7 +221,7 @@ function Comms:OnOfficerCommReceived(prefix, message, distribution, sender)
             end  -- Make sure we can sync while in the raid
             Guild:UpdateLastSync(message) -- message contains the lastSync time.
             PDKP:Print(sender .. ' has sent a DKP sync request. Preparing sync data now, this may take a few minutes...')
-            Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', UpdatePushBar)
+            Comms:SendCommsMessage('pdkpSyncRes', Comms:PackupSyncDatabse(), 'GUILD', nil, 'BULK', PDKP_UpdatePushBar)
         end,
     }
     local func = officerFunc[prefix]
@@ -234,7 +232,7 @@ function Comms:SendGuildPush(full)
     Comms:ResetDatabse()
     PDKP:Print("Preparing data to push to GUILD this may take a few minutes...")
     Comms:PrepareDatabase(full)
-    Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'GUILD', nil, 'BULK', UpdatePushBar)
+    Comms:SendCommsMessage('pdkpPushReceive', pdkpPushDatabase, 'GUILD', nil, 'BULK', PDKP_UpdatePushBar)
 end
 
 function Comms:SendGuildUpdate(histEntry)
@@ -263,10 +261,11 @@ function Comms:ResetDatabse()
 end
 
 function Comms:PrepareDatabase(full)
+    wipe(pdkpPushDatabase);
     if full then -- full overwrite
         pdkpPushDatabase = {
             addon_version = '',
-            full = full,
+            full = true,
             guildDB = {
                 numOfMembers = Guild.db.numOfMembers,
                 members = Guild.db.members
@@ -280,8 +279,7 @@ function Comms:PrepareDatabase(full)
         }
     else -- merge, partial.
         pdkpPushDatabase = {
-            addon_version = '',
-            full = full,
+            full = false,
             guildDB = {
                 numOfMembers = Guild.db.numOfMembers,
                 members = Guild.members,

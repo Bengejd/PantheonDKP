@@ -585,8 +585,52 @@ function DKP:DeleteOldEntries()
       dkpDB.history.all[entryID] = nil
     end
 
+    local entryCount = 0
+    local removedCount = 0
+
+    for _, member in pairs(Guild.members) do
+        for _, raid in pairs(core.raids) do
+            local entriesToRemove = {};
+
+            if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end
+            for i=1, #member.dkp[raid].entries do
+                entryCount = entryCount + 1
+                local entry = member.dkp[raid].entries[i];
+                if entry ~= nil and timeToSearch > entry then
+                    table.insert(entriesToRemove, i)
+                end
+            end
+            for _, entry in pairs(entriesToRemove) do
+                member.dkp[raid].entries[entry] = nil;
+                removedCount = removedCount + 1;
+            end
+
+            wipe(entriesToRemove);
+
+            for i=1, #member.dkp[raid].deleted do
+                entryCount = entryCount + 1
+                local entry = member.dkp[raid].deleted[i];
+                if entry ~= nil and timeToSearch > entry then
+                    table.insert(entriesToRemove, i)
+                elseif entry == nil then
+                    table.insert(entriesToRemove, i);
+                end
+            end
+            for _, entry in pairs(entriesToRemove) do
+                member.dkp[raid].deleted[entry] = nil;
+                removedCount = removedCount + 1;
+            end
+        end
+
+
+    end
+
+    PDKP:Print('Deleted ' .. removedCount .. ' Old Entry keys');
+    PDKP:Print('Entries left: ' .. entryCount);
+
     if #removeEntries > 0 then
         PDKP:Print('Deleted ' .. #removeEntries .. ' Old Entries')
     end
+
     PDKP:Print(afterCount .. ' Entries Found')
 end

@@ -19,13 +19,6 @@ local Comms = core.Comms;
 --
 
 function Import:AcceptData(reqData)
-    local addon_version = tonumber(reqData.addon_version)
-    local my_addon_version = tonumber(Defaults.addon_version)
-
-    if (my_addon_version and addon_version) and (my_addon_version > addon_version) then
-        -- TODO: Possibly do something here??
-    end
-
     Util:Debug('Import received from addon version '.. tostring(reqData.addon_version))
 
     if reqData.full then -- THIS IS A FULL OVERWRITE
@@ -140,8 +133,19 @@ function Import:AcceptFullDatabase(data)
     local guildData = data.guildDB
     local dkpData = data.dkpDB
 
+    Util:WatchVar(data, 'Import_Data');
+    Util:WatchVar(Guild.db, 'Guild_DB');
+    Util:WatchVar(DKP.dkpDB, 'DKP_DB');
+
     if guildData then
-        Guild.db.members = guildData.members
+        wipe(Guild.db.members);
+        for key, member in pairs(guildData.members) do
+            Guild.db.members[key] = member;
+        end
+    end
+
+    if guildData then
+
     end
 
     if dkpData then
@@ -149,6 +153,8 @@ function Import:AcceptFullDatabase(data)
         DKP.dkpDB.history = dkpData.history;
         DKP.dkpDB.members = dkpData.members;
     end
+
+    core.initialized = false -- Reset the initialize status.
 
     PDKP:InitializeGuildData() -- Re-initialize the guild data.
     pdkp_init_scrollbar() -- re-setup the scroll section, if necessary.
