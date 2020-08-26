@@ -427,6 +427,9 @@ function PDKP:CheckForUpdate(version, silent)
     myMajor, myMinor, myPatch = tonumber(myMajor), tonumber(myMinor), tonumber(myPatch)
     theirMajor, theirMinor, theirPatch = tonumber(theirMajor), tonumber(theirMinor), tonumber(theirPatch)
 
+    if myMajor == nil or myMinor == nil or myPatch == nil then return end
+    if theirMajor == nil or theirMinor == nil or theirPatch == nil then return end;
+
     local hasUpdate = false
     local majorMatch = theirMajor == myMajor
     local minorMatch = theirMinor == myMinor
