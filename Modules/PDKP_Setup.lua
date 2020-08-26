@@ -682,6 +682,8 @@ function Setup:OfficerWindow()
     mainFrame:SetFrameLevel(1);
     mainFrame:SetToplevel(true)
 
+    Util:WatchVar(_G['pdkpOfficerFrame']);
+
     local officerButton = CreateFrame("Button", 'pdkpOfficerButton', RaidFrame, 'UIPanelButtonTemplate')
     officerButton:SetHeight(30);
     officerButton:SetWidth(80);
@@ -823,7 +825,7 @@ function Setup:OfficerWindow()
     raidGroup.frame:SetFrameStrata('HIGH');
 
     local label = AceGUI:Create("Label")
-    label:SetText("This will give all officers in the raid the 'Assist' role.")
+    label:SetText("This will give all officers & Class Leaders in the raid the 'Assist' role.")
     raidGroup:AddChild(promoteOfficer)
     raidGroup:AddChild(label)
 
@@ -873,9 +875,13 @@ function Setup:OfficerWindow()
         end
     end
 
-    mainFrame:SetScript('OnHide', function() toggleKids(false) end)
+    mainFrame:SetScript('OnHide', function()
+        toggleKids(false)
+        _G['pdkpOfficerFrame'].closed = true
+    end)
     mainFrame:SetScript('OnShow', function()
         GUI:UpdateRaidClasses()
+        _G['pdkpOfficerFrame'].closed = false
         toggleKids(true) end)
 
     GUI.officerInterfaceFrame = mainFrame;

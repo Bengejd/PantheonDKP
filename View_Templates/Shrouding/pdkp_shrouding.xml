@@ -170,48 +170,6 @@
                     </OnClick>
                 </Scripts>
             </Button>
-
-            <!-- Roll Tracker -->
-
-            <Frame name="pdkp_shrouding_frame" hidden="false" >
-                <Anchors>
-                    <Anchor point="TOPLEFT" >
-                        <Offset>
-                            <AbsDimension x="8" y="-30"/>
-                        </Offset>
-                    </Anchor>
-                    <Anchor point="BOTTOMRIGHT" >
-                        <Offset>
-                            <AbsDimension x="-8" y="8"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Layers>
-                    <Layer level="BACKGROUND">
-
-
-                        <FontString name="$parentStatusText" inherits="GameFontNormalSmall" text="" justifyH="LEFT" justifyV="TOP">
-                            <Color r="0.5" g="0.5" b="1.0"/>
-                            <Anchors>
-                                <Anchor point="BOTTOMLEFT">
-                                    <Offset>
-                                        <AbsDimension x="2" y="2"/>
-                                    </Offset>
-                                </Anchor>
-                                <Anchor point="BOTTOMRIGHT">
-                                    <Offset>
-                                        <AbsDimension x="-2" y="12"/>
-                                    </Offset>
-                                </Anchor>
-                            </Anchors>
-
-                        </FontString>
-
-                    </Layer>
-                </Layers>
-            </Frame>
-
-
         </Frames>
         <Scripts>
             <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>

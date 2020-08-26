@@ -174,7 +174,7 @@ function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
             Shroud:UpdateWindow() -- Update the window.
         end,
         ['pdkpDkpOfficer'] = function()
-            if Raid.dkpOfficer ~= message then
+            if Raid.dkpOfficer ~= message and message ~= nil then
                 PDKP:Print(message .. ' is now the DKP Officer')
             end
             Raid.dkpOfficer = message

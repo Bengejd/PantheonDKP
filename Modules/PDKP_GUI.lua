@@ -688,7 +688,7 @@ function GUI:ToggleOfficerInterface()
 
     if officerFrame then
        if officerFrame:IsShown() and not Raid:IsInRaid() then officerFrame:Hide()
-       elseif Raid:IsInRaid() and not officerFrame:IsShown() then
+       elseif Raid:IsInRaid() and not officerFrame:IsShown() and not officerFrame.closed then
             officerFrame:Show()
 
            if Raid:isRaidLeader() then officerFrame.raidControlGroup.frame:Show()
