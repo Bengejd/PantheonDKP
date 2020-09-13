@@ -5,7 +5,7 @@
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap, pdkp_settingsDB
+## SavedVariables: pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap, pdkp_settingsDB, pdkp_test
 
 #@no-lib-strip@
 embed.xml
@@ -35,6 +35,7 @@ Modules\PDKP_Import.lua
 Modules\PDKP_Setup.lua
 Modules\PDKP_Officer.lua
 Modules\PDKP_Minimap.lua
+Modules\PDKP_Json.lua
 
 
 View_Templates\Shrouding\pdkp_shrouding.xml

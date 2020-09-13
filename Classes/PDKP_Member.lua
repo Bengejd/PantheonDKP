@@ -138,6 +138,22 @@ function Member:CanEdit()
     return self.canEdit;
 end
 
+function Member:VerifyTables()
+    local dkp = self.dkp['Ahn\'Qiraj'];
+    local verified_total = 0;
+    local member_total = dkp.total;
+    local entries = dkp['entries'];
+    local history = DKP:GetHistory()
+
+    for key, entry in pairs(entries) do
+        local change = history[entry]['dkpChange'];
+        verified_total = verified_total + change;
+    end
+    if member_total ~= verified_total then
+        print('Issue with ', self.name, 'Verified: ', verified_total, 'Actual: ', member_total);
+    end
+end
+
 function Member:Save()
     if self.lvl == nil then return end;
     if (self.lvl < 55 and not self.canEdit) then return end

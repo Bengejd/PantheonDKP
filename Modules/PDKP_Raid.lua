@@ -143,7 +143,7 @@ function Raid:IsAssist()
 end
 
 function Raid:BossKill(bossID, bossName)
-    if not core.canEdit then return end; -- If you can't edit, then you shoudln't be here.
+    if not core.canEdit then return end; -- If you can't edit, then you shouldn't be here.
 
     local bk
     for raidName, raidObj in pairs(core.bossIDS) do
@@ -181,7 +181,11 @@ function Raid:BossKill(bossID, bossName)
     local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
     popup.text = bk.name .. ' was killed! Award 10 DKP?'
     popup.bossInfo = bk;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+
+    print('Boss kill popup has been disabled until further notice.')
+    print('Please award DKP manually for', bk.name, 'in', bk.raid)
+
+    --StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
 function Raid:AcceptBossKillDKPUpdate(bossInfo)
@@ -213,11 +217,13 @@ function Raid:AcceptBossKillDKPUpdate(bossInfo)
 
     for key, raidMember in pairs(raidRoster) do
         local member = Guild:GetMemberByName(raidMember.name)
-        table.insert(memberNames, member.name)
-        charNames = charNames..member['formattedName']
-        if key < #raidRoster then charNames = charNames .. ', ' end
-        charObjs[member.name] = member;
-        Util:WatchVar(member.dkp['Molten Core'], 'DKP_' .. member['name']);
+        if member and member ~= nil then
+            table.insert(memberNames, member.name)
+            charNames = charNames..member['formattedName']
+            if key < #raidRoster then charNames = charNames .. ', ' end
+            charObjs[member.name] = member;
+            Util:WatchVar(member.dkp['Molten Core'], 'DKP_' .. member['name']);
+        end
     end
 
     local historyEntry = {

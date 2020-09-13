@@ -18,7 +18,8 @@ local Import = core.Import;
 local item = core.Item;
 local Member = core.Member;
 local Officer = core.Officer;
-local Minimap = core.Minimap
+local Minimap = core.Minimap;
+local json = core.JSON;
 
 local PlaySound = PlaySound
 
@@ -269,94 +270,97 @@ function PDKP:HandleSlashCommands(msg, item)
     if safeFuncs[msg] then return safeFuncs[msg]() end
     if splitFuncs[splitMsg] then return splitMsg[msg]() end
 
-    if msg == 'professionTracking' then
-        if not _G['pdkpProf'] then local f, t ,c = CreateFrame("Frame", "pdkpProf"), 2383,0
-            f:SetScript("OnUpdate", function(_, e)
-                c=c+e
-                if c>3 then
-                    c=0
-                    CastSpellByID(t)
-                    if t == 2383 then t= 2580 else t=2383 end
-                end
-            end)
-            _G['pdkpProf']:Hide()
-        end
-        if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
-    end
-
-    if msg == 'pdkpTestWho' then
-        SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
-    end
-
     -- OFFICER ONLY COMMANDS
     if not core.canEdit then
         return Util:Debug('Cannot process this command because you are not an officer')
     end;
 
-    if msg == 'pdkpTestAutoSync' then
-        Comms:DatabaseSyncRequest()
-    end
-
-    if msg == 'item' and item then
-        return Item:LinkItem();
-    end
-
-    if msg == 'historyEdit' then
-        Setup:HistoryEdit()
-    end
-
-    if msg == 'invite' then
-        return Invites:Show();
-        --        local tempInvites = {'Sparklenips', 'Annaliese'}
-        --        for i=1, #tempInvites do
-        --            InviteUnit(tempInvites[i]);
-        --        end
-    end
-
-    if msg == 'pdkpPrioWindow' then
---        Setup:PrioList()
-    end
-
-    if msg == 'officer' then
-        Officer:Show()
-    end
-
-    if msg == 'raidChecker' then
-        Raid:IsInInstance()
-    end
-
-    if msg == 'sortHistory' then
-        DKP:SortHistory()
-    end
-
-    if msg == 'exportDKP' then
-        DKP:ExportCSV()
-    end
-
-    if msg == 'bossKill' then
-        return Raid:BossKill(669, 'Sulfuron Harbinger');
-    end
-
-    if msg == 'classes' then
-        return Guild:GetClassBreakdown();
-    end
-
-    if msg == 'timer' then
-        return GUI:CreateTimer()
-    end
-
-    if msg == 'pdkp_reset_all_db' and core.Defaults:IsDebug() then
-        DKP:ResetDB()
-        Guild:ResetDB()
-    end
-
-    if msg == 'enableDebugging' then
-        core.defaults:ToggleDebugging()
-    end
-
-    if msg == 'validateTables' then
-        DKP:ValidateTables()
-    end
+    local unsafeFuncs = {
+        ['professionTracking']=function()
+            if not _G['pdkpProf'] then local f, t ,c = CreateFrame("Frame", "pdkpProf"), 2383,0
+                f:SetScript("OnUpdate", function(_, e)
+                    c=c+e
+                    if c>3 then
+                        c=0
+                        CastSpellByID(t)
+                        if t == 2383 then t= 2580 else t=2383 end
+                    end
+                end)
+                _G['pdkpProf']:Hide()
+            end
+            if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
+        end,
+        ['pdkpTestWho']=function()
+            SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
+        end,
+        ['pdkpTestAutoSync']=function()
+            Comms:DatabaseSyncRequest()
+        end,
+        ['item']=function()
+            if item then
+                return Item:LinkItem();
+            end
+        end,
+        ['historyEdit']=function()
+            Setup:HistoryEdit()
+        end,
+        ['invite']=function()
+            return Invites:Show();
+            --        local tempInvites = {'Sparklenips', 'Annaliese'}
+            --        for i=1, #tempInvites do
+            --            InviteUnit(tempInvites[i]);
+            --        end
+        end,
+        ['pdkpPrioWindow']=function()
+            --        Setup:PrioList()
+        end,
+        ['verifyTables']=function()
+            for _, member in pairs(Guild.members) do
+                member:VerifyTables()
+            end
+        end,
+        ['officer']=function()
+            Officer:Show()
+        end,
+        ['raidChecker']=function()
+            Raid:IsInInstance()
+        end,
+        ['sortHistory']=function()
+            DKP:SortHistory()
+        end,
+        ['exportDKP']=function()
+            DKP:ExportCSV()
+        end,
+        ['bossKill']=function()
+            return Raid:BossKill(669, 'Sulfuron Harbinger');
+        end,
+        ['classes']=function()
+            return Guild:GetClassBreakdown();
+        end,
+        ['timer']=function()
+            return GUI:CreateTimer()
+        end,
+        ['pdkp_reset_all_db']=function()
+            if core.Defaults.IsDebug() then
+                DKP:ResetDB()
+                Guild:ResetDB()
+            end
+        end,
+        ['enableDebugging']=function()
+            core.defaults:ToggleDebugging()
+        end,
+        ['validateTables']=function()
+            DKP:ValidateTables()
+        end,
+        ['testJSON']=function()
+            return PDKP:LoadJsonData()
+        end,
+        ['pdkp_template']=function() end,
+    }
+    if unsafeFuncs[msg] then return unsafeFuncs[msg]() end
+    --if msg == 'item' and item then
+    --    return Item:LinkItem();
+    --end
 end
 
 
@@ -377,6 +381,84 @@ end
 
 function PDKP:GetDataCount()
     return table.getn(PDKP.data);
+end
+
+function PDKP:LoadJsonData()
+    local testDBDefaults = {
+        profile = {}
+    }
+
+    local testData = {
+        currentDB = 'Molten Core',
+        arrayExample = {
+            [1598513669] = {
+                ["deleted"] = false,
+                ["isShroud"] = false,
+                ["id"] = 1598513669,
+                ["reason"] = "Other",
+                ["isRoll"] = false,
+                ["text"] = "|cff22bb33Other - hazzard|r",
+                ["members"] = {
+                    "Tylrswftmend", -- [1]
+                    "Corseau", -- [2]
+                    "Funkorama", -- [3]
+                    "Stellâ", -- [4]
+                    "Primera", -- [5]
+                    "Bigbootyhoho", -- [6]
+                    "Laird", -- [7]
+                    "Zukohere", -- [8]
+                    "Oxford", -- [9]
+                    "Jakemeoff", -- [10]
+                    "Suprarz", -- [11]
+                    "Bugaboom", -- [12]
+                    "Dolamroth", -- [13]
+                    "Captnutsack", -- [14]
+                    "Boomerslayer", -- [15]
+                    "Ones", -- [16]
+                    "Honeypot", -- [17]
+                    "Fawntine", -- [18]
+                    "Rez", -- [19]
+                    "Veltrix", -- [20]
+                    "Whisp", -- [21]
+                    "Alexinchains", -- [22]
+                    "Inigma", -- [23]
+                    "Knittie", -- [24]
+                    "Mystile", -- [25]
+                    "Gartog", -- [26]
+                    "Varix", -- [27]
+                    "Calixta", -- [28]
+                    "Ihurricanel", -- [29]
+                    "Thepurple", -- [30]
+                    "Olerando", -- [31]
+                    "Edgelawdy", -- [32]
+                    "Snaildaddy", -- [33]
+                    "Cloverduk", -- [34]
+                    "Retkin", -- [35]
+                    "Luckerdawg", -- [36]
+                    "Goobimus", -- [37]
+                    "Nightshelf", -- [38]
+                    "Tokentoken", -- [39]
+                },
+            },
+            lastEdit = 0,
+            history = {
+                all = {},
+                deleted = {}
+            },
+        }
+    }
+    local test = LibStub("AceDB-3.0"):New("pdkp_test", testDBDefaults, true)
+    local testDB = test.profile
+
+    local serialized = PDKP:Serialize(DKP.dkpDB)
+    local compressed = core.LibDeflate:CompressDeflate(serialized)
+    local encoded = core.LibDeflate:EncodeForWoWAddonChannel(compressed)
+    local completelyEncoded = Comms:DataEncoder(DKP.dkpDB)
+
+    testDB['completelyEncoded'] = { }
+    testDB['serizliedData']={ }
+    testDB['encodedData']={ }
+    testDB['compressed']={ }
 end
 
 -----------------------------
