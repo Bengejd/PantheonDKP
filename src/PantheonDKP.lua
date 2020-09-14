@@ -103,6 +103,12 @@ function PDKP:HandleSlashCommands(msg)
 
     Util:Debug('New command received ' .. msg);
 
+    local safeCommands = {
+        ['openDebug'] = {
+            -- Open a little interface with several debug buttons that allows you to click them instead of making macros.
+        }
+    }
+
     -- Commands:
     -- pdkp - Opens / closes the GUI
     -- pdkp show - Opens the GUI

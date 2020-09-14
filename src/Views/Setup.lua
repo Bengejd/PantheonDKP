@@ -187,8 +187,87 @@ function Setup:MainUI()
     Setup:RandomStuff()
 end
 
+function Setup:Debugging()
+    local f = CreateFrame("Frame", "pdkp_debug_frame", UIParent)
+    f:SetFrameStrata("HIGH")
+    f:SetPoint("BOTTOMLEFT")
+    f:SetHeight(500)
+    f:SetWidth(200)
+
+    f:SetBackdrop( {
+        bgFile = TRANSPARENT_BACKGROUND,
+        edgeFile = SHROUD_BORDER, tile = true, tileSize = 64, edgeSize = 16,
+        insets = { left = 5, right = 5, top = 5, bottom = 5 }
+    });
+
+    setMovable(f)
+
+    -- mini close button
+    local b = createCloseButton(f, true)
+    b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
+
+    -- title
+    local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    t:SetPoint("TOPLEFT", 5, -10)
+    t:SetPoint("TOPRIGHT", -10, -30)
+    t:SetText("PDKP Debugging")
+    t:SetParent(f)
+
+    --local sb = CreateFrame("Button", "MyButton", f, "UIPanelButtonTemplate")
+    --sb:SetSize(80 ,22) -- width, height
+    --sb:SetText("Submit")
+    --sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 12)
+    --sb:SetScript("OnClick", function()
+    --    local st = PDKP.memberTable
+    --
+    --    if #st.selected >= 1 then
+    --        for _, name in pairs(st.selected) do
+    --            local _, rowIndex = tfind(st.rows, name, 'name')
+    --            if rowIndex then
+    --                local row = st.rows[rowIndex]
+    --                if row.dataObj['name'] == name then
+    --                    local member = Guild:GetMemberByName(name)
+    --                    member:UpdateDKP(nil, nil)
+    --                    row:UpdateRowValues()
+    --                end
+    --            end
+    --        end
+    --    end
+    --end)
+
+    local buttons = {
+        ['show']=function()
+            print('Showing PDKP')
+        end,
+        ['hide']=function()
+            print('Hiding PDKP')
+        end,
+
+    }
+    local button_counter_x = 1
+    local button_counter_y = 1
+    local button_counter = 1
+    for name, func in pairs(buttons) do
+        local db = CreateFrame("Button", nil, f, "UiPanelButtonTemplate")
+        db:SetSize(80, 22)
+        db:SetText(name)
+
+        db:SetScript("OnClick", func)
+
+        pos_x = 10
+        pos_y = -25
+
+        pos_y = pos_y * button_counter
+
+        db:SetPoint("TOPLEFT", f, "TOPLEFT", pos_x, pos_y)
+
+        button_counter = button_counter + 1
+    end
+end
+
 function Setup:RandomStuff()
     --Setup:ShroudingBox()
+    Setup:Debugging()
 
     Setup:ScrollTable()
     Setup:Filters()
