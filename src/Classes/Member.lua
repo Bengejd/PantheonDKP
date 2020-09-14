@@ -3,6 +3,8 @@ local _G = _G;
 local L = core.L;
 
 local Raid = core.Raid;
+local Guild = core.Guild;
+local DKP = core.DKP
 
 local Defaults, Util = core.Defaults, core.Util;
 local Character = core.Character;
@@ -68,5 +70,18 @@ function Member:UpdateDKP(raid, entry)
 end
 
 function Member:Save()
+    local hasEntries = false
 
+    for _, raid in pairs(Defaults.raids) do
+        if raid ~= 'Onyxia\'s Lair' then
+            dkp = self.dkp[raid]
+            if dkp.total > 0 or #dkp.entries > 0 or dkp.previousTotal > 0 or dkp.deleted > 0 then
+                hasEntries = true
+            end
+        end
+    end
+
+    if hasEntries then
+        print('Fuck yeah!')
+    end
 end

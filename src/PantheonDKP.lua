@@ -67,6 +67,45 @@ function PDKP:OnInitialize(event, name)
     self:RegisterChatCommand("pdkp", "HandleSlashCommands")
     self:RegisterChatCommand("shroud", "HandleShroudCommands")
     self:RegisterChatCommand("prio", "HandlePrioCommands")
+
+    PDKP:InitializeDatabases()
+end
+
+function PDKP:InitializeDatabases()
+    local dbDefaults = {
+        profile = {
+            dkpDB = {
+                currentDB = 'Molten Core',
+                members = {},
+                lastEdit = 0,
+                history = {
+                    all = {},
+                    deleted = {}
+                },
+            },
+            guildDB = {
+                name = nil,
+                numOfMembers = 0,
+                members = {},
+                officers = {},
+                migrated = false,
+            },
+            raidHistory = {
+                lockouts = {}
+            },
+            minimap = {
+                minimapPos=207
+            },
+            settings = {
+                changelog_shown = true,
+                previous_version = "2.9.4",
+                sortDir = "DESC"
+            },
+        }
+    }
+    local database = LibStub("AceDB-3.0"):New("pdkp_DB", dbDefaults, true)
+    core.PDKP.db = database.profile
+    Util:Debug("Database finished Initializing")
 end
 
 function PDKP:HandleShroudCommands(item)
@@ -100,26 +139,20 @@ end
 
 -- Generic function that handles all the slash commands.
 function PDKP:HandleSlashCommands(msg)
+    if string.len(msg) == 0 then return end -- No command attached.
+
+    local guiCommands = {
+        ['show']=function() GUI:Show() end,
+        ['hide']=function() GUI:Hide() end,
+    }
+
+    if guiCommands[msg] then return guiCommands[msg]() end
+
 
     Util:Debug('New command received ' .. msg);
 
-    local safeCommands = {
-        ['openDebug'] = {
-            -- Open a little interface with several debug buttons that allows you to click them instead of making macros.
-        }
-    }
 
-    -- Commands:
-    -- pdkp - Opens / closes the GUI
-    -- pdkp show - Opens the GUI
-    -- pdkp hide - Hides the GUI
 
-    --if string.len(msg) == 0 then
-    --    if GUI.shown then return GUI:Hide()
-    --    else return PDKP:Show()
-    --    end
-    --end
-    --
     --local splitMsg, name = strsplit(' ', msg)
     --
     --local safeFuncs = {
@@ -163,9 +196,11 @@ function PDKP:HandleSlashCommands(msg)
     --end
     --
     ---- OFFICER ONLY COMMANDS
-    --if not core.canEdit then
-    --    return Util:Debug('Cannot process this command because you are not an officer')
-    --end;
+    if not core.canEdit then
+        return Util:Debug('Cannot process this command because you are not an officer')
+    end;
+
+
     --
     --if msg == 'pdkpTestAutoSync' then
     --    Comms:DatabaseSyncRequest()

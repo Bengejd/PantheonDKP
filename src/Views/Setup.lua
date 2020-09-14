@@ -185,6 +185,8 @@ function Setup:MainUI()
     pdkp_frame = f
 
     Setup:RandomStuff()
+
+    return pdkp_frame
 end
 
 function Setup:Debugging()

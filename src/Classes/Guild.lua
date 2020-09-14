@@ -33,17 +33,8 @@ Guild.currentRaid = 'Molten Core';
 
 -- Init the Databse.
 local function initDB()
-    local guildDBDefaults = {
-        profile = {
-            name = nil,
-            numOfMembers = 0,
-            members = {},
-            officers = {},
-        }
-    }
-    local db = LibStub("AceDB-3.0"):New("pdkp_guildDB", guildDBDefaults, true);
-    GuildDB = db.profile;
-    return db.profile;
+    GuildDB = PDKP.db.guildDB
+    return GuildDB
 end
 
 function Guild:HasMembers()
@@ -80,6 +71,7 @@ end
 function Guild:GetMembers()
 
     GuildRoster()
+    DKP:GetTableNames()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();

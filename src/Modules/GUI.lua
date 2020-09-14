@@ -26,7 +26,18 @@ GUI.sortDir = 'ASC'
 
 function GUI:Init()
     Util:Debug('Initializing GUI')
-
     GUI.pdkp_frame = Setup:MainUI()
     Shroud:Setup()
+end
+
+function GUI:Show()
+    if GUI.pdkp_frame then
+        GUI.pdkp_frame:Show()
+    end
+end
+
+function GUI:Hide()
+    if GUI.pdkp_frame then
+        GUI.pdkp_frame:Hide()
+    end
 end
