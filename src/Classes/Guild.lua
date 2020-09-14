@@ -108,6 +108,21 @@ function Guild:GetMembers()
     return Guild.online, Guild.members; -- Always return, even if it's empty.
 end
 
+function Guild:UpdateOnlineStatus()
+    GuildRoster()
+    local onlineTable = {};
+    Guild.numOfMembers, _, _ = GetNumGuildMembers();
+    if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
+    for i=1, Guild.numOfMembers do
+        local name, _, _, _, _, _, _, _, online, _, _ = GetGuildRosterInfo(i)
+        if online then
+            name = strsplit('-', name)
+            table.insert(onlineTable, name)
+        end
+    end
+    return onlineTable
+end
+
 function Guild:InitBankInfo(index, member)
     Guild.bankIndex = index
     DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)

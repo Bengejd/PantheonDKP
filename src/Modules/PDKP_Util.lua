@@ -37,9 +37,12 @@ local class_colors = Defaults.class_colors;
 --     Debug Functions     --
 -----------------------------
 
+local watchedVars = {};
+
 function Util:WatchVar(tData, strName)
-    if ViragDevTool_AddData and Defaults.debug then
+    if ViragDevTool_AddData and Defaults.debug and not watchedVars[strName] then
         ViragDevTool_AddData(tData, strName)
+        watchedVars[strName]=true
     end
 end
 

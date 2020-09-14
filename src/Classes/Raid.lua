@@ -4,6 +4,7 @@ local L = core.L;
 
 local Defaults = core.Defaults;
 local Settings = core.Settings;
+local Util = core.Util;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
@@ -30,6 +31,22 @@ function Raid:new()
     self.CurrentRaid = nil;
 
     return self
+end
+
+function Raid:GetRaidInfo()
+    local raidRoster = {};
+    if UnitInRaid("player") then
+        for i=1, 40 do
+            local name, rank, subgroup, level, class, fileName,
+            zone, online, isDead, role, isML = GetRaidRosterInfo(i);
+            if name ~= nil then
+                table.insert(raidRoster, name)
+            end
+        end
+    else
+        Util:Debug('No raid party found')
+    end
+    return raidRoster
 end
 
 function Raid:BossKill()

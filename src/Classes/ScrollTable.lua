@@ -5,6 +5,8 @@ local L = core.L;
 local ScrollTable = core.ScrollTable;
 local Util = core.Util;
 local Defaults = core.Defaults;
+local Guild = core.Guild;
+local Raid = core.Raid;
 
 local debuggingSet = false;
 
@@ -104,7 +106,7 @@ function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear
     self:UpdateLastSelect(objIndex, not isSelected)
 end
 
-function ScrollTable:CheckSelect(row, clickType)
+function ScrollTable:CheckSelect(row, clickType, select_all)
     local selectOn = row.selectOn
     local objIndex = row.dataObj[selectOn]
 
@@ -202,7 +204,7 @@ end
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     Util:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
 
-    local special_filters = {['Select_All']= true, ['online']=true, ['raid']=true, ['selected']=true};
+    local special_filters = {['Select_All']= true, ['online']=true, ['raid']=true};
 
     if filterOn == 'Class_All' then -- Reset all class filters if this gets checked.
         for _, class in pairs(Defaults.classes) do
@@ -213,20 +215,24 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
         self.appliedFilters[filterOn] = checkedStatus;
     end
 
-    if special_filters[filterOn] and checkedStatus then
-        print('Special Filter', filterOn, 'toggled!');
+    if filterOn == 'online' and checkedStatus then
+        self.online = Guild:UpdateOnlineStatus()
+    elseif filterOn == 'raid' and checkedStatus then
+        self.raid = Raid:GetRaidInfo()
+    elseif filterOn == 'Select_All' and checkedStatus then
+        print('Select All has not been created yet');
     end
 
     self.displayedRows = {};
     for i=1, #self.displayData do
-        local row = self.rows[i];
-        if not row:ApplyFilters() then
-            table.insert(self.displayedRows, row);
+    local row = self.rows[i];
+    if not row:ApplyFilters() then
+    table.insert(self.displayedRows, row);
         end
-    end
+        end
 
-    self:RefreshTableSize();
-    self:RefreshLayout();
+        self:RefreshTableSize();
+        self:RefreshLayout();
 end
 
 ----- INITIALIZATION FUNCTIONS -----
@@ -267,6 +273,9 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.selected = {};
     self.lastSelect = nil;
+
+    self.online = {};
+    self.raid = {};
 
     self.cols = {};
     self.data = {};
@@ -412,21 +421,29 @@ function ScrollTable:OnLoad()
             local filterPrio = {'Class_', 'online', 'raid', 'selected'}
 
             for filter, checkedStatus in pairs(super.appliedFilters or {}) do
-                -- It's one of the classes, not all.
+                if row.isFiltered then break end -- No need to waste time looping through the rest.
 
+                -- It's one of the classes, not all.
                 if substr(filter, 'Class_') and not substr(filter, '_All') and not checkedStatus then
-                    --print(filter, 'First called');
                     local _, class = strsplit('_', filter);
                     if dataObj['class'] == class then
                         row.isFiltered = true
                         break; -- We don't need to continue running checks, if it's filtered.
                     end
                 elseif filter == 'Class_All' and not checkedStatus then
-                    --print(filter, 'Second called');
                     row.isFiltered = true;
-                    break;
-                else
-                    --print(filter, 'Third called');
+                elseif checkedStatus then
+                    if filter == 'online' then
+                        if #super.online > 0 then
+                           row.isFiltered = not tContains(super.online, dataObj['name'])
+                        end
+                    elseif filter == 'selected' then
+                        row.isFiltered = not tContains(super.selected, dataObj['name'])
+                    elseif filter == 'Select_All' then
+
+                    elseif filter == 'raid' then
+                        row.isFiltered = not tContains(super.raid, dataObj['name'])
+                    end
                 end
             end
 
@@ -441,6 +458,11 @@ function ScrollTable:OnLoad()
             local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
 
             col:SetJustifyH(header['point'])
+
+            if label == 'class' then
+                local _, colored_class = Util:ColorTextByClass(val, val)
+                val = colored_class
+            end
 
             col:SetSize(self.COL_WIDTH, self.COL_HEIGHT)
             local col_point = header['point'] or 'LEFT'
@@ -579,6 +601,8 @@ function ScrollTable:OnLoad()
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
     HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
 end
+
+local eventFunc = {''}
 
 
 
