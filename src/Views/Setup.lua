@@ -353,7 +353,6 @@ function Setup:RandomStuff()
     Setup:Filters()
     Setup:RaidDropdown()
     Setup:RaidReasons()
-    Setup:TableSearch()
     --Setup:BossKillLoot()
     --Setup:TabView()
 end
@@ -416,6 +415,12 @@ function Setup:TableSearch()
     end)
 
     clearButton:Hide()
+
+    ef.editBox = eb
+    ef.searchLabel = sl
+    ef.clearButton = clearButton
+
+    return ef
 end
 
 function Setup:Filters()
@@ -804,6 +809,18 @@ function Setup:ScrollTable()
     st.cols[1]:Click()
 
     PDKP.memberTable = st;
+
+    st.searchFrame = Setup:TableSearch()
+
+    -- Entries label
+    -- 0 Entries shown | 0 selected
+    local label = st.searchFrame:CreateFontString(st.searchFrame, 'OVERLAY', 'GameFontNormalLeftYellow')
+    label:SetSize(200, 14)
+    label:SetPoint("LEFT", st.searchFrame.clearButton, "LEFT", 60, 0)
+    label:SetText("0 Players shown | 0 selected")
+
+    st.entryLabel = label
+
 end
 
 

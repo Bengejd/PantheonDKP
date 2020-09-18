@@ -44,6 +44,7 @@ function ScrollTable:HighlightRow(row, shouldHighlight)
     else
         row:UnlockHighlight()
     end
+    self.UpdateLabelTotals()
 end
 
 ----- SELECT FUNCTIONS -----
@@ -52,6 +53,8 @@ function ScrollTable:ClearSelected()
     wipe(self.selected)
     self.lastSelect = nil
     _G['pdkp_filter_Select_All']:SetChecked(false)
+
+    self:UpdateLabelTotals()
 end
 
 function ScrollTable:UpdateLastSelect(objIndex, isSelected)
@@ -64,6 +67,7 @@ function ScrollTable:UpdateLastSelect(objIndex, isSelected)
     else
         self.lastSelect = nil;
     end
+    self.UpdateLabelTotals()
 end
 
 function ScrollTable:RowShiftClicked(objIndex, selectIndex)
@@ -75,14 +79,14 @@ function ScrollTable:RowShiftClicked(objIndex, selectIndex)
     self:UpdateSelectStatus(objIndex, selectIndex, false, false)
     if #self.selected <= 1 then return end -- Only one thing selected, do nothing.
 
-    local _, prevSelectIndex = tfind(self.rows, previousSelect, self.ROW_SELECT_ON)
-    local _, currSelectIndex = tfind(self.rows, self.lastSelect, self.ROW_SELECT_ON)
+    local _, prevSelectIndex = tfind(self.displayedRows, previousSelect, self.ROW_SELECT_ON)
+    local _, currSelectIndex = tfind(self.displayedRows, self.lastSelect, self.ROW_SELECT_ON)
 
     local startIndex = prevSelectIndex < currSelectIndex and prevSelectIndex or currSelectIndex
     local endIndex = prevSelectIndex > currSelectIndex and prevSelectIndex or currSelectIndex
 
     -- Grab the list items between startIndex and endIndex.
-    local betweenRows = { unpack( self.rows, startIndex, endIndex) }
+    local betweenRows = { unpack( self.displayedRows, startIndex, endIndex) }
     for i=1, #betweenRows do
         local rowObjIndex = betweenRows[i]['dataObj'][self.ROW_SELECT_ON]
         local rowSelected = tfind(self.selected, rowObjIndex)
@@ -91,6 +95,7 @@ function ScrollTable:RowShiftClicked(objIndex, selectIndex)
             self:HighlightRow(betweenRows[i], true)
         end
     end
+    self:UpdateLabelTotals()
 end
 
 function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear, select_all)
@@ -122,6 +127,7 @@ function ScrollTable:CheckSelect(row, clickType)
             self:RowShiftClicked(objIndex, selectIndex)
         else -- Control or Regular Click.
             self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl, select_all)
+            self:UpdateLabelTotals()
         end
 
         return self:RefreshLayout()
@@ -129,6 +135,8 @@ function ScrollTable:CheckSelect(row, clickType)
 
     local isSelected, _ = tfind(self.selected, objIndex)
     self:HighlightRow(row, isSelected)
+
+    self:UpdateLabelTotals()
 end
 
 function ScrollTable:SelectAll()
@@ -213,7 +221,13 @@ function ScrollTable:RefreshLayout()
             row:Hide();
         end
     end
+    self:UpdateLabelTotals()
     self:RefreshTableSize();
+end
+
+function ScrollTable:UpdateLabelTotals()
+    if self == nil or self.entryLabel == nil then return end
+    self.entryLabel:SetText(#self.displayedRows .. " Players shown | " .. #self.selected .. " selected")
 end
 
 ----- FILTER FUNCTIONS -----
@@ -297,6 +311,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.displayedRows = {};
     self.appliedFilters = {};
     self.searchText = nil;
+    self.entryLabel = nil;
 
     self.selected = {};
     self.lastSelect = nil;
