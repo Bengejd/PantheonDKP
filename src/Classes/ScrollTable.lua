@@ -132,7 +132,6 @@ function ScrollTable:CheckSelect(row, clickType)
 end
 
 function ScrollTable:SelectAll()
-    print('Select All has not been created yet');
     for i=1, #self.displayData do
         local row = self.rows[i];
         if not row.isFiltered then
