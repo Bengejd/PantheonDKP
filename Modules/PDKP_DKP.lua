@@ -43,7 +43,6 @@ DKP.lastSync = nil
 
 local MonolithData = {}
 
-
 local dkpDBDefaults = {
     profile = {
         currentDB = 'Molten Core',
@@ -62,7 +61,7 @@ function DKP:InitDKPDB()
     dkpDB = core.DKP.db.profile
     DKP.dkpDB = dkpDB;
 
-    Util:Debug('Current raid DKP shown: '.. dkpDB.currentDB)
+    Util:Debug('Current raid DKP shown: ' .. dkpDB.currentDB)
 end
 
 --[[
@@ -82,7 +81,8 @@ end
 function DKP:VerifyTables()
     local next = next
     for key, member in pairs(dkpDB.members) do
-        if type(member) == type('') then -- Remove the string.
+        if type(member) == type('') then
+            -- Remove the string.
             dkpDB.members[key] = nil;
         elseif next(dkpDB.members[key]) == nil then
             dkpDB.members[key] = nil;
@@ -96,28 +96,38 @@ end
 
 function DKP:ConfirmChange()
     local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
-    if dkpChange == 0 then return end; -- Don't need to change anything.
+    if dkpChange == 0 then
+        return
+    end ; -- Don't need to change anything.
 
-    if dkpChange > 0 then dkpChange = Util:FormatFontTextColor(Util.success, dkpChange)
-    else dkpChange = Util:FormatFontTextColor(Util.warning, dkpChange)
+    if dkpChange > 0 then
+        dkpChange = Util:FormatFontTextColor(Util.success, dkpChange)
+    else
+        dkpChange = Util:FormatFontTextColor(Util.warning, dkpChange)
     end
 
     local text = ''
     local chars = {};
 
     for _, char in pairs(GUI.selected) do
-       if char.name then table.insert(chars, char) end
+        if char.name then
+            table.insert(chars, char)
+        end
     end
 
-    local function compareClass(a,b) return a.class < b.class end
+    local function compareClass(a, b)
+        return a.class < b.class
+    end
     table.sort(chars, compareClass)
 
     for key, member in pairs(chars) do
-        text = text..member['formattedName']
-        if key < #chars then text = text .. ', ' end
+        text = text .. member['formattedName']
+        if key < #chars then
+            text = text .. ', '
+        end
     end
 
-    local titleText = 'Are you sure you\'d like to give '..dkpChange..' DKP to the following players: \n \n'..text
+    local titleText = 'Are you sure you\'d like to give ' .. dkpChange .. ' DKP to the following players: \n \n' .. text
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = titleText
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data = chars;
     StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames = text
@@ -134,7 +144,8 @@ end
 
 -- Fixes the names of the entry members, if necessary.
 function DKP:FixEntryMembers(entry)
-    if entry['members'] == nil or #entry['members'] == 0 then -- Fixing legacy code.
+    if entry['members'] == nil or #entry['members'] == 0 then
+        -- Fixing legacy code.
         entry['members'] = {}
         for name in string.gmatch(entry['names'], '([^,]+)') do
             name = Util:RemoveColorFromname(name)
@@ -151,23 +162,27 @@ function DKP:DeleteEntry(entry, noBroacast)
     local entryKey = entry['id']
 
     for _, key in pairs(dkpDB.history['deleted']) do
-       if key == entryKey then
-           return Util:Debug("Entry was previously deleted")
-       end
+        if key == entryKey then
+            return Util:Debug("Entry was previously deleted")
+        end
     end
 
     local isInHistory = false;
 
     for key, _ in pairs(dkpDB.history['all']) do
-        if key == entryKey then isInHistory = true; end
+        if key == entryKey then
+            isInHistory = true;
+        end
     end
 
-    if isInHistory == false then return PDKP:Print('Your dkp tables are outdated, please request a full dkp push') end
+    if isInHistory == false then
+        return PDKP:Print('Your dkp tables are outdated, please request a full dkp push')
+    end
 
     local changeAmount = entry['dkpChange']
     local raid = entry['raid']
 
---    -- We have to inverse the amount (make negatives positives, and positives negatives).
+    --    -- We have to inverse the amount (make negatives positives, and positives negatives).
     changeAmount = changeAmount * -1;
 
     local members = Guild.members
@@ -184,7 +199,9 @@ function DKP:DeleteEntry(entry, noBroacast)
             local deleted = member.dkp[raid].deleted
 
             for key, val in pairs(history) do
-                if val == entryKey then table.remove(history, key) end
+                if val == entryKey then
+                    table.remove(history, key)
+                end
             end
 
             table.insert(deleted, entryKey)
@@ -197,7 +214,7 @@ function DKP:DeleteEntry(entry, noBroacast)
             for key, charObj in pairs(PDKP.data) do
                 if charObj.name == member.name then
                     PDKP.data[key] = member;
-                    break; -- Break the loop after we find our match.
+                    break ; -- Break the loop after we find our match.
                 end
             end
         end
@@ -230,13 +247,17 @@ function DKP:DeleteEntry(entry, noBroacast)
     Guild:UpdateBankLastEdit(dkpDB.lastEdit)
     DKP.bankID = dkpDB.lastEdit
 
-    if noBroacast then return end -- Don't broadcast this change.
+    if noBroacast then
+        return
+    end -- Don't broadcast this change.
     Comms:SendGuildUpdate(entry)
 end
 
 function DKP:UpdateEntries()
     local dkpChange = GUI.pdkp_dkp_amount_box:GetNumber();
-    if dkpChange == 0 then return end; -- Don't need to change anything.
+    if dkpChange == 0 then
+        return
+    end ; -- Don't need to change anything.
 
     local dDate, tTime, server_time, datetime = Util:GetDateTimes()
 
@@ -250,7 +271,8 @@ function DKP:UpdateEntries()
 
     if reasonVal >= 1 and reasonVal <= 5 then
         raid = dropdowns[2].text:GetText();
-        if reasonVal >= 1 and reasonVal <= 3 or reasonVal == 5 then -- Ontime, Signup, Benched, Unexcused Absence
+        if reasonVal >= 1 and reasonVal <= 3 or reasonVal == 5 then
+            -- Ontime, Signup, Benched, Unexcused Absence
             historyText = raid .. ' - ' .. reason;
         end
 
@@ -258,9 +280,11 @@ function DKP:UpdateEntries()
             boss = dropdowns[3].text:GetText();
             historyText = raid .. ' - ' .. boss;
         end
-    elseif reasonVal == 6 then -- item Win
+    elseif reasonVal == 6 then
+        -- item Win
         historyText = 'Item Win - ';
-    elseif reasonVal == 7 then -- Other selected
+    elseif reasonVal == 7 then
+        -- Other selected
         local otherBox = getglobal('pdkp_other_entry_box')
         historyText = 'Other - ' .. otherBox:GetText();
     end
@@ -273,7 +297,8 @@ function DKP:UpdateEntries()
         historyText = Util:FormatFontTextColor(warning, historyText)
     end
 
-    if reasonVal == 6 then -- item win
+    if reasonVal == 6 then
+        -- item win
         local buttonText = _G['pdkp_item_link_text']
         local textButtonText = buttonText:GetText()
         if not Util:IsEmpty(textButtonText) then
@@ -284,21 +309,24 @@ function DKP:UpdateEntries()
 
     if raid == nil then
         raid = DKP.dkpDB.currentDB
-        Util:Debug('No raid found, setting raid to '.. raid)
+        Util:Debug('No raid found, setting raid to ' .. raid)
     end
 
-    if raid == 'Onyxia\'s Lair' then -- Fix for Onyxia.
-       raid = 'Molten Core'
+    if raid == 'Onyxia\'s Lair' then
+        -- Fix for Onyxia.
+        raid = 'Molten Core'
     end
 
     local charObjs = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].data -- Grab the data from our popup.
     local charNames = StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].charNames -- The char name string.
 
     local memberNames = {}
-    for key, member in pairs(charObjs) do table.insert(memberNames, member.name) end
+    for key, member in pairs(charObjs) do
+        table.insert(memberNames, member.name)
+    end
 
     local historyEntry = {
-        ['id']=server_time,
+        ['id'] = server_time,
         ['text'] = historyText,
         ['reason'] = reason,
         ['bossKill'] = boss,
@@ -306,24 +334,26 @@ function DKP:UpdateEntries()
         ['dkpChange'] = dkpChange,
         ['dkpChangeText'] = dkpChangeText,
         ['officer'] = Util:GetMyNameColored(),
-        ['item']= itemText,
-        ['date']= dDate,
-        ['time']=tTime,
-        ['serverTime']=server_time,
-        ['datetime']=datetime,
-        ['names']=charNames,
-        ['members']= memberNames,
-        ['deleted']=false,
-        ['edited']=false,
-        ['isShroud']=false,
-        ['isRoll']=false,
-        ['previousTotals']={}
+        ['item'] = itemText,
+        ['date'] = dDate,
+        ['time'] = tTime,
+        ['serverTime'] = server_time,
+        ['datetime'] = datetime,
+        ['names'] = charNames,
+        ['members'] = memberNames,
+        ['deleted'] = false,
+        ['edited'] = false,
+        ['isShroud'] = false,
+        ['isRoll'] = false,
+        ['previousTotals'] = {}
     }
 
     for key, member in pairs(charObjs) do
         local name = member.name;
         local dkp = member.dkp[raid];
-        if dkp.entries == nil then member.dkp[raid].entries = {} end
+        if dkp.entries == nil then
+            member.dkp[raid].entries = {}
+        end
         table.insert(dkp.entries, server_time)
 
         dkp.previousTotal = dkp.total
@@ -339,10 +369,13 @@ function DKP:UpdateEntries()
 
         dkp.total = dkp.total + dkpChange
 
-        if dkp.total < 0 then dkp.total = 0 end
+        if dkp.total < 0 then
+            dkp.total = 0
+        end
 
-        if member.bName then -- update the player, visually.
-            local dkpText = _G[member.bName ..'_col3'];
+        if member.bName then
+            -- update the player, visually.
+            local dkpText = _G[member.bName .. '_col3'];
             dkpText:SetText(dkp.total)
         end
         member:Save() -- Update the database locally.
@@ -375,23 +408,33 @@ function DKP:GetCurrentDB()
     if dkpDB.currentDB == 'Onyxia\'s Lair' then
         dkpDB.currentDB = 'Molten Core';
     end
-return dkpDB.currentDB
+    return dkpDB.currentDB
 end
 
 function DKP:UpdateEntryRaidDkpTotal(raid, name, dkpChange)
-    if dkpChange == 0 or Util:IsEmpty(name) then return end;
-    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end
-    if raid == nil then raid = dkpDB.currentDB; end
+    if dkpChange == 0 or Util:IsEmpty(name) then
+        return
+    end ;
+    if raid == 'Onyxia\'s Lair' then
+        raid = 'Molten Core'
+    end
+    if raid == nil then
+        raid = dkpDB.currentDB;
+    end
 
     local entry = dkpDB.members[name];
     entry[raid] = entry[raid] or 0;
 
     entry[raid] = entry[raid] + dkpChange;
-    if entry[raid] < 0 then entry[raid] = 0 end
+    if entry[raid] < 0 then
+        entry[raid] = 0
+    end
 end
 
 function DKP:ChangeDKPSheets(raid, noUpdate)
-    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core'; end
+    if raid == 'Onyxia\'s Lair' then
+        raid = 'Molten Core';
+    end
 
     if dkpDB.currentDB ~= raid then
         print('PantheonDKP: Showing ' .. Util:FormatFontTextColor(warning, raid) .. ' DKP table');
@@ -411,7 +454,9 @@ end
 
 function DKP:GetPlayerDKP(name)
     local member = Guild.members[name]
-    if member == nil then return 0 end;
+    if member == nil then
+        return 0
+    end ;
     return member:GetDKP(dkpDB.currentDB, 'total')
 end
 
@@ -440,13 +485,15 @@ function DKP:GetHighestDKP()
     local currentRaid = DKP:GetCurrentDB();
 
     for key, charObj in pairs(Guild.members) do
-       if charObj.dkp then
-           if charObj.dkp[currentRaid] and charObj.dkp[currentRaid].total and charObj.dkp[currentRaid].total > maxDKP then
-              maxDKP = charObj.dkp[currentRaid].total
-           end
-       end
+        if charObj.dkp then
+            if charObj.dkp[currentRaid] and charObj.dkp[currentRaid].total and charObj.dkp[currentRaid].total > maxDKP then
+                maxDKP = charObj.dkp[currentRaid].total
+            end
+        end
     end
-    if maxDKP == 0 and Defaults:IsDebug() then return 50 end;
+    if maxDKP == 0 and Defaults:IsDebug() then
+        return 50
+    end ;
     return maxDKP;
 end
 
@@ -458,18 +505,24 @@ function DKP:ValidateTables()
     local deleted = history.deleted;
     local all = history.all;
 
-    local function compare(a,b)
-        if a == nil and b == nil then return false
-        elseif a == nil then return false
-        elseif b == nil then return true
-        else return a > b
+    local function compare(a, b)
+        if a == nil and b == nil then
+            return false
+        elseif a == nil then
+            return false
+        elseif b == nil then
+            return true
+        else
+            return a > b
         end
     end
 
-    local function validateEntries(entries, name) -- Ensures that the entries are unique across the board.
+    local function validateEntries(entries, name)
+        -- Ensures that the entries are unique across the board.
         table.sort(entries, compare)
         local nonDuplicates = {}
-        for key, value in pairs(entries) do -- remove the duplicates.
+        for key, value in pairs(entries) do
+            -- remove the duplicates.
             if value ~= nil and value >= 1500000000 and value ~= entries[key + 1] then
                 table.insert(nonDuplicates, value)
                 for _, deletedEntry in pairs(deleted) do
@@ -480,7 +533,7 @@ function DKP:ValidateTables()
                 end
             end
         end
---        print(name, ' had ', #entries - #nonDuplicates, ' duplicate or corrupt entries')
+        --        print(name, ' had ', #entries - #nonDuplicates, ' duplicate or corrupt entries')
         return nonDuplicates;
     end
 
@@ -491,7 +544,7 @@ function DKP:ValidateTables()
         local mcDKP = member['Molten Core']
         local bwlDKP = member['Blackwing Lair']
 
-        for i=1, #member['entries'] do
+        for i = 1, #member['entries'] do
             local entryKey = member['entries'][i]
             local histEntry = all[entryKey]
             if histEntry ~= nil then
@@ -502,14 +555,16 @@ function DKP:ValidateTables()
             end
         end
         if validBwlDKP ~= bwlDKP then
-           print(name, ' validDKP: ', validBwlDKP, 'actual', bwlDKP)
+            print(name, ' validDKP: ', validBwlDKP, 'actual', bwlDKP)
         end
     end
 
     for key, member in pairs(members) do
-        if type(key) == type('') then -- we have an object.
+        if type(key) == type('') then
+            -- we have an object.
             local entries = member['entries']
-            if entries then -- Make sure that the entries are unique.
+            if entries then
+                -- Make sure that the entries are unique.
                 entries = validateEntries(entries, key)
                 if #entries > 0 then
                     validateDKP(key, member)
@@ -520,12 +575,13 @@ function DKP:ValidateTables()
 end
 
 function DKP:CanRequestSync()
-    if DKP.lastSync then -- The last sync has been established.
+    if DKP.lastSync then
+        -- The last sync has been established.
         local _, _, server_time, _ = Util:GetDateTimes() -- Grab the current server time.
         local secondsSinceSync = (server_time - DKP.lastSync) -- the seconds since our last sync
         local minsSinceSync = math.floor(secondsSinceSync / 60) -- Minutes since last sync.
         if minsSinceSync >= 15 then
-           return true, minsSinceSync, 0
+            return true, minsSinceSync, 0
         else
             local minsTillNextSync = 15 - minsSinceSync
             return false, minsSinceSync, minsTillNextSync
@@ -540,14 +596,16 @@ function DKP:SyncReqAndLastSyncEqual(syncRequest)
 end
 
 function DKP:ExportCSV()
-    local exportString = "Name, Class, Molten Core, Blackwing Lair\n"
+    local exportString = "Name, Class, Molten Core, Blackwing Lair, Ahn'qiraj\n"
     local members = Guild.members
     local memberNames = {}
     for key, member in pairs(members) do
         table.insert(memberNames, key)
     end
 
-    local function compare(a, b) return a < b; end
+    local function compare(a, b)
+        return a < b;
+    end
 
     table.sort(memberNames, compare)
 
@@ -582,7 +640,7 @@ function DKP:DeleteOldEntries()
     end
 
     for _, entryID in pairs(removeEntries) do
-      dkpDB.history.all[entryID] = nil
+        dkpDB.history.all[entryID] = nil
     end
 
     local entryCount = 0
@@ -592,8 +650,10 @@ function DKP:DeleteOldEntries()
         for _, raid in pairs(core.raids) do
             local entriesToRemove = {};
 
-            if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end
-            for i=1, #member.dkp[raid].entries do
+            if raid == 'Onyxia\'s Lair' then
+                raid = 'Molten Core'
+            end
+            for i = 1, #member.dkp[raid].entries do
                 entryCount = entryCount + 1
                 local entry = member.dkp[raid].entries[i];
                 if entry ~= nil and timeToSearch > entry then
@@ -607,7 +667,7 @@ function DKP:DeleteOldEntries()
 
             wipe(entriesToRemove);
 
-            for i=1, #member.dkp[raid].deleted do
+            for i = 1, #member.dkp[raid].deleted do
                 entryCount = entryCount + 1
                 local entry = member.dkp[raid].deleted[i];
                 if entry ~= nil and timeToSearch > entry then
@@ -634,3 +694,29 @@ function DKP:DeleteOldEntries()
 
     PDKP:Print(afterCount .. ' Entries Found')
 end
+
+pdkp_guildDB = {
+    ["profileKeys"] = {
+        ["Lariese - Blaumeux"] = "Default",
+        ["Neekio - Blaumeux"] = "Default",
+        ["Pantheonbank - Blaumeux"] = "Default",
+        ["Huntswomann - Blaumeux"] = "Default",
+    }, ["profiles"] = {
+        ["Default"] = {
+            ["numOfMembers"] = 478,
+            ["members"] = {
+                ["Alexinchains"] = {
+                    ["name"] = "Alexinchains",
+                    ["dkp"] = {
+                        ["Blackwing Lair"] = {
+                            ["deleted"] = {},
+                            ["previousTotal"] = 598,
+                            ["total"] = 608,
+                            ["entries"] = {
+                                1598587405, 1598588304, 1598589457, 1598589655, 1598583640, 1598586324, 1598585988, 1598590113, 1598590749, 1598590759, 1599008437, 1599010945, 1599011233, 1599010983, 1599012424, 1599014128, 1599015198, 1599015406, 1599016843, 1599017576, 1599017589, [131] = 1597801370, [116] = 1596776200, [118] = 1597197303, [120] = 1597804077, [122] = 1597801123, [124] = 1597200667, [126] = 1597803895, [128] = 1597802927, [132] = 1597799168, [107] = 1596769533, [109] = 1596771821, [111] = 1596773640, [129] = 1597200349, [115] = 1596776084, [117] = 1597805033, [119] = 1597199444, [121] = 1597801160, [123] = 1597198141, [125] = 1597802198, [127] = 1597804508, [130] = 1597199836, [133] = 1597805283, [113] = 1596775028, [108] = 1596771549, [110] = 1596772859, [112] = 1596774862, [114] = 1596775523,
+                                },
+                        },
+                        ["Molten Core"] = {
+                            ["deleted"] = {},
+                            ["previousTotal"] = 246,
+                            ["total"] = 256, ["entries"] = { [213] = 1597807066, [221] = 1597810074, [214] = 1597807516, [222] = 1597810088, [215] = 1597807650, [223] = 1597810146, [216] = 1597808074, [224] = 1597806389, [217] = 1597808433, [218] = 1597809128, [219] = 1597809368, [212] = 1597806665, [220] = 1597809622, }, }, ["Ahn'Qiraj"] = { ["deleted"] = { 1599095038, }, ["previousTotal"] = 212, ["total"] = 202, ["entries"] = { 1598458398, 1598497359, 1598499937, 1598501275, 1598501319, 1598501731, 1598502740, 1598504802, 1598510737, 1598513403, 1598513669, 1598579250, 1599105550, 1599109562, 1599109837, 1599109912, 1599099810, 1599097534, 1599096804, 1599095314, 1599098936, 1599098461, 1599102680, }, }, }, ["canEdit"] = false, ["class"] = "Rogue", ["formattedname"] = "|cffFFF569Alexinchains|r", ["rankIndex"] = 5, }, ["Lvoldemort"] = { ["name"] = "Lvoldemort", ["dkp"] = { ["Molten Core"] = { ["deleted"] = {}, ["previousTotal"] = 0, ["total"] = 0, ["entries"] = {}, }, ["Blackwing Lair"] = { ["deleted"] = {}, ["previousTotal"] = 0, ["total"] = 0, ["entries"] = {}, }, }, ["canEdit"] = false, ["class"] = "Hunter", ["rankIndex"] = 6, ["formattedname"] = "|cffABD473Lvoldemort|r", }, ["Bleego"] = { ["name"] = "Bleego", ["dkp"] = { ["Blackwing Lair"] = { ["deleted"] = {}, ["previousTotal"] = 0, ["total"] = 0, ["entries"] = {}, }, ["Molten Core"] = { ["deleted"] = {}, ["previousTotal"] = 0, ["total"] = 0, ["entries"] = {}, }, ["Ahn'Qiraj"] = { ["deleted"] = {}, ["previousTotal"] = 0, ["total"] = 0, ["entries"] = {}, }, }, ["canEdit"] = false, ["class"] = "Druid", ["formattedname"] = "|cffFF7D0ABleego|r", ["rankIndex"] = 6, }, } } } }
