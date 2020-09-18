@@ -51,6 +51,7 @@ end
 function ScrollTable:ClearSelected()
     wipe(self.selected)
     self.lastSelect = nil
+    _G['pdkp_filter_Select_All']:SetChecked(false)
 end
 
 function ScrollTable:UpdateLastSelect(objIndex, isSelected)
@@ -92,7 +93,7 @@ function ScrollTable:RowShiftClicked(objIndex, selectIndex)
     end
 end
 
-function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear)
+function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear, select_all)
     clear = clear or false
     if clear then
         self:ClearSelected()
@@ -106,7 +107,7 @@ function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear
     self:UpdateLastSelect(objIndex, not isSelected)
 end
 
-function ScrollTable:CheckSelect(row, clickType, select_all)
+function ScrollTable:CheckSelect(row, clickType)
     local selectOn = row.selectOn
     local objIndex = row.dataObj[selectOn]
 
@@ -120,7 +121,7 @@ function ScrollTable:CheckSelect(row, clickType, select_all)
         elseif hasShift then -- Shift click
             self:RowShiftClicked(objIndex, selectIndex)
         else -- Control or Regular Click.
-            self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
+            self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl, select_all)
         end
 
         return self:RefreshLayout()
@@ -128,6 +129,23 @@ function ScrollTable:CheckSelect(row, clickType, select_all)
 
     local isSelected, _ = tfind(self.selected, objIndex)
     self:HighlightRow(row, isSelected)
+end
+
+function ScrollTable:SelectAll()
+    print('Select All has not been created yet');
+    for i=1, #self.displayData do
+        local row = self.rows[i];
+        if not row.isFiltered then
+            local selectOn = row.selectOn
+            local objIndex = row.dataObj[selectOn]
+            local isSelected, _ = tfind(self.selected, objIndex)
+
+            if not isSelected then
+                tinsert(self.selected, objIndex)
+            end
+        end
+    end
+    self:RefreshLayout()
 end
 
 ----- REFRESH FUNCTIONS -----
@@ -204,8 +222,6 @@ end
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     Util:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
 
-    local special_filters = {['Select_All']= true, ['online']=true, ['raid']=true};
-
     if filterOn == 'Class_All' then -- Reset all class filters if this gets checked.
         for _, class in pairs(Defaults.classes) do
             local fClass = 'Class_' .. class;
@@ -219,20 +235,31 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
         self.online = Guild:UpdateOnlineStatus()
     elseif filterOn == 'raid' and checkedStatus then
         self.raid = Raid:GetRaidInfo()
-    elseif filterOn == 'Select_All' and checkedStatus then
-        print('Select All has not been created yet');
     end
 
     self.displayedRows = {};
     for i=1, #self.displayData do
-    local row = self.rows[i];
-    if not row:ApplyFilters() then
-    table.insert(self.displayedRows, row);
+        local row = self.rows[i];
+        if not row:ApplyFilters() then
+            table.insert(self.displayedRows, row);
         end
-        end
+    end
 
-        self:RefreshTableSize();
-        self:RefreshLayout();
+    if filterOn == 'Select_All' and checkedStatus then
+        self:SelectAll()
+    end
+
+    self:RefreshTableSize();
+    self:RefreshLayout();
+end
+
+function ScrollTable:SearchChanged(searchText)
+    self.searchText = searchText
+    local checkedStatus = true
+    if searchText == '' or searchText == nil then
+        checkedStatus = false
+    end
+    self:ApplyFilter('name', checkedStatus)
 end
 
 ----- INITIALIZATION FUNCTIONS -----
@@ -270,6 +297,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.displayData = {};
     self.displayedRows = {};
     self.appliedFilters = {};
+    self.searchText = nil;
 
     self.selected = {};
     self.lastSelect = nil;
@@ -417,9 +445,6 @@ function ScrollTable:OnLoad()
             local dataObj = row.dataObj;
             row.isFiltered = false;
             local super = row.super;
-
-            local filterPrio = {'Class_', 'online', 'raid', 'selected'}
-
             for filter, checkedStatus in pairs(super.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to waste time looping through the rest.
 
@@ -443,6 +468,8 @@ function ScrollTable:OnLoad()
 
                     elseif filter == 'raid' then
                         row.isFiltered = not tContains(super.raid, dataObj['name'])
+                    elseif filter == 'name' then
+                        row.isFiltered = not Util:StringsMatch(dataObj['name'], super.searchText)
                     end
                 end
             end

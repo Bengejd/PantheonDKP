@@ -137,44 +137,35 @@ local function createEditBox(name, parent, options)
     clearButton:SetText("Clear")
     clearButton:SetSize(45, 15)
     clearButton:SetPoint("RIGHT", ef, "RIGHT", -2, 0)
-    clearButton:SetScript("OnClick", function()
-        print("Clear Edit Box!")
-    end)
 
     -- edit box
     local eb = CreateFrame("EditBox", "$parent_editBox", pdkp_frame)
-    eb:SetWidth(90)
+    eb:SetWidth(75)
     eb:SetHeight(50)
-    eb:SetPoint("LEFT", ef, "LEFT", 5, 0)
+    eb:SetPoint("LEFT", ef, "LEFT", 48, 0)
     eb:SetFontObject(GameFontNormalSmall)
     eb:SetFrameStrata("DIALOG")
-    eb:SetMaxLetters(12)
+    eb:SetMaxLetters(11)
     eb:SetAutoFocus(false)
 
-    local function resetSearch()
-        eb:ClearFocus()
-        local text = eb:GetText()
+    local function toggleClearButton(text)
         if text == nil or text == "" then
-            sl:Show()
             clearButton:Hide()
+        else
+            clearButton:Show()
         end
     end
 
-    local function clearSearch()
-        eb:SetText("")
-        resetSearch()
+    local function resetSearch()
+        eb:ClearFocus()
+        toggleClearButton(eb:GetText())
     end
 
     eb:SetScript("OnEscapePressed", function() resetSearch() end)
     eb:SetScript("OnEnterPressed", function() resetSearch() end)
     eb:SetScript("OnTextChanged", function()
         local text = eb:GetText()
-        if text == nil and text == "" then
-            sl:Show()
-        else
-            sl:Hide()
-            clearButton:Show()
-        end
+        toggleClearButton(text)
     end)
     eb:SetScript("OnEditFocusLost", function()
         _G["pdkp_frame_edit_frame_clear_button"]:Hide()
@@ -184,10 +175,12 @@ local function createEditBox(name, parent, options)
 
     end)
 
+    clearButton:SetScript("OnClick", function()
+        eb:SetText("")
+        resetSearch()
+    end)
+
     _G["pdkp_frame_edit_frame_clear_button"]:Hide()
-
-    return frame
-
 end
 
 --------------------------
@@ -199,7 +192,6 @@ function Setup:DropdownValueChanged(dropdown, b)
     UIDropdownMenu_SetSelectedValue(dropdown, b.value, b.value);
     UIDropdownMenu_SetText(dropdown, b.value);
 end
-
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -367,7 +359,63 @@ function Setup:RandomStuff()
 end
 
 function Setup:TableSearch()
-    createEditBox('pdkp_search', GUI.pdkp_frame, {})
+    -- edit frame
+    local ef = CreateFrame("Frame", "$parent_edit_frame", pdkp_frame)
+    ef:SetHeight(25)
+    ef:SetWidth(165)
+    ef:SetPoint('BOTTOMLEFT', pdkp_frame, "BOTTOMLEFT", 10, 10)
+
+    -- search label
+    local sl = ef:CreateFontString(ef, 'OVERLAY', 'GameFontNormalSmall')
+    sl:SetText("Search:")
+    sl:SetPoint("LEFT", ef, "LEFT", -12, 0)
+    sl:SetWidth(80)
+
+    -- edit clear button
+    local clearButton = CreateFrame("Button", "$parent_clear_button", ef, "UIPanelButtonTemplate")
+    clearButton:SetText("Clear")
+    clearButton:SetSize(45, 15)
+    clearButton:SetPoint("RIGHT", ef, "RIGHT", -2, 0)
+
+    -- edit box
+    local eb = CreateFrame("EditBox", "$parent_editBox", pdkp_frame)
+    eb:SetWidth(75)
+    eb:SetHeight(50)
+    eb:SetPoint("LEFT", ef, "LEFT", 48, 0)
+    eb:SetFontObject(GameFontNormalSmall)
+    eb:SetFrameStrata("DIALOG")
+    eb:SetMaxLetters(11)
+    eb:SetAutoFocus(false)
+
+    local function toggleClearButton(text)
+        if text == nil or text == "" then
+            clearButton:Hide()
+        else
+            clearButton:Show()
+        end
+    end
+
+    local function resetSearch()
+        eb:ClearFocus()
+        toggleClearButton(eb:GetText())
+    end
+
+    eb:SetScript("OnEscapePressed", function() resetSearch() end)
+    eb:SetScript("OnEnterPressed", function() resetSearch() end)
+    eb:SetScript("OnTextChanged", function()
+        local text = eb:GetText()
+        toggleClearButton(text)
+        PDKP.memberTable:SearchChanged(text)
+    end)
+    eb:SetScript("OnEditFocusLost", function() toggleClearButton(eb:GetText()) end)
+    eb:SetScript("OnEditFocusGained", function() toggleClearButton(eb:GetText()) end)
+
+    clearButton:SetScript("OnClick", function()
+        eb:SetText("")
+        resetSearch()
+    end)
+
+    clearButton:Hide()
 end
 
 function Setup:Filters()
@@ -478,8 +526,6 @@ function Setup:Filters()
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
 end
-
-
 
 function Setup:RaidReasons()
     local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
