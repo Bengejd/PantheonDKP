@@ -254,7 +254,7 @@ function Setup:AdjustmentDropdowns()
 
             if d1.value >= 1 and d1.value <= 5 then
                 local raid = core.raids[d2.value];
-                if raid == core.raids[1] then adjustAmount = 5 else adjustAmount = 10 end;
+                if raid == core.raids[1] or raid == core.raids[4] then adjustAmount = 5 else adjustAmount = 10 end;
 
                 if d1.value >= 1 and d1.value <= 3 then -- Ontime / Signup bonus
                     updateAmountBox = true

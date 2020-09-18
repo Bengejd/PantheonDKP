@@ -247,9 +247,6 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     if prevNum < currNum then startIndex = prevNum else startIndex = currNum end
     if currNum > prevNum then endIndex = currNum else endIndex = prevNum end
 
-    local startIndex; -- the entry we're starting at.
-    local endIndex; -- the entry we're ending at.
-
     local displayData = GUI:GetTableDisplayData(true);
 
     local charObjStop = getglobal("pdkp_dkp_entry" .. currNum)
@@ -265,8 +262,8 @@ function GUI:EntryShiftClicked(charObj, clickType, bName)
     if charStop > charStart then endIndex = charStop else endIndex = charStart end
 
     for i = startIndex, endIndex do
-        local charObj = displayData[i]
-        GUI:AddToSelected(charObj);
+        local _charObj = displayData[i]
+        GUI:AddToSelected(_charObj);
     end
 
     GUI.lastEntryClicked = bName;
@@ -439,8 +436,8 @@ function GUI:ShowSelectedHistory(charObj)
                             end
                         end
 
-                        for i = 1, #labels do
-                            local label = labels[i];
+                        for j = 1, #labels do
+                            local label = labels[j];
                             label.entry = entry;
                             label:SetCallback("OnClick", labelCallback)
                         end
@@ -462,11 +459,11 @@ function GUI:ShowSelectedHistory(charObj)
                         local ig = AceGUI:Create("InlineGroup")
 
                         local formattedDate = Util:Format12HrDateTime(entry['datetime'])
-                        local title = formattedDate
+                        local dtitle = formattedDate
 
-                        if entry['raid'] then title = entry['raid'] .. ' | ' .. formattedDate end
+                        if entry['raid'] then dtitle = entry['raid'] .. ' | ' .. formattedDate end
 
-                        ig:SetTitle(title)
+                        ig:SetTitle(dtitle)
                         ig:SetLayout("Flow")
                         ig:SetFullWidth(true)
 
@@ -496,10 +493,10 @@ function GUI:ShowSelectedHistory(charObj)
                             namesLabel:SetCallback("OnClick", function(self, _, buttonType)
                                 if IsShiftKeyDown() and buttonType == "LeftButton" then
                                     local tableData = GUI:GetTableDisplayData(true)
-                                    for key, charObj in pairs(tableData) do
-                                        for key, name in pairs(entry['members']) do
-                                            if name == charObj.name then
-                                                GUI:AddToSelected(charObj)
+                                    for _, char_Obj in pairs(tableData) do
+                                        for _, name in pairs(entry['members']) do
+                                            if name == char_Obj.name then
+                                                GUI:AddToSelected(char_Obj)
                                                 break;
                                             end
                                         end
