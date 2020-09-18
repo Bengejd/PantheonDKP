@@ -71,7 +71,6 @@ end
 function Guild:GetMembers()
 
     GuildRoster()
-    DKP:GetTableNames()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();

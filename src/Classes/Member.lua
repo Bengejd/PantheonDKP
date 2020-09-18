@@ -23,8 +23,8 @@ function Member:new(guildIndex)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
 
-    self.name, self.rank, self.rankIndex, self.lvl, self.class, self.zone,
-    self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(guildIndex)
+    self:GetGuildData(guildIndex)
+
     self.canEdit = self.rankIndex <= 3;
     self.isOfficer = self.canEdit;
     self.name = strsplit('-', self.name) -- Remove the server name from their name.
@@ -52,6 +52,11 @@ function Member:new(guildIndex)
     self.dkp['Molten Core'].total = guildIndex;
 
     return self
+end
+
+function Member:GetGuildData(guildIndex)
+    self.name, self.rank, self.rankIndex, self.lvl, self.class, self.zone,
+    self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(guildIndex)
 end
 
 function Member:GetDKP(raidName, variableName)
