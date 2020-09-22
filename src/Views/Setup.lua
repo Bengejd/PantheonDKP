@@ -36,6 +36,8 @@ local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
 local filterButtons = {};
 
+local pi = math.pi
+
 --------------------------
 -- Local      Functions --
 --------------------------
@@ -293,36 +295,16 @@ function Setup:Debugging()
     t:SetText("PDKP Debugging")
     t:SetParent(f)
 
-    --local sb = CreateFrame("Button", "MyButton", f, "UIPanelButtonTemplate")
-    --sb:SetSize(80 ,22) -- width, height
-    --sb:SetText("Submit")
-    --sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 12)
-    --sb:SetScript("OnClick", function()
-    --    local st = PDKP.memberTable
-    --
-    --    if #st.selected >= 1 then
-    --        for _, name in pairs(st.selected) do
-    --            local _, rowIndex = tfind(st.rows, name, 'name')
-    --            if rowIndex then
-    --                local row = st.rows[rowIndex]
-    --                if row.dataObj['name'] == name then
-    --                    local member = Guild:GetMemberByName(name)
-    --                    member:UpdateDKP(nil, nil)
-    --                    row:UpdateRowValues()
-    --                end
-    --            end
-    --        end
-    --    end
-    --end)
-
     local buttons = {
+        ['reload']=function()
+            ReloadUI()
+        end,
         ['show']=function()
-            print('Showing PDKP')
+            GUI:Show()
         end,
         ['hide']=function()
-            print('Hiding PDKP')
+            GUI:Hide()
         end,
-
     }
     local button_counter_x = 1
     local button_counter_y = 1
@@ -354,7 +336,7 @@ function Setup:RandomStuff()
     Setup:RaidDropdown()
     Setup:RaidReasons()
     --Setup:BossKillLoot()
-    --Setup:TabView()
+    Setup:TabView()
 end
 
 function Setup:TableSearch()
@@ -425,6 +407,7 @@ end
 
 function Setup:Filters()
     local f = CreateFrame("Frame", "$parentFilterFrame", pdkp_frame)
+
     f:SetBackdrop({
         tile = true, tileSize = 0,
         edgeFile = SCROLL_BORDER, edgeSize = 8,
@@ -533,16 +516,33 @@ function Setup:Filters()
 end
 
 function Setup:RaidReasons()
-    local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
-    f:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
-    f:SetHeight(225);
-    f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
-    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
-    f:Show()
+    local dm = CreateFrame("Frame", '$parent_reasons_frame', pdkp_frame, 'UIDropDownMenuTemplate')
+
+    UIDropDownMenu_SetWidth(dm, 225)
+    UIDropDownMenu_SetText(dm, 'Adjustment Reason')
+    dm:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    dm:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+
+    -- Reason, Raid
+
+    UIDropDownMenu_Initialize(dm, function(self, level, _)
+        local info = UIDropDownMenu_CreateInfo()
+        local menu_items = {'1', '2', '3', '4', '5'}
+        for key, val in pairs(menu_items) do
+            info.text = val;
+            info.checked = false
+            info.menuList = key
+            info.hasArrow = false
+            info.func = function(b)
+                --UIDropDownMenu_SetSelectedValue(dm, b.value, b.value)
+                UIDropDownMenu_SetText(dm, b.value)
+                b.checked = true
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+    end)
+
+    dm:Show()
 
     GUI.adjustmentReasons = {
         {
@@ -586,30 +586,124 @@ function Setup:RaidReasons()
         },
     }
 
-    local menuList = {
-        { text = "Select an Option", isTitle = true},
-        { text = "Option 1", func = function() print("You've chosen option 1"); end,
-          menuList = {
-            { text = "Option 3", func = function() print("You've chosen option 3"); end }
-        } },
-        { text = "Option 2", func = function() print("You've chosen option 2"); end,
-          menuList = {
-              { text = "Option 3", func = function() print("You've chosen option 3"); end }
-          }
-        },
-        { text = "More Options", hasArrow = true,
-          menuList = {
-              { text = "Option 3", func = function() print("You've chosen option 3"); end }
-          }
-        }
-    }
-    local menuFrame = CreateFrame("Frame", "Omen_TitleDropDownMenu", f, "UIDropDownMenuTemplate")
-    menuFrame.menuList = menuList
-    menuFrame:SetParent(f)
 
-    -- Or make the menu appear at the frame:
-    menuFrame:SetPoint("Center", f, "Center")
-    EasyMenu(menuList, menuFrame, menuFrame, 0, 10, nil)
+
+    --- WORKING DROPDOWN SINGLE VALUE
+    --local dropdown = CreateFrame("FRAME", 'pdkp_raid_dropdown', _G['pdkp_frameFilterFrame'], 'UIDropDownMenuTemplate');
+    --dropdown:SetPoint("TOPRIGHT", _G['pdkp_frameFilterFrame'], "TOPRIGHT", 15, 75);
+    --UIDropDownMenu_SetWidth(dropdown, 100);
+    --UIDropDownMenu_SetText(dropdown, Settings.current_raid)
+    --
+    --UIDropDownMenu_Initialize(dropdown, function(self, level, _)
+    --    local info = UIDropDownMenu_CreateInfo();
+    --    for key, raid in pairs(Defaults.raids) do
+    --        info.text = raid;
+    --        info.checked = false;
+    --        info.menuList = key;
+    --        info.hasArrow = false;
+    --        info.func = function(b)
+    --            UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value);
+    --            UIDropDownMenu_SetText(dropdown, b.value);
+    --            b.checked = true;
+    --
+    --            Settings:ChangeCurrentRaid(b.value);
+    --            PDKP.memberTable:RaidChanged()
+    --        end
+    --        UIDropDownMenu_AddButton(info)
+    --    end
+    --end)
+    --
+    --UIDropDownMenu_SetSelectedValue(dropdown, Settings.current_raid, Settings.current_raid);
+    --
+    ---- Implement the function to change the favoriteNumber
+    --function dropdown:SetValue(self, arg1, arg2, checked)
+    --    raidName = newValue
+    --    print(self, arg1, arg2, checked);
+    --    -- Update the text; if we merely wanted it to display newValue, we would not need to do this
+    --    --UIDropDownMenu_SetText(dropdown, raidName)
+    --    ---- Because this is called from a sub-menu, only that menu level is closed by default.
+    --    ---- Close the entire menu with this next call
+    --    --CloseDropDownMenus()
+    --end
+
+    ---- BROKEN DROPDOWN MENU
+    --local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
+    --f:SetBackdrop({
+    --    tile = true, tileSize = 0,
+    --    edgeFile = SCROLL_BORDER, edgeSize = 8,
+    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --})
+    --f:SetHeight(225);
+    --f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    --f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+    --f:Show()
+    --
+    --GUI.adjustmentReasons = {
+    ----    {
+    ----        ['title']='On Time Bonus',
+    ----        ['menu']={
+    ----            'Molten Core',
+    ----            'Blackwing Lair',
+    ----            'Ahn\'Qiraj'
+    ----        }
+    ----    },
+    ----    {
+    ----        ['title']='Completion Bonus',
+    ----        ['menu']={
+    ----
+    ----        }
+    ----
+    ----    },
+    ----    {
+    ----        ['title']='Benched',
+    ----        ['menu']={
+    ----
+    ----        }
+    ----    },
+    ----    {
+    ----        ['title']='Boss Kill',
+    ----        ['menu']={
+    ----
+    ----        }
+    ----    },
+    ----    {
+    ----        ['title']='Unexcused Absence',
+    ----        ['menu']={
+    ----
+    ----        }
+    ----    },
+    ----    {
+    ----        ['title']='Item Win'
+    ----    },
+    ----    {
+    ----        ['title']='Other'
+    ----    },
+    ----}
+    --
+    --local menuList = {
+    --    { text = "Select an Option", isTitle = true},
+    --    { text = "Option 1", func = function() print("You've chosen option 1"); end,
+    --      menuList = {
+    --        { text = "Option 3", func = function() print("You've chosen option 3"); end }
+    --    } },
+    --    { text = "Option 2", func = function() print("You've chosen option 2"); end,
+    --      menuList = {
+    --          { text = "Option 3", func = function() print("You've chosen option 3"); end }
+    --      }
+    --    },
+    --    { text = "More Options", hasArrow = true,
+    --      menuList = {
+    --          { text = "Option 3", func = function() print("You've chosen option 3"); end }
+    --      }
+    --    }
+    --}
+    --local menuFrame = CreateFrame("Frame", "Omen_TitleDropDownMenu", f, "UIDropDownMenuTemplate")
+    --menuFrame.menuList = menuList
+    --menuFrame:SetParent(f)
+    --
+    ---- Or make the menu appear at the frame:
+    --menuFrame:SetPoint("Center", f, "Center")
+    --EasyMenu(menuList, menuFrame, menuFrame, 0, 10, nil)
 end
 
 function Setup:RaidDropdown()
@@ -655,11 +749,138 @@ function Setup:RaidDropdown()
 end
 
 function Setup:TabView()
-    --PanelTemplates_SetNumTabs(myTabContainerFrame, 2);  -- 2 because there are 2 frames total.
-    --PanelTemplates_SetTab(myTabContainerFrame, 1);      -- 1 because we want tab 1 selected.
-    --myTabPage1:Show();  -- Show page 1.
-    --myTabPage2:Hide();  -- Hide all other pages (in this case only one).
 
+    local tc = CreateFrame("Frame", 'myTabContainerFrame', UIParent, nil)
+    tc:SetSize(200, 200);
+    tc:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    tc:SetMovable(true)
+    tc:EnableMouse(true)
+    tc:SetParent(UIParent)
+
+    tc:SetBackdrop({
+        tile = true, tileSize = 32,
+        edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border', edgeSize = 32,
+        bgFile= 'Interface\\DialogFrame\\UI-DialogBox-Background',
+        insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    })
+
+    local header = tc:CreateFontString(tc, 'OVERLAY', 'GameFontNormal')
+    header:SetSize(356, 64)
+    header:SetPoint("TOP", 0, 12)
+    header:SetText("My Frame")
+
+    local tab_pages = {}
+    local tab_buttons = {}
+
+    local tab_page_opts = {
+        [1]={
+            ['name']='Filter',
+            ['text']='Filter Page',
+            ['title']='Filter',
+            ['points']={
+                ['side']='TOPLEFT',
+                ['rel']='TOPLEFT',
+            },
+        },
+        [2]={
+            ['name']='History',
+            ['text']='History Page',
+            ['title']='History',
+            ['points']={
+                ['side']='TOPRIGHT',
+                ['rel']='TOPRIGHT',
+            },
+
+        },
+    }
+
+    local function createTabButton(opts, page)
+        local t = CreateFrame("Button", page:GetName() .. '_Tab', tc, "CharacterFrameTabButtonTemplate")
+        t:SetText(opts['text'])
+        t:SetSize(t:GetTextWidth() + 30, 30)
+        t:SetPoint(opts['points']['side'], "$parent", opts['points']['rel'], 0, 30)
+        t:SetFrameLevel(tc:GetFrameLevel() + 4)
+
+        local textures = {'LeftDisabled', 'MiddleDisabled', 'RightDisabled', 'Left', 'Middle', 'Right'}
+
+        local text_down = {'LeftDisabled', 'Left'}
+        local text_left = {'MiddleDisabled', 'Middle'}
+        local text_up = {'RightDisabled', 'Right'}
+
+        local rotate_270 = (pi / 180) * 270
+        local rotate_90 = (pi / 180) * 90
+        local rotate_360 = (pi / 180) * 360
+        local rotate_180 = (pi / 180) * 180
+
+        for _, tex in pairs(textures) do
+            _G[t:GetName() .. tex]:SetRotation(rotate_180)
+        end
+
+        --_G[t:GetName() .. 'LeftDisabled']:SetTexCoord(0, 0.15625, 0, 0.546875)
+        _G[t:GetName() .. 'Left']:SetTexCoord(0, 0.84375, 1, 0)
+        --_G[t:GetName() .. 'MiddleDisabled']:SetTexCoord(0.15625, 0.84375, 0, 0.546875)
+        --_G[t:GetName() .. 'Middle']:SetTexCoord(0.15625, 0.84375, 0, 1.0)
+        --_G[t:GetName() .. 'RightDisabled']:SetTexCoord(0.84375, 1.0, 0, 0.546875)
+        --_G[t:GetName() .. 'Right']:SetTexCoord(0.84375, 1.0, 0, 1.0)
+
+        --local midTex = _G[t:GetName() .. 'Middle']:SetRotation()
+        --midTex:SetRotation(rotate_left)
+
+        PanelTemplates_TabResize(t, 0, nil, 36, 60);
+
+        local tab_text = _G[t:GetName() .. 'Text']
+        tab_text:SetAllPoints(t)
+
+        return t
+    end
+
+    local function rotateTab(tab)
+        --rotate_down
+    end
+
+    local function toggleTab(t)
+        for _, page in pairs(tab_pages) do
+            if page.tab:GetName() == t:GetName() then
+                page:Show()
+            else
+                page:Hide()
+            end
+        end
+    end
+
+    local function createTabPage(opts)
+        local page = CreateFrame("Frame", '$parent_' .. opts['name'] .. '_Page', tc, nil)
+        page:SetPoint("TOPLEFT", tc)
+        page:SetPoint("BOTTOMRIGHT", tc)
+
+        local page_text = page:CreateFontString(page, "OVERLAY", 'GameFontNormal')
+        page_text:SetText(opts['text'])
+        page_text:SetPoint("TOPLEFT", page)
+        page_text:SetPoint("BOTTOMRIGHT", page)
+        page_text:SetSize(20, 30)
+
+        page.text = page_text
+
+        page.tab = createTabButton(opts, page)
+
+        page.tab:SetScript("OnClick", function()
+            toggleTab(page.tab)
+        end)
+
+        return page
+    end
+
+    for key, page_opts in pairs(tab_page_opts) do
+        local page = createTabPage(page_opts)
+        table.insert(tab_pages, page)
+        if key ~= 1 then page:Hide() end
+
+        local tab = page.tab
+        tab:SetScript("OnClick", function()
+            toggleTab(tab)
+        end)
+    end
+    tc:Show()
 end
 
 function Setup:BossKillLoot()
