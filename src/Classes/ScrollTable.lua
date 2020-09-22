@@ -333,6 +333,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self:RefreshData()
 
+    Util:WatchVar(self.selected, 'Table_Selected')
+
     -------------------------
     -- Setup the Frames
     -------------------------

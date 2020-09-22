@@ -4,13 +4,16 @@ local L = core.L;
 
 local Raid = core.Raid;
 local Guild = core.Guild;
-local DKP = core.DKP
+local DKP = core.DKP;
+local Settings = core.Settings;
+
+local setmetatable, strsplit, pairs, next = setmetatable, strsplit, pairs, next
 
 local Defaults, Util = core.Defaults, core.Util;
 local Character = core.Character;
 local bank_name = Defaults.bank_name;
 
-local setmetatable, strsplit, pairs = setmetatable, strsplit, pairs
+local guildDB, memberDB;
 
 local GetGuildRosterInfo = GetGuildRosterInfo
 
@@ -23,7 +26,12 @@ function Member:new(guildIndex)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
 
+    self.guildIndex = guildIndex
+
     self:GetGuildData(guildIndex)
+
+    guildDB = Guild.db
+    memberDB = Guild.db.members
 
     self.canEdit = self.rankIndex <= 3;
     self.isOfficer = self.canEdit;
@@ -37,36 +45,68 @@ function Member:new(guildIndex)
     self.dkp = {};
     self.isDkpOfficer = false
 
-    for _, raid in pairs(Defaults.raids) do
-        if raid ~= 'Onyxia\'s Lair' then
-            self.dkp[raid] = {
-                previousTotal = 0,
-                total = 0,
-                entries = {},
-                deleted = {}
-            }
-        end
-    end
+    self:InitializeDKP()
 
-    -- TODO: Save / Retrieve this data instead of using guildIndex
-    self.dkp['Molten Core'].total = guildIndex;
+    self:Save()
 
     return self
 end
 
-function Member:GetGuildData(guildIndex)
+function Member:GetGuildData(index)
+    index = index or self.guildIndex;
     self.name, self.rank, self.rankIndex, self.lvl, self.class, self.zone,
-    self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(guildIndex)
+    self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(index)
+end
+
+function Member:InitializeDKP()
+    for _, raid in pairs(Defaults.dkp_raids) do
+        if tEmpty(memberDB[self.name]) or not memberDB[self.name][raid] or tEmpty(memberDB[self.name][raid]) then
+            self:InitRaidDKP(raid)
+        else -- Member exists in the database, raid exists in the member data, and the raid has values.
+            self.dkp[raid] = memberDB[self.name][raid]
+        end
+    end
+end
+
+function Member:InitRaidDKP(raid)
+    self.dkp[raid] = {
+        previousTotal = 0,
+        total = 0,
+        entries = {},
+        deleted = {}
+    }
+
+    if raid == 'Molten Core' and self.dkp['Molten Core'].total == 0 then
+        Print('Defaulting Molten Core')
+        self.dkp['Molten Core'].total = self.guildIndex;
+    end
 end
 
 function Member:GetDKP(raidName, variableName)
-    raidName = raidName and tContains(Defaults.raids, raidName) or Raid:GetCurrentRaid()
+    raidName = raidName or Raid:GetCurrentRaid()
     if tContains(DKPVariables, variableName) then
         return self.dkp[raidName][variableName]
     elseif variableName == 'all' then
         return self.dkp[raidName]
     end
 end
+
+function Member:QuickCalc(raid, calc_name)
+    local dkpTotal = self.dkp[raid].total
+    if dkpTotal > 0 then
+        calc_name = calc_name or 'shroud';
+        local calcs = {
+            ['shroud']=0.5,
+            ['roll']=0.1,
+            ['other']=0.15
+        }
+        local percent = calcs[calc_name]
+        return math.ceil(dkpTotal * percent)
+    else
+        return dkpTotal
+    end
+end
+
 
 function Member:UpdateDKP(raid, entry)
     raid = raid or Raid:GetCurrentRaid()
@@ -75,18 +115,18 @@ function Member:UpdateDKP(raid, entry)
 end
 
 function Member:Save()
-    local hasEntries = false
-
-    for _, raid in pairs(Defaults.raids) do
-        if raid ~= 'Onyxia\'s Lair' then
-            dkp = self.dkp[raid]
-            if dkp.total > 0 or #dkp.entries > 0 or dkp.previousTotal > 0 or dkp.deleted > 0 then
-                hasEntries = true
-            end
+    for _, raid in pairs(Defaults.dkp_raids) do
+        local dkp = self.dkp[raid]
+        if dkp.total > 0 or #dkp.entries > 0 or dkp.previousTotal > 0 or #dkp.deleted > 0 then
+            memberDB[self.name] = memberDB[self.name] or {}
+            memberDB[self.name][raid] = dkp
         end
     end
+end
 
-    if hasEntries then
-        print('Fuck yeah!')
-    end
+--- TESTING FUNCTIONS BELOW
+---
+function Member:UpdateDKPTest(raid, newTotal)
+    raid = raid or Raid:GetCurrentRaid()
+    self.dkp[raid].total = newTotal
 end

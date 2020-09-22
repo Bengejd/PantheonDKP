@@ -185,15 +185,17 @@ local function createEditBox(name, parent, options)
     _G["pdkp_frame_edit_frame_clear_button"]:Hide()
 end
 
---------------------------
--- Setup      Functions --
---------------------------
-
 function Setup:DropdownValueChanged(dropdown, b)
     b.selected = true;
     UIDropdownMenu_SetSelectedValue(dropdown, b.value, b.value);
     UIDropdownMenu_SetText(dropdown, b.value);
 end
+
+--------------------------
+-- Setup      Functions --
+--------------------------
+
+
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -305,6 +307,18 @@ function Setup:Debugging()
         ['hide']=function()
             GUI:Hide()
         end,
+        ['debug']=function()
+            Settings:ToggleDebugging()
+        end,
+        ['shroud']=function()
+            DKP:TestShroud()
+        end,
+        ['roll']=function()
+            DKP:TestShroud()
+        end,
+        ['reset DKP']=function()
+            DKP:ResetDKP()
+        end
     }
     local button_counter_x = 1
     local button_counter_y = 1
@@ -336,7 +350,9 @@ function Setup:RandomStuff()
     Setup:RaidDropdown()
     Setup:RaidReasons()
     --Setup:BossKillLoot()
-    Setup:TabView()
+    --Setup:TabView()
+
+    Setup:DKPAdjustments()
 end
 
 function Setup:TableSearch()
@@ -513,6 +529,21 @@ function Setup:Filters()
     for _, b in pairs(filterButtons) do
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
+end
+
+function Setup:DKPAdjustments()
+    local f = CreateFrame("Frame", "$parentAdjustmentFrame", pdkp_frame)
+
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(150)
+    f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,0)
+
+    
 end
 
 function Setup:RaidReasons()
@@ -1030,6 +1061,7 @@ function Setup:ScrollTable()
     st.cols[1]:Click()
 
     PDKP.memberTable = st;
+    GUI.memberTable = st;
 
     st.searchFrame = Setup:TableSearch()
 

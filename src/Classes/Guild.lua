@@ -19,7 +19,7 @@ local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 
-local GuildDB;
+local GuildDB = PDKP.guildDB;
 
 local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
 local strsplit, tonumber, tostring, pairs, type, next = strsplit, tonumber, tostring, pairs, type, next -- Global lua functions.
@@ -33,7 +33,7 @@ Guild.currentRaid = 'Molten Core';
 
 -- Init the Databse.
 local function initDB()
-    GuildDB = PDKP.db.guildDB
+    GuildDB = PDKP.guildDB
     return GuildDB
 end
 
@@ -49,6 +49,7 @@ function Guild:new()
     end
 
     Guild.db = initDB()
+    Guild.db.members = PDKP.guildDB.members;
 
     Guild.officers = {};
     Guild.members = {};
@@ -68,6 +69,10 @@ function Guild:IsNewMemberObject(name)
     end
 end
 
+function Guild:UpdateNumOfMembers(num)
+    GuildDB.numOfMembers = num
+end
+
 function Guild:GetMembers()
 
     GuildRoster()
@@ -75,7 +80,7 @@ function Guild:GetMembers()
     Guild.online = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();
 
-    if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
+    if Guild.numOfMembers > 0 then Guild:UpdateNumOfMembers(Guild.numOfMembers) else Guild.numOfMembers = GuildDB.numOfMembers; end
     for i=1, Guild.numOfMembers do
         local member = Member:new(i)
         local isNew = Guild:IsNewMemberObject(member['name'])
@@ -103,7 +108,7 @@ function Guild:UpdateOnlineStatus()
     GuildRoster()
     local onlineTable = {};
     Guild.numOfMembers, _, _ = GetNumGuildMembers();
-    if Guild.numOfMembers > 0 then GuildDB.numOfMembers = Guild.numOfMembers else Guild.numOfMembers = GuildDB.numOfMembers; end
+    if Guild.numOfMembers > 0 then Guild:UpdateNumOfMembers(Guild.numOfMembers) else Guild.numOfMembers = GuildDB.numOfMembers; end
     for i=1, Guild.numOfMembers do
         local name, _, _, _, _, _, _, _, online, _, _ = GetGuildRosterInfo(i)
         if online then

@@ -19,11 +19,13 @@ local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local Character = core.Character;
+local Settings = core.Settings;
+
 
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
 local replace, format, tostring, gsub = string.rep, string.format, tostring, string.gsub
 local floor, fmod = math.floor, math.fmod;
-local insert, sort = table.insert, table.sort;
+local insert, sort, next = table.insert, table.sort, next;
 local date, type, print = date, type, print
 local getn, pairs, ipairs = table.getn, pairs, ipairs
 
@@ -40,7 +42,7 @@ local class_colors = Defaults.class_colors;
 local watchedVars = {};
 
 function Util:WatchVar(tData, strName)
-    if ViragDevTool_AddData and Defaults.debug and not watchedVars[strName] then
+    if ViragDevTool_AddData and Settings:IsDebug() and not watchedVars[strName] then
         ViragDevTool_AddData(tData, strName)
         watchedVars[strName]=true
     end
@@ -196,7 +198,7 @@ end
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
 function Util:Debug(string)
-    if Defaults.debug and not Defaults.silent then
+    if Settings:IsDebug() and not Defaults.silent then
         PDKP:Print(Util:FormatFontTextColor(Util.info, string))
     end
 end
@@ -342,6 +344,10 @@ end
 -- Equivalent of the pairs() function on tables. But this allows you to iterate in order.
 function orderedPairs(t)
     return orderedNext, t, nil
+end
+
+function tEmpty(t)
+    return next(t) == nil;
 end
 
 

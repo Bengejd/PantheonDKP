@@ -22,6 +22,7 @@ src\Classes\Member.lua
 src\Classes\Guild.lua
 src\Classes\Raid.lua
 src\Classes\ScrollTable.lua
+src\Classes\DKP_Entry.lua
 
 # Database files
 src\Modules\Character.lua
@@ -33,6 +34,7 @@ src\Modules\Comms.lua
 src\Modules\Loot.lua
 src\Modules\Shroud.lua
 src\Modules\GUI.lua
+src\Modules\DKP.lua
 
 # Views
 src\Views\Setup.lua

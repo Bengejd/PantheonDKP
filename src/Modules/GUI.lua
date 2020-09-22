@@ -21,8 +21,9 @@ local Defaults = core.Defaults;
 local Character = core.Character;
 
 GUI.pdkp_frame = nil;
-GUI.sortBy = 'name'
-GUI.sortDir = 'ASC'
+GUI.sortBy = 'name';
+GUI.sortDir = 'ASC';
+GUI.memberTable = nil;
 
 function GUI:Init()
     Util:Debug('Initializing GUI')

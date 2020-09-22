@@ -31,6 +31,13 @@ Defaults.raids = {
     'Ahn\'Qiraj',
     --    'Naxxramas',
 };
+
+Defaults.dkp_raids = {
+    'Molten Core',
+    'Blackwing Lair',
+    'Ahn\'Qiraj'
+};
+
 Defaults.raidBosses = {
     ["Onyxia's Lair"] = {
         'Onyxia'

@@ -19,6 +19,7 @@ local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
+local Settings = core.Settings;
 
 core.firstLogin = nil;
 
@@ -73,38 +74,50 @@ end
 
 function PDKP:InitializeDatabases()
     local dbDefaults = {
-        profile = {
-            dkpDB = {
-                currentDB = 'Molten Core',
-                members = {},
-                lastEdit = 0,
-                history = {
-                    all = {},
-                    deleted = {}
-                },
-            },
-            guildDB = {
-                name = nil,
-                numOfMembers = 0,
-                members = {},
-                officers = {},
-                migrated = false,
-            },
-            raidHistory = {
-                lockouts = {}
-            },
-            minimap = {
-                minimapPos=207
-            },
-            settings = {
-                changelog_shown = true,
-                previous_version = "2.9.4",
-                sortDir = "DESC"
-            },
-        }
+        global = {}
     }
     local database = LibStub("AceDB-3.0"):New("pdkp_DB", dbDefaults, true)
-    core.PDKP.db = database.profile
+    local next = next
+
+    if next(database.global) == nil then
+        Util:Debug("Creating PDKP Database with default values")
+
+        database.global['db'] = {
+            ['guildDB'] = {
+                ['members'] = {},
+                ['numOfMembers'] = 0
+            },
+            ['officersDB'] = {},
+            ['dkpDB'] = {
+                ['lastEdit'] = 0,
+                ['history'] = {
+                    ['all'] = {},
+                    ['deleted'] = {},
+                }
+            },
+            ['settingsDB'] = {
+                ['previous_version'] = "2.9.5",
+                ['current_version'] = "2.9.5",
+                ['minimapPos'] = 207,
+                ['debug'] = false,
+            },
+        }
+    end
+
+    local db = database.global['db']
+    core.PDKP.db = db
+
+
+
+    core.PDKP.guildDB = db.guildDB or {};
+    core.PDKP.officersDB = db.officersDB or {};
+    core.PDKP.settingsDB = db.settingsDB or {};
+    core.PDKP.dkpDB = db.dkpDB or {};
+
+    Settings:InitDB()
+
+
+
     Util:Debug("Database finished Initializing")
 end
 
@@ -148,10 +161,15 @@ function PDKP:HandleSlashCommands(msg)
 
     if guiCommands[msg] then return guiCommands[msg]() end
 
+    local debugCommands = {
+        ['debug']=function()
+            Settings:ToggleDebugging()
+        end,
+    }
+
+    if debugCommands[msg] then return debugCommands[msg]() end
 
     Util:Debug('New command received ' .. msg);
-
-
 
     --local splitMsg, name = strsplit(' ', msg)
     --
