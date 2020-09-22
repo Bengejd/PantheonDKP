@@ -79,7 +79,7 @@ function PDKP:InitializeDatabases()
     local database = LibStub("AceDB-3.0"):New("pdkp_DB", dbDefaults, true)
     local next = next
 
-    if next(database.global) == nil then
+    if database['global'] == nil or next(database.global) == nil then
         Util:Debug("Creating PDKP Database with default values")
 
         database.global['db'] = {

@@ -49,7 +49,11 @@ function Settings:ToggleDebugging()
 end
 
 function Settings:IsDebug()
-    return SettingsDB['debug'] == true
+    if SettingsDB ~= nil then
+        return SettingsDB['debug'] == true
+    else
+        return false
+    end
 end
 
 

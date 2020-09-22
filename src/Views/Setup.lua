@@ -543,20 +543,22 @@ function Setup:DKPAdjustments()
     f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,0)
 
-    
-end
+    local adjustHeader = f:CreateFontString(f, "OVERLAY", 'GameFontNormal')
+    adjustHeader:SetText("DKP Adjustments")
+    adjustHeader:SetPoint("TOPLEFT", 5, -5)
 
-function Setup:RaidReasons()
-    local dm = CreateFrame("Frame", '$parent_reasons_frame', pdkp_frame, 'UIDropDownMenuTemplate')
+    local mainDD = CreateFrame("Frame", "$parent_reasons_dropdown", f, 'UIDropDownMenuTemplate')
 
-    UIDropDownMenu_SetWidth(dm, 225)
-    UIDropDownMenu_SetText(dm, 'Adjustment Reason')
-    dm:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
-    dm:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+    local mdd_title = mainDD:CreateFontString(mainDD, "OVERLAY", 'GameFontNormal')
+    mdd_title:SetText("Reason")
+    mdd_title:SetPoint("TOPLEFT", 20, 10)
 
-    -- Reason, Raid
+    UIDropDownMenu_SetWidth(mainDD, 225)
+    UIDropDownMenu_SetText(mainDD, 'No Reason Selected')
+    mainDD:SetPoint("BOTTOMLEFT", f, "BOTTOMRIGHT", -3, 0)
+    mainDD:SetPoint("BOTTOMRIGHT", f, "RIGHT", -10,0)
 
-    UIDropDownMenu_Initialize(dm, function(self, level, _)
+    UIDropDownMenu_Initialize(mainDD, function(self, level, _)
         local info = UIDropDownMenu_CreateInfo()
         local menu_items = {'1', '2', '3', '4', '5'}
         for key, val in pairs(menu_items) do
@@ -566,56 +568,87 @@ function Setup:RaidReasons()
             info.hasArrow = false
             info.func = function(b)
                 --UIDropDownMenu_SetSelectedValue(dm, b.value, b.value)
-                UIDropDownMenu_SetText(dm, b.value)
+                UIDropDownMenu_SetText(mainDD, b.value)
                 b.checked = true
             end
             UIDropDownMenu_AddButton(info)
         end
     end)
 
-    dm:Show()
+    mainDD:Show()
 
-    GUI.adjustmentReasons = {
-        {
-            ['title']='On Time Bonus',
-            ['menu']={
-                'Molten Core',
-                'Blackwing Lair',
-                'Ahn\'Qiraj'
-            }
-        },
-        {
-            ['title']='Completion Bonus',
-            ['menu']={
+end
 
-            }
-
-        },
-        {
-            ['title']='Benched',
-            ['menu']={
-
-            }
-        },
-        {
-            ['title']='Boss Kill',
-            ['menu']={
-
-            }
-        },
-        {
-            ['title']='Unexcused Absence',
-            ['menu']={
-
-            }
-        },
-        {
-            ['title']='Item Win'
-        },
-        {
-            ['title']='Other'
-        },
-    }
+function Setup:RaidReasons()
+    --local dm = CreateFrame("Frame", '$parent_reasons_frame', pdkp_frame, 'UIDropDownMenuTemplate')
+    --
+    --UIDropDownMenu_SetWidth(dm, 225)
+    --UIDropDownMenu_SetText(dm, 'Adjustment Reason')
+    --dm:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
+    --dm:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
+    --
+    ---- Reason, Raid
+    --
+    --UIDropDownMenu_Initialize(dm, function(self, level, _)
+    --    local info = UIDropDownMenu_CreateInfo()
+    --    local menu_items = {'1', '2', '3', '4', '5'}
+    --    for key, val in pairs(menu_items) do
+    --        info.text = val;
+    --        info.checked = false
+    --        info.menuList = key
+    --        info.hasArrow = false
+    --        info.func = function(b)
+    --            --UIDropDownMenu_SetSelectedValue(dm, b.value, b.value)
+    --            UIDropDownMenu_SetText(dm, b.value)
+    --            b.checked = true
+    --        end
+    --        UIDropDownMenu_AddButton(info)
+    --    end
+    --end)
+    --
+    --dm:Show()
+    --
+    --GUI.adjustmentReasons = {
+    --    {
+    --        ['title']='On Time Bonus',
+    --        ['menu']={
+    --            'Molten Core',
+    --            'Blackwing Lair',
+    --            'Ahn\'Qiraj'
+    --        }
+    --    },
+    --    {
+    --        ['title']='Completion Bonus',
+    --        ['menu']={
+    --
+    --        }
+    --
+    --    },
+    --    {
+    --        ['title']='Benched',
+    --        ['menu']={
+    --
+    --        }
+    --    },
+    --    {
+    --        ['title']='Boss Kill',
+    --        ['menu']={
+    --
+    --        }
+    --    },
+    --    {
+    --        ['title']='Unexcused Absence',
+    --        ['menu']={
+    --
+    --        }
+    --    },
+    --    {
+    --        ['title']='Item Win'
+    --    },
+    --    {
+    --        ['title']='Other'
+    --    },
+    --}
 
 
 

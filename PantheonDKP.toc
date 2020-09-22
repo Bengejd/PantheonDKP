@@ -15,6 +15,9 @@ src\embed.xml
 
 src\init.lua
 
+# This should be last in the file, so that the previous modules had time to load first.
+src\PantheonDKP.xml
+
 # Module files
 
 # Classes
@@ -38,6 +41,3 @@ src\Modules\DKP.lua
 
 # Views
 src\Views\Setup.lua
-
-# This should be last in the file, so that the previous modules had time to load first.
-src\PantheonDKP.xml

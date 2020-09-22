@@ -347,6 +347,8 @@ function orderedPairs(t)
 end
 
 function tEmpty(t)
+    if type(t) ~= type({}) then return true end
+
     return next(t) == nil;
 end
 
