@@ -78,33 +78,54 @@ local function createCheckButton(parent, point, x, y, displayText, uniqueName, c
     return cb;
 end
 
-local function createDropdown(name, parent, options, defaultVal)
-    defaultVal = defaultVal or '';
-    local dropdown = CreateFrame("FRAME", '$parentDropdown_' .. name, parent, 'UIDropDownMenuTemplate');
-    dropdown:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 15, 75);
-    dropdown.SetWidth = UIDropDownMenu_SetWidth;
-    dropdown.Init = UIDropDownMenu_Initialize;
-    dropdown.CreateInfo = UIDropDownMenu_CreateInfo;
-    dropdown.SetValue = UIDropDownMenu_SetSelectedValue;
-    dropdown.SetText = UIDropDownMenu_SetText;
-    dropdown.buttons = {};
+--- Opts:
+---     name (string): Name of the dropdown (lowercase)
+---     parent (Frame): Parent frame of the dropdown.
+---     items (Table): String table of the dropdown options.
+---     defaultVal (String): String value for the dropdown to default to (empty otherwise).
+---     changeFunc (Function): A custom function to be called, after selecting a dropdown option.
+local function createDropdown(opts)
+    local dropdown_name = '$parent_' .. opts['name'] .. '_dropdown'
+    local menu_items = opts['items'] or {}
+    local title_text = opts['title'] or ''
+    local dropdown_width = 0
+    local default_val = opts['defaultVal'] or ''
+    local change_func = opts['changeFunc'] or function (dropdown_val) end
 
-    dropdown:SetWidth(dropdown, 100);
-    dropdown:Init(dropdown, function()
-        local info = dropdown:CreateInfo();
-        for key, option in pairs(options) do
-            info.text = option;
-            info.checked = false;
-            info.menuList = key
-            info.hasArrow = false;
+    local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
+    local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
+    dd_title:SetPoint("TOPLEFT", 20, 10)
+
+    for _, item in pairs(menu_items) do -- Sets the dropdown width to the largest item string width.
+        dd_title:SetText(item)
+        local text_width = dd_title:GetStringWidth() + 20
+        if text_width > dropdown_width then
+            dropdown_width = text_width
+        end
+    end
+
+    UIDropDownMenu_SetWidth(dropdown, dropdown_width)
+    UIDropDownMenu_SetText(dropdown, default_val)
+    dd_title:SetText(title_text)
+
+    UIDropDownMenu_Initialize(dropdown, function(self, level, _)
+        local info = UIDropDownMenu_CreateInfo()
+        for key, val in pairs(menu_items) do
+            info.text = val;
+            info.checked = false
+            info.menuList= key
+            info.hasArrow = false
             info.func = function(b)
-                Setup:DropdownValueChanged(dropdown, b)
+                UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value)
+                UIDropDownMenu_SetText(dropdown, b.value)
+                b.checked = true
+                change_func(dropdown, b.value)
             end
             UIDropDownMenu_AddButton(info)
         end
     end)
-    UIDropDownMenu_SetSelectedValue(dropdown, defaultVal, defaultVal);
-    return dropdown;
+
+    return dropdown
 end
 
 local function createEditBox(name, parent, options)
@@ -183,12 +204,6 @@ local function createEditBox(name, parent, options)
     end)
 
     _G["pdkp_frame_edit_frame_clear_button"]:Hide()
-end
-
-function Setup:DropdownValueChanged(dropdown, b)
-    b.selected = true;
-    UIDropdownMenu_SetSelectedValue(dropdown, b.value, b.value);
-    UIDropdownMenu_SetText(dropdown, b.value);
 end
 
 --------------------------
@@ -348,7 +363,6 @@ function Setup:RandomStuff()
     Setup:ScrollTable()
     Setup:Filters()
     Setup:RaidDropdown()
-    Setup:RaidReasons()
     --Setup:BossKillLoot()
     --Setup:TabView()
 
@@ -532,14 +546,14 @@ function Setup:Filters()
 end
 
 function Setup:DKPAdjustments()
-    local f = CreateFrame("Frame", "$parentAdjustmentFrame", pdkp_frame)
+    local f = CreateFrame("Frame", "$parent_adjustment_frame", pdkp_frame)
 
     f:SetBackdrop({
         tile = true, tileSize = 0,
         edgeFile = SCROLL_BORDER, edgeSize = 8,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetHeight(150)
+    f:SetHeight(250)
     f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,0)
 
@@ -547,269 +561,80 @@ function Setup:DKPAdjustments()
     adjustHeader:SetText("DKP Adjustments")
     adjustHeader:SetPoint("TOPLEFT", 5, -5)
 
-    local mainDD = CreateFrame("Frame", "$parent_reasons_dropdown", f, 'UIDropDownMenuTemplate')
+    local mainDD, raidDD;
 
-    local mdd_title = mainDD:CreateFontString(mainDD, "OVERLAY", 'GameFontNormal')
-    mdd_title:SetText("Reason")
-    mdd_title:SetPoint("TOPLEFT", 20, 10)
-
-    UIDropDownMenu_SetWidth(mainDD, 225)
-    UIDropDownMenu_SetText(mainDD, 'No Reason Selected')
-    mainDD:SetPoint("BOTTOMLEFT", f, "BOTTOMRIGHT", -3, 0)
-    mainDD:SetPoint("BOTTOMRIGHT", f, "RIGHT", -10,0)
-
-    UIDropDownMenu_Initialize(mainDD, function(self, level, _)
-        local info = UIDropDownMenu_CreateInfo()
-        local menu_items = {'1', '2', '3', '4', '5'}
-        for key, val in pairs(menu_items) do
-            info.text = val;
-            info.checked = false
-            info.menuList = key
-            info.hasArrow = false
-            info.func = function(b)
-                --UIDropDownMenu_SetSelectedValue(dm, b.value, b.value)
-                UIDropDownMenu_SetText(mainDD, b.value)
-                b.checked = true
-            end
-            UIDropDownMenu_AddButton(info)
+    local reason_opts = {
+        ['name']='reasons',
+        ['parent']=f,
+        ['title']='Reason',
+        ['items']= {'On Time Bonus', 'Completion Bonus', 'Boss Kill', 'Unexcused Absence', 'Item Win', 'Other'},
+        ['defaultVal']='',
+        ['changeFunc']=function(_, dropdown_val)
+            raidDD:Show()
         end
-    end)
+    }
+
+    mainDD = createDropdown(reason_opts)
+    mainDD:SetPoint("TOPLEFT", f, "TOPLEFT", -3, -50)
+
+    local raid_opts = {
+        ['name']='raid',
+        ['parent']=mainDD,
+        ['title']='Raid',
+        ['items']= Defaults.dkp_raids,
+        ['defaultVal']='',
+        ['changeFunc']=function(_, dropdown_val)
+            local mainDD_Val = UIDropDownMenu_GetSelectedValue(mainDD)
+            print(mainDD_Val)
+        end
+    }
+
+    --for raid_name, raid in pairs(Defaults.raidBosses) do
+    --    local boss_opts = {
+    --        ['name']='boss_' .. raid_name,
+    --        ['parent']=raidDD,
+    --        ['title']='Boss',
+    --        --['items']=Defaults.raidBosses[]
+    --        ['items']=Defaults.raidBosses
+    --    }
+    --end
+
+    --local boss_opts = {
+    --    ['name']='boss',
+    --    ['parent']=raidDD,
+    --    ['title']='Boss',
+    --    --['items']=Defaults.raidBosses[]
+    --    ['items']=Defaults.raidBosses
+    --}
+
+    raidDD = createDropdown(raid_opts)
+    raidDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
+
+
+    raidDD:Hide()
+
 
     mainDD:Show()
 
 end
 
-function Setup:RaidReasons()
-    --local dm = CreateFrame("Frame", '$parent_reasons_frame', pdkp_frame, 'UIDropDownMenuTemplate')
-    --
-    --UIDropDownMenu_SetWidth(dm, 225)
-    --UIDropDownMenu_SetText(dm, 'Adjustment Reason')
-    --dm:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
-    --dm:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
-    --
-    ---- Reason, Raid
-    --
-    --UIDropDownMenu_Initialize(dm, function(self, level, _)
-    --    local info = UIDropDownMenu_CreateInfo()
-    --    local menu_items = {'1', '2', '3', '4', '5'}
-    --    for key, val in pairs(menu_items) do
-    --        info.text = val;
-    --        info.checked = false
-    --        info.menuList = key
-    --        info.hasArrow = false
-    --        info.func = function(b)
-    --            --UIDropDownMenu_SetSelectedValue(dm, b.value, b.value)
-    --            UIDropDownMenu_SetText(dm, b.value)
-    --            b.checked = true
-    --        end
-    --        UIDropDownMenu_AddButton(info)
-    --    end
-    --end)
-    --
-    --dm:Show()
-    --
-    --GUI.adjustmentReasons = {
-    --    {
-    --        ['title']='On Time Bonus',
-    --        ['menu']={
-    --            'Molten Core',
-    --            'Blackwing Lair',
-    --            'Ahn\'Qiraj'
-    --        }
-    --    },
-    --    {
-    --        ['title']='Completion Bonus',
-    --        ['menu']={
-    --
-    --        }
-    --
-    --    },
-    --    {
-    --        ['title']='Benched',
-    --        ['menu']={
-    --
-    --        }
-    --    },
-    --    {
-    --        ['title']='Boss Kill',
-    --        ['menu']={
-    --
-    --        }
-    --    },
-    --    {
-    --        ['title']='Unexcused Absence',
-    --        ['menu']={
-    --
-    --        }
-    --    },
-    --    {
-    --        ['title']='Item Win'
-    --    },
-    --    {
-    --        ['title']='Other'
-    --    },
-    --}
-
-
-
-    --- WORKING DROPDOWN SINGLE VALUE
-    --local dropdown = CreateFrame("FRAME", 'pdkp_raid_dropdown', _G['pdkp_frameFilterFrame'], 'UIDropDownMenuTemplate');
-    --dropdown:SetPoint("TOPRIGHT", _G['pdkp_frameFilterFrame'], "TOPRIGHT", 15, 75);
-    --UIDropDownMenu_SetWidth(dropdown, 100);
-    --UIDropDownMenu_SetText(dropdown, Settings.current_raid)
-    --
-    --UIDropDownMenu_Initialize(dropdown, function(self, level, _)
-    --    local info = UIDropDownMenu_CreateInfo();
-    --    for key, raid in pairs(Defaults.raids) do
-    --        info.text = raid;
-    --        info.checked = false;
-    --        info.menuList = key;
-    --        info.hasArrow = false;
-    --        info.func = function(b)
-    --            UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value);
-    --            UIDropDownMenu_SetText(dropdown, b.value);
-    --            b.checked = true;
-    --
-    --            Settings:ChangeCurrentRaid(b.value);
-    --            PDKP.memberTable:RaidChanged()
-    --        end
-    --        UIDropDownMenu_AddButton(info)
-    --    end
-    --end)
-    --
-    --UIDropDownMenu_SetSelectedValue(dropdown, Settings.current_raid, Settings.current_raid);
-    --
-    ---- Implement the function to change the favoriteNumber
-    --function dropdown:SetValue(self, arg1, arg2, checked)
-    --    raidName = newValue
-    --    print(self, arg1, arg2, checked);
-    --    -- Update the text; if we merely wanted it to display newValue, we would not need to do this
-    --    --UIDropDownMenu_SetText(dropdown, raidName)
-    --    ---- Because this is called from a sub-menu, only that menu level is closed by default.
-    --    ---- Close the entire menu with this next call
-    --    --CloseDropDownMenus()
-    --end
-
-    ---- BROKEN DROPDOWN MENU
-    --local f = CreateFrame("Frame", "$parentReasonsFrame", pdkp_frame)
-    --f:SetBackdrop({
-    --    tile = true, tileSize = 0,
-    --    edgeFile = SCROLL_BORDER, edgeSize = 8,
-    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    --})
-    --f:SetHeight(225);
-    --f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
-    --f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
-    --f:Show()
-    --
-    --GUI.adjustmentReasons = {
-    ----    {
-    ----        ['title']='On Time Bonus',
-    ----        ['menu']={
-    ----            'Molten Core',
-    ----            'Blackwing Lair',
-    ----            'Ahn\'Qiraj'
-    ----        }
-    ----    },
-    ----    {
-    ----        ['title']='Completion Bonus',
-    ----        ['menu']={
-    ----
-    ----        }
-    ----
-    ----    },
-    ----    {
-    ----        ['title']='Benched',
-    ----        ['menu']={
-    ----
-    ----        }
-    ----    },
-    ----    {
-    ----        ['title']='Boss Kill',
-    ----        ['menu']={
-    ----
-    ----        }
-    ----    },
-    ----    {
-    ----        ['title']='Unexcused Absence',
-    ----        ['menu']={
-    ----
-    ----        }
-    ----    },
-    ----    {
-    ----        ['title']='Item Win'
-    ----    },
-    ----    {
-    ----        ['title']='Other'
-    ----    },
-    ----}
-    --
-    --local menuList = {
-    --    { text = "Select an Option", isTitle = true},
-    --    { text = "Option 1", func = function() print("You've chosen option 1"); end,
-    --      menuList = {
-    --        { text = "Option 3", func = function() print("You've chosen option 3"); end }
-    --    } },
-    --    { text = "Option 2", func = function() print("You've chosen option 2"); end,
-    --      menuList = {
-    --          { text = "Option 3", func = function() print("You've chosen option 3"); end }
-    --      }
-    --    },
-    --    { text = "More Options", hasArrow = true,
-    --      menuList = {
-    --          { text = "Option 3", func = function() print("You've chosen option 3"); end }
-    --      }
-    --    }
-    --}
-    --local menuFrame = CreateFrame("Frame", "Omen_TitleDropDownMenu", f, "UIDropDownMenuTemplate")
-    --menuFrame.menuList = menuList
-    --menuFrame:SetParent(f)
-    --
-    ---- Or make the menu appear at the frame:
-    --menuFrame:SetPoint("Center", f, "Center")
-    --EasyMenu(menuList, menuFrame, menuFrame, 0, 10, nil)
-end
-
 function Setup:RaidDropdown()
 
-    local dropdown = CreateFrame("FRAME", 'pdkp_raid_dropdown', _G['pdkp_frameFilterFrame'], 'UIDropDownMenuTemplate');
-    dropdown:SetPoint("TOPRIGHT", _G['pdkp_frameFilterFrame'], "TOPRIGHT", 15, 75);
-    UIDropDownMenu_SetWidth(dropdown, 100);
-    UIDropDownMenu_SetText(dropdown, Settings.current_raid)
+    local parent_frame = _G['pdkp_frameFilterFrame']
 
-    UIDropDownMenu_Initialize(dropdown, function(self, level, _)
-        local info = UIDropDownMenu_CreateInfo();
-        for key, raid in pairs(Defaults.raids) do
-            info.text = raid;
-            info.checked = false;
-            info.menuList = key;
-            info.hasArrow = false;
-            info.func = function(b)
-                UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value);
-                UIDropDownMenu_SetText(dropdown, b.value);
-                b.checked = true;
-
-                Settings:ChangeCurrentRaid(b.value);
-                PDKP.memberTable:RaidChanged()
-            end
-            UIDropDownMenu_AddButton(info)
+    local raid_opts = {
+        ['name']='raid',
+        ['parent']=parent_frame,
+        ['title']='Raid',
+        ['items']= Defaults.dkp_raids,
+        ['defaultVal']=Settings.current_raid,
+        ['changeFunc']=function(_, dropdown_val)
+            Settings:ChangeCurrentRaid(dropdown_val);
+            PDKP.memberTable:RaidChanged()
         end
-    end)
-
-    UIDropDownMenu_SetSelectedValue(dropdown, Settings.current_raid, Settings.current_raid);
-
-    -- Implement the function to change the favoriteNumber
-    function dropdown:SetValue(self, arg1, arg2, checked)
-        raidName = newValue
-        print(self, arg1, arg2, checked);
-        -- Update the text; if we merely wanted it to display newValue, we would not need to do this
-        --UIDropDownMenu_SetText(dropdown, raidName)
-        ---- Because this is called from a sub-menu, only that menu level is closed by default.
-        ---- Close the entire menu with this next call
-        --CloseDropDownMenus()
-    end
-
-    Util:WatchVar(dropdown, 'Raid_Dropdown');
+    }
+    local raid_dd = createDropdown(raid_opts)
+    raid_dd:SetPoint("TOPRIGHT", parent_frame, "TOPRIGHT", 15, 75);
 end
 
 function Setup:TabView()

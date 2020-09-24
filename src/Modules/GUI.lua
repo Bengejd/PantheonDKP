@@ -25,6 +25,8 @@ GUI.sortBy = 'name';
 GUI.sortDir = 'ASC';
 GUI.memberTable = nil;
 
+GUI.adjustmentDropdowns = {}
+
 function GUI:Init()
     Util:Debug('Initializing GUI')
     GUI.pdkp_frame = Setup:MainUI()
