@@ -56,7 +56,7 @@ function Settings:IsDebug()
 end
 
 function Settings:CanEdit()
-    local pName, _ = UnitName("PLAYER")
+    local pName = Util:GetMyName()
     local member = Guild.members[pName]
 
     if (member and member.canEdit) or Settings:IsDebug() then
@@ -64,6 +64,8 @@ function Settings:CanEdit()
     end
     return false
 end
+
+
 
 
 

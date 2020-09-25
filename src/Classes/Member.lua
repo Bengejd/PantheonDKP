@@ -103,7 +103,7 @@ function Member:QuickCalc(raid, calc_name)
         local calcs = {
             ['Shroud']=0.5,
             ['Roll']=0.1,
-            ['Unexcused Absence']=0.15
+            ['Unexcused Absence']=0
         }
         local percent = calcs[calc_name]
         return math.ceil(dkpTotal * percent)

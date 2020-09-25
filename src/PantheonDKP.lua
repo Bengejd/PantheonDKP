@@ -165,6 +165,9 @@ function PDKP:HandleSlashCommands(msg)
         ['debug']=function()
             Settings:ToggleDebugging()
         end,
+        ['boss Kill']=function()
+
+        end
     }
 
     if debugCommands[msg] and Settings:IsDebug() then return debugCommands[msg]() end

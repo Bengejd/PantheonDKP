@@ -15,8 +15,10 @@ local tostring, print, setmetatable, pairs = tostring, print, setmetatable, pair
 local canEdit, bossIDS = core.canEdit, core.bossIDS;
 
 local currentRaid = nil;
-
 local Raid = core.Raid;
+
+Raid.recent_boss_kill = {};
+
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
 function Raid:new()
@@ -31,6 +33,10 @@ function Raid:new()
     self.CurrentRaid = nil;
 
     return self
+end
+
+function Raid:NewBossKill()
+    --return Raid:BossKill(669, 'Sulfuron Harbinger');
 end
 
 function Raid:GetRaidInfo()
@@ -103,7 +109,19 @@ end
 function Raid:GetInstanceInfo()
     name, instance_type, difficultyIndex, difficultyName, maxPlayers,
     dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
+end
 
+--- Debug funcs
+function Raid:TestBossKill()
+    local raids = Defaults.bossIDS
+    local raid_bosses = raids[Settings.current_raid]
+    for id, name in pairs(raid_bosses) do
+        return {
+            ['name']=name,
+            ['id']=id,
+            ['raid']=Settings.current_raid
+        }
+    end
 end
 
 -- Events: PLAYER_ENTERING_WORLD, ZONE_CHANGED_NEW_AREA, GROUP_ROSTER_UPDATE,

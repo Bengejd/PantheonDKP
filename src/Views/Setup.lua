@@ -20,6 +20,7 @@ local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local ScrollTable = core.ScrollTable;
 local Settings = core.Settings;
+local Loot = core.Loot;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -57,6 +58,10 @@ local function createCloseButton(f, mini)
     b:SetParent(f)
     b:SetScript("OnClick", function(self) self:GetParent():Hide() end)
     return b
+end
+
+function Setup:CreateCloseButton(f, mini)
+    return createCloseButton(f, mini)
 end
 
 local function createCheckButton(parent, point, x, y, displayText, uniqueName, center, frame)
@@ -184,7 +189,6 @@ local function createEditBox(opts)
     box:SetAutoFocus(false)
     box:SetFontObject(GameFontHighlightSmall)
     box:SetMultiLine(multi_line)
-    box:SetNumeric(numeric)
 
     box.isValid = function()
         if box:IsVisible() then
@@ -196,6 +200,14 @@ local function createEditBox(opts)
             end
         else
             return true
+        end
+    end
+
+    box.getValue = function()
+        if numeric then
+            return box:GetNumber()
+        else
+            return box:GetText()
         end
     end
 
@@ -344,7 +356,11 @@ function Setup:Debugging()
             print(encoded_time)
             print(compressed_time)
             print(serialized_time)
-        end
+        end,
+        ['boss kill']=function()
+            local boss_info = Raid:TestBossKill()
+            print(boss_info['name'], boss_info['id'], boss_info['raid'])
+        end,
     }
     local button_counter_x = 1
     local button_counter_y = 1
@@ -365,6 +381,8 @@ function Setup:Debugging()
 
         button_counter = button_counter + 1
     end
+
+    if not Settings:IsDebug() then f:Hide() end
 end
 
 function Setup:RandomStuff()
@@ -565,7 +583,7 @@ function Setup:DKPAdjustments()
         edgeFile = SCROLL_BORDER, edgeSize = 8,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetHeight(250)
+    f:SetHeight(225)
     f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,0)
 
@@ -573,8 +591,7 @@ function Setup:DKPAdjustments()
     adjustHeader:SetText("DKP Adjustments")
     adjustHeader:SetPoint("TOPLEFT", 5, -5)
 
-    local mainDD;
-    local boss_dropdowns = {};
+    local mainDD, amount_box, other_box;
 
     --- Main Dropdown
 
@@ -591,6 +608,7 @@ function Setup:DKPAdjustments()
     mainDD = createDropdown(reason_opts)
     mainDD:SetPoint("TOPLEFT", f, "TOPLEFT", -3, -50)
 
+
     --- Bosses section
 
     for raid, _ in pairs(Defaults.raidBosses) do
@@ -606,8 +624,6 @@ function Setup:DKPAdjustments()
         }
         local bossDD = createDropdown(boss_opts)
         bossDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
-
-        table.insert(boss_dropdowns, bossDD)
     end
 
     --- Amount section
@@ -617,12 +633,12 @@ function Setup:DKPAdjustments()
         ['title']='Amount',
         ['multi']=false,
         ['max_chars']=7,
+        ['numeric']=true,
         ['textValidFunc']=function(box)
-            print('Box is valid')
             PDKP_ToggleAdjustmentDropdown()
         end
     }
-    local amount_box = createEditBox(amount_opts)
+    amount_box = createEditBox(amount_opts)
 
     amount_box.frame:SetWidth(75)
     amount_box:SetWidth(60)
@@ -636,11 +652,10 @@ function Setup:DKPAdjustments()
         ['title']='Other',
         ['multi']=true,
         ['textValidFunc']=function(box)
-            print('Box is valid')
             PDKP_ToggleAdjustmentDropdown()
         end
     }
-    local other_box = createEditBox(other_opts)
+    other_box = createEditBox(other_opts)
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
     other_box:Hide()
 
@@ -649,7 +664,15 @@ function Setup:DKPAdjustments()
     sb:SetSize(80, 22) -- width, height
     sb:SetText("Submit")
     sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
-    sb:SetScript("OnClick", function() DKP:Submit() end)
+    sb:SetScript("OnClick", function()
+        DKP:Submit()
+        other_box:SetText("")
+        amount_box:SetText("")
+        other_box:ClearFocus()
+        amount_box:ClearFocus()
+
+        PDKP_ToggleAdjustmentDropdown()
+    end)
     sb.canSubmit = false
     sb.toggle = function()
         if sb.canSubmit then sb:Enable() else sb:Disable() end
@@ -658,7 +681,39 @@ function Setup:DKPAdjustments()
 
     GUI.submit_entry = sb
 
+    --- Shroud / Roll buttons
+    local shroud = CreateFrame("Button", "$parent_shroud", f, "UIPanelButtonTemplate")
+    shroud:SetSize(75, 25)
+    shroud:SetText("Shroud")
+    shroud:SetPoint("TOPLEFT", amount_box, "BOTTOMLEFT", -10, -10)
+    shroud:SetScript("OnClick", function()
+        local amount = DKP:CalculateButton('Shroud')
+        amount_box:SetText("-" .. amount)
+    end)
+
+    local roll = CreateFrame("Button", "$parent_roll", f, "UIPanelButtonTemplate")
+    roll:SetSize(75, 25)
+    roll:SetText("Roll")
+    roll:SetPoint("LEFT", shroud, "RIGHT", 0, 0)
+    roll:SetScript("OnClick", function()
+        local amount = DKP:CalculateButton('Roll')
+        amount_box:SetText("-" .. amount)
+    end)
+
+    GUI.adjust_buttons = {shroud, roll}
+
     mainDD:Show()
+
+
+    --- Boss Loot Section
+    local boss_loot_frame = Loot:CreateBossLoot(f)
+
+    local loot_close = createCloseButton(boss_loot_frame, true)
+    loot_close:SetPoint('TOPRIGHT', boss_loot_frame, 'TOPRIGHT', 0, -1)
+
+    boss_loot_frame:Hide()
+
+    GUI.boss_loot_frame = boss_loot_frame;
 
     if not Settings:CanEdit() then f:Hide() end
 
@@ -704,6 +759,9 @@ function PDKP_ToggleAdjustmentDropdown()
     local adjust_amount_setting = Defaults.adjustment_amounts[raid_val][reason_val]
     if adjust_amount_setting ~= nil then amount_box:SetText(adjust_amount_setting) end
 
+    GUI.adjustment_entry['amount']=amount_box:getValue()
+    GUI.adjustment_entry['other']=other_box:getValue()
+
     for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD}) do
         if b_dd:IsVisible() then
             GUI.adjustment_entry['boss']=UIDropDownMenu_GetSelectedValue(b_dd)
@@ -719,16 +777,28 @@ function PDKP_ToggleAdjustmentDropdown()
         can_submit = can_submit and frame.isValid()
     end
 
+    local selected = #PDKP.memberTable.selected
+
     --- Selection check
-    can_submit = can_submit and #PDKP.memberTable.selected > 0
+    can_submit = can_submit and selected > 0
 
     if reason_val == 'Item Win' then
-        can_submit = can_submit and #PDKP.memberTable.selected == 1
+        can_submit = can_submit and selected == 1
+        GUI.boss_loot_frame:Show()
+    else
+        GUI.boss_loot_frame:Hide()
+    end
+
+    for _, button in pairs(GUI.adjust_buttons) do
+        if selected == 1 then
+            button:Enable()
+        else
+            button:Disable()
+        end
     end
 
     sb.canSubmit = can_submit
-
-    print(can_submit)
+    sb.canSubmit = can_submit
 
     sb.toggle()
 end

@@ -30,6 +30,10 @@ GUI.adjustmentDropdowns_names = {};
 GUI.editBoxes = {};
 GUI.submit_entry = nil;
 GUI.adjustment_entry = {};
+GUI.adjust_buttons = {}
+
+GUI.boss_loot_frame = nil;
+GUI.recent_boss_kill = {};
 
 function GUI:Init()
     Util:Debug('Initializing GUI')

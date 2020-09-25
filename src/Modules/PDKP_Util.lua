@@ -82,6 +82,11 @@ function Util:RemoveColorFromText(name)
     return fName
 end
 
+function Util:GetMyName()
+    local pName, _ = UnitName("PLAYER")
+    return pName
+end
+
 -----------------------------
 --     Time Functions      --
 -----------------------------
