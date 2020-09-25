@@ -28,13 +28,12 @@ Settings.current_raid = 'Molten Core';
 
 function Settings:InitDB()
     SettingsDB = core.PDKP.db['settingsDB']
+    Settings.current_raid = SettingsDB['current_raid'] or 'Molten Core';
 end
 
 function Settings:ChangeCurrentRaid(raid)
-    if raid == 'Onyxia\'s Lair' then
-        raid = 'Molten Core'
-    end
     Settings.current_raid = raid;
+    SettingsDB['current_raid']=raid;
 end
 
 function Settings:ToggleDebugging()

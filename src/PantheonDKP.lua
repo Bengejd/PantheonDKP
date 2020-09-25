@@ -167,7 +167,7 @@ function PDKP:HandleSlashCommands(msg)
         end,
     }
 
-    if debugCommands[msg] then return debugCommands[msg]() end
+    if debugCommands[msg] and Settings:IsDebug() then return debugCommands[msg]() end
 
     Util:Debug('New command received ' .. msg);
 
@@ -286,24 +286,24 @@ function PDKP:HandleSlashCommands(msg)
     --end
 end
 
---function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
---
---    if Shroud.shroudPhrases[string.lower(msg)] and Raid:IsAssist() then
---        -- This should send the list to everyone in the raid, so that it just automatically pops up.
---        if Raid.dkpOfficer and Raid:IsDkpOfficer() then -- We have the DKP officer established
---            Util:Debug('DKP Officer is updating shrouders with ' .. name)
---            return Shroud:UpdateShrouders(name)
---        elseif Raid.dkpOfficer == nil and Raid:isMasterLooter() then
---            Util:Debug('Master Looter is updating shrouders with ' .. name)
---            return Shroud:UpdateShrouders(name)
---        end
---    elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
---        if not Raid:IsInRaid() then
---            ConvertToRaid()
---        end
---        InviteUnit(name)
---    end
---end
+function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
+
+    --if Shroud.shroudPhrases[string.lower(msg)] and Raid:IsAssist() then
+    --    -- This should send the list to everyone in the raid, so that it just automatically pops up.
+    --    if Raid.dkpOfficer and Raid:IsDkpOfficer() then -- We have the DKP officer established
+    --        Util:Debug('DKP Officer is updating shrouders with ' .. name)
+    --        return Shroud:UpdateShrouders(name)
+    --    elseif Raid.dkpOfficer == nil and Raid:isMasterLooter() then
+    --        Util:Debug('Master Looter is updating shrouders with ' .. name)
+    --        return Shroud:UpdateShrouders(name)
+    --    end
+    --elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
+    --    if not Raid:IsInRaid() then
+    --        ConvertToRaid()
+    --    end
+    --    InviteUnit(name)
+    --end
+end
 
 local events = CreateFrame("Frame", "EventsFrame");
 

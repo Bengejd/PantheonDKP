@@ -26,6 +26,7 @@ GUI.sortDir = 'ASC';
 GUI.memberTable = nil;
 
 GUI.adjustmentDropdowns = {}
+GUI.adjustmentDropdowns_names = {};
 
 function GUI:Init()
     Util:Debug('Initializing GUI')

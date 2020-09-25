@@ -83,18 +83,31 @@ end
 ---     parent (Frame): Parent frame of the dropdown.
 ---     items (Table): String table of the dropdown options.
 ---     defaultVal (String): String value for the dropdown to default to (empty otherwise).
+---     hide (Boolean): A boolean value for whether the dropdown should start hidden.
+---     dropdownTable (table): A table of dropdowns for this to be inserted into.
+---     showOnValue (string): A custom value for when the table should be shown.
 ---     changeFunc (Function): A custom function to be called, after selecting a dropdown option.
+---     showFunc (Function): A custom function to be called, when the dropdown shows.
+---     hideFunc (Function): A custom function to be called, when the dropdown hides.
 local function createDropdown(opts)
     local dropdown_name = '$parent_' .. opts['name'] .. '_dropdown'
     local menu_items = opts['items'] or {}
     local title_text = opts['title'] or ''
-    local dropdown_width = 0
     local default_val = opts['defaultVal'] or ''
+    local hide = opts['hide'] or false
+    local showFunc = opts['showFunc'] or function() end
+    local hideFunc = opts['hideFunc'] or function() end
     local change_func = opts['changeFunc'] or function (dropdown_val) end
+
 
     local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
     local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOPLEFT", 20, 10)
+
+    dropdown.uniqueID = opts['name']
+    dropdown.showOnValue = opts['showOnValue'] or 'Always'
+    local dropdown_width = 0;
+    dropdown.initialized = false
 
     for _, item in pairs(menu_items) do -- Sets the dropdown width to the largest item string width.
         dd_title:SetText(item)
@@ -104,12 +117,18 @@ local function createDropdown(opts)
         end
     end
 
+    dropdown:SetScript("OnShow", showFunc)
+    dropdown:SetScript("OnHide", hideFunc)
+
+    if hide then dropdown:Hide() end
+
     UIDropDownMenu_SetWidth(dropdown, dropdown_width)
     UIDropDownMenu_SetText(dropdown, default_val)
     dd_title:SetText(title_text)
 
     UIDropDownMenu_Initialize(dropdown, function(self, level, _)
         local info = UIDropDownMenu_CreateInfo()
+
         for key, val in pairs(menu_items) do
             info.text = val;
             info.checked = false
@@ -119,11 +138,18 @@ local function createDropdown(opts)
                 UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value)
                 UIDropDownMenu_SetText(dropdown, b.value)
                 b.checked = true
-                change_func(dropdown, b.value)
+                change_func()
             end
             UIDropDownMenu_AddButton(info)
         end
+
+        if not dropdown.initialized and default_val and default_val ~= '' then
+            dropdown.initialized = true;
+            UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
+        end
     end)
+
+    if opts['dropdownTable'] then opts['dropdownTable'][opts['name']]=dropdown end
 
     return dropdown
 end
@@ -209,8 +235,6 @@ end
 --------------------------
 -- Setup      Functions --
 --------------------------
-
-
 
 function Setup:MainUI()
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -333,6 +357,14 @@ function Setup:Debugging()
         end,
         ['reset DKP']=function()
             DKP:ResetDKP()
+        end,
+        ['compressString']=function()
+            local testTime = 1600749114
+            local encoded_time, compressed_time, serialized_time = Comms:DataEncoder(testTime)
+            print(testTime)
+            print(encoded_time)
+            print(compressed_time)
+            print(serialized_time)
         end
     }
     local button_counter_x = 1
@@ -362,11 +394,12 @@ function Setup:RandomStuff()
 
     Setup:ScrollTable()
     Setup:Filters()
+    Setup:DKPAdjustments()
     Setup:RaidDropdown()
     --Setup:BossKillLoot()
     --Setup:TabView()
 
-    Setup:DKPAdjustments()
+
 end
 
 function Setup:TableSearch()
@@ -562,6 +595,7 @@ function Setup:DKPAdjustments()
     adjustHeader:SetPoint("TOPLEFT", 5, -5)
 
     local mainDD, raidDD;
+    local boss_dropdowns = {};
 
     local reason_opts = {
         ['name']='reasons',
@@ -569,52 +603,50 @@ function Setup:DKPAdjustments()
         ['title']='Reason',
         ['items']= {'On Time Bonus', 'Completion Bonus', 'Boss Kill', 'Unexcused Absence', 'Item Win', 'Other'},
         ['defaultVal']='',
-        ['changeFunc']=function(_, dropdown_val)
-            raidDD:Show()
-        end
+        ['dropdownTable']=GUI.adjustmentDropdowns,
+        ['changeFunc']=PDKP_ToggleAdjustmentDropdown
     }
 
     mainDD = createDropdown(reason_opts)
     mainDD:SetPoint("TOPLEFT", f, "TOPLEFT", -3, -50)
 
-    local raid_opts = {
-        ['name']='raid',
-        ['parent']=mainDD,
-        ['title']='Raid',
-        ['items']= Defaults.dkp_raids,
-        ['defaultVal']='',
-        ['changeFunc']=function(_, dropdown_val)
-            local mainDD_Val = UIDropDownMenu_GetSelectedValue(mainDD)
-            print(mainDD_Val)
-        end
-    }
+    for raid, _ in pairs(Defaults.raidBosses) do
+        local boss_opts = {
+            ['name']='boss_' .. raid,
+            ['parent']=mainDD,
+            ['title']='Boss',
+            ['hide']=true,
+            ['dropdownTable']=GUI.adjustmentDropdowns,
+            ['showOnValue']=raid,
+            ['items']=Defaults.raidBosses[raid],
+        }
+        local bossDD = createDropdown(boss_opts)
+        bossDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
 
-    --for raid_name, raid in pairs(Defaults.raidBosses) do
-    --    local boss_opts = {
-    --        ['name']='boss_' .. raid_name,
-    --        ['parent']=raidDD,
-    --        ['title']='Boss',
-    --        --['items']=Defaults.raidBosses[]
-    --        ['items']=Defaults.raidBosses
-    --    }
-    --end
-
-    --local boss_opts = {
-    --    ['name']='boss',
-    --    ['parent']=raidDD,
-    --    ['title']='Boss',
-    --    --['items']=Defaults.raidBosses[]
-    --    ['items']=Defaults.raidBosses
-    --}
-
-    raidDD = createDropdown(raid_opts)
-    raidDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
-
-
-    raidDD:Hide()
-
+        table.insert(boss_dropdowns, bossDD)
+    end
 
     mainDD:Show()
+
+end
+
+function PDKP_ToggleAdjustmentDropdown()
+    local gui_dds = GUI.adjustmentDropdowns;
+
+    local reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD = gui_dds['reasons'], gui_dds['raid'], gui_dds['boss_Blackwing Lair'],
+    gui_dds['boss_Molten Core'], gui_dds['boss_Ahn\'Qiraj'], gui_dds['boss_Naxxramas']
+
+    local reason_val = UIDropDownMenu_GetSelectedValue(reasonDD)
+    local raid_val = UIDropDownMenu_GetSelectedValue(raidDD)
+
+    for _, boss_dropdown in pairs({bwlDD, mcDD, aqDD, naxxDD} ) do
+        if reason_val == 'Boss Kill' and boss_dropdown.uniqueID == 'boss_' .. raid_val then
+            boss_dropdown:Show()
+        else
+            boss_dropdown:Hide()
+        end
+    end
+
 
 end
 
@@ -628,9 +660,11 @@ function Setup:RaidDropdown()
         ['title']='Raid Selection',
         ['items']= Defaults.dkp_raids,
         ['defaultVal']=Settings.current_raid,
-        ['changeFunc']=function(_, dropdown_val)
+        ['dropdownTable']=GUI.adjustmentDropdowns,
+        ['changeFunc']=function(dropdown, dropdown_val)
             Settings:ChangeCurrentRaid(dropdown_val);
             PDKP.memberTable:RaidChanged()
+            PDKP_ToggleAdjustmentDropdown()
         end
     }
     local raid_dd = createDropdown(raid_opts)
