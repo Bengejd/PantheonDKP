@@ -48,3 +48,20 @@ function DKP:ResetDKP()
     end
     memberTable:RaidChanged()
 end
+
+function DKP:Submit()
+    local st = PDKP.memberTable
+    if #st.selected >= 1 then
+        for _, name in pairs(st.selected) do
+            local _, rowIndex = tfind(st.rows, name, 'name')
+            if rowIndex then
+                local row = st.rows[rowIndex]
+                if row.dataObj['name'] == name then
+                    local member = Guild:GetMemberByName(name)
+                    member:UpdateDKP(nil, nil)
+                    row:UpdateRowValues()
+                end
+            end
+        end
+    end
+end

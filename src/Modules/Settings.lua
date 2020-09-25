@@ -55,5 +55,15 @@ function Settings:IsDebug()
     end
 end
 
+function Settings:CanEdit()
+    local pName, _ = UnitName("PLAYER")
+    local member = Guild.members[pName]
+
+    if (member and member.canEdit) or Settings:IsDebug() then
+        return true
+    end
+    return false
+end
+
 
 

@@ -27,6 +27,9 @@ GUI.memberTable = nil;
 
 GUI.adjustmentDropdowns = {}
 GUI.adjustmentDropdowns_names = {};
+GUI.editBoxes = {};
+GUI.submit_entry = nil;
+GUI.adjustment_entry = {};
 
 function GUI:Init()
     Util:Debug('Initializing GUI')

@@ -120,6 +120,19 @@ local function createDropdown(opts)
     dropdown:SetScript("OnShow", showFunc)
     dropdown:SetScript("OnHide", hideFunc)
 
+    dropdown.isValid = function()
+        if dropdown:IsVisible() then
+            local box_text = UIDropDownMenu_GetSelectedValue(dropdown)
+            if box_text and box_text ~= "" and box_text ~= 0 then
+                return true
+            else
+                return false
+            end
+        else
+            return true
+        end
+    end
+
     if hide then dropdown:Hide() end
 
     UIDropDownMenu_SetWidth(dropdown, dropdown_width)
@@ -138,7 +151,7 @@ local function createDropdown(opts)
                 UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value)
                 UIDropDownMenu_SetText(dropdown, b.value)
                 b.checked = true
-                change_func()
+                change_func(dropdown, b.value)
             end
             UIDropDownMenu_AddButton(info)
         end
@@ -154,82 +167,72 @@ local function createDropdown(opts)
     return dropdown
 end
 
-local function createEditBox(name, parent, options)
-    local opts = {
-        ['name'] = name or '$parent_editbox',
-        ['parent'] = parent or 'pdkp_frame',
-        ['posx']= options['x'] or 0,
-        ['posy']=options['y'] or 0,
-        ['relative']=options['relative'] or 'BOTTOMLEFT',
-        ['callback']=options['callback'] or nil,
-    }
+local function createEditBox(opts)
+    local name = opts['name'] or 'edit_box'
+    local parent = opts['parent'] or pdkp_frame
+    local box_label_text = opts['title'] or ''
+    local multi_line = opts['multi']
+    local max_chars = opts['max_chars'] or 225
+    local textValidFunc = opts['textValidFunc'] or function() end
+    local numeric = opts['numeric'] or false
 
-    -- edit frame
-    local ef = CreateFrame("Frame", "$parent_edit_frame", pdkp_frame)
-    --ef:SetBackdrop( {
-    --    bgFile = TRANSPARENT_BACKGROUND,
-    --    edgeFile = SHROUD_BORDER, tile = true, tileSize = 17, edgeSize = 16,
-    --    insets = { left = 5, right = 5, top = 5, bottom = 5 }
-    --});
-    ef:SetHeight(25)
-    ef:SetWidth(165)
-    ef:SetPoint('BOTTOMLEFT', pdkp_frame, "BOTTOMLEFT", 10, 10)
+    local box = CreateFrame("EditBox", "$parent_" .. name, parent)
+    box:SetHeight(30)
+    box:SetWidth(150)
+    box:SetFrameStrata("DIALOG")
+    box:SetMaxLetters(max_chars)
+    box:SetAutoFocus(false)
+    box:SetFontObject(GameFontHighlightSmall)
+    box:SetMultiLine(multi_line)
+    box:SetNumeric(numeric)
 
-    -- edit label
-    local sl = ef:CreateFontString(ef, 'OVERLAY', 'GameFontNormalSmall')
-    sl:SetText("Search:")
-    sl:SetPoint("LEFT", ef, "LEFT", -12, 0)
-    sl:SetWidth(80)
-
-    -- edit clear button
-    local clearButton = CreateFrame("Button", "$parent_clear_button", ef, "UIPanelButtonTemplate")
-    clearButton:SetText("Clear")
-    clearButton:SetSize(45, 15)
-    clearButton:SetPoint("RIGHT", ef, "RIGHT", -2, 0)
-
-    -- edit box
-    local eb = CreateFrame("EditBox", "$parent_editBox", pdkp_frame)
-    eb:SetWidth(75)
-    eb:SetHeight(50)
-    eb:SetPoint("LEFT", ef, "LEFT", 48, 0)
-    eb:SetFontObject(GameFontNormalSmall)
-    eb:SetFrameStrata("DIALOG")
-    eb:SetMaxLetters(11)
-    eb:SetAutoFocus(false)
-
-    local function toggleClearButton(text)
-        if text == nil or text == "" then
-            clearButton:Hide()
+    box.isValid = function()
+        if box:IsVisible() then
+            local box_text = box:GetText()
+            if box_text and box_text ~= "" and box_text ~= 0 then
+                return true
+            else
+                return false
+            end
         else
-            clearButton:Show()
+            return true
         end
     end
 
-    local function resetSearch()
-        eb:ClearFocus()
-        toggleClearButton(eb:GetText())
+    box:SetScript("OnEscapePressed", function() box:ClearFocus() end)
+    box:SetScript("OnTextChanged", function()
+        if box.isValid() then textValidFunc(box) end
+    end)
+
+    local box_frame = CreateFrame("Frame", '$parent_edit_frame', box)
+    box_frame:SetBackdrop( {
+        bgFile = TRANSPARENT_BACKGROUND,
+        edgeFile = SHROUD_BORDER, tile = true, tileSize = 17, edgeSize = 16,
+        insets = { left = 5, right = 5, top = 5, bottom = 5 }
+    });
+    box_frame:SetWidth(170)
+
+    if multi_line then
+        box_frame:SetPoint("TOPLEFT", box, "TOPLEFT", -10, 10)
+        box_frame:SetPoint("BOTTOMRIGHT", box, "BOTTOMRIGHT", 10, -15)
+        box_frame:SetHeight(50)
+    else
+        box_frame:SetPoint("TOPLEFT", box, "TOPLEFT", -10, 0)
+        box_frame:SetHeight(30)
     end
 
-    eb:SetScript("OnEscapePressed", function() resetSearch() end)
-    eb:SetScript("OnEnterPressed", function() resetSearch() end)
-    eb:SetScript("OnTextChanged", function()
-        local text = eb:GetText()
-        toggleClearButton(text)
-    end)
-    eb:SetScript("OnEditFocusLost", function()
-        _G["pdkp_frame_edit_frame_clear_button"]:Hide()
-        print('hiding button')
-    end)
-    eb:SetScript("OnEditFocusGained", function()
+    box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
 
-    end)
+    -- label
+    local el = box:CreateFontString(box_frame, "OVERLAY", 'GameFontNormal')
+    el:SetText(box_label_text)
+    el:SetPoint("TOPLEFT", box_frame, "TOPLEFT", 5, 10)
 
-    clearButton:SetScript("OnClick", function()
-        eb:SetText("")
-        resetSearch()
-    end)
+    GUI.editBoxes[name]=box
 
-    _G["pdkp_frame_edit_frame_clear_button"]:Hide()
+    box.frame = box_frame
+    box.title = el
+    return box
 end
 
 --------------------------
@@ -278,30 +281,6 @@ function Setup:MainUI()
     local b = createCloseButton(f, false)
     b:SetSize(22, 25) -- width, height
     b:SetPoint("TOPRIGHT", -2, -10)
-
-    -- Submit Button
-
-    local sb = CreateFrame("Button", "MyButton", f, "UIPanelButtonTemplate")
-    sb:SetSize(80 ,22) -- width, height
-    sb:SetText("Submit")
-    sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 12)
-    sb:SetScript("OnClick", function()
-        local st = PDKP.memberTable
-
-        if #st.selected >= 1 then
-            for _, name in pairs(st.selected) do
-                local _, rowIndex = tfind(st.rows, name, 'name')
-                if rowIndex then
-                    local row = st.rows[rowIndex]
-                    if row.dataObj['name'] == name then
-                        local member = Guild:GetMemberByName(name)
-                        member:UpdateDKP(nil, nil)
-                        row:UpdateRowValues()
-                    end
-                end
-            end
-        end
-    end)
 
     pdkp_frame = f
 
@@ -594,8 +573,10 @@ function Setup:DKPAdjustments()
     adjustHeader:SetText("DKP Adjustments")
     adjustHeader:SetPoint("TOPLEFT", 5, -5)
 
-    local mainDD, raidDD;
+    local mainDD;
     local boss_dropdowns = {};
+
+    --- Main Dropdown
 
     local reason_opts = {
         ['name']='reasons',
@@ -610,6 +591,8 @@ function Setup:DKPAdjustments()
     mainDD = createDropdown(reason_opts)
     mainDD:SetPoint("TOPLEFT", f, "TOPLEFT", -3, -50)
 
+    --- Bosses section
+
     for raid, _ in pairs(Defaults.raidBosses) do
         local boss_opts = {
             ['name']='boss_' .. raid,
@@ -618,6 +601,7 @@ function Setup:DKPAdjustments()
             ['hide']=true,
             ['dropdownTable']=GUI.adjustmentDropdowns,
             ['showOnValue']=raid,
+            ['changeFunc']=PDKP_ToggleAdjustmentDropdown,
             ['items']=Defaults.raidBosses[raid],
         }
         local bossDD = createDropdown(boss_opts)
@@ -626,28 +610,127 @@ function Setup:DKPAdjustments()
         table.insert(boss_dropdowns, bossDD)
     end
 
+    --- Amount section
+    local amount_opts = {
+        ['name']='amount',
+        ['parent']=mainDD,
+        ['title']='Amount',
+        ['multi']=false,
+        ['max_chars']=7,
+        ['textValidFunc']=function(box)
+            print('Box is valid')
+            PDKP_ToggleAdjustmentDropdown()
+        end
+    }
+    local amount_box = createEditBox(amount_opts)
+
+    amount_box.frame:SetWidth(75)
+    amount_box:SetWidth(60)
+    amount_box:SetPoint("TOPLEFT", mainDD, "BOTTOMLEFT", 25, -20)
+
+    --- Other Edit Box Section
+
+    local other_opts = {
+        ['name']= 'other',
+        ['parent']= mainDD,
+        ['title']='Other',
+        ['multi']=true,
+        ['textValidFunc']=function(box)
+            print('Box is valid')
+            PDKP_ToggleAdjustmentDropdown()
+        end
+    }
+    local other_box = createEditBox(other_opts)
+    other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
+    other_box:Hide()
+
+    --- Submit button
+    local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    sb:SetSize(80, 22) -- width, height
+    sb:SetText("Submit")
+    sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
+    sb:SetScript("OnClick", function() DKP:Submit() end)
+    sb.canSubmit = false
+    sb.toggle = function()
+        if sb.canSubmit then sb:Enable() else sb:Disable() end
+    end
+    sb:Disable()
+
+    GUI.submit_entry = sb
+
     mainDD:Show()
+
+    if not Settings:CanEdit() then f:Hide() end
 
 end
 
 function PDKP_ToggleAdjustmentDropdown()
+    if tEmpty(GUI.adjustmentDropdowns) then return end
+
     local gui_dds = GUI.adjustmentDropdowns;
+
+    wipe(GUI.adjustment_entry) -- Wipe the old entry details.
+
+    local entry_details = GUI.adjustment_entry
+
+    --- Submit Button
+    local sb = GUI.submit_entry
 
     local reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD = gui_dds['reasons'], gui_dds['raid'], gui_dds['boss_Blackwing Lair'],
     gui_dds['boss_Molten Core'], gui_dds['boss_Ahn\'Qiraj'], gui_dds['boss_Naxxramas']
 
+    local other_box = GUI.editBoxes['other']
+    local amount_box = GUI.editBoxes['amount']
+
     local reason_val = UIDropDownMenu_GetSelectedValue(reasonDD)
     local raid_val = UIDropDownMenu_GetSelectedValue(raidDD)
 
-    for _, boss_dropdown in pairs({bwlDD, mcDD, aqDD, naxxDD} ) do
-        if reason_val == 'Boss Kill' and boss_dropdown.uniqueID == 'boss_' .. raid_val then
-            boss_dropdown:Show()
+    entry_details['raid']=raid_val
+    entry_details['reason']=reason_val
+
+    local function toggleFrameVisiblity(frame, show)
+        if show then
+            frame:Show()
         else
-            boss_dropdown:Hide()
+            frame:Hide()
         end
     end
 
+    for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD} ) do
+        toggleFrameVisiblity(b_dd, reason_val == 'Boss Kill' and b_dd.uniqueID == 'boss_' .. raid_val)
+    end
+    toggleFrameVisiblity(other_box, reason_val == 'Other')
 
+    local adjust_amount_setting = Defaults.adjustment_amounts[raid_val][reason_val]
+    if adjust_amount_setting ~= nil then amount_box:SetText(adjust_amount_setting) end
+
+    for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD}) do
+        if b_dd:IsVisible() then
+            GUI.adjustment_entry['boss']=UIDropDownMenu_GetSelectedValue(b_dd)
+        end
+    end
+
+    local can_submit = true
+
+    local entry_frames = {reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD, other_box, amount_box}
+
+    --- Validate every frame.
+    for _, frame in pairs(entry_frames) do
+        can_submit = can_submit and frame.isValid()
+    end
+
+    --- Selection check
+    can_submit = can_submit and #PDKP.memberTable.selected > 0
+
+    if reason_val == 'Item Win' then
+        can_submit = can_submit and #PDKP.memberTable.selected == 1
+    end
+
+    sb.canSubmit = can_submit
+
+    print(can_submit)
+
+    sb.toggle()
 end
 
 function Setup:RaidDropdown()

@@ -99,11 +99,11 @@ end
 function Member:QuickCalc(raid, calc_name)
     local dkpTotal = self.dkp[raid].total
     if dkpTotal > 0 then
-        calc_name = calc_name or 'shroud';
+        calc_name = calc_name or 'Shroud';
         local calcs = {
-            ['shroud']=0.5,
-            ['roll']=0.1,
-            ['other']=0.15
+            ['Shroud']=0.5,
+            ['Roll']=0.1,
+            ['Unexcused Absence']=0.15
         }
         local percent = calcs[calc_name]
         return math.ceil(dkpTotal * percent)
@@ -112,11 +112,11 @@ function Member:QuickCalc(raid, calc_name)
     end
 end
 
-
 function Member:UpdateDKP(raid, entry)
     raid = raid or Raid:GetCurrentRaid()
     --entry = entry or {};
     self.dkp[raid].total = self.dkp[raid].total + 10
+    self:Save()
 end
 
 function Member:Save()

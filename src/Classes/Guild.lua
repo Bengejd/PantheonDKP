@@ -58,6 +58,7 @@ function Guild:new()
     Guild.memberNames = {};
     Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
+
     return Guild
 end
 
@@ -88,7 +89,7 @@ function Guild:GetMembers()
         if member.lvl >= 55 or member.canEdit or member.isOfficer then
             if member.name == nil then member.name = '' end;
             if member.isBank then Guild:InitBankInfo(i, member) end -- Init bank info.
-            if member.isOfficer then insert(Guild.officers, member) end -- Init Officers
+            if member.isOfficer then Guild.officers[member.name]=member end -- Init Officers
             if member.isClassLeader then insert(Guild.classLeaders, member) end; -- Init class classLeaders
             -- Add member to the table only if it's new, to allow object persistence.
             if isNew then
@@ -125,8 +126,7 @@ function Guild:InitBankInfo(index, member)
 end
 
 function Guild:GetMemberByName(name)
-    local hasMember = tContains(Guild.memberNames, name)
-    if hasMember then return Guild.members[name]
+    if tContains(Guild.memberNames, name) then return Guild.members[name]
     else return nil
     end
 end

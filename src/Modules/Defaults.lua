@@ -24,6 +24,35 @@ Defaults.class_colors = {
     ["Druid"] = "FF7D0A", ["Hunter"] = "ABD473" , ["Mage"] = "40C7EB", ["Paladin"] = "F58CBA",
     ["Priest"] = "FFFFFF", ["Rogue"] = "FFF569", ["Warlock"] = "8787ED", ["Warrior"] = "C79C6E"
 };
+
+Defaults.adjustment_amounts = {
+    ["Molten Core"] = {
+        ['On Time Bonus']=10,
+        ['Completion Bonus']=10,
+        ['Boss Kill']=10,
+        ['Unexcused Absence']=0.15
+    },
+    ["Blackwing Lair"] = {
+        ['On Time Bonus']=10,
+        ['Completion Bonus']=10,
+        ['Boss Kill']=10,
+        ['Unexcused Absence']=0.15
+    },
+    ['Ahn\'Qiraj']={
+        ['On Time Bonus']=5,
+        ['Completion Bonus']=5,
+        ['Boss Kill']=10,
+        ['Unexcused Absence']=0.15
+    },
+    ['Naxxramas']={
+        ['On Time Bonus']=5,
+        ['Completion Bonus']=5,
+        ['Boss Kill']=6,
+        ['Unexcused Absence']=0.15
+    },
+
+}
+
 Defaults.raids = {
     'Onyxia\'s Lair',
     'Molten Core',
@@ -31,13 +60,11 @@ Defaults.raids = {
     'Ahn\'Qiraj',
     --    'Naxxramas',
 };
-
 Defaults.dkp_raids = {
     'Molten Core',
     'Blackwing Lair',
     'Ahn\'Qiraj'
 };
-
 Defaults.raidBosses = {
     ["Onyxia's Lair"] = {
         'Onyxia'

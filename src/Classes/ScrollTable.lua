@@ -228,6 +228,7 @@ end
 function ScrollTable:UpdateLabelTotals()
     if self == nil or self.entryLabel == nil then return end
     self.entryLabel:SetText(#self.displayedRows .. " Players shown | " .. #self.selected .. " selected")
+    PDKP_ToggleAdjustmentDropdown()
 end
 
 ----- FILTER FUNCTIONS -----
