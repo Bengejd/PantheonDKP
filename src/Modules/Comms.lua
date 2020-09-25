@@ -2,7 +2,24 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
+local DKP = core.DKP;
+local GUI = core.GUI;
+local Item = core.Item;
+local PDKP = core.PDKP;
+local Raid = core.Raid;
+local Util = core.Util;
 local Comms = core.Comms;
+local Setup = core.Setup;
+local Guild = core.Guild; -- Uppercase is the file
+local guild = core.guild; -- Lowercase is the object
+local Shroud = core.Shroud;
+local Member = core.Member;
+local Import = core.Import;
+local Officer = core.Officer;
+local Invites = core.Invites;
+local Minimap = core.Minimap;
+local Defaults = core.Defaults;
+local Settings = core.Settings;
 
 Comms.commsRegistered = false
 
@@ -25,6 +42,13 @@ local GUILD_COMMS = {
     ['pdkpSyncRes']=true,
     ['pdkpVersion']=true,
 }
+
+function Comms:DataEncoder(data)
+    local serialized = PDKP:Serialize(data)
+    local compressed = core.LibDeflate:CompressDeflate(serialized)
+    local encoded = core.LibDeflate:EncodeForWoWAddonChannel(compressed)
+    return encoded, compressed, serialized;
+end
 
 ---------------------------
 -- GENERIC Functions   --

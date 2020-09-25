@@ -26,4 +26,5 @@ core.ScrollTable = {};
 core.PDKP = LibStub("AceAddon-3.0"):NewAddon("PDKP", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0");
 core.PDKP.ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 core.PDKP.cbh = LibStub("CallbackHandler-1.0"):New(core.PDKP);
+core.LibDeflate = LibStub:GetLibrary("LibDeflate")
 
