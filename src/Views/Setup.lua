@@ -625,7 +625,7 @@ function Setup:RaidDropdown()
     local raid_opts = {
         ['name']='raid',
         ['parent']=parent_frame,
-        ['title']='Raid',
+        ['title']='Raid Selection',
         ['items']= Defaults.dkp_raids,
         ['defaultVal']=Settings.current_raid,
         ['changeFunc']=function(_, dropdown_val)
