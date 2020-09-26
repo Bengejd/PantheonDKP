@@ -35,6 +35,10 @@ GUI.adjust_buttons = {}
 GUI.boss_loot_frame = nil;
 GUI.recent_boss_kill = {};
 
+GUI.filter_frame = nil;
+GUI.adjustment_frame = nil;
+GUI.history_frame = nil;
+
 function GUI:Init()
     Util:Debug('Initializing GUI')
     GUI.pdkp_frame = Setup:MainUI()

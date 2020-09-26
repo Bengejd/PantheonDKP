@@ -57,18 +57,25 @@ function Loot:CreateBossLoot(adjust_frame)
     f.loot = {};
     f.loot_frames = {};
 
+
     f.getVisible = function ()
+        local visible_frames = {}
         for _, frame in pairs(f.loot_frames) do
-            
+
+            if not f:IsVisible() then
+                return f.loot_frames
+            end
+            if frame:IsVisible() then table.insert(visible_frames, frame) end
         end
+        return visible_frames
     end
 
     f:SetScript("OnShow", function()
         local boss_loot = Loot:GetBossLoot()
-        for _, l in boss_loot do table.insert(f.loot, l) end
+        for _, l in pairs(boss_loot) do table.insert(f.loot, l) end
 
         for key, item in pairs(f.loot) do
-            local i_frame = CreateFrame("Frame", "$parent_item_" .. key, f)
+            local i_frame = CreateFrame("Frame", "$parent_item_" .. key .. '_' .. item, f)
             i_frame:SetHeight(25)
             i_frame:SetWidth(200)
 
@@ -76,13 +83,18 @@ function Loot:CreateBossLoot(adjust_frame)
             if key == 1 or #f.loot_frames == 0 then
                 i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
             else
-                i_frame:SetPoint("TOPLEFT", f.loot_frames[#f.loot_frames - key], "TOPLEFT", 0, -20)
+                i_frame:SetPoint("TOPLEFT", f.loot_frames[key - 1], "TOPLEFT", 0, -20)
             end
 
             -- Create the item font-string.
             local is = i_frame:CreateFontString(i_frame, "OVERLAY", 'GameFontNormal')
             is:SetPoint("TOPLEFT", 0, 20)
             local cb = Setup:CreateCloseButton(i_frame, true)
+
+            cb:SetScript("OnClick", function()
+                cb:GetParent():Hide()
+
+            end)
 
             -- Create a close button.
             cb:SetSize(15, 15) -- width, height
@@ -97,82 +109,17 @@ function Loot:CreateBossLoot(adjust_frame)
             is:SetText(item)
 
             i_frame:SetScript("OnHide", function ()
-                local visible_items = {};
-
-            end)
-
-            i_frame:SetScript("OnHide", function()
-                local visible_items = {}
-                print(#f.loot_frames)
-                for _, i_frame in pairs(f.loot_frames) do
-                    if i_frame:IsVisible() then table.insert(visible_items, i_frame) end
-                end
+                local visible_items = f.getVisible()
                 for key, i_frame in pairs(visible_items) do
                     i_frame:ClearAllPoints()
                     if key == 1 then
                         i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
                     else
-                        i_frame:SetPoint("TOPLEFT", visible_items[key - 1], "TOPLEFT", 0, -20)
+                        i_frame:SetPoint("TOPLEFT", visible_items[key -1], "TOPLEFT", 0, -20)
                     end
                 end
             end)
-            i_frame:Show()
 
-            i_frame.item = item;
-            i_frame.check = check;
-
-            table.insert(f.loot_frames, i_frame)
-        end
-
-        local boss_items = {}
-        for key, item in pairs(f.loot) do
-
-            -- Create the item frame.
-            local i_frame = CreateFrame("Frame", "$parent_item_" .. key, f)
-            i_frame:SetHeight(25)
-            i_frame:SetWidth(200)
-
-            -- Set them appropriately.
-            if #f.loot_frames == 0 then
-                i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
-            else
-                i_frame:SetPoint("TOPLEFT", f.loot_frames[#f.loot_frames - 1], "TOPLEFT", 0, -20)
-            end
-
-            -- Create the item font-string.
-            local is = i_frame:CreateFontString(i_frame, "OVERLAY", 'GameFontNormal')
-            is:SetPoint("TOPLEFT", 0, 20)
-            local cb = Setup:CreateCloseButton(i_frame, true)
-
-            -- Create a close button.
-            cb:SetSize(15, 15) -- width, height
-            cb:SetPoint("RIGHT", -10, 25)
-            cb:SetFrameLevel(i_frame:GetFrameLevel() + 4)
-
-            --- check box
-            local check = CreateFrame("CheckButton", '$parent_item_'..key..'_check', i_frame, "ChatConfigCheckButtonTemplate")
-            check:SetPoint("RIGHT", cb, "LEFT", -5, 0)
-
-            -- Set the font-string.
-            is:SetText(item)
-
-            table.insert(boss_items, i_frame)
-
-            i_frame:SetScript("OnHide", function()
-                local visible_items = {}
-                print(#f.loot_frames)
-                for _, i_frame in pairs(f.loot_frames) do
-                    if i_frame:IsVisible() then table.insert(visible_items, i_frame) end
-                end
-                for key, i_frame in pairs(visible_items) do
-                    i_frame:ClearAllPoints()
-                    if key == 1 then
-                        i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
-                    else
-                        i_frame:SetPoint("TOPLEFT", visible_items[key - 1], "TOPLEFT", 0, -20)
-                    end
-                end
-            end)
             i_frame:Show()
 
             i_frame.item = item;

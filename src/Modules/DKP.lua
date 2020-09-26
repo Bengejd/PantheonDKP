@@ -61,7 +61,14 @@ function DKP:Submit()
 
     local entry = DKP_Entry:New(GUI.adjustment_entry)
 
-    print(entry.amount)
+    for _, name in pairs(entry['names']) do
+        local member = Guild:GetMemberByName(name)
+        member:NewEntry(entry)
+    end
+    PDKP.memberTable:RaidChanged()
+
+    entry:Save()
+    core.PDKP.dkpDB['history']['lastEdit']=entry.id
 end
 
 function DKP:CalculateButton(b_type)

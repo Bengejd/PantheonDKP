@@ -112,6 +112,14 @@ function Member:QuickCalc(raid, calc_name)
     end
 end
 
+function Member:NewEntry(entry)
+    local raid = entry['raid'] or 'Molten Core'
+    self.dkp[raid].previousTotal = self.dkp[raid].total
+    self.dkp[raid].total = self.dkp[raid].total + entry['dkp_change']
+    table.insert(self.dkp[raid].entries, entry.id)
+    self:Save()
+end
+
 function Member:UpdateDKP(raid, entry)
     raid = raid or Raid:GetCurrentRaid()
     --entry = entry or {};

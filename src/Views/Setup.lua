@@ -257,7 +257,7 @@ function Setup:MainUI()
     f:SetClampedToScreen(true);
 
     f:SetWidth(742) -- Set these to whatever height/width is needed
-    f:SetHeight(682) -- for your Texture
+    f:SetHeight(632) -- for your Texture
 
     local function createTextures(tex)
         local x = tex['x'] or 0
@@ -395,8 +395,7 @@ function Setup:RandomStuff()
     Setup:RaidDropdown()
     --Setup:BossKillLoot()
     --Setup:TabView()
-
-
+    Setup:DKPHistory()
 end
 
 function Setup:TableSearch()
@@ -573,6 +572,8 @@ function Setup:Filters()
     for _, b in pairs(filterButtons) do
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
+
+    GUI.filter_frame = f;
 end
 
 function Setup:DKPAdjustments()
@@ -717,6 +718,8 @@ function Setup:DKPAdjustments()
 
     if not Settings:CanEdit() then f:Hide() end
 
+    GUI.adjustment_frame = f;
+
 end
 
 function PDKP_ToggleAdjustmentDropdown()
@@ -759,8 +762,8 @@ function PDKP_ToggleAdjustmentDropdown()
     local adjust_amount_setting = Defaults.adjustment_amounts[raid_val][reason_val]
     if adjust_amount_setting ~= nil then amount_box:SetText(adjust_amount_setting) end
 
-    GUI.adjustment_entry['amount']=amount_box:getValue()
-    GUI.adjustment_entry['other']=other_box:getValue()
+    GUI.adjustment_entry['dkp_change']=amount_box:getValue()
+    GUI.adjustment_entry['other_text']=other_box:getValue()
 
     for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD}) do
         if b_dd:IsVisible() then
@@ -784,7 +787,7 @@ function PDKP_ToggleAdjustmentDropdown()
 
     if reason_val == 'Item Win' then
         can_submit = can_submit and selected == 1
-        GUI.boss_loot_frame:Show()
+        --GUI.boss_loot_frame:Show()
     else
         GUI.boss_loot_frame:Hide()
     end
@@ -803,13 +806,50 @@ function PDKP_ToggleAdjustmentDropdown()
     sb.toggle()
 end
 
+function Setup:DKPHistory()
+    local f = CreateFrame("Frame", "$parent_history_frame", pdkp_frame)
+
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(225)
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
+    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,35)
+
+    local history_text = f:CreateFontString(f, "Overlay", "GameFontNormal")
+    history_text:SetPoint("TOP", f, "CENTER", 0, 0)
+    history_text:SetText("History Frame")
+
+    local history_button = CreateFrame("Button", "$parent_history_button", pdkp_frame, 'UIPanelButtonTemplate')
+    history_button:SetSize(80, 30)
+    history_button:SetPoint("CENTER", pdkp_frame, "TOP", 0, -50)
+    history_button:SetScript("OnClick", function()
+        if GUI.history_frame:IsVisible() then
+            GUI.history_frame:Hide()
+            GUI.filter_frame:Show()
+            GUI.adjustment_frame:Show()
+        else
+            GUI.history_frame:Show()
+            GUI.filter_frame:Hide()
+            GUI.adjustment_frame:Hide()
+        end
+    end)
+    history_button:SetText("History")
+
+    f:Hide()
+
+    GUI.history_frame = f;
+end
+
 function Setup:RaidDropdown()
 
     local parent_frame = _G['pdkp_frameFilterFrame']
 
     local raid_opts = {
         ['name']='raid',
-        ['parent']=parent_frame,
+        ['parent']=pdkp_frame,
         ['title']='Raid Selection',
         ['items']= Defaults.dkp_raids,
         ['defaultVal']=Settings.current_raid,
@@ -821,7 +861,8 @@ function Setup:RaidDropdown()
         end
     }
     local raid_dd = createDropdown(raid_opts)
-    raid_dd:SetPoint("TOPRIGHT", parent_frame, "TOPRIGHT", 15, 75);
+
+    raid_dd:SetPoint("TOPRIGHT", parent_frame, "TOPRIGHT", 15, 25);
 end
 
 function Setup:TabView()
@@ -1061,7 +1102,7 @@ function Setup:ScrollTable()
         ['anchor']={
             ['point']='TOPLEFT',
             ['rel_point_x']=12,
-            ['rel_point_y']=-120,
+            ['rel_point_y']=-70,
         }
     }
     local col_settings = {
