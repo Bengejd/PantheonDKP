@@ -24,6 +24,13 @@ local backdropSettings = {
     insets = { left = 4, right = 4, top = 4, bottom = 4 },
 }
 
+local PaneBackdrop  = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true, tileSize = 16, edgeSize = 16,
+    insets = { left = 3, right = 3, top = 5, bottom = 3 }
+}
+
 local rotate_up = (pi / 180) * 270
 local rotate_down = (pi / 180) * 90
 
@@ -45,6 +52,7 @@ end
 -- Refreshes the data that we are utilizing.
 function HistoryTable:RefreshData()
     self.data = self.retrieveDataFunc();
+
     self.displayData = {};
 
     for i=1, #self.data do
@@ -72,15 +80,17 @@ function HistoryTable:RaidChanged()
 end
 
 function HistoryTable:RefreshTableSize()
-    -- The last step is to ensure the scroll range is updated appropriately.
-    -- Calculate the total height of the scrollable region (using the model
-    -- size), and the displayed height based on the number of shown buttons.
+    local shownHeight, totalHeight, tablePadding = 0, 0, 50
 
-    local total_rows = self.displayedRows and #self.displayedRows or #self.displayData;
-
-    local buttonHeight = self.ROW_HEIGHT;
-    local totalHeight = (total_rows * buttonHeight) + self.ROW_HEIGHT;
-    local shownHeight = self.MAX_ROWS * buttonHeight;
+    -- Since the rows have varying heights, we have to collect this info ourselves, instead of using a template.
+    for i=1, #self.displayedRows do
+        local row = self.displayedRows[i]
+        if row.content:IsVisible() then -- If the row is not collapsed.
+            shownHeight = shownHeight + row:GetHeight() + 12
+        end
+        totalHeight = totalHeight + row:GetHeight() + 12
+    end
+    totalHeight = totalHeight + tablePadding -- add some padding just to be safe.
 
     HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
 end
@@ -184,6 +194,8 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.firstSortRan = false;
     self.isDragging = false
 
+    self.total_row_height = 0
+
     self.ROW_HEIGHT = row_settings['height'] or 20
     self.ROW_WIDTH = row_settings['width'] or 300
 
@@ -269,10 +281,57 @@ end
 function HistoryTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
-        local row = CreateFrame("Button", nil, self.scrollChild)
+        local row = CreateFrame("Frame", nil, self.scrollChild)
+
+        local titletext = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        titletext:SetPoint("TOPLEFT", 14, 0)
+        titletext:SetPoint("TOPRIGHT", -14, 0)
+        titletext:SetJustifyH("LEFT")
+        titletext:SetHeight(18)
+        titletext:SetText(i)
+
+        local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+        collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 14, 0)
+        collapse_button:SetScript("OnClick", function()
+            if row.content:IsVisible() then
+                row.content:Hide()
+                row:SetHeight(50)
+                self.total_row_height = (self.total_row_height + 50)  - row.max_height
+                collapse_button:SetText("O")
+            else
+                row.content:Show()
+                row:SetHeight(row.max_height)
+                self.total_row_height = (self.total_row_height + row.max_height)  - 50
+                collapse_button:SetText("X")
+            end
+            self:RefreshTableSize()
+        end)
+        collapse_button:SetSize(30, 20)
+        collapse_button:SetText("X")
+
+        local collapse_text = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        collapse_text:SetPoint("TOPLEFT", 14, 0)
+        collapse_text:SetPoint("TOPRIGHT", -14, 0)
+        collapse_text:SetHeight(18)
+        collapse_text:SetText(i)
+
+
+        local border = CreateFrame("Frame", nil, row)
+        border:SetPoint("TOPLEFT", 0, -17)
+        border:SetPoint("BOTTOMRIGHT", -1, 3)
+        border:SetBackdrop(PaneBackdrop)
+        border:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
+        border:SetBackdropBorderColor(0.4, 0.4, 0.4)
+
+        local content = CreateFrame("Frame", nil, border)
+        content:SetPoint("TOPLEFT", 10, -10)
+        content:SetPoint("BOTTOMRIGHT", -10, 10)
+
+        row.border = border;
+        row.content = content;
+
         row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
-        row:RegisterForClicks("LeftButtonUp", "RightButtonUp");
-        row:RegisterForDrag("LeftButton")
+
 
         row.cols = {};
         row.index = i
@@ -282,37 +341,13 @@ function HistoryTable:OnLoad()
         row:SetID(i)
         row.isFiltered = false;
 
+        row.max_width = 0;
+        row.max_height = 0;
+
         if i == 1 then -- Anchor the first row relative to the frame.
             row:SetPoint("TOPLEFT", self.ListScrollFrame, 16, 0)
         else
             row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
-        end
-
-        if self.showRowBackdrop then
-            row:SetBackdrop(backdropSettings)
-        end
-
-        if self.showHighlight then
-            row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
-            row:SetPushedTexture(HIGHLIGHT_TEXTURE)
-            row:SetScript("OnClick", function(r, clickType)
-                self:CheckSelect(r, clickType)
-            end)
-        end
-
-        if self.showSep then
-            local sep = row:CreateTexture(nil, 'BACKGROUND')
-            sep:SetTexture(ROW_SEPARATOR)
-            sep:SetHeight(3)
-            sep:SetWidth(self.ROW_WIDTH)
-
-            if i == 1 then
-                sep:SetPoint("TOPLEFT", row, 0, 0, row, "TOPRIGHT")
-            elseif i == 2 then
-                sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
-            else
-                sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
-            end
         end
 
         row.super = self;
@@ -364,49 +399,85 @@ function HistoryTable:OnLoad()
             return row.isFiltered;
         end
 
-        for key, header in pairs(self.HEADERS) do
+        for key=1, #self.HEADERS do
+            local header = self.HEADERS[key]
             local label = header['label'];
+
             local col_name = '$parent' .. label
-            local col = row:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
+            local display_name = header['displayName']
+            local col = content:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
             local getVal = header['getValueFunc']
             local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
-            
 
-            --local label = header['label'] or ''
-            --local col_name = '$parent' .. label
-            --local col = row:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
-            --local getVal = header['getValueFunc']
-            --local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
-            --
-            --col:SetJustifyH(header['point'])
-            --
-            --if label == 'class' then
-            --    local _, colored_class = Util:ColorTextByClass(val, val)
-            --    val = colored_class
-            --end
-            --
-            --col:SetSize(self.COL_WIDTH, self.COL_HEIGHT)
-            --local col_point = header['point'] or 'LEFT'
-            --col:SetJustifyH(col_point)
-            --
-            --if type(val) == 'number' and val > 9999 then
-            --    col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letter spacing.
-            --end
-            --
-            --if key == 1 then
-            --    col:SetPoint(col_point, row)
-            --else
-            --    col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", 0, 0)
-            --
-            --    if key == #self.HEADERS and col_point == 'RIGHT' then
-            --        col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
-            --    end
-            --end
-            --
-            --col:SetText(val)
-            --
-            --row.cols[key] = col;
+            col:SetSize(row:GetWidth() - 15, self.COL_HEIGHT)
+
+            if key == 1 then
+                col:SetPoint("TOPLEFT", 5, -5)
+            else
+                col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
+            end
+
+            col:SetText(display_name .. ": " .. val)
+
+            row.max_height = row.max_height + col:GetStringHeight() + 12
+
+            row.cols[key]=col;
+
+            self.total_row_height = self.total_row_height + row.max_height;
         end
+
+        row:SetHeight(row.max_height)
+
+        if row.max_height < self.ROW_HEIGHT then
+            self.ROW_HEIGHT = row.max_height;
+        end
+
+        --[[        --for key, header in pairs(self.HEADERS) do
+                --    local label = header['label'];
+                --
+                --    local col_name = '$parent' .. label
+                --    local display_name = header['displayName']
+                --    local col = row:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
+                --    local getVal = header['getValueFunc']
+                --    local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
+                --
+                --    col:SetSize(self.frame:GetWidth(), self.COL_HEIGHT)
+                --
+                --    if key == 1 then
+                --        col:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -5)
+                --    else
+                --        col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, 0)
+                --    end
+                --
+                --    col:SetText(display_name .. ": " .. val)
+                --
+                --    if label == 'formattedNames' then
+                --        col:SetText(display_name .. " : " .. "TESTING")
+                --    end
+                --
+                --    row.cols[key]=col;
+                --
+                --    --
+                --    --col:SetJustifyH(header['point'])
+                --    --
+                --    --if type(val) == 'number' and val > 9999 then
+                --    --    col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letter spacing.
+                --    --end
+                --    --
+                --    --if key == 1 then
+                --    --    col:SetPoint(col_point, row)
+                --    --else
+                --    --    col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", 0, 0)
+                --    --
+                --    --    if key == #self.HEADERS and col_point == 'RIGHT' then
+                --    --        col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
+                --    --    end
+                --    --end
+                --    --
+                --    --col:SetText(val)
+                --    --
+                --    --row.cols[key] = col;
+                --end]]
 
         rawset(t, i, row)
         return row

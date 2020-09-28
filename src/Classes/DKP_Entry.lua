@@ -20,7 +20,7 @@ function DKP_Entry:New(entry_details)
     self.reason = entry_details['reason'] or 'No Valid Reason'
     self.dkp_change = entry_details['dkp_change'] or 0
     self.boss = entry_details['boss'] or ''
-    self.raid = entry_details['raid']
+    self.raid = entry_details['raid'] or 'Molten Core'
     self.adjust_type = entry_details['adjust_type'] or ''
     self.edited = entry_details['edited'] or false;
     self.deleted = entry_details['deleted'] or false;
@@ -33,7 +33,7 @@ function DKP_Entry:New(entry_details)
     self.formattedNames = self:GetFormattedNames()
     self.change_text = self:GetChangeText()
     self.historyText = self:GetHistoryText()
-    self.formattedOfficer = self:GetFOrmattedOfficer()
+    self.formattedOfficer = self:GetFormattedOfficer()
 
     return self
 end
@@ -49,6 +49,7 @@ function DKP_Entry:Save()
         ['deleted']=self.deleted,
         ['officer']=self.officer,
         ['id']=self.id,
+        ['raid']=self.raid,
         ['names']=self.names,
         ['previousTotals']=self.previousTotals,
     }

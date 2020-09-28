@@ -108,12 +108,14 @@ function PDKP:InitializeDatabases()
     local db = database.global['db']
     core.PDKP.db = db
 
-    core.PDKP.guildDB = db.guildDB or {};
-    core.PDKP.officersDB = db.officersDB or {};
-    core.PDKP.settingsDB = db.settingsDB or {};
-    core.PDKP.dkpDB = db.dkpDB or {};
+    core.PDKP.guildDB = db.guildDB -- or {};
+    core.PDKP.officersDB = db.officersDB -- or {};
+    core.PDKP.settingsDB = db.settingsDB -- or {};
+
+    core.PDKP.dkpDB = db.dkpDB;
 
     Settings:InitDB()
+    DKP:InitDB()
 
 
 
@@ -175,7 +177,7 @@ function PDKP:HandleSlashCommands(msg)
         end,
     }
 
-    if officerCommands[msg] and Settings:CanEdit() then return officerCommands[msg]() end
+    if officerCommands[msg]  then return officerCommands[msg]() end
 
     print('Unknown PDKP command:', msg)
 
@@ -223,7 +225,7 @@ function PDKP:HandleSlashCommands(msg)
     --end
     --
     ---- OFFICER ONLY COMMANDS
-    if not Settings:canEdit() then
+    if not Settings:CanEdit() then
         return Util:Debug('Cannot process this command because you are not an officer')
     end;
 

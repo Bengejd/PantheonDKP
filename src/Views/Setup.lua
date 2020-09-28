@@ -859,6 +859,8 @@ function PDKP_ToggleAdjustmentDropdown()
         GUI.boss_loot_frame:Hide()
     end
 
+    GUI.adjustment_entry['names']=PDKP.memberTable.selected
+
     for _, button in pairs(GUI.adjust_buttons) do
         if selected == 1 then
             button:Enable()
@@ -1230,30 +1232,22 @@ function Setup:ScrollTable()
 end
 
 function Setup:HistoryTable()
-    local st = {};
-    local data = {}
 
-    for i=1, 40 do
-        local d = {
-            ['name']=i,
-            ['class']=i,
-            ['dkp']=i,
-        }
-        table.insert(data, d)
-    end
+    local ht = {};
 
     local table_settings = {
         ['name']= 'ScrollTable',
         ['parent']=GUI.history_frame,
-        ['height']=GUI.history_frame:GetHeight() - 30,
+        ['height']=GUI.history_frame:GetHeight(),
         ['width']=GUI.history_frame:GetWidth(),
         ['movable']=true,
         ['enableMouse']=true,
         ['retrieveDataFunc']=function()
-            return data
+            local keys, entries = DKP:GetEntries(true)
+            return keys
         end,
-        ['retrieveDisplayDataFunc']=function(self, name)
-            return name
+        ['retrieveDisplayDataFunc']=function(self, id)
+            return DKP:GetEntry(id)
         end,
         ['anchor']={
             ['point']='TOPLEFT',
@@ -1263,50 +1257,54 @@ function Setup:HistoryTable()
 
     }
     local col_settings = {
-        ['height']=14,
-        ['width']=90,
+        ['height']=0,
+        ['width']=200,
         ['firstSort']=1, -- Denotes the header we want to sort by originally.
         ['stacked']=true,
         ['headers'] = {
             [1] = {
-                ['label']='name',
+                ['label']='formattedOfficer',
                 ['sortable']=false,
+                ['displayName']='Officer',
                 ['point']='LEFT',
                 ['showSortDirection'] = false,
                 ['display']=false,
             },
             [2] = {
-                ['label']='name',
+                ['label']='historyText',
                 ['sortable']=false,
                 ['point']='LEFT',
-                ['showSortDirection'] = false,
-                ['display']=false,
-            },
-            [3] = {
-                ['label']='name',
-                ['sortable']=false,
-                ['point']='LEFT',
+                ['displayName']='Reason',
                 ['showSortDirection'] = false,
                 ['display']=false,
             },
             [4] = {
-                ['label']='name',
+                ['label']='formattedNames',
                 ['sortable']=false,
                 ['point']='LEFT',
+                ['displayName']='Members',
+                ['showSortDirection'] = false,
+                ['display']=false,
+            },
+            [3] = {
+                ['label']='change_text',
+                ['sortable']=false,
+                ['point']='LEFT',
+                ['displayName']='Amount',
                 ['showSortDirection'] = false,
                 ['display']=false,
             },
         }
     }
     local row_settings = {
-        ['height']=75,
-        ['width']=285,
-        ['max_values'] = #data,
+        ['height']=100,
+        ['width']=350,
+        ['max_values'] = 1000,
         ['showbackdrop']=true,
         ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
-    st = HistoryTable:newHybrid(table_settings, col_settings, row_settings)
+    ht = HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 end
 
 function Setup:FauxScrollTable2()

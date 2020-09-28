@@ -22,6 +22,34 @@ local Defaults = core.Defaults;
 local Settings = core.Settings;
 local DKP_Entry = core.DKP_Entry;
 
+local DkpDB;
+
+function DKP:InitDB()
+    DkpDB = core.PDKP.dkpDB
+    DKP.history = DkpDB['history']
+end
+
+function DKP:GetEntries(keysOnly)
+
+    keysOnly = keysOnly or false
+    local entry_keys, entries = {}, {};
+    for key, _ in pairs(DkpDB['history']['all']) do
+        table.insert(entry_keys, key)
+        if not keysOnly then
+            local dkp_entry = DKP:GetEntry(key)
+            entries[key] = dkp_entry
+            dkp_entry:Save()
+        end
+    end
+    return entry_keys, entries;
+end
+
+function DKP:GetEntry(id)
+    local db_entry = DkpDB['history']['all'][id]
+    local entry = DKP_Entry:New(db_entry)
+    return entry
+end
+
 function DKP:RaidNotOny(raid)
     return raid ~= 'Onyxia\'s Lair'
 end
@@ -57,7 +85,13 @@ function DKP:Submit()
     end
 
     local pName = Util:GetMyName()
+    if Settings:IsDebug() then
+        pName = 'Neekio'
+    end
+
     GUI.adjustment_entry['officer']= pName
+
+    Util:WatchVar(GUI.adjustment_entry, 'adjustment_Entry')
 
     local entry = DKP_Entry:New(GUI.adjustment_entry)
 
