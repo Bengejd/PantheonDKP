@@ -21,6 +21,7 @@ local Defaults = core.Defaults;
 local ScrollTable = core.ScrollTable;
 local Settings = core.Settings;
 local Loot = core.Loot;
+local HistoryTable = core.HistoryTable;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -429,7 +430,7 @@ function Setup:RandomStuff()
     --Setup:TabView()
     Setup:DKPHistory()
     Setup:RaidTools()
-    local scroll_frame = Setup:FauxScrollTable()
+    local scroll_frame = Setup:HistoryTable()
 end
 
 function Setup:RaidTools()
@@ -884,10 +885,6 @@ function Setup:DKPHistory()
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,35)
 
-    local history_text = f:CreateFontString(f, "Overlay", "GameFontNormal")
-    history_text:SetPoint("TOP", f, "CENTER", 0, 0)
-    history_text:SetText("History Frame")
-
     local history_button = CreateFrame("Button", "$parent_history_button", pdkp_frame, 'UIPanelButtonTemplate')
     history_button:SetSize(80, 30)
     history_button:SetPoint("CENTER", pdkp_frame, "TOP", 0, -50)
@@ -907,6 +904,8 @@ function Setup:DKPHistory()
     f:Hide()
 
     GUI.history_frame = f;
+
+    history_button:Click()
 end
 
 function Setup:RaidDropdown()
@@ -1188,7 +1187,8 @@ function Setup:ScrollTable()
                 ['sortable']=true,
                 ['point']='CENTER',
                 ['showSortDirection'] = true,
-                ['compareFunc']=compare
+                ['compareFunc']=compare,
+                ['colored']=true,
             },
             [3] = {
                 ['label']='dkp',
@@ -1206,6 +1206,7 @@ function Setup:ScrollTable()
         ['height']=20,
         ['width']=285,
         ['max_values'] = 425,
+        ['showHighlight']=true,
         ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
@@ -1228,11 +1229,7 @@ function Setup:ScrollTable()
 
 end
 
-function pdkp_scrollbar_update()
-    print('Scroll bar Updated')
-end
-
-function Setup:FauxScrollTable()
+function Setup:HistoryTable()
     local st = {};
     local data = {}
 
@@ -1248,8 +1245,8 @@ function Setup:FauxScrollTable()
     local table_settings = {
         ['name']= 'ScrollTable',
         ['parent']=GUI.history_frame,
-        ['height']=500,
-        ['width']=330,
+        ['height']=GUI.history_frame:GetHeight() - 30,
+        ['width']=GUI.history_frame:GetWidth(),
         ['movable']=true,
         ['enableMouse']=true,
         ['retrieveDataFunc']=function()
@@ -1260,43 +1257,56 @@ function Setup:FauxScrollTable()
         end,
         ['anchor']={
             ['point']='TOPLEFT',
-            ['rel_point_x']=12,
-            ['rel_point_y']=-70,
+            ['rel_point_x']=0,
+            ['rel_point_y']=0,
         }
+
     }
     local col_settings = {
         ['height']=14,
         ['width']=90,
         ['firstSort']=1, -- Denotes the header we want to sort by originally.
+        ['stacked']=true,
         ['headers'] = {
             [1] = {
                 ['label']='name',
                 ['sortable']=false,
                 ['point']='LEFT',
                 ['showSortDirection'] = false,
+                ['display']=false,
             },
             [2] = {
-                ['label']='class',
+                ['label']='name',
                 ['sortable']=false,
-                ['point']='CENTER',
+                ['point']='LEFT',
                 ['showSortDirection'] = false,
+                ['display']=false,
             },
             [3] = {
-                ['label']='dkp',
+                ['label']='name',
                 ['sortable']=false,
-                ['point']='RIGHT',
+                ['point']='LEFT',
                 ['showSortDirection'] = false,
+                ['display']=false,
+            },
+            [4] = {
+                ['label']='name',
+                ['sortable']=false,
+                ['point']='LEFT',
+                ['showSortDirection'] = false,
+                ['display']=false,
             },
         }
     }
     local row_settings = {
-        ['height']=20,
+        ['height']=75,
         ['width']=285,
-        ['max_values'] = 425,
+        ['max_values'] = #data,
+        ['showbackdrop']=true,
         ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
-    st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+    st = HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 end
 
 function Setup:FauxScrollTable2()

@@ -152,8 +152,12 @@ function Loot:GetItemByName(name)
     return iName
 end
 
-
 local LOOT_EVENTS = {
     'CHAT_MSG_LOOT', 'LOOT_BIND_CONFIRM', 'OPEN_MASTER_LOOT_LIST', 'UPDATE_MASTER_LOOT_LIST', 'LOOT_SLOT_CHANGED',
     'LOOT_OPENED',
+}
+
+--- lOOT PRIO SCREEN TO UPDATE MANUALLY, WITHIN THE ADDON?
+local LOOT_PRIO = {
+
 }

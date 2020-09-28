@@ -26,6 +26,7 @@ src\Classes\Guild.lua
 src\Classes\Raid.lua
 src\Classes\ScrollTable.lua
 src\Classes\DKP_Entry.lua
+src\Classes\DKP_History.lua
 
 # Database files
 src\Modules\Character.lua

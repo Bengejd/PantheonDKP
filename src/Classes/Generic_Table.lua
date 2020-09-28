@@ -2,13 +2,13 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
-local ScrollTable = core.ScrollTable;
+local HistoryTable = core.HistoryTable;
 local Util = core.Util;
 local Defaults = core.Defaults;
 local Guild = core.Guild;
 local Raid = core.Raid;
 
-ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
+HistoryTable.__index = HistoryTable; -- Set the __index parameter to reference
 
 local type, floor, strupper, pi, substr = type, math.floor, strupper, math.pi, string.match
 local tinsert, tremove = tinsert, tremove
@@ -18,145 +18,32 @@ local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
 local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
+local backdropSettings = {
+    tile = true, tileSize = 0,
+    edgeFile = SCROLL_BORDER, edgeSize = 8,
+    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+}
+
 local rotate_up = (pi / 180) * 270
 local rotate_down = (pi / 180) * 90
 
 ----- MISC FUNCTIONS -----
 
-function ScrollTable:SetParent(parent)
-    if parent == nil then error('ScrollTable parent is nil'); end
+function HistoryTable:SetParent(parent)
+    if parent == nil then error('HistoryTable parent is nil'); end
     if type(parent) == type({}) then
         return parent
     elseif type(parent) == type('') then
         return _G[parent];
     else
-        error('ScrollTable parent must be a string or table')
+        error('HistoryTable parent must be a string or table')
     end
-end
-
------ HIGHLIGHT FUNCTIONS -----
-
-function ScrollTable:HighlightRow(row, shouldHighlight)
-    if shouldHighlight then
-        row:LockHighlight()
-    else
-        row:UnlockHighlight()
-    end
-    self.UpdateLabelTotals()
-end
-
------ SELECT FUNCTIONS -----
-
-function ScrollTable:ClearSelected()
-    wipe(self.selected)
-    self.lastSelect = nil
-    _G['pdkp_filter_Select_All']:SetChecked(false)
-
-    self:UpdateLabelTotals()
-end
-
-function ScrollTable:UpdateLastSelect(objIndex, isSelected)
-    local selectCount = #self.selected;
-
-    if isSelected then
-        self.lastSelect = objIndex;
-    elseif selectCount >= 1 then
-        self.lastSelect = self.selected[selectCount]
-    else
-        self.lastSelect = nil;
-    end
-    self.UpdateLabelTotals()
-end
-
-function ScrollTable:RowShiftClicked(objIndex, selectIndex)
-    local previousSelect = self.lastSelect
-
-    if previousSelect == objIndex then return end -- Do nothing if the same thing is clicked again.
-
-    -- Shift clicks always add to the lastSelect.
-    self:UpdateSelectStatus(objIndex, selectIndex, false, false)
-    if #self.selected <= 1 then return end -- Only one thing selected, do nothing.
-
-    local _, prevSelectIndex = tfind(self.displayedRows, previousSelect, self.ROW_SELECT_ON)
-    local _, currSelectIndex = tfind(self.displayedRows, self.lastSelect, self.ROW_SELECT_ON)
-
-    local startIndex = prevSelectIndex < currSelectIndex and prevSelectIndex or currSelectIndex
-    local endIndex = prevSelectIndex > currSelectIndex and prevSelectIndex or currSelectIndex
-
-    -- Grab the list items between startIndex and endIndex.
-    local betweenRows = { unpack( self.displayedRows, startIndex, endIndex) }
-    for i=1, #betweenRows do
-        local rowObjIndex = betweenRows[i]['dataObj'][self.ROW_SELECT_ON]
-        local rowSelected = tfind(self.selected, rowObjIndex)
-        if not rowSelected then -- Add it to the list, if it is not already selected.
-            tinsert(self.selected, rowObjIndex)
-            self:HighlightRow(betweenRows[i], true)
-        end
-    end
-    self:UpdateLabelTotals()
-end
-
-function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear, select_all)
-    clear = clear or false
-    if clear then
-        self:ClearSelected()
-    end
-
-    if isSelected then
-        tremove(self.selected, selectIndex)
-    else
-        tinsert(self.selected, objIndex)
-    end
-    self:UpdateLastSelect(objIndex, not isSelected)
-end
-
-function ScrollTable:CheckSelect(row, clickType)
-    local selectOn = row.selectOn
-    local objIndex = row.dataObj[selectOn]
-
-    if clickType == 'LeftButton' then
-        local hasCtrl = IsControlKeyDown()
-        local hasShift = IsShiftKeyDown()
-        local isSelected, selectIndex = tfind(self.selected, objIndex)
-
-        if hasShift and hasCtrl then -- Do nothing here.
-            return
-        elseif hasShift then -- Shift click
-            self:RowShiftClicked(objIndex, selectIndex)
-        else -- Control or Regular Click.
-            self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl, select_all)
-            self:UpdateLabelTotals()
-        end
-
-        return self:RefreshLayout()
-    end
-
-    local isSelected, _ = tfind(self.selected, objIndex)
-    self:HighlightRow(row, isSelected)
-
-    self:UpdateLabelTotals()
-end
-
-function ScrollTable:SelectAll()
-    for i=1, #self.displayData do
-        local row = self.rows[i];
-        if not row.isFiltered then
-            local selectOn = row.selectOn
-            local objIndex = row.dataObj[selectOn]
-            local isSelected, _ = tfind(self.selected, objIndex)
-
-            if not isSelected then
-                tinsert(self.selected, objIndex)
-            end
-        end
-    end
-    self:RefreshLayout()
 end
 
 ----- REFRESH FUNCTIONS -----
 
 -- Refreshes the data that we are utilizing.
-function ScrollTable:RefreshData()
+function HistoryTable:RefreshData()
     self.data = self.retrieveDataFunc();
     self.displayData = {};
 
@@ -165,7 +52,7 @@ function ScrollTable:RefreshData()
     end
 end
 
-function ScrollTable:GetDisplayRows()
+function HistoryTable:GetDisplayRows()
     wipe(self.displayedRows); -- Return to initial value.
     for i=1, #self.displayData do
         local row = self.rows[i];
@@ -177,14 +64,14 @@ function ScrollTable:GetDisplayRows()
     end
 end
 
-function ScrollTable:RaidChanged()
+function HistoryTable:RaidChanged()
     for i=1, #self.displayData do
         local row = self.rows[i];
         row:UpdateRowValues();
     end
 end
 
-function ScrollTable:RefreshTableSize()
+function HistoryTable:RefreshTableSize()
     -- The last step is to ensure the scroll range is updated appropriately.
     -- Calculate the total height of the scrollable region (using the model
     -- size), and the displayed height based on the number of shown buttons.
@@ -198,7 +85,7 @@ function ScrollTable:RefreshTableSize()
     HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
 end
 
-function ScrollTable:RefreshLayout()
+function HistoryTable:RefreshLayout()
     local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
 
     self:GetDisplayRows();
@@ -213,8 +100,6 @@ function ScrollTable:RefreshLayout()
             else
                 row:SetPoint("TOPLEFT", self.displayedRows[i-1], "BOTTOMLEFT")
             end
-            local isSelected, _ = tfind(self.selected, row.dataObj[row.selectOn])
-            self:HighlightRow(row, isSelected)
         else
             row:Hide();
         end
@@ -223,7 +108,7 @@ function ScrollTable:RefreshLayout()
     self:RefreshTableSize();
 end
 
-function ScrollTable:UpdateLabelTotals()
+function HistoryTable:UpdateLabelTotals()
     if self == nil or self.entryLabel == nil then return end
     self.entryLabel:SetText(#self.displayedRows .. " Players shown | " .. #self.selected .. " selected")
     PDKP_ToggleAdjustmentDropdown()
@@ -231,7 +116,7 @@ end
 
 ----- FILTER FUNCTIONS -----
 
-function ScrollTable:ApplyFilter(filterOn, checkedStatus)
+function HistoryTable:ApplyFilter(filterOn, checkedStatus)
     Util:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
 
     if filterOn == 'Class_All' then -- Reset all class filters if this gets checked.
@@ -265,22 +150,13 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     self:RefreshLayout();
 end
 
-function ScrollTable:SearchChanged(searchText)
-    self.searchText = searchText
-    local checkedStatus = true
-    if searchText == '' or searchText == nil then
-        checkedStatus = false
-    end
-    self:ApplyFilter('name', checkedStatus)
-end
-
 ----- INITIALIZATION FUNCTIONS -----
 
-function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     local self = {};
-    setmetatable(self, ScrollTable); -- Set the metatable so we use ScrollTable's __index
+    setmetatable(self, HistoryTable); -- Set the metatable so we use HistoryTable's __index
 
-    -- Set all of the important settings or default if they were not provided.
+    --- Table settings
     self.parent = self:SetParent(table_settings['parent'])
     self.name = self.parent and self.parent:GetName() .. '_' .. table_settings['name'] or table_settings['name']
     self.height = table_settings['height'] or 300
@@ -292,49 +168,41 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
         ['rel_point_x']=0,
         ['rel_point_y']=0
     }
-
-    self.ROW_HEIGHT = row_settings['height'] or 20
-    self.ROW_WIDTH = row_settings['width'] or 300
-    self.ROW_MULTI_SELECT = row_settings['multiSelect'] or false
-    self.ROW_SELECT_ON = row_settings['indexOn'] or nil
     self.retrieveDataFunc = table_settings['retrieveDataFunc']
     self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
 
-    self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
-    self.showHighlight = row_settings['showHighlight'] or false
+    self.showTableBackdrop = table_settings['showBackdrop'] or false
 
-    self.COL_HEIGHT = col_settings['height'] or 14
-    self.COL_WIDTH = col_settings['width'] or 100
-    self.HEADERS = col_settings['headers']
-
+    --- Generic Settings
     self.displayData = {};
     self.displayedRows = {};
     self.appliedFilters = {};
-    self.searchText = nil;
-    self.entryLabel = nil;
-
-    self.selected = {};
-    self.lastSelect = nil;
-
-    self.online = {};
-    self.raid = {};
-
     self.cols = {};
     self.data = {};
-
-    -- Sort vars
     self.sortBy = nil;
     self.sortDir = nil;
-    self.firstSort = col_settings['firstSort'] or nil;
     self.firstSortRan = false;
-
-    -- Drag vars
     self.isDragging = false
+
+    self.ROW_HEIGHT = row_settings['height'] or 20
+    self.ROW_WIDTH = row_settings['width'] or 300
+
+    --- Row settings
+    self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
+    self.showHighlight = row_settings['showHighlight'] or false
+    self.showSep = row_settings['showSep'] or false
+    self.showRowBackdrop = row_settings['showbackdrop'] or false
+
+    --- Col settings
+    self.COL_HEIGHT = col_settings['height'] or 14
+    self.COL_WIDTH = col_settings['width'] or 100
+    self.HEADERS = col_settings['headers']
+    self.firstSort = col_settings['firstSort'] or nil;
 
     self:RefreshData()
 
     -------------------------
-    -- Setup the Frames
+    --- Setup the Frames
     -------------------------
 
     -- Create our base frame.
@@ -346,17 +214,14 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.frame:SetWidth(self.width)
     self.frame:SetPoint(self.anchor['point'], self.parent, self.anchor['rel_point_x'], self.anchor['rel_point_y'])
 
-    -- Give the frame a visible background and border:
-    self.frame:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
+    if self.showTableBackdrop then
+        self.frame:SetBackdrop(backdropSettings)
+    end
 
     self.frame.parent = self
 
     -----------------
-    -- Create the ScrollFrame
+    --- Create the ScrollFrame
 
     local listScrollFrame = CreateFrame("ScrollFrame", "ListScrollFrame", self.frame, 'HybridScrollFrameTemplate')
 
@@ -364,7 +229,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     listScrollFrame:SetPoint("BOTTOMRIGHT", -30, 8)
 
     ----------------
-    -- Create the slider
+    --- Create the slider
     local scrollBar = CreateFrame("Slider", 'scrollBar', listScrollFrame, 'HybridScrollBarTemplate')
     scrollBar:SetPoint("TOPLEFT", listScrollFrame, "TOPRIGHT", 1, -16)
     scrollBar:SetPoint("BOTTOMLEFT", listScrollFrame, "BOTTOMRIGHT", 1, 12)
@@ -373,7 +238,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.scrollChild = listScrollFrame.scrollChild;
 
     ----------------
-    -- Set the on_ functions
+    --- Set the on_ functions
     self:OnLoad()
 
     self.ListScrollFrame.buttonHeight = self.ROW_HEIGHT;
@@ -401,7 +266,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     return self
 end
 
-function ScrollTable:OnLoad()
+function HistoryTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Button", nil, self.scrollChild)
@@ -423,6 +288,10 @@ function ScrollTable:OnLoad()
             row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
         end
 
+        if self.showRowBackdrop then
+            row:SetBackdrop(backdropSettings)
+        end
+
         if self.showHighlight then
             row:SetHighlightTexture(HIGHLIGHT_TEXTURE)
             row:SetPushedTexture(HIGHLIGHT_TEXTURE)
@@ -431,17 +300,19 @@ function ScrollTable:OnLoad()
             end)
         end
 
-        local sep = row:CreateTexture(nil, 'BACKGROUND')
-        sep:SetTexture(ROW_SEPARATOR)
-        sep:SetHeight(3)
-        sep:SetWidth(self.ROW_WIDTH)
+        if self.showSep then
+            local sep = row:CreateTexture(nil, 'BACKGROUND')
+            sep:SetTexture(ROW_SEPARATOR)
+            sep:SetHeight(3)
+            sep:SetWidth(self.ROW_WIDTH)
 
-        if i == 1 then
-            sep:SetPoint("TOPLEFT", row, 0, 0, row, "TOPRIGHT")
-        elseif i == 2 then
-            sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
-        else
-            sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
+            if i == 1 then
+                sep:SetPoint("TOPLEFT", row, 0, 0, row, "TOPRIGHT")
+            elseif i == 2 then
+                sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
+            else
+                sep:SetPoint("TOPLEFT", row, 0, 0, self.rows[i-1], "TOPLEFT")
+            end
         end
 
         row.super = self;
@@ -533,107 +404,8 @@ function ScrollTable:OnLoad()
         rawset(t, i, row)
         return row
     end })
-    local cols = setmetatable({}, { __index = function(t, i)
-        local header = self.HEADERS[i] or {};
-        local label = header['label'] or 'Test'
-        local sortable = header['sortable'] or false
-        local point = header['point'] or 'LEFT'
-        local showSortDirection = header['showSortDirection'] or false
-        local compare = header['compareFunc'];
-        local font = header['font'] or "AchievementPointsFont"
-
-        local col = CreateFrame("Button", "$parent_Col_" .. label, self.ListScrollFrame)
-
-        local width = header['width'] or self.COL_WIDTH;
-
-        col:SetHeight(self.COL_HEIGHT)
-        col:SetWidth(width)
-
-        if i == 1 then
-            col:SetPoint("TOPLEFT", self.ListScrollFrame, -10, 20)
-        else
-            col:SetPoint("TOPLEFT", self.cols[i-1], "TOPRIGHT", 20, 0)
-        end
-
-        local fs = col:CreateFontString(col, "OVERLAY", font)
-        fs:SetText(strupper(label))
-        fs:SetPoint("CENTER")
-
-        local fsLength = fs:GetWidth()
-
-        col.arrow = nil;
-        col.dir = nil;
-        col.label = label
-        col.compare = compare
-        col.fontString = fs
-
-        function col:ToggleArrow(show)
-            if col.arrow ~= nil and show then
-                col.arrow:Show()
-            elseif col.arrow ~= nil and not show then
-                col.arrow:Hide()
-            end
-        end
-
-        if showSortDirection then
-            local arrow = col:CreateTexture(nil, 'BACKGROUND')
-            arrow:SetTexture(ARROW_TEXTURE)
-            arrow:SetPoint('RIGHT', col, 0, -3)
-            col.arrow = arrow;
-
-            col:ToggleArrow(false)
-
-            arrow:SetRotation(rotate_down)
-        end
-
-        if sortable then
-            col:SetScript("OnClick", function()
-                if col:GetParent():IsVisible() then
-                    for key, column in pairs(self.cols) do
-                        if key ~= i then
-                            column.dir = nil;
-                            column:ToggleArrow(false)
-                        else
-                            column:ToggleArrow(true)
-                            self.sortBy = column.label
-                        end
-                    end
-
-                    col.dir = (col.dir == nil or col.dir == 'ASC') and 'DESC' or 'ASC' -- Tenary
-
-                    local deg = col.dir == 'DESC' and rotate_down or rotate_up
-                    point = col.dir == 'DESC' and -3 or 2
-
-                    -- Gives us uniform arrow spacing, based on label length.
-                    -- Base is based off of length of "Name" and "Class" when they are uppercase.
-                    local baseLength = 55
-                    local arrow_x = floor((fsLength - baseLength) / 2 - 1)
-
-                    if col.arrow ~= nil then
-                        col.arrow:SetRotation(deg)
-                        col.arrow:SetPoint('TOPRIGHT', col, 'TOPRIGHT', arrow_x, point)
-                    end
-
-                    self.sortDir = col.dir
-                    table.sort(self.rows, col.compare)
-                    self:RefreshLayout();
-                end
-            end)
-        end
-
-        col:Show()
-
-        rawset(t, i, col)
-        return col
-    end})
 
     self.rows = rows
-    self.cols = cols
-
-    for i=1, #self.HEADERS do
-        local col = self.cols[i]
-        col:Show()
-    end
 
     self.ListScrollFrame.buttons = self.rows;
 
@@ -649,4 +421,4 @@ local eventFunc = {''}
 
 
 
-pdkp_ScrollTableMixin = core.ScrollTable;
+pdkp_HistoryTableMixin = core.History_Table;
