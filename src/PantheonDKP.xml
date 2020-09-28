@@ -57,4 +57,16 @@
 	</Button>
 
 
+	<ScrollFrame name="pdkp_dkp_scrollbarTemplate" inherits="FauxScrollFrameTemplate" hidden="true" textureSubLevel="-1" virtual="true">
+		<Scripts>
+<!--			<OnVerticalScroll>-->
+<!--				FauxScrollFrame_OnVerticalScroll(self, offset, 20, pdkp_dkp_scrollbar_Update);-->
+<!--			</OnVerticalScroll>-->
+<!--			<OnShow>-->
+<!--				pdkp_dkp_scrollbar_Update();-->
+<!--			</OnShow>-->
+<!--			<OnLoad>-->
+<!--			</OnLoad>-->
+		</Scripts>
+	</ScrollFrame>
 </Ui>

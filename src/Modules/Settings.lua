@@ -65,6 +65,10 @@ function Settings:CanEdit()
     return false
 end
 
+function Settings:GetAddonVersion()
+    return GetAddOnMetadata('PantheonDKP', "Version")
+end
+
 
 
 

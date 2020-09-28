@@ -35,6 +35,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
                 PDKP_UnregisterEvent(events, event);
                 Guild:new();
                 GUI:Init();
+                GUI:UpdateEasyStats()
             else
                 GuildRoster();
             end
@@ -107,8 +108,6 @@ function PDKP:InitializeDatabases()
     local db = database.global['db']
     core.PDKP.db = db
 
-
-
     core.PDKP.guildDB = db.guildDB or {};
     core.PDKP.officersDB = db.officersDB or {};
     core.PDKP.settingsDB = db.settingsDB or {};
@@ -154,6 +153,8 @@ end
 function PDKP:HandleSlashCommands(msg)
     if string.len(msg) == 0 then return end -- No command attached.
 
+    Util:Debug('New command received ' .. msg);
+
     local guiCommands = {
         ['show']=function() GUI:Show() end,
         ['hide']=function() GUI:Hide() end,
@@ -162,17 +163,22 @@ function PDKP:HandleSlashCommands(msg)
     if guiCommands[msg] then return guiCommands[msg]() end
 
     local debugCommands = {
-        ['debug']=function()
-            Settings:ToggleDebugging()
-        end,
         ['boss Kill']=function()
-
         end
     }
 
     if debugCommands[msg] and Settings:IsDebug() then return debugCommands[msg]() end
 
-    Util:Debug('New command received ' .. msg);
+    local officerCommands = {
+        ['debug']=function()
+            Settings:ToggleDebugging()
+        end,
+    }
+
+    if officerCommands[msg] and Settings:CanEdit() then return officerCommands[msg]() end
+
+    print('Unknown PDKP command:', msg)
+
 
     --local splitMsg, name = strsplit(' ', msg)
     --
@@ -217,7 +223,7 @@ function PDKP:HandleSlashCommands(msg)
     --end
     --
     ---- OFFICER ONLY COMMANDS
-    if not core.canEdit then
+    if not Settings:canEdit() then
         return Util:Debug('Cannot process this command because you are not an officer')
     end;
 

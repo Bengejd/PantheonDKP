@@ -70,6 +70,11 @@ function Util:FormatFontTextColor(color_hex, text)
     return "|cff" .. color_hex .. text .. "|r"
 end
 
+--function Util:FormatFontTextByRGBA(text, hex)
+--    if r == nil or g == nil or b == nil or a == nil or text == nil then return text end
+--    return "|c"
+--end
+
 -- Removes color from text
 function Util:RemoveColorFromText(name)
     local fixedName = name

@@ -34,6 +34,9 @@ local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
 local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
+local CHAR_INFO_TEXTURE = 'Interface\\CastingBar\\UI-CastingBar-Border-Small'
+
+local adoon_version_hex = '0059c5'
 
 local filterButtons = {};
 
@@ -288,18 +291,47 @@ function Setup:MainUI()
 
     setMovable(f)
 
-    -- Close button
+    --- Close button
 
     local b = createCloseButton(f, false)
     b:SetSize(22, 25) -- width, height
     b:SetPoint("TOPRIGHT", -2, -10)
 
+    local addon_title = f:CreateFontString(f, "Overlay", "BossEmoteNormalHuge")
+    addon_title:SetText("PantheonDKP")
+    addon_title:SetSize(200, 25)
+    addon_title:SetPoint("CENTER", f, "TOP", 0, -25)
+
+    --- Addon Version
+    local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
+    addon_version:SetSize(50, 14)
+    addon_version:SetText(Util:FormatFontTextColor(adoon_version_hex, "v" .. Settings:GetAddonVersion()))
+    addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
+
+    local easy_stats = f:CreateTexture('pdkp_easy_stats', 'OVERLAY')
+    easy_stats:SetTexture(CHAR_INFO_TEXTURE)
+    easy_stats:SetSize(240, 72)
+    easy_stats:SetPoint("TOPLEFT", f, "TOPLEFT", 65, -25)
+    easy_stats:SetTexCoord(0, 1, 1, 0)
+
+    local easy_stats_text = f:CreateFontString(f, "OVERLAY", "GameFontNormalLeftYellow")
+    easy_stats_text:SetSize(175, 20)
+    easy_stats_text:SetPoint("LEFT", easy_stats, "LEFT", 35, 0)
+
+    f.easy_stats = easy_stats
+    f.easy_stats.text = easy_stats_text
+    f.addon_title = addon_title
+    f.addon_version = addon_version
+
     pdkp_frame = f
+
+    tinsert(UISpecialFrames,f:GetName())
 
     Setup:RandomStuff()
 
     return pdkp_frame
 end
+
 
 function Setup:Debugging()
     local f = CreateFrame("Frame", "pdkp_debug_frame", UIParent)
@@ -396,6 +428,40 @@ function Setup:RandomStuff()
     --Setup:BossKillLoot()
     --Setup:TabView()
     Setup:DKPHistory()
+    Setup:RaidTools()
+    local scroll_frame = Setup:FauxScrollTable()
+end
+
+function Setup:RaidTools()
+    local f = CreateFrame("Frame", 'pdkp_raid_frame', RaidFrame, 'BasicFrameTemplateWithInset')
+    f:SetSize(300, 425)
+    f:SetPoint("LEFT", RaidFrame, "RIGHT", 0, 0)
+    f.title = f:CreateFontString(nil, "OVERLAY")
+    f.title:SetFontObject("GameFontHighlight")
+    f.title:SetPoint("CENTER", f.TitleBg, "CENTER", 11, 0)
+    f.title:SetText("PDKP Raid Interface")
+    f:SetFrameStrata("FULLSCREEN")
+    f:SetFrameLevel(1)
+    f:SetToplevel(true)
+
+
+
+    local b = CreateFrame("Button", 'pdkp_raid_frame_button', RaidFrame, 'UIPanelButtonTemplate')
+    b:SetHeight(30)
+    b:SetWidth(80)
+    b:SetText("Raid Tools")
+    b:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0)
+    b:SetScript("OnClick", function()
+        if f:IsVisible() then f:Hide() else f:Show() end
+
+        --if Raid.spamText == nil and raidSpamTime ~= nil then
+        --    raidSpamTime:SetText("[TIME] [RAID] invites going out. Pst for invite")
+        --    Raid.spamText = raidSpamTime:GetText()
+        --end
+    end)
+
+
+    GUI.raid_frame = f
 end
 
 function Setup:TableSearch()
@@ -712,7 +778,7 @@ function Setup:DKPAdjustments()
     local loot_close = createCloseButton(boss_loot_frame, true)
     loot_close:SetPoint('TOPRIGHT', boss_loot_frame, 'TOPRIGHT', 0, -1)
 
-    boss_loot_frame:Hide()
+    --boss_loot_frame:Hide()
 
     GUI.boss_loot_frame = boss_loot_frame;
 
@@ -787,7 +853,7 @@ function PDKP_ToggleAdjustmentDropdown()
 
     if reason_val == 'Item Win' then
         can_submit = can_submit and selected == 1
-        --GUI.boss_loot_frame:Show()
+        GUI.boss_loot_frame:Show()
     else
         GUI.boss_loot_frame:Hide()
     end
@@ -1160,6 +1226,838 @@ function Setup:ScrollTable()
 
     st.entryLabel = label
 
+end
+
+function pdkp_scrollbar_update()
+    print('Scroll bar Updated')
+end
+
+function Setup:FauxScrollTable()
+    local st = {};
+    local data = {}
+
+    for i=1, 40 do
+        local d = {
+            ['name']=i,
+            ['class']=i,
+            ['dkp']=i,
+        }
+        table.insert(data, d)
+    end
+
+    local table_settings = {
+        ['name']= 'ScrollTable',
+        ['parent']=GUI.history_frame,
+        ['height']=500,
+        ['width']=330,
+        ['movable']=true,
+        ['enableMouse']=true,
+        ['retrieveDataFunc']=function()
+            return data
+        end,
+        ['retrieveDisplayDataFunc']=function(self, name)
+            return name
+        end,
+        ['anchor']={
+            ['point']='TOPLEFT',
+            ['rel_point_x']=12,
+            ['rel_point_y']=-70,
+        }
+    }
+    local col_settings = {
+        ['height']=14,
+        ['width']=90,
+        ['firstSort']=1, -- Denotes the header we want to sort by originally.
+        ['headers'] = {
+            [1] = {
+                ['label']='name',
+                ['sortable']=false,
+                ['point']='LEFT',
+                ['showSortDirection'] = false,
+            },
+            [2] = {
+                ['label']='class',
+                ['sortable']=false,
+                ['point']='CENTER',
+                ['showSortDirection'] = false,
+            },
+            [3] = {
+                ['label']='dkp',
+                ['sortable']=false,
+                ['point']='RIGHT',
+                ['showSortDirection'] = false,
+            },
+        }
+    }
+    local row_settings = {
+        ['height']=20,
+        ['width']=285,
+        ['max_values'] = 425,
+        ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
+    }
+
+    st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+end
+
+function Setup:FauxScrollTable2()
+    ----------------------------------------------------------------
+    -- Set up some constants (really just variables, except we call
+    -- them "constants" because we will never change their values,
+    -- only read them) to keep track of values we'll use repeatedly:
+
+    local ROW_HEIGHT = 16   -- How tall is each row?
+    local MAX_ROWS = 5      -- How many rows can be shown at once?
+
+    ----------------------------------------------------------------
+    -- Create some fake data:
+
+    local MyAddonDB = {}
+    for i = 1, 50 do
+        MyAddonDB[i] = "Test " .. math.random(100)
+    end
+
+    ----------------------------------------------------------------
+    -- Create the frame:
+
+    local frame = CreateFrame("Frame", "pdkp_scroll_frame", UIParent)
+    frame:EnableMouse(true)
+    frame:SetMovable(true)
+    frame:SetSize(196, ROW_HEIGHT * MAX_ROWS + 16)
+    frame:SetPoint("CENTER")
+
+    -- Give the frame a visible background and border:
+    frame:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background", tile = true, tileSize = 16,
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+
+    ----------------------------------------------------------------
+    -- Define a function that we'll call later to update the datum
+    -- displayed in each row:
+
+    function frame:Update()
+        -- Using method notation (object:function) means that the
+        -- object (in this case, our frame) is available within the
+        -- function's scope via the variable "self".
+
+        local maxValue = #MyAddonDB
+
+        -- Call the FauxScrollFrame template's Update function, with
+        -- the relevant parameters:
+        FauxScrollFrame_Update(self.scrollBar, maxValue, MAX_ROWS, ROW_HEIGHT)
+        -- #1 is a reference to the scroll bar frame.
+        -- #2 is the total number of data available to be shown.
+        -- #3 is how many rows of data can be displayed at once.
+        -- #4 is the height of each row.
+
+        -- Now figure out which datum to show in each row,
+        -- and show it:
+        local offset = FauxScrollFrame_GetOffset(self.scrollBar)
+        for i = 1, MAX_ROWS do
+            local value = i + offset
+            if value <= maxValue then
+                -- There is a datum available to show.
+
+                -- Get a local reference to the row to save
+                -- two table lookups:
+                local row = self.rows[i]
+                -- Fill in the row with the datum:
+                row:SetText(MyAddonDB[value])
+                -- Show the row:
+                row:Show()
+            else
+                -- We've reached the end of the data.
+                -- Hide the row:
+                self.rows[i]:Hide()
+            end
+        end
+    end
+
+    ----------------------------------------------------------------
+    -- Create the scroll bar:
+
+    local bar = CreateFrame("ScrollFrame", "$parentScrollBar", frame, "FauxScrollFrameTemplate")
+    bar:SetPoint("TOPLEFT", 0, -8)
+    bar:SetPoint("BOTTOMRIGHT", -30, 8)
+
+    -- Tell the scroll bar what to do when it's scrolled:
+    bar:SetScript("OnVerticalScroll", function(self, offset)
+        -- These first two lines replace a call to the global
+        -- FauxScrollFrame_OnVerticalScroll function, saving a
+        -- global lookup and a function call.
+        self:SetValue(offset)
+        self.offset = math.floor(offset / ROW_HEIGHT + 0.5)
+
+        -- FauxScrollFrame_OnVerticalScroll can also call an update
+        -- function if we pass it one, but since we aren't using it,
+        -- we should just call the function ourselves:
+        frame:Update()
+    end)
+
+    bar:SetScript("OnShow", function()
+        frame:Update()
+    end)
+
+    frame.scrollBar = bar
+
+    ----------------------------------------------------------------
+    -- Create the individual rows:
+
+    -- I'm using a metatable here for efficiency (rows are not created
+    -- until they are needed) and convenience (I don't have
+    -- to check if a row exists yet and create one manually).
+    local rows = setmetatable({}, { __index = function(t, i)
+        local row = CreateFrame("Button", "$parentRow"..i, frame)
+        row:SetSize(150, ROW_HEIGHT)
+        row:SetNormalFontObject(GameFontHighlightLeft)
+
+        if i == 1 then
+            row:SetPoint("TOPLEFT", frame, 8, 0)
+        else
+            row:SetPoint("TOPLEFT", frame.rows[i-1], "BOTTOMLEFT")
+        end
+
+        rawset(t, i, row)
+        return row
+    end })
+
+    frame.rows = rows
+
+    return frame;
+end
+
+local function someoneElsesScrollFunc()
+    local BARWIDTH = 18;
+
+    -- Function to create vertical and horizontal scroll bars for the internal scroll frame
+    -- A so called "ScrollBar" here is actually a frame that contains a Slider and two buttons on both ends.
+    local function CreateScrollBar(parent, horizontal)
+        local BUTTONWIDTH = BARWIDTH * 0.6;
+
+        local frame = CreateFrame("Frame", nil, parent);
+
+        frame:Hide();
+        frame:SetWidth(BARWIDTH);
+        frame:SetHeight(BARWIDTH);
+        frame:EnableMouseWheel(true); -- Mouse wheel support
+
+        -- Creates a border to decorate the scroll bar
+        local border = CreateFrame("Frame", nil, frame);
+        border:SetBackdrop({ bgFile = "", tile = true, tileSize = 16, edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12, insets = {left = 0, right = 0, top = 0, bottom = 0 }, });
+        border:SetBackdropBorderColor(0.75, 0.75, 0.75, 0.5);
+        border:SetAllPoints(frame);
+        border:SetScale(0.75); -- Just to make the border soft and fine
+
+        -- This is the real Slider
+        local bar = CreateFrame("Slider", nil, frame);
+        frame._bar = bar;
+
+        bar:SetOrientation("VERTICAL");
+        if horizontal then
+            bar:SetOrientation("HORIZONTAL");
+        end
+
+        bar:SetMinMaxValues(0, 0);
+        bar:SetValueStep(1);
+        bar:SetValue(0);
+
+        bar:SetWidth(BUTTONWIDTH);
+        bar:SetHeight(BUTTONWIDTH);
+
+        -- The thumb nail texture
+        local thumb = bar:CreateTexture(nil, "OVERLAY");
+        thumb:SetTexture("Interface\\ChatFrame\\ChatFrameBackground");
+
+        if horizontal then
+            thumb:SetGradientAlpha("VERTICAL", 0.15, 0.15, 0.15, 1, 0.5, 0.5, 0.5, 0.75)
+        else
+            thumb:SetGradientAlpha("HORIZONTAL", 0.5, 0.5, 0.5, 0.75, 0.15, 0.15, 0.15, 1)
+        end
+
+        thumb:SetWidth(BUTTONWIDTH);
+        thumb:SetHeight(BUTTONWIDTH);
+        bar:SetThumbTexture(thumb);
+
+        -- Create scroll bar buttons
+        bar.CreateButton = function(self, oper, horizontal)
+            local button = CreateFrame("Button", nil, self);
+            button.CreateButtonTexture = function(self, iconPath, horizontal, layer, add)
+                local texture = self:CreateTexture(nil, layer or "ARTWORK");
+                texture:SetHeight(BUTTONWIDTH * 2);
+                texture:SetWidth(BUTTONWIDTH * 2);
+                texture:SetTexture(iconPath);
+                if horizontal then
+                    -- Blizzard folks did not even provide horizontal scroll bar button icons, I have to use their vertical ones
+                    -- and rotate them by 90 degrees, oh man, sorry about the following nasty code.
+                    local SQRT2 = math.sqrt(2);
+                    texture:SetTexCoord(0.5 + math.cos(math.rad(315)) / SQRT2, 0.5 + math.sin(math.rad(315)) / SQRT2,
+                            0.5 + math.cos(math.rad(225)) / SQRT2, 0.5 + math.sin(math.rad(225)) / SQRT2,
+                            0.5 + math.cos(math.rad(45))  / SQRT2, 0.5 + math.sin(math.rad(45))  / SQRT2,
+                            0.5 + math.cos(math.rad(135)) / SQRT2, 0.5 + math.sin(math.rad(135)) / SQRT2);
+                end
+
+                if add then
+                    texture:SetBlendMode("ADD");
+                end
+
+                texture:SetPoint("CENTER", self, "CENTER");
+                return texture;
+            end;
+
+            button:SetWidth(BUTTONWIDTH);
+            button:SetHeight(BUTTONWIDTH);
+            button._oper = oper;
+
+            local texturePrefix = "Interface\\Buttons\\UI-ScrollBar-ScrollUpButton-";
+            if oper == 1 then
+                texturePrefix = "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-";
+            end
+
+            button:SetNormalTexture(button:CreateButtonTexture(texturePrefix.."Up", horizontal));
+            button:SetPushedTexture(button:CreateButtonTexture(texturePrefix.."Down", horizontal));
+            button:SetDisabledTexture(button:CreateButtonTexture(texturePrefix.."Disabled", horizontal));
+            button:SetHighlightTexture(button:CreateButtonTexture(texturePrefix.."Highlight", horizontal));
+
+            -- Buttons shall be disabled is the Slider value hits its limit.
+            button.UpdateStatus = function(self, value)
+                value = value or self:GetParent():GetValue();
+                local minVal, maxVal = self:GetParent():GetMinMaxValues();
+                if (self._oper == -1 and value <= minVal) or (self._oper == 1 and value >= maxVal) then
+                    self:Disable();
+                else
+                    self:Enable();
+                end
+            end;
+
+
+
+            -- Clicks on scroll bar button increases or decreases Slider value, depending on which button is clicked.
+            --button:SetScript("OnClick", function() this:OnClick(); end);
+
+            button:SetScript("OnMouseDown", function(self)
+                self:SetScript("OnUpdate", function(self, elapse)
+                    self._updateElapsed = (self._updateElapsed or 10) + elapse;
+                    if self._updateElapsed > 0.1 then
+                        self._updateElapsed = 0;
+                        local parent = self:GetParent();
+                        parent:SetValue(parent:GetValue() + self._oper * parent:GetValueStep());
+                    end
+                end);
+            end);
+
+            button:SetScript("OnMouseUp", function(self)
+                self:SetScript("OnUpdate", nil);
+                self._updateElapsed = nil;
+                PlaySound("UChatScrollButton");
+            end);
+
+            button:UpdateStatus();
+            return button;
+        end;
+
+        bar.UpdateButtonStatus = function(self, value)
+            value = value or self:GetValue();
+            bar._button1:UpdateStatus(value);
+            bar._button2:UpdateStatus(value);
+        end;
+
+        bar._button1 = bar:CreateButton(-1, horizontal);
+        bar._button2 = bar:CreateButton(1, horizontal);
+
+        -- Setup the scroll bar layouts
+        if horizontal then
+            bar._button1:SetPoint("LEFT", frame, "LEFT", BUTTONWIDTH / 4, 0);
+            bar._button2:SetPoint("RIGHT", frame, "RIGHT", -BUTTONWIDTH / 4, 0);
+            bar:SetPoint("LEFT", frame, "LEFT", BUTTONWIDTH * 1.4, 0);
+            bar:SetPoint("RIGHT", frame, "RIGHT", -BUTTONWIDTH * 1.4, 0);
+        else
+            bar._button1:SetPoint("TOP", frame, "TOP", 0, -BUTTONWIDTH / 4);
+            bar._button2:SetPoint("BOTTOM", frame, "BOTTOM", 0, BUTTONWIDTH / 4);
+            bar:SetPoint("TOP", frame, "TOP", 0, -BUTTONWIDTH * 1.4);
+            bar:SetPoint("BOTTOM", frame, "BOTTOM", 0, BUTTONWIDTH * 1.4);
+        end
+
+        bar.OnScrollBarUpdated = function(self)
+            local parent = self:GetParent():GetParent();
+            if parent and type(parent.OnScrollBarUpdated) == "function" then
+                parent:OnScrollBarUpdated(self:GetParent());
+            end
+        end;
+
+        bar:SetScript("OnValueChanged", function(self,arg1)
+            bar:UpdateButtonStatus(arg1);
+            local parent = bar:GetParent():GetParent();
+            if parent and type(parent.OnScrollBarValueChanged) == "function" then
+                parent:OnScrollBarValueChanged(bar:GetParent(), arg1);
+            end
+        end);
+
+        bar:SetScript("OnShow", function() bar:OnScrollBarUpdated(); end);
+        bar:SetScript("OnHide", function() bar:OnScrollBarUpdated(); end);
+        bar:SetScript("OnSizeChanged", function() bar:OnScrollBarUpdated(); end);
+
+        -- Makes the scroll bar look like a Slider!
+        frame.GetOrientation = function(self) return self._bar:GetOrientation(); end;
+        frame.GetValue = function(self) return self._bar:GetValue(); end;
+        frame.SetValue = function(self, value) return self._bar:SetValue(value); end;
+        frame.GetValueStep = function(self) return self._bar:GetValueStep(); end;
+        frame.SetValueStep = function(self, step) return self._bar:SetValueStep(step); end;
+        frame.GetMinMaxValues = function(self) return self._bar:GetMinMaxValues(); end;
+
+        frame.SetMinMaxValues = function(self, minValue, maxValue)
+            -- Change the thumbnail texture size to fit the scroll range.
+            local horizontal = self:GetOrientation() == "HORIZONTAL";
+            local barSize, thumbSize;
+            if horizontal then
+                barSize = (self._bar:GetRight() or 0) - (self._bar:GetLeft() or 0);
+            else
+                barSize = (self._bar:GetTop() or 0) - (self._bar:GetBottom() or 0);
+            end
+
+            local range = maxValue - minValue;
+            if range < barSize then
+                thumbSize = barSize - range;
+            else
+                thumbSize = barSize / math.max(range, 1) * BUTTONWIDTH;
+            end
+
+            thumbSize = math.max(6, math.min(barSize, thumbSize));
+
+            if horizontal then
+                self._bar:GetThumbTexture():SetWidth(thumbSize);
+            else
+                self._bar:GetThumbTexture():SetHeight(thumbSize);
+            end
+
+            self._bar:SetMinMaxValues(minValue, maxValue);
+            self._bar:UpdateButtonStatus();
+        end;
+
+        frame.UpdateScrollRange = function(self, range)
+            if type(range) ~= "number" then
+                range = 0;
+            end
+
+            if range < 0.01 or range > 1000000 then
+                range = 0;
+            end
+
+            -- Make the range evenly dividable by value-step, otherwise some bottom/right items might never
+            -- be able to scroll up properly when value-step is greater than 1.
+            range = math.ceil(range);
+            local step = math.max(1, math.ceil(self:GetValueStep()));
+            local md = range % step;
+            if md > 0 then
+                range = range - md + step;
+            end
+
+            self:SetMinMaxValues(0, range);
+            if self:GetValue() >= range then
+                self:SetValue(range);
+            end
+
+            return range > 0 and range;
+        end;
+
+        frame:SetScript("OnMouseWheel", function(self, arg1) frame._bar:SetValue(frame._bar:GetValue() - arg1 * frame._bar:GetValueStep() * 5); end);
+
+        return frame;
+    end
+
+    local PRIVATE = "{E82052F8-B0B9-4677-928E-631E9D21252B}";
+    local SIGNATURE = "{A38788E5-CD67-424C-9089-9A4D80EB9E09}";
+
+    -- The container
+    local frame = CreateFrame("Frame", name, parent, template);
+    if not frame then
+        return nil;
+    end
+
+    -- The bottom-right knob for locating the scroll frame when scroll bar(s) show/hide
+    local knob = CreateFrame("Frame", nil, frame);
+    knob:SetWidth(BARWIDTH);
+    knob:SetHeight(BARWIDTH);
+    knob:SetPoint("TOPLEFT", frame, "BOTTOMRIGHT");
+
+    -- The real scroll frame, inaccessible
+    local scrollFrame = CreateFrame("ScrollFrame", nil, frame);
+    scrollFrame._knob = knob;
+
+    scrollFrame:EnableMouseWheel(true);
+    scrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT");
+    scrollFrame:SetPoint("BOTTOMRIGHT", knob, "TOPLEFT");
+
+    frame[PRIVATE] = { ["scrollFrame"] = scrollFrame, ["SetScript"] = frame.SetScript, ["GetScript"] = frame.GetScript };
+
+    local scrollChild = CreateFrame("Frame", nil, scrollFrame);
+    scrollFrame:SetScrollChild(scrollChild);
+    scrollChild:SetWidth(scrollFrame:GetWidth());
+    scrollChild:SetHeight(1);
+
+    scrollFrame._enableV = 1;
+    scrollFrame._enableH = 1;
+    scrollFrame._vBar = CreateScrollBar(scrollFrame); -- The vertical scroll bar on right side
+    scrollFrame._hBar = CreateScrollBar(scrollFrame, 1); -- The horizontal scroll bar on bottom
+
+    ------------------------------------------------------------
+    -- Container Frame Properties
+    ------------------------------------------------------------
+
+    frame.GetVersion = function() return MAJOR_VERSION, MINOR_VERSION; end;
+
+    frame.SetScript = function(self, script, handler)
+        if type(script) == "string" and (script == "OnVerticalScroll" or script == "OnHorizontalScroll") then
+            if type(handler) ~= "function" then
+                handler = nil;
+            end
+
+            if script == "OnVerticalScroll" then
+                self[PRIVATE]["OnVerticalScroll"] = handler;
+            else
+                self[PRIVATE]["OnHorizontalScroll"] = handler;
+            end
+        else
+            self[PRIVATE]["SetScript"](self, script, handler);
+        end
+    end;
+
+    frame.GetScript = function(self, script)
+        if type(script) == "string" and (script == "OnVerticalScroll" or script == "OnHorizontalScroll") then
+            return self[PRIVATE][script];
+        else
+            return self[PRIVATE]["GetScript"](self, script);
+        end
+    end
+
+    frame.GetScrollChild = function(self) return self[PRIVATE]["content"]; end;
+
+    frame.SetScrollChild = function(self, child)
+        if type(child) ~= "table" or type(child.GetPoint) ~= "function" then
+            child = nil;
+        elseif child[SIGNATURE] then
+            return nil; -- already being a scroll child of someone else
+        end
+
+        local original = self:GetScrollChild();
+        local originalV = self:GetVerticalScroll();
+        local originalH = self:GetHorizontalScroll();
+
+        if original then
+            -- Restore functions
+            original.ClearAllPoints = original[SIGNATURE]["ClearAllPoints"];
+            original.SetAllPoints = original[SIGNATURE]["SetAllPoints"];
+            original.SetPoint = original[SIGNATURE]["SetPoint"];
+            original.SetParent = original[SIGNATURE]["SetParent"];
+            original.GetParent = original[SIGNATURE]["GetParent"];
+            original[SIGNATURE] = nil;
+            original:ClearAllPoints();
+            original:SetParent(nil);
+        end
+
+        self[PRIVATE]["content"] = child;
+
+        if child then
+            local scrollChild = self[PRIVATE]["scrollFrame"]:GetScrollChild();
+            child:SetParent(scrollChild);
+            child:ClearAllPoints();
+            child:SetPoint("TOPLEFT", scrollChild, "TOPLEFT");
+            if self:GetAutoChildWidth() then
+                child:SetPoint("TOPRIGHT", scrollChild, "TOPRIGHT");
+            end
+
+            if child:GetHeight() == 0 then
+                child:SetHeight(1);
+            end
+
+            -- Hijack some functions to prevent changes of child anchors and other stuff
+            child[SIGNATURE] = { ["parent"] = self, ["ClearAllPoints"] = child.ClearAllPoints, ["SetAllPoints"] = child.SetAllPoints,
+                                 ["SetPoint"] = child.SetPoint, ["SetParent"] = child.SetParent, ["GetParent"] = child.GetParent };
+            child.ClearAllPoints = function() end;
+            child.SetAllPoints = function() end;
+            child.SetPoint = function() end;
+            child.SetParent = function() end;
+            child.GetParent = function(self) return self[SIGNATURE]["parent"]; end;
+        end
+
+        self[PRIVATE]["scrollFrame"]._vBar:SetValue(0);
+        self[PRIVATE]["scrollFrame"]._hBar:SetValue(0);
+        return original, originalV, originalH;
+    end;
+
+    frame.SetVerticalScroll = function(self, offset)
+        if type(offset) == "number" then
+            self[PRIVATE]["scrollFrame"]._vBar:SetValue(offset);
+        end
+    end;
+
+    frame.GetVerticalScroll = function(self) return self[PRIVATE]["scrollFrame"]:GetVerticalScroll(); end;
+    frame.GetVerticalScrollRange = function(self) return self[PRIVATE]["scrollFrame"]:GetVerticalScrollRange(); end;
+
+    frame.SetHorizontalScroll = function(self, offset)
+        if type(offset) == "number" then
+            self[PRIVATE]["scrollFrame"]._hBar:SetValue(-offset);
+        end
+    end;
+
+    frame.GetHorizontalScroll = function(self) return self[PRIVATE]["scrollFrame"]:GetHorizontalScroll(); end;
+    frame.GetHorizontalScrollRange = function(self) return self[PRIVATE]["scrollFrame"]:GetHorizontalScrollRange(); end;
+    frame.UpdateScrollChildRect = function(self) return self[PRIVATE]["scrollFrame"]:UpdateScrollChildRect(); end;
+
+    frame.GetAutoChildWidth = function(self) return self[PRIVATE]["auto child width"] end;
+
+    frame.SetAutoChildWidth = function(self, auto)
+        if (self:GetAutoChildWidth() and auto) or (not self:GetAutoChildWidth() and not auto) then
+            return; -- No change
+        end
+
+        self[PRIVATE]["auto child width"] = auto;
+        local child = self:GetScrollChild();
+        if child then
+            local scrollChild = self[PRIVATE]["scrollFrame"]:GetScrollChild();
+            child[SIGNATURE]["ClearAllPoints"](child);
+            child[SIGNATURE]["SetPoint"](child, "TOPLEFT", scrollChild, "TOPLEFT");
+            if auto then
+                child[SIGNATURE]["SetPoint"](child, "TOPRIGHT", scrollChild, "TOPRIGHT");
+            end
+        end
+    end;
+
+    frame.GetScrollStep = function(self) return self[PRIVATE]["scrollFrame"]._vBar:GetValueStep(); end;
+
+    frame.SetScrollStep = function(self, step)
+        if type(step) ~= "number" or step < 1 then
+            step = 1;
+        end
+
+        step = math.ceil(step);
+
+        self[PRIVATE]["scrollFrame"]._vBar:SetValueStep(step);
+        self[PRIVATE]["scrollFrame"]._hBar:SetValueStep(step);
+        return step;
+    end;
+
+    frame.EnableVerticalBar = function(self)
+        if not self:IsVerticalBarEnabled() then
+            self[PRIVATE]["scrollFrame"]._enableV = 1;
+            self[PRIVATE]["scrollFrame"]:UpdateScrollBarsRange();
+        end
+    end;
+
+    frame.DisableVerticalBar = function(self)
+        if self:IsVerticalBarEnabled() then
+            self[PRIVATE]["scrollFrame"]._enableV = nil;
+            self[PRIVATE]["scrollFrame"]:UpdateScrollBarsRange();
+        end
+    end;
+
+    frame.IsVerticalBarEnabled = function(self) return self[PRIVATE]["scrollFrame"]._enableV; end;
+
+    frame.EnableHorizontalBar = function(self)
+        if not self:IsHorizontalBarEnabled() then
+            self[PRIVATE]["scrollFrame"]._enableH = 1;
+            self[PRIVATE]["scrollFrame"]:UpdateScrollBarsRange();
+        end
+    end;
+
+    frame.DisableHorizontalBar = function(self)
+        if self:IsHorizontalBarEnabled() then
+            self[PRIVATE]["scrollFrame"]._enableH = nil;
+            self[PRIVATE]["scrollFrame"]:UpdateScrollBarsRange();
+        end
+    end;
+
+    frame.IsHorizontalBarEnabled = function(self) return self[PRIVATE]["scrollFrame"]._enableH; end;
+
+    local function IsRegionInRegion(interior, exterior)
+        local l1, t1, r1, b1 = interior:GetLeft(), interior:GetTop(), interior:GetRight(), interior:GetBottom();
+        local l2, t2, r2, b2 = exterior:GetLeft(), exterior:GetTop(), exterior:GetRight(), exterior:GetBottom();
+        if not (l1 and t1 and r1 and b1 and l2 and t2 and r2 and b2) then
+            return nil; -- one or both regions are invalid
+        end
+        local l, t, r, b = l1 - l2, t1 - t2, r1 - r2, b1 - b2;
+        return (l >= 0 and t <= 0 and r <= 0 and b >= 0), l, t, r, b;
+    end;
+
+    frame.CheckVisible = function(self, left, top, right, bottom)
+        if not (type(left) == "number" and type(top) == "number" and type(right) == "number" and type(bottom) == "number") then
+            return nil;
+        end
+
+        local frame = self[PRIVATE]["scrollFrame"];
+        local l2, t2, r2, b2 = frame:GetLeft(), frame:GetTop(), frame:GetRight(), frame:GetBottom();
+        if not (l2 and t2 and r2 and b2) then
+            return nil;
+        end
+
+        local l, t, r, b = left - l2, top - t2, right - r2, bottom - b2;
+        local result = 1;
+        if l < 0 or t > 0 or r > 0 or b < 0 then
+            result = 0;
+        end
+
+        return result, l, t, r, b; -- 0: out of boundary, 1: in boundary, nil: invalid
+    end;
+
+    frame.EnsureVisible = function(self, left, top, right, bottom, ignoreHorizontal, ignoreVertical)
+        if not ignoreHorizontal or not ignoreVertical then
+            local result, l, t, r, b = self:CheckVisible(left, top, right, bottom);
+            if result == 0 then
+                if not ignoreHorizontal then
+                    if l < 0 then
+                        -- scroll to left of the region
+                        self:SetHorizontalScroll(self:GetHorizontalScroll() - l);
+                    elseif r > 0 then
+                        -- scroll to right of the region
+                        self:SetHorizontalScroll(self:GetHorizontalScroll() - r);
+                    end
+                end
+
+                if not ignoreVertical then
+                    if t > 0 then
+                        -- scroll to top of the region
+                        self:SetVerticalScroll(self:GetVerticalScroll() - t);
+                    elseif b < 0 then
+                        -- scroll to bottom of the region
+                        self:SetVerticalScroll(self:GetVerticalScroll() - b);
+                    end
+                end
+            end
+        end
+        return self:GetHorizontalScroll(), self:GetVerticalScroll();
+    end;
+
+    frame.CheckRegionVisible = function(self, region)
+        if type(region) ~= "table" or type(region.GetLeft) ~= "function" then
+            return nil;
+        end
+        return self:CheckVisible(region:GetLeft(), region:GetTop(), region:GetRight(), region:GetBottom());
+    end;
+
+    frame.EnsureRegionVisible = function(self, region, ignoreHorizontal, ignoreVertical)
+        if type(region) ~= "table" or type(region.GetLeft) ~= "function" then
+            return self:GetHorizontalScroll(), self:GetVerticalScroll();
+        end
+        return self:EnsureVisible(region:GetLeft(), region:GetTop(), region:GetRight(), region:GetBottom(), ignoreHorizontal, ignoreVertical);
+    end;
+
+    frame.ScrollToTop = function(self)
+        local low, hi = self[PRIVATE]["scrollFrame"]._vBar:GetMinMaxValues();
+        self[PRIVATE]["scrollFrame"]._vBar:SetValue(low);
+    end;
+
+    frame.ScrollToBottom = function(self)
+        local low, hi = self[PRIVATE]["scrollFrame"]._vBar:GetMinMaxValues();
+        self[PRIVATE]["scrollFrame"]._vBar:SetValue(hi);
+    end;
+
+    frame.ScrollToLeft = function(self)
+        local low, hi = self[PRIVATE]["scrollFrame"]._hBar:GetMinMaxValues();
+        self[PRIVATE]["scrollFrame"]._hBar:SetValue(low);
+    end;
+
+    frame.ScrollToRight = function(self)
+        local low, hi = self[PRIVATE]["scrollFrame"]._hBar:GetMinMaxValues();
+        self[PRIVATE]["scrollFrame"]._hBar:SetValue(hi);
+    end;
+
+    ------------------------------------------------------------
+    -- The Real ScrollFrame(Inaccessible) Properties
+    ------------------------------------------------------------
+
+    scrollFrame.UpdateScrollBarsRange = function(self, h, v)
+        self._hBar:UpdateScrollRange(h or self:GetHorizontalScrollRange());
+        self._vBar:UpdateScrollRange(v or self:GetVerticalScrollRange());
+
+        if self._hBar:UpdateScrollRange(h or self:GetHorizontalScrollRange()) and self._enableH then
+            self._hBar:Show();
+        else
+            self._hBar:Hide();
+            if self:GetHorizontalScroll() ~= 0 then
+                self:SetHorizontalScroll(0);
+            end
+        end
+
+        if self._vBar:UpdateScrollRange(v or self:GetVerticalScrollRange()) and self._enableV then
+            self._vBar:Show();
+        else
+            self._vBar:Hide();
+            if self:GetVerticalScroll() ~= 0 then
+                self:GetVerticalScroll(0);
+            end
+        end
+    end;
+
+    scrollFrame.OnScrollBarUpdated = function(self)
+        self._knob:ClearAllPoints();
+        self._vBar:ClearAllPoints();
+        self._hBar:ClearAllPoints();
+
+        local POINTS = { "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" };
+        local score = 1;
+
+        if self._vBar:IsShown() then
+            score = score + 1;
+            self._vBar:SetPoint("TOPRIGHT", self:GetParent(), "TOPRIGHT", 2, 2);
+            if self._hBar:IsShown() then
+                self._vBar:SetPoint("BOTTOMRIGHT", self._knob, "TOPRIGHT", 2, -BARWIDTH * 0.25);
+            else
+                self._vBar:SetPoint("BOTTOMRIGHT", self._knob, "TOPRIGHT", 2, -2);
+            end
+        end
+
+        if self._hBar:IsShown() then
+            score = score + 2;
+            self._hBar:SetPoint("BOTTOMLEFT", self:GetParent(), "BOTTOMLEFT", -2, -2);
+            if self._vBar:IsShown() then
+                self._hBar:SetPoint("BOTTOMRIGHT", self._knob, "BOTTOMLEFT", BARWIDTH * 0.25, -2);
+            else
+                self._hBar:SetPoint("BOTTOMRIGHT", self._knob, "BOTTOMLEFT", 2, -2);
+            end
+        end
+
+        self._knob:SetPoint(POINTS[score], self:GetParent(), "BOTTOMRIGHT");
+    end
+
+    scrollFrame.OnScrollBarValueChanged = function(self, bar, value)
+        if bar:GetOrientation() == "HORIZONTAL" then
+            self:SetHorizontalScroll(-value);
+        else
+            self:SetVerticalScroll(value);
+        end
+    end;
+
+    scrollFrame:SetScript("OnSizeChanged", function()
+        scrollFrame:GetScrollChild():SetWidth(scrollFrame:GetWidth());
+        scrollFrame:UpdateScrollBarsRange();
+    end);
+
+    scrollFrame:SetScript("OnShow", function() scrollFrame:UpdateScrollBarsRange(); end);
+
+    scrollFrame:SetScript("OnMouseWheel", function(self,arg1)
+        local bar = scrollFrame._vBar;
+        if bar:IsShown() then
+            bar:SetValue(bar:GetValue() - arg1 * bar:GetValueStep() * 5);
+        end
+    end);
+
+    scrollFrame:SetScript("OnScrollRangeChanged", function(self, arg1, arg2) scrollFrame:UpdateScrollBarsRange(arg1, arg2); end);
+
+    scrollFrame:SetScript("OnVerticalScroll", function(self ,arg1)
+        local handler = scrollFrame:GetParent():GetScript("OnVerticalScroll");
+        if type(handler) == "function" then
+            handler(scrollFrame:GetParent(), arg1);
+        end
+    end);
+
+    scrollFrame:SetScript("OnHorizontalScroll", function(self, arg1)
+        local handler = scrollFrame:GetParent():GetScript("OnHorizontalScroll");
+        if type(handler) == "function" then
+            handler(scrollFrame:GetParent(), arg1);
+        end
+    end);
+
+    return frame;
 end
 
 
