@@ -37,6 +37,9 @@ RAID ASSIGNMENTS:
    Allow assignments for sheep / hibernates.
    Auto mark targets based on name and mouse-overs (Hibernates / Sheeps based on target name).
 
+   - Go to Other, If you put the amount before you put the text in, So it doesn't lock up.
+   -
+
 
 MAKING IT MORE PUBLIC:
     TODO: Enable PUGS
