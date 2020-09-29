@@ -97,31 +97,32 @@ end
 
 function HistoryTable:RefreshLayout()
     local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
-
     self:GetDisplayRows();
+
+    local collapsed_rows = 0
+    local max_rows = self.MAX_ROWS
 
     for i=1, #self.displayedRows do
         local row = self.displayedRows[i];
-        row:ClearAllPoints(); -- Remove it from view.
-        if i >= offset + 1 and i <= offset + self.MAX_ROWS then
+        row:ClearAllPoints(); -- Remove it from view
+
+        if row.collapsed then
+            collapsed_rows = collapsed_rows + 1
+        end
+
+        if i >= offset + 1 and i <= offset + self.MAX_ROWS + collapsed_rows then
             row:Show();
             if i == offset + 1 then
-                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, 0)
+                row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, -14)
             else
                 row:SetPoint("TOPLEFT", self.displayedRows[i-1], "BOTTOMLEFT")
             end
         else
+            print('hidden', i)
             row:Hide();
         end
     end
-    self:UpdateLabelTotals()
     self:RefreshTableSize();
-end
-
-function HistoryTable:UpdateLabelTotals()
-    if self == nil or self.entryLabel == nil then return end
-    self.entryLabel:SetText(#self.displayedRows .. " Players shown | " .. #self.selected .. " selected")
-    PDKP_ToggleAdjustmentDropdown()
 end
 
 ----- FILTER FUNCTIONS -----
@@ -283,38 +284,43 @@ function HistoryTable:OnLoad()
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Frame", nil, self.scrollChild)
 
-        local titletext = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        titletext:SetPoint("TOPLEFT", 14, 0)
-        titletext:SetPoint("TOPRIGHT", -14, 0)
-        titletext:SetJustifyH("LEFT")
-        titletext:SetHeight(18)
-        titletext:SetText(i)
+        row.cols = {};
+        row.index = i
+        row.realIndex = nil;
+        row.selectOn = self.ROW_SELECT_ON
+        row.dataObj = self.displayData[i];
+        row:SetID(i)
+        row.isFiltered = false;
+        row.collapsed = false;
+
+        local formattedID = Util:Format12HrDateTime(row.dataObj['id'])
+
+        local collapse_text, titletext;
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-        collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 14, 0)
+        collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, 0)
         collapse_button:SetScript("OnClick", function()
             if row.content:IsVisible() then
                 row.content:Hide()
                 row:SetHeight(50)
                 self.total_row_height = (self.total_row_height + 50)  - row.max_height
                 collapse_button:SetText("O")
+                collapse_text:Show()
+                titletext:Hide()
+                row.collapsed = true
             else
                 row.content:Show()
                 row:SetHeight(row.max_height)
                 self.total_row_height = (self.total_row_height + row.max_height)  - 50
                 collapse_button:SetText("X")
+                collapse_text:Hide()
+                titletext:Show()
+                row.collapsed = false
             end
-            self:RefreshTableSize()
+            self:RefreshLayout()
         end)
         collapse_button:SetSize(30, 20)
         collapse_button:SetText("X")
-
-        local collapse_text = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        collapse_text:SetPoint("TOPLEFT", 14, 0)
-        collapse_text:SetPoint("TOPRIGHT", -14, 0)
-        collapse_text:SetHeight(18)
-        collapse_text:SetText(i)
-
 
         local border = CreateFrame("Frame", nil, row)
         border:SetPoint("TOPLEFT", 0, -17)
@@ -322,6 +328,19 @@ function HistoryTable:OnLoad()
         border:SetBackdrop(PaneBackdrop)
         border:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
         border:SetBackdropBorderColor(0.4, 0.4, 0.4)
+
+        titletext = border:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        titletext:SetPoint("TOPLEFT", 14, 0)
+        titletext:SetPoint("TOPRIGHT", -14, 0)
+        titletext:SetJustifyH("LEFT")
+        titletext:SetHeight(18)
+        titletext:SetText(i)
+
+        collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        collapse_text:SetHeight(18)
+        collapse_text:SetText(formattedID .. " | " .. row.dataObj['reason'])
+        collapse_text:SetPoint("LEFT", 14, 0)
+        collapse_text:Hide()
 
         local content = CreateFrame("Frame", nil, border)
         content:SetPoint("TOPLEFT", 10, -10)
@@ -332,20 +351,11 @@ function HistoryTable:OnLoad()
 
         row:SetSize(self.ROW_WIDTH, self.ROW_HEIGHT)
 
-
-        row.cols = {};
-        row.index = i
-        row.realIndex = nil;
-        row.selectOn = self.ROW_SELECT_ON
-        row.dataObj = self.displayData[i];
-        row:SetID(i)
-        row.isFiltered = false;
-
         row.max_width = 0;
         row.max_height = 0;
 
         if i == 1 then -- Anchor the first row relative to the frame.
-            row:SetPoint("TOPLEFT", self.ListScrollFrame, 16, 0)
+            row:SetPoint("TOPLEFT", self.ListScrollFrame, 16, -10)
         else
             row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
         end

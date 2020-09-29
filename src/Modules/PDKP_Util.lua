@@ -150,6 +150,10 @@ function Util:displayTime(timeInSeconds)
     return format("%dD:%2dHr:%2dMin",days,hours,minutes)
 end
 
+function Util:Format12HrDateTime(dateTime)
+    return date("%a, %b %d | %I:%M %p", dateTime)
+end
+
 -----------------------------
 --     String Functions    --
 -----------------------------

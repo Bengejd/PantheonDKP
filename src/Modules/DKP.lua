@@ -31,6 +31,16 @@ end
 
 function DKP:GetEntries(keysOnly)
 
+    local compare = function(a,b)
+        if type(a) == type({}) and type(b) == type({}) then
+            return a['id'] > b['id']
+        else
+            if type(a) == type(1) and type(b) == type(1) then
+                return a > b
+            end
+        end
+    end
+
     keysOnly = keysOnly or false
     local entry_keys, entries = {}, {};
     for key, _ in pairs(DkpDB['history']['all']) do
@@ -41,6 +51,10 @@ function DKP:GetEntries(keysOnly)
             dkp_entry:Save()
         end
     end
+
+    table.sort(entry_keys, compare)
+    table.sort(entries, compare)
+
     return entry_keys, entries;
 end
 
