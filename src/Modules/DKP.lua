@@ -106,7 +106,7 @@ end
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
 
-    print('Deleting entry', entry['historyText'])
+    print('Deleting entry', entry['id'])
 
     DkpDB['history']['all'][entry['id']]['deleted']=true -- Mark the entry as having been deleted.
 

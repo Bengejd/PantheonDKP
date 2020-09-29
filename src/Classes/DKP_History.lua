@@ -57,37 +57,31 @@ function HistoryTable:HistoryUpdated()
     end
 
     self:RefreshData()
-    self:GetDisplayRows()
-    --self:RaidChanged()
+    self:GetDisplayRows(true)
+    self:RefreshLayout()
 end
 
 -- Refreshes the data that we are utilizing.
 function HistoryTable:RefreshData()
-    print('Wiping Data')
-    self.data = {}
+     wipe(self.data)
 
     self.data = self.retrieveDataFunc();
-    print('Data should have data now: ', #self.data)
-
-    --- Can't delete entries that haven't yet been saved to the disk. Hmmmm....
-
-    self.displayData = {};
-
+    wipe(self.displayData);
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
 end
 
-function HistoryTable:GetDisplayRows()
-    self.displayedRows = {}
-    --wipe(); -- Return to initial value.
+function HistoryTable:GetDisplayRows(update)
+    wipe(self.displayedRows)
     for i=1, #self.displayData do
         local row = self.rows[i];
+        local dataObj = self.displayData[i]
 
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row);
+            if update then row:UpdateRowValues(dataObj) end
             row:Show()
-        else
         end
     end
 end
@@ -125,9 +119,9 @@ function HistoryTable:RefreshTableSize()
     self.ListScrollFrame:UpdateScrollChildRect()
 end
 
-function HistoryTable:RefreshLayout()
+function HistoryTable:RefreshLayout(update)
     local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
-    self:GetDisplayRows();
+    self:GetDisplayRows(update);
 
     local collapsed_rows = 0
 
@@ -319,28 +313,33 @@ end
 function HistoryTable:OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
-        local row = CreateFrame("Frame", nil, self.scrollChild)
+        local row = CreateFrame("Frame", '$parent_row_' .. i, self.scrollChild)
 
         row.cols = {};
         row.index = i
         row.realIndex = nil;
         row.selectOn = self.ROW_SELECT_ON
         row.dataObj = self.displayData[i];
-        row:SetID(row.dataObj['id'])
 
-        print('row:', i, 'ID:', row:GetID())
+        function row:ReportID(state)
+            if row:GetID() ~= row.dataObj['id'] then row:SetID(row.dataObj['id'])
+            else return
+            end
+            state = state or 'Initial'
+            print('row:', i, state .. ' ID:', row:GetID())
+        end
+
+        row:ReportID() -- Prints out the ID.
 
         row.isFiltered = false;
         row.collapsed = false;
-
-        local formattedID = Util:Format12HrDateTime(row.dataObj['id'])
 
         local collapse_text, titletext;
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
         collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, 0)
 
-        local collapse_frame = function()
+        row.collapse_frame = function()
             if row.content:IsVisible() then
                 row.content:Hide()
                 row:SetHeight(50)
@@ -357,8 +356,8 @@ function HistoryTable:OnLoad()
         end
 
         collapse_button:SetScript("OnClick", function()
-            collapse_frame()
-            self:RefreshLayout()
+            row:collapse_frame()
+            self:RefreshLayout(false)
         end)
         collapse_button:SetSize(30, 20)
         collapse_button:SetText("X")
@@ -374,14 +373,10 @@ function HistoryTable:OnLoad()
         titletext:SetPoint("TOPLEFT", 14, 15)
         titletext:SetJustifyH("LEFT")
         titletext:SetHeight(18)
-        titletext:SetText(formattedID .. " | " .. i)
 
         collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         collapse_text:SetHeight(18)
-        collapse_text:SetText( i .. " | " .. row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
         collapse_text:SetPoint("LEFT", 14, 0)
-
-        if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
         collapse_text:Hide()
 
         local content = CreateFrame("Frame", nil, border)
@@ -404,144 +399,81 @@ function HistoryTable:OnLoad()
 
         row.super = self;
 
-        function row:UpdateRowValues()
-            for key, header in pairs(row.super['HEADERS']) do
+        function row:UpdateRowValues(entry)
+            local self = row.super
+            local headers = self.HEADERS;
+            if entry then row.dataObj = entry; end
+            row.max_height = 0
+
+            row:SetID(row.dataObj['id'])
+            row:ReportID('Updated')
+
+            for key=1, #headers do
+                local header = headers[key]
                 local label = header['label']
-                local valFunc = header['getValueFunc']
-                if valFunc ~= nil then
-                    local val = (valFunc ~= nil and row.dataObj ~= nil) and valFunc(row.dataObj) or row.dataObj[label]
-                    row.cols[key]:SetText(val)
+                local display_name = header['displayName']
+                local col_name = '$parent_' .. row:GetID() .. '_' .. label
+                local col = row.cols[key]
+                local getVal = header['getValueFunc']
+                local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
+
+                if col == nil then
+                    col = content:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
+                    col.click_frame = nil;
                 end
+
+                if header['onClickFunc'] then
+                    local cf = col.click_frame;
+                    if cf == nil then
+                        cf = CreateFrame("Frame", nil, row)
+                        cf:SetAllPoints(col)
+                        cf:SetScript("OnMouseUp", function(_, buttonType)
+                            if row.content:IsVisible() then
+                                header['onClickFunc'](row, buttonType)
+                            end
+                        end)
+                        col.click_frame = cf;
+                    end
+                end
+
+                col:SetSize(row:GetWidth() - 15, self.COL_HEIGHT)
+                if key == 1 then
+                    col:SetPoint("TOPLEFT", 5, -5)
+                else
+                    col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
+                end
+                col:SetText(display_name .. ": " .. val)
+
+                row.max_height = row.max_height + col:GetStringHeight() + 12
+                row.cols[key] = col
             end
+            row:SetHeight(row.max_height)
+            if row.max_height < self.ROW_HEIGHT then self.ROW_HEIGHT = row.max_height end
+
+            row:UpdateTextValues()
+        end
+
+        function row:UpdateTextValues()
+            local formattedID = row.dataObj['formattedID']
+            titletext:SetText(formattedID .. " | " .. i)
+            collapse_text:SetText( i .. " | " .. row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
+
+            if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
+
+            row:collapse_frame()
         end
 
         function row:ApplyFilters()
             local dataObj = row.dataObj;
             row.isFiltered = false;
-            local super = row.super;
-
+            --local super = row.super;
             row.isFiltered = dataObj['deleted']
-
-            --for filter, checkedStatus in pairs(super.appliedFilters or {}) do
-            --    if row.isFiltered then break end -- No need to waste time looping through the rest.
-            --
-            --    -- It's one of the classes, not all.
-            --    if substr(filter, 'Class_') and not substr(filter, '_All') and not checkedStatus then
-            --        local _, class = strsplit('_', filter);
-            --        if dataObj['class'] == class then
-            --            row.isFiltered = true
-            --            break; -- We don't need to continue running checks, if it's filtered.
-            --        end
-            --    elseif filter == 'Class_All' and not checkedStatus then
-            --        row.isFiltered = true;
-            --    elseif checkedStatus then
-            --        if filter == 'online' then
-            --            if #super.online > 0 then
-            --                row.isFiltered = not tContains(super.online, dataObj['name'])
-            --            end
-            --        elseif filter == 'selected' then
-            --            row.isFiltered = not tContains(super.selected, dataObj['name'])
-            --        elseif filter == 'Select_All' then
-            --
-            --        elseif filter == 'raid' then
-            --            row.isFiltered = not tContains(super.raid, dataObj['name'])
-            --        elseif filter == 'name' then
-            --            row.isFiltered = not Util:StringsMatch(dataObj['name'], super.searchText)
-            --        end
-            --    end
-            --end
-
             return row.isFiltered;
         end
 
-        for key=1, #self.HEADERS do
-            local header = self.HEADERS[key]
-            local label = header['label'];
+        row:UpdateRowValues()
 
-            local col_name = '$parent' .. label
-            local display_name = header['displayName']
-            local col = content:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
-            local getVal = header['getValueFunc']
-            local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
-
-            if header['onClickFunc'] then
-                local click_frame = CreateFrame("Frame", nil, row)
-                click_frame:SetAllPoints(col)
-                click_frame:SetScript("OnMouseUp", function(_, buttonType)
-                    if row.content:IsVisible() then
-                        header['onClickFunc'](row, buttonType)
-                    end
-                end)
-            end
-
-            col:SetSize(row:GetWidth() - 15, self.COL_HEIGHT)
-
-            if key == 1 then
-                col:SetPoint("TOPLEFT", 5, -5)
-            else
-                col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
-            end
-
-            col:SetText(display_name .. ": " .. val)
-
-            row.max_height = row.max_height + col:GetStringHeight() + 12
-
-            row.cols[key]=col;
-
-        end
-
-        row:SetHeight(row.max_height)
-
-        if row.max_height < self.ROW_HEIGHT then self.ROW_HEIGHT = row.max_height; end
-
-        collapse_frame() -- start collapsed by default.
-
-        --[[        --for key, header in pairs(self.HEADERS) do
-                --    local label = header['label'];
-                --
-                --    local col_name = '$parent' .. label
-                --    local display_name = header['displayName']
-                --    local col = row:CreateFontString(col_name, 'OVERLAY', 'GameFontHighlightLeft')
-                --    local getVal = header['getValueFunc']
-                --    local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
-                --
-                --    col:SetSize(self.frame:GetWidth(), self.COL_HEIGHT)
-                --
-                --    if key == 1 then
-                --        col:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -5)
-                --    else
-                --        col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, 0)
-                --    end
-                --
-                --    col:SetText(display_name .. ": " .. val)
-                --
-                --    if label == 'formattedNames' then
-                --        col:SetText(display_name .. " : " .. "TESTING")
-                --    end
-                --
-                --    row.cols[key]=col;
-                --
-                --    --
-                --    --col:SetJustifyH(header['point'])
-                --    --
-                --    --if type(val) == 'number' and val > 9999 then
-                --    --    col:SetSpacing(0.5) -- For excessively large numbers. Decrease the letter spacing.
-                --    --end
-                --    --
-                --    --if key == 1 then
-                --    --    col:SetPoint(col_point, row)
-                --    --else
-                --    --    col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", 0, 0)
-                --    --
-                --    --    if key == #self.HEADERS and col_point == 'RIGHT' then
-                --    --        col:SetPoint("TOPLEFT", row.cols[key -1], "TOPRIGHT", -10, 0)
-                --    --    end
-                --    --end
-                --    --
-                --    --col:SetText(val)
-                --    --
-                --    --row.cols[key] = col;
-                --end]]
+        row:collapse_frame()
 
         rawset(t, i, row)
         return row

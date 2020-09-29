@@ -34,6 +34,7 @@ function DKP_Entry:New(entry_details)
     self.change_text = self:GetChangeText()
     self.historyText = self:GetHistoryText()
     self.formattedOfficer = self:GetFormattedOfficer()
+    self.formattedID = Util:Format12HrDateTime(self.id)
 
     return self
 end
