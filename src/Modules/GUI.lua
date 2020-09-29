@@ -26,22 +26,26 @@ GUI.sortBy = 'name';
 GUI.sortDir = 'ASC';
 GUI.memberTable = nil;
 
-GUI.adjustmentDropdowns = {}
-GUI.adjustmentDropdowns_names = {};
-GUI.editBoxes = {};
-GUI.submit_entry = nil;
-GUI.adjustment_entry = {};
-GUI.adjust_buttons = {}
+--- Adjustments Section
+GUI.adjustment_frame = nil; -- The DKP Adjustments Frame
+GUI.adjustmentDropdowns = {} -- -- The DKP Adjustment Dropdown Menus names
+GUI.adjustmentDropdowns_names = {}; -- The DKP Adjustment Dropdown Menus names
+GUI.editBoxes = {}; -- The DKP Adjustment Edit Boxes
+GUI.adjustment_submit_button = nil; -- The Submit Button
+GUI.adjustment_entry = {}; -- The Entry info we are creating when hitting submit
+GUI.adjust_buttons = {} -- The Adjustment Buttons
+GUI.boss_loot_frame = nil; -- The DKP Adjustments Boss Loot Frame
 
-GUI.boss_loot_frame = nil;
-GUI.recent_boss_kill = {};
+GUI.recent_boss_kill = {}; -- The Info regarding our most recent Boss Kill
 
-GUI.filter_frame = nil;
-GUI.adjustment_frame = nil;
-GUI.history_frame = nil;
-GUI.raid_frame = nil;
+GUI.filter_frame = nil; -- The Member Table Filter Frame
 
-GUI.popup_entry = nil;
+GUI.history_frame = nil; -- The DKP History Frame
+GUI.history_table = nil; -- The DKP History Table
+
+GUI.raid_frame = nil; -- The PDKP Raid Tools frame.
+
+GUI.popup_entry = nil; -- The popup entry that we are editing/deleting.
 
 function GUI:Init()
     Util:Debug('Initializing GUI')
@@ -101,8 +105,8 @@ function GUI:RefreshTables()
     GUI.memberTable:ClearSelected()
     GUI.memberTable:ClearAll()
 
-    GUI.history_table:HistoryUpdated()
     GUI.memberTable:RaidChanged()
+    GUI.history_table:HistoryUpdated()
 
     wipe(GUI.memberTable.selected)
 end

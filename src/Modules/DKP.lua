@@ -33,8 +33,7 @@ function DKP:InitDB()
     Util:WatchVar(DkpDB['history']['all'], 'DkpDB')
 end
 
-function DKP:GetEntries(keysOnly)
-
+function DKP:GetEntries(keysOnly, id)
     local compare = function(a,b)
         if type(a) == type({}) and type(b) == type({}) then
             return a['id'] > b['id']
@@ -45,10 +44,17 @@ function DKP:GetEntries(keysOnly)
         end
     end
 
+    local history = DkpDB['history']['all']
+
+    if id then
+        local entry = DKP_Entry:New(history[id])
+        return entry;
+    end
+
     keysOnly = keysOnly or false
     local entry_keys, entries = {}, {};
-    for key, _ in pairs(DkpDB['history']['all']) do
-        local dkp_entry = DKP:GetEntry(key)
+    for key, _ in pairs(history) do
+        local dkp_entry = DKP_Entry:New(history[key])
         if not dkp_entry['deleted'] then
             table.insert(entry_keys, key)
             if not keysOnly then
@@ -57,17 +63,10 @@ function DKP:GetEntries(keysOnly)
             end
         end
     end
-
     table.sort(entry_keys, compare)
     table.sort(entries, compare)
 
     return entry_keys, entries;
-end
-
-function DKP:GetEntry(id)
-    local db_entry = DkpDB['history']['all'][id]
-    local entry = DKP_Entry:New(db_entry)
-    return entry
 end
 
 function DKP:RaidNotOny(raid)

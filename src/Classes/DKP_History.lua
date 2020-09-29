@@ -7,6 +7,7 @@ local Util = core.Util;
 local Defaults = core.Defaults;
 local Guild = core.Guild;
 local Raid = core.Raid;
+local Settings = core.Settings;
 
 HistoryTable.__index = HistoryTable; -- Set the __index parameter to reference
 
@@ -51,14 +52,18 @@ end
 
 function HistoryTable:HistoryUpdated()
 
-    for i=1, #self.displayedRows do
+    self.appliedFilters['raid']=Settings.current_raid
+    Util:WatchVar(self.appliedFilters, 'HistoryFilters')
+
+    for i=1, #self.rows do
         local row = self.rows[i]
         row:Hide()
     end
 
     self:RefreshData()
-    self:GetDisplayRows(true)
-    self:RefreshLayout()
+    self:RefreshLayout(true)
+
+    print('HistoryUpdate', #self.displayedRows)
 end
 
 -- Refreshes the data that we are utilizing.
@@ -76,21 +81,17 @@ function HistoryTable:GetDisplayRows(update)
     wipe(self.displayedRows)
     for i=1, #self.displayData do
         local row = self.rows[i];
-        local dataObj = self.displayData[i]
+        local dataObj = self.displayData[i] --- This is the key to updating the table values correctly.
+        if update then row:UpdateRowValues(dataObj) end
+
+        row:Hide()
 
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row);
-            if update then row:UpdateRowValues(dataObj) end
             row:Show()
         end
     end
-end
 
-function HistoryTable:RaidChanged()
-    for i=1, #self.displayData do
-        local row = self.rows[i];
-        row:UpdateRowValues();
-    end
 end
 
 function HistoryTable:RefreshTableSize()
@@ -120,8 +121,9 @@ function HistoryTable:RefreshTableSize()
 end
 
 function HistoryTable:RefreshLayout(update)
-    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
     self:GetDisplayRows(update);
+
+    local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
 
     local collapsed_rows = 0
 
@@ -216,6 +218,8 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.firstSortRan = false;
     self.isDragging = false
     self.rows = {};
+
+    self.appliedFilters['raid']=Settings.current_raid
 
     Util:WatchVar(self.data, 'HistoryTable Data')
     Util:WatchVar(self.displayData, 'HistoryTable DisplayData')
@@ -325,8 +329,11 @@ function HistoryTable:OnLoad()
             if row:GetID() ~= row.dataObj['id'] then row:SetID(row.dataObj['id'])
             else return
             end
+
+            if not Settings:IsDebug() then return end
+
             state = state or 'Initial'
-            print('row:', i, state .. ' ID:', row:GetID())
+            --print('row:', i, state .. ' ID:', row:GetID())
         end
 
         row:ReportID() -- Prints out the ID.
@@ -455,8 +462,8 @@ function HistoryTable:OnLoad()
 
         function row:UpdateTextValues()
             local formattedID = row.dataObj['formattedID']
-            titletext:SetText(formattedID .. " | " .. i)
-            collapse_text:SetText( i .. " | " .. row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
+            titletext:SetText(formattedID)
+            collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
 
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
 
@@ -466,8 +473,19 @@ function HistoryTable:OnLoad()
         function row:ApplyFilters()
             local dataObj = row.dataObj;
             row.isFiltered = false;
-            --local super = row.super;
-            row.isFiltered = dataObj['deleted']
+
+            if dataObj['deleted'] == true then row.isFiltered = true end
+
+            local self = row.super;
+
+            for filter, val in pairs(self.appliedFilters or {}) do
+                if row.isFiltered then break end -- No need to waste time looping through the rest.
+
+                if filter == 'raid' then
+                    row.isFiltered = row.dataObj['raid'] ~= val
+                end
+            end
+
             return row.isFiltered;
         end
 

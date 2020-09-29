@@ -756,7 +756,7 @@ function Setup:DKPAdjustments()
     end
     sb:Disable()
 
-    GUI.submit_entry = sb
+    GUI.adjustment_submit_button = sb
 
     --- Shroud / Roll buttons
     local shroud = CreateFrame("Button", "$parent_shroud", f, "UIPanelButtonTemplate")
@@ -808,7 +808,7 @@ function PDKP_ToggleAdjustmentDropdown()
     local entry_details = GUI.adjustment_entry
 
     --- Submit Button
-    local sb = GUI.submit_entry
+    local sb = GUI.adjustment_submit_button
 
     local reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD = gui_dds['reasons'], gui_dds['raid'], gui_dds['boss_Blackwing Lair'],
     gui_dds['boss_Molten Core'], gui_dds['boss_Ahn\'Qiraj'], gui_dds['boss_Naxxramas']
@@ -916,6 +916,15 @@ function Setup:DKPHistory()
 
     GUI.history_frame = f;
 
+    local ob = CreateFrame("Button", "$parent_options", f, "UIPanelButtonTemplate")
+    ob:SetSize(80, 22) -- width, height
+    ob:SetText("Options")
+    ob:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
+    ob:SetScript("OnClick", function()
+        print('Opening History Options')
+        -- TODO: Hookup the options button frame.
+    end)
+
     history_button:Click()
 end
 
@@ -932,7 +941,7 @@ function Setup:RaidDropdown()
         ['dropdownTable']=GUI.adjustmentDropdowns,
         ['changeFunc']=function(dropdown, dropdown_val)
             Settings:ChangeCurrentRaid(dropdown_val);
-            PDKP.memberTable:RaidChanged()
+            GUI:RefreshTables()
             PDKP_ToggleAdjustmentDropdown()
         end
     }
@@ -1074,6 +1083,12 @@ function Setup:TabView()
         end)
     end
     tc:Show()
+end
+
+function Setup:SyncStatus()
+
+
+    --Util:Format12HrDateTime(self.id)
 end
 
 function Setup:BossKillLoot()
@@ -1252,11 +1267,11 @@ function Setup:HistoryTable()
         ['movable']=true,
         ['enableMouse']=true,
         ['retrieveDataFunc']=function()
-            local keys, entries = DKP:GetEntries(true)
+            local keys, entries = DKP:GetEntries(true, nil)
             return keys
         end,
         ['retrieveDisplayDataFunc']=function(self, id)
-            return DKP:GetEntry(id)
+            return DKP:GetEntries(false, id)
         end,
         ['anchor']={
             ['point']='TOPLEFT',
