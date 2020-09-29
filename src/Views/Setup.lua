@@ -394,14 +394,23 @@ function Setup:Debugging()
             local boss_info = Raid:TestBossKill()
             print(boss_info['name'], boss_info['id'], boss_info['raid'])
         end,
+        ['memory']=function()
+            Util:ReportMemory()
+        end
     }
     local button_counter_x = 1
     local button_counter_y = 1
     local button_counter = 1
     for name, func in pairs(buttons) do
         local db = CreateFrame("Button", nil, f, "UiPanelButtonTemplate")
-        db:SetSize(80, 22)
+
+        db:SetHeight(22)
         db:SetText(name)
+
+        local width = db:GetTextWidth() + 10
+        if width < 80 then width = 80 end
+
+        db:SetWidth(width)
 
         db:SetScript("OnClick", func)
 

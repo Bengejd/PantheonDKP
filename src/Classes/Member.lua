@@ -154,4 +154,11 @@ end
 function Member:UpdateDKPTest(raid, newTotal)
     raid = raid or Raid:GetCurrentRaid()
     self.dkp[raid].total = newTotal
+
+    for key, val in pairs({'entries', 'deleted'}) do
+        self.dkp[raid][val] = {}
+        memberDB[self.name][raid][val] = {}
+    end
+
+    self:Save()
 end

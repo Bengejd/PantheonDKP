@@ -24,9 +24,13 @@ local DKP_Entry = core.DKP_Entry;
 
 local DkpDB;
 
+DKP.entries = {};
+
 function DKP:InitDB()
     DkpDB = core.PDKP.dkpDB
     DKP.history = DkpDB['history']
+
+    Util:WatchVar(DkpDB['history']['all'], 'DkpDB')
 end
 
 function DKP:GetEntries(keysOnly)
@@ -44,11 +48,13 @@ function DKP:GetEntries(keysOnly)
     keysOnly = keysOnly or false
     local entry_keys, entries = {}, {};
     for key, _ in pairs(DkpDB['history']['all']) do
-        table.insert(entry_keys, key)
-        if not keysOnly then
-            local dkp_entry = DKP:GetEntry(key)
-            entries[key] = dkp_entry
-            dkp_entry:Save()
+        local dkp_entry = DKP:GetEntry(key)
+        if not dkp_entry['deleted'] then
+            table.insert(entry_keys, key)
+            if not keysOnly then
+                entries[key] = dkp_entry
+                dkp_entry:Save()
+            end
         end
     end
 
@@ -82,29 +88,27 @@ function DKP:Submit()
     GUI.adjustment_entry['officer']= pName
     GUI.adjustment_entry['names'] = { unpack(PDKP.memberTable.selected) }
 
-    for key, n in pairs({unpack(PDKP.memberTable.selected)}) do
-        print(n)
-    end
-
-    Util:WatchVar(GUI.adjustment_entry, 'adjustment_Entry')
-
     local entry = DKP_Entry:New(GUI.adjustment_entry)
+
+    print(entry['historyText'])
 
     for _, name in pairs(entry['names']) do
         local member = Guild:GetMemberByName(name)
         member:NewEntry(entry)
     end
-    PDKP.memberTable:RaidChanged()
 
     entry:Save()
     core.PDKP.dkpDB['history']['lastEdit']=entry.id
 
-    GUI.memberTable:ClearSelected()
-    GUI.memberTable:ClearAll()
+    GUI:RefreshTables()
 end
 
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
+
+    print('Deleting entry', entry['historyText'])
+
+    DkpDB['history']['all'][entry['id']]['deleted']=true -- Mark the entry as having been deleted.
 
     for key, name in pairs(entry['names']) do
         local member = Guild:GetMemberByName(name)
@@ -134,13 +138,23 @@ function DKP:TestShroud()
     memberTable:RaidChanged()
 end
 
-function DKP:ResetDKP()
-    local memberTable = PDKP.memberTable
-    local selectedNames = memberTable.selected;
-    for _, name in pairs(selectedNames) do
-        local member = Guild:GetMemberByName(name)
-        member:UpdateDKPTest('Molten Core', member.guildIndex)
+function DKP:ResetDKP(selected)
+    if selected then
+        local memberTable = PDKP.memberTable
+        local selectedNames = memberTable.selected;
+
+        for _, name in pairs(selectedNames) do
+            local member = Guild:GetMemberByName(name)
+            member:UpdateDKPTest('Molten Core', member.guildIndex)
+        end
+
+        DkpDB['history']['all']={}
+        DkpDB['history']['deleted']={}
+    else
+
     end
+
+
     memberTable:RaidChanged()
 end
 

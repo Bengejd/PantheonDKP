@@ -255,6 +255,11 @@ function Util:HexToRGBA(hex)
     return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, (a ~= "") and (tonumber(a, 16) / 255) or 1
 end
 
+function Util:ReportMemory()
+    UpdateAddOnMemoryUsage()
+    print('PDKP Memory: ', math.ceil((GetAddOnMemoryUsage("PantheonDKP") / 1000)) .. 'MB')
+end
+
 function dumpTable(tbl, indent, depth, currentDepth)
     indent = indent or 0;
     depth = depth or 1

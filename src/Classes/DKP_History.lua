@@ -56,13 +56,20 @@ function HistoryTable:HistoryUpdated()
         row:Hide()
     end
 
-    self:GetDisplayRows()
     self:RefreshData()
+    self:GetDisplayRows()
+    --self:RaidChanged()
 end
 
 -- Refreshes the data that we are utilizing.
 function HistoryTable:RefreshData()
+    print('Wiping Data')
+    self.data = {}
+
     self.data = self.retrieveDataFunc();
+    print('Data should have data now: ', #self.data)
+
+    --- Can't delete entries that haven't yet been saved to the disk. Hmmmm....
 
     self.displayData = {};
 
@@ -72,13 +79,15 @@ function HistoryTable:RefreshData()
 end
 
 function HistoryTable:GetDisplayRows()
-    wipe(self.displayedRows); -- Return to initial value.
+    self.displayedRows = {}
+    --wipe(); -- Return to initial value.
     for i=1, #self.displayData do
         local row = self.rows[i];
+
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row);
+            row:Show()
         else
-            --row:Hide();
         end
     end
 end
@@ -212,6 +221,12 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.sortDir = nil;
     self.firstSortRan = false;
     self.isDragging = false
+    self.rows = {};
+
+    Util:WatchVar(self.data, 'HistoryTable Data')
+    Util:WatchVar(self.displayData, 'HistoryTable DisplayData')
+    Util:WatchVar(self.displayedRows, 'HistoryTable DisplayedRows')
+    Util:WatchVar(self.rows, 'HistoryTable Rows')
 
     self.total_row_height = 0
 
@@ -311,7 +326,10 @@ function HistoryTable:OnLoad()
         row.realIndex = nil;
         row.selectOn = self.ROW_SELECT_ON
         row.dataObj = self.displayData[i];
-        row:SetID(i)
+        row:SetID(row.dataObj['id'])
+
+        print('row:', i, 'ID:', row:GetID())
+
         row.isFiltered = false;
         row.collapsed = false;
 
@@ -356,11 +374,11 @@ function HistoryTable:OnLoad()
         titletext:SetPoint("TOPLEFT", 14, 15)
         titletext:SetJustifyH("LEFT")
         titletext:SetHeight(18)
-        titletext:SetText(formattedID)
+        titletext:SetText(formattedID .. " | " .. i)
 
         collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         collapse_text:SetHeight(18)
-        collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
+        collapse_text:SetText( i .. " | " .. row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
         collapse_text:SetPoint("LEFT", 14, 0)
 
         if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
@@ -401,34 +419,37 @@ function HistoryTable:OnLoad()
             local dataObj = row.dataObj;
             row.isFiltered = false;
             local super = row.super;
-            for filter, checkedStatus in pairs(super.appliedFilters or {}) do
-                if row.isFiltered then break end -- No need to waste time looping through the rest.
 
-                -- It's one of the classes, not all.
-                if substr(filter, 'Class_') and not substr(filter, '_All') and not checkedStatus then
-                    local _, class = strsplit('_', filter);
-                    if dataObj['class'] == class then
-                        row.isFiltered = true
-                        break; -- We don't need to continue running checks, if it's filtered.
-                    end
-                elseif filter == 'Class_All' and not checkedStatus then
-                    row.isFiltered = true;
-                elseif checkedStatus then
-                    if filter == 'online' then
-                        if #super.online > 0 then
-                            row.isFiltered = not tContains(super.online, dataObj['name'])
-                        end
-                    elseif filter == 'selected' then
-                        row.isFiltered = not tContains(super.selected, dataObj['name'])
-                    elseif filter == 'Select_All' then
+            row.isFiltered = dataObj['deleted']
 
-                    elseif filter == 'raid' then
-                        row.isFiltered = not tContains(super.raid, dataObj['name'])
-                    elseif filter == 'name' then
-                        row.isFiltered = not Util:StringsMatch(dataObj['name'], super.searchText)
-                    end
-                end
-            end
+            --for filter, checkedStatus in pairs(super.appliedFilters or {}) do
+            --    if row.isFiltered then break end -- No need to waste time looping through the rest.
+            --
+            --    -- It's one of the classes, not all.
+            --    if substr(filter, 'Class_') and not substr(filter, '_All') and not checkedStatus then
+            --        local _, class = strsplit('_', filter);
+            --        if dataObj['class'] == class then
+            --            row.isFiltered = true
+            --            break; -- We don't need to continue running checks, if it's filtered.
+            --        end
+            --    elseif filter == 'Class_All' and not checkedStatus then
+            --        row.isFiltered = true;
+            --    elseif checkedStatus then
+            --        if filter == 'online' then
+            --            if #super.online > 0 then
+            --                row.isFiltered = not tContains(super.online, dataObj['name'])
+            --            end
+            --        elseif filter == 'selected' then
+            --            row.isFiltered = not tContains(super.selected, dataObj['name'])
+            --        elseif filter == 'Select_All' then
+            --
+            --        elseif filter == 'raid' then
+            --            row.isFiltered = not tContains(super.raid, dataObj['name'])
+            --        elseif filter == 'name' then
+            --            row.isFiltered = not Util:StringsMatch(dataObj['name'], super.searchText)
+            --        end
+            --    end
+            --end
 
             return row.isFiltered;
         end

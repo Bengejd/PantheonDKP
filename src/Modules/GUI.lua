@@ -97,6 +97,16 @@ function GUI:UpdateEasyStats()
 
 end
 
+function GUI:RefreshTables()
+    GUI.memberTable:ClearSelected()
+    GUI.memberTable:ClearAll()
+
+    GUI.history_table:HistoryUpdated()
+    GUI.memberTable:RaidChanged()
+
+    wipe(GUI.memberTable.selected)
+end
+
 ---------------------------
 ---  GLOBAL POP UPS     ---
 ---------------------------
