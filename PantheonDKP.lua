@@ -254,6 +254,9 @@ function PDKP:HandleSlashCommands(msg, item)
         ['hide']=function() return GUI:Hide() end,
         ['shroud']=function() return PDKP:MessageRecieved('shroud', Util:GetMyName()) end,
         ['']=function() end,
+        ['memory']=function()
+            return Util:ReportMemory()
+        end,
     }
 
     local splitFuncs = {

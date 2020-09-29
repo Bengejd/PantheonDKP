@@ -242,6 +242,11 @@ function Util:displayTime(timeInSeconds)
     return format("%dD:%2dHr:%2dMin",days,hours,minutes)
 end
 
+function Util:ReportMemory()
+    UpdateAddOnMemoryUsage()
+    print('PDKP Memory: ', math.ceil((GetAddOnMemoryUsage("PantheonDKP") / 1000)) .. 'MB')
+end
+
 -- OrderedNext helper function
 function __genOrderedIndex( t )
     local orderedIndex = {}
