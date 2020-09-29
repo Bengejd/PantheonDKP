@@ -112,6 +112,18 @@ function Member:QuickCalc(raid, calc_name)
     end
 end
 
+function Member:DeleteEntry(entry)
+    local rdkp = self.dkp[entry['raid']]
+
+    if tContains(rdkp['deleted'], entry['id']) then
+        return -- We've already deleted this entry.
+    end
+
+    rdkp.total = rdkp.total - entry['dkp_change'] --- Figure out a more elegant way to get previous DKP difference from this value.
+    tremoveByKey(rdkp.entries, entry['id'])
+    tinsert(rdkp.deleted, entry['id'])
+end
+
 function Member:NewEntry(entry)
     local raid = entry['raid'] or 'Molten Core'
     self.dkp[raid].previousTotal = self.dkp[raid].total

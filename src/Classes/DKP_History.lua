@@ -49,6 +49,17 @@ end
 
 ----- REFRESH FUNCTIONS -----
 
+function HistoryTable:HistoryUpdated()
+
+    for i=1, #self.displayedRows do
+        local row = self.rows[i]
+        row:Hide()
+    end
+
+    self:GetDisplayRows()
+    self:RefreshData()
+end
+
 -- Refreshes the data that we are utilizing.
 function HistoryTable:RefreshData()
     self.data = self.retrieveDataFunc();
@@ -67,7 +78,7 @@ function HistoryTable:GetDisplayRows()
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row);
         else
-            row:Hide();
+            --row:Hide();
         end
     end
 end
@@ -80,19 +91,29 @@ function HistoryTable:RaidChanged()
 end
 
 function HistoryTable:RefreshTableSize()
-    local shownHeight, totalHeight, tablePadding = 0, 0, 50
+    local shownHeight, totalHeight, collapsed, tablePadding, averageHeight = 0, 0, 0, 75, 0
 
     -- Since the rows have varying heights, we have to collect this info ourselves, instead of using a template.
     for i=1, #self.displayedRows do
         local row = self.displayedRows[i]
-        if row.content:IsVisible() then -- If the row is not collapsed.
-            shownHeight = shownHeight + row:GetHeight() + 12
+        if row:IsVisible() then -- If the row is not collapsed.
+            shownHeight = math.floor(shownHeight + row:GetHeight())
         end
+        if row.collapsed then collapsed = collapsed + 1 end
         totalHeight = totalHeight + row:GetHeight() + 12
+        averageHeight = averageHeight + row:GetHeight() - 12
     end
-    totalHeight = totalHeight + tablePadding -- add some padding just to be safe.
+
+    averageHeight = averageHeight / #self.displayedRows
+
+    totalHeight = math.floor(totalHeight) + tablePadding -- add some padding just to be safe.
+
+    if averageHeight < 50 then averageHeight = 51 end
+
+    self.ListScrollFrame.buttonHeight = averageHeight
 
     HybridScrollFrame_Update(self.ListScrollFrame, totalHeight, shownHeight);
+    self.ListScrollFrame:UpdateScrollChildRect()
 end
 
 function HistoryTable:RefreshLayout()
@@ -100,15 +121,12 @@ function HistoryTable:RefreshLayout()
     self:GetDisplayRows();
 
     local collapsed_rows = 0
-    local max_rows = self.MAX_ROWS
 
     for i=1, #self.displayedRows do
         local row = self.displayedRows[i];
         row:ClearAllPoints(); -- Remove it from view
 
-        if row.collapsed then
-            collapsed_rows = collapsed_rows + 1
-        end
+        if row.collapsed then collapsed_rows = collapsed_rows + 1 end
 
         if i >= offset + 1 and i <= offset + self.MAX_ROWS + collapsed_rows then
             row:Show();
@@ -118,8 +136,8 @@ function HistoryTable:RefreshLayout()
                 row:SetPoint("TOPLEFT", self.displayedRows[i-1], "BOTTOMLEFT")
             end
         else
-            print('hidden', i)
             row:Hide();
+            if row.collapsed then collapsed_rows = collapsed_rows + 1 end
         end
     end
     self:RefreshTableSize();
@@ -201,7 +219,8 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.ROW_WIDTH = row_settings['width'] or 300
 
     --- Row settings
-    self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
+    self.MAX_ROWS =  5  -- arbitrary
+
     self.showHighlight = row_settings['showHighlight'] or false
     self.showSep = row_settings['showSep'] or false
     self.showRowBackdrop = row_settings['showbackdrop'] or false
@@ -263,16 +282,19 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.ListScrollFrame.buttons = self.rows;
 
-    scrollBar:SetMinMaxValues(1, (#self.data * self.ROW_HEIGHT))
+    local max_row_value = (#self.data * self.ROW_HEIGHT)
+    if max_row_value == 0 then max_row_value = 10 end
+
+    scrollBar:SetMinMaxValues(1, max_row_value)
 
     scrollBar.buttonHeight = self.ROW_HEIGHT;
     scrollBar:SetValueStep(self.ROW_HEIGHT);
-    scrollBar:SetStepsPerPage(self.MAX_ROWS -2);
+    scrollBar:SetStepsPerPage(self.MAX_ROWS + 2);
     scrollBar:SetValue(1);
 
     self.scrollBar = scrollBar;
 
-    self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 0);
+    self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", 0, 0);
 
     self:RefreshLayout();
 
@@ -299,24 +321,25 @@ function HistoryTable:OnLoad()
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
         collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, 0)
-        collapse_button:SetScript("OnClick", function()
+
+        local collapse_frame = function()
             if row.content:IsVisible() then
                 row.content:Hide()
                 row:SetHeight(50)
-                self.total_row_height = (self.total_row_height + 50)  - row.max_height
                 collapse_button:SetText("O")
                 collapse_text:Show()
-                titletext:Hide()
                 row.collapsed = true
             else
                 row.content:Show()
                 row:SetHeight(row.max_height)
-                self.total_row_height = (self.total_row_height + row.max_height)  - 50
                 collapse_button:SetText("X")
                 collapse_text:Hide()
-                titletext:Show()
                 row.collapsed = false
             end
+        end
+
+        collapse_button:SetScript("OnClick", function()
+            collapse_frame()
             self:RefreshLayout()
         end)
         collapse_button:SetSize(30, 20)
@@ -330,16 +353,17 @@ function HistoryTable:OnLoad()
         border:SetBackdropBorderColor(0.4, 0.4, 0.4)
 
         titletext = border:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        titletext:SetPoint("TOPLEFT", 14, 0)
-        titletext:SetPoint("TOPRIGHT", -14, 0)
+        titletext:SetPoint("TOPLEFT", 14, 15)
         titletext:SetJustifyH("LEFT")
         titletext:SetHeight(18)
-        titletext:SetText(i)
+        titletext:SetText(formattedID)
 
-        collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         collapse_text:SetHeight(18)
-        collapse_text:SetText(formattedID .. " | " .. row.dataObj['reason'])
+        collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
         collapse_text:SetPoint("LEFT", 14, 0)
+
+        if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
         collapse_text:Hide()
 
         local content = CreateFrame("Frame", nil, border)
@@ -355,7 +379,7 @@ function HistoryTable:OnLoad()
         row.max_height = 0;
 
         if i == 1 then -- Anchor the first row relative to the frame.
-            row:SetPoint("TOPLEFT", self.ListScrollFrame, 16, -10)
+            row:SetPoint("TOPLEFT", self.ListScrollFrame, 8, -14)
         else
             row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT")
         end
@@ -419,6 +443,16 @@ function HistoryTable:OnLoad()
             local getVal = header['getValueFunc']
             local val = (getVal ~= nil and row.dataObj ~= nil) and getVal(row.dataObj) or row.dataObj[label]
 
+            if header['onClickFunc'] then
+                local click_frame = CreateFrame("Frame", nil, row)
+                click_frame:SetAllPoints(col)
+                click_frame:SetScript("OnMouseUp", function(_, buttonType)
+                    if row.content:IsVisible() then
+                        header['onClickFunc'](row, buttonType)
+                    end
+                end)
+            end
+
             col:SetSize(row:GetWidth() - 15, self.COL_HEIGHT)
 
             if key == 1 then
@@ -433,14 +467,13 @@ function HistoryTable:OnLoad()
 
             row.cols[key]=col;
 
-            self.total_row_height = self.total_row_height + row.max_height;
         end
 
         row:SetHeight(row.max_height)
 
-        if row.max_height < self.ROW_HEIGHT then
-            self.ROW_HEIGHT = row.max_height;
-        end
+        if row.max_height < self.ROW_HEIGHT then self.ROW_HEIGHT = row.max_height; end
+
+        collapse_frame() -- start collapsed by default.
 
         --[[        --for key, header in pairs(self.HEADERS) do
                 --    local label = header['label'];
@@ -493,6 +526,7 @@ function HistoryTable:OnLoad()
         return row
     end })
 
+
     self.rows = rows
 
     self.ListScrollFrame.buttons = self.rows;
@@ -500,6 +534,8 @@ function HistoryTable:OnLoad()
     -- Bind the update field on the scrollframe to a function that'll update
     -- the displayed contents. This is called when the frame is scrolled.
     self.ListScrollFrame.update = function() self:RefreshLayout(); end
+
+    self:RefreshLayout()
 
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
     HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);

@@ -68,6 +68,58 @@ function DKP:RaidNotOny(raid)
     return raid ~= 'Onyxia\'s Lair'
 end
 
+function DKP:Submit()
+    if not Settings:CanEdit() then
+        Util:Debug('Officers are the only ones who can edit DKP')
+        return
+    end
+
+    local pName = Util:GetMyName()
+    if Settings:IsDebug() then
+        pName = 'Neekio'
+    end
+
+    GUI.adjustment_entry['officer']= pName
+    GUI.adjustment_entry['names'] = { unpack(PDKP.memberTable.selected) }
+
+    for key, n in pairs({unpack(PDKP.memberTable.selected)}) do
+        print(n)
+    end
+
+    Util:WatchVar(GUI.adjustment_entry, 'adjustment_Entry')
+
+    local entry = DKP_Entry:New(GUI.adjustment_entry)
+
+    for _, name in pairs(entry['names']) do
+        local member = Guild:GetMemberByName(name)
+        member:NewEntry(entry)
+    end
+    PDKP.memberTable:RaidChanged()
+
+    entry:Save()
+    core.PDKP.dkpDB['history']['lastEdit']=entry.id
+
+    GUI.memberTable:ClearSelected()
+    GUI.memberTable:ClearAll()
+end
+
+function DKP:DeleteEntry()
+    local entry = GUI.popup_entry;
+
+    for key, name in pairs(entry['names']) do
+        local member = Guild:GetMemberByName(name)
+        member:DeleteEntry(entry)
+    end
+    tremove(DkpDB['history']['all'], entry['id'])
+    DkpDB['history']['all'][entry['id']] = nil;
+    tinsert(DkpDB['history']['deleted'], entry['id'])
+
+    GUI.history_table:HistoryUpdated()
+    GUI.memberTable:RaidChanged()
+
+    GUI.popup_entry = nil;
+end
+
 --- TESTING FUNCTIONS BELOW
 
 function DKP:TestShroud()
@@ -90,33 +142,6 @@ function DKP:ResetDKP()
         member:UpdateDKPTest('Molten Core', member.guildIndex)
     end
     memberTable:RaidChanged()
-end
-
-function DKP:Submit()
-    if not Settings:CanEdit() then
-        Util:Debug('Officers are the only ones who can edit DKP')
-        return
-    end
-
-    local pName = Util:GetMyName()
-    if Settings:IsDebug() then
-        pName = 'Neekio'
-    end
-
-    GUI.adjustment_entry['officer']= pName
-
-    Util:WatchVar(GUI.adjustment_entry, 'adjustment_Entry')
-
-    local entry = DKP_Entry:New(GUI.adjustment_entry)
-
-    for _, name in pairs(entry['names']) do
-        local member = Guild:GetMemberByName(name)
-        member:NewEntry(entry)
-    end
-    PDKP.memberTable:RaidChanged()
-
-    entry:Save()
-    core.PDKP.dkpDB['history']['lastEdit']=entry.id
 end
 
 function DKP:CalculateButton(b_type)

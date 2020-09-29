@@ -282,6 +282,18 @@ function dumpTable(tbl, indent, depth, currentDepth)
     return toprint
 end
 
+function tremoveByKey(tab, val)
+    for i, v in ipairs (tab) do
+        if type(v) == type({}) then
+            if (v.id == val) then
+                tab[i] = nil
+            end
+        elseif v == val then
+            tab[i] = nil
+        end
+    end
+end
+
 -- Custom function for finding table index.
 function tfind(t, item, objIndex)
     objIndex = objIndex or nil;

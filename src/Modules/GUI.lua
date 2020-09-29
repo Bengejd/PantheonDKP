@@ -41,6 +41,8 @@ GUI.adjustment_frame = nil;
 GUI.history_frame = nil;
 GUI.raid_frame = nil;
 
+GUI.popup_entry = nil;
+
 function GUI:Init()
     Util:Debug('Initializing GUI')
     GUI.pdkp_frame = Setup:MainUI()
@@ -93,4 +95,139 @@ function GUI:UpdateEasyStats()
     --
     --easy_frame:SetSize(borderX, 72);
 
+end
+
+---------------------------
+---  GLOBAL POP UPS     ---
+---------------------------
+
+PDKP_POPUP_DIALOG_SETTINGS = {
+    ['PDKP_Placeholder']={
+        text = "This method is under construction",
+        button1 = "OK",
+        OnAccept = function()
+        end,
+        OnCancel = function()
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+    ["PDKP_RAID_BOSS_KILL"]={
+        text = "", -- set by the calling function.
+        button1 = "Award DKP",
+        button2 = "Cancel",
+        bossID = nil,
+        bossName = nil,
+        OnAccept = function()
+            pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossInfo);
+            StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
+        end,
+        OnCancel = function() end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+    ['PDKP_CONFIRM_DKP_CHANGE'] = {
+        text = "",
+        button1 = "Confirm",
+        button2 = "Cancel",
+        OnAccept = function()
+            DKP:UpdateEntries()
+        end,
+        OnCancel = function()
+            StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+
+    ['PDKP_DKP_ENTRY_POPUP']={
+        text = "What would you like to do to this entry?",
+        button1 = "Edit",
+        button3 = 'Cancel',
+        button2 = "Delete",
+        OnAccept = function(self) -- Edit
+            print('Edit Clicked')
+        end,
+        OnCancel = function(self) -- Delete
+            StaticPopup_Show('PDKP_CONFIRM_DKP_ENTRY_DELETE')
+
+            --StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].text = 'Are you sure you want to DELETE this entry?'
+            --local entry = StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry
+            --StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry = entry;
+            --StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_CONFIRM')
+        end,
+        OnAlt = function(self) -- Cancel
+            print('Cancel clicked')
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+    ['PDKP_CONFIRM_DKP_ENTRY_DELETE']={
+        text = "Are you sure you want to DELETE this entry?",
+        button1 = "Confirm",
+        button2 = "Cancel",
+        OnAccept = function(self) -- Confirm
+            DKP:DeleteEntry()
+        end,
+        OnCancel = function() -- Cancel
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+    ['PDKP_CONFIRM_DKP_ENTRY_POPUP']={
+
+    },
+    ['PDKP_OFFICER_PUSH_CONFIRM'] = {
+        text = "WARNING THIS IS GUILD WIDE \n Overwrite is permanent and cannot be reversed. Merge is a safer option.",
+        button1 = "Overwrite",
+        button3 = 'Cancel',
+        button2 = "Merge",
+        OnAccept = function(...) -- First (Overwrite)
+            Comms:SendGuildPush(true)
+        end,
+        OnCancel = function(...) -- Second (Merge)
+            local _, _, clickType = ...
+            -- Because creating another instance of the popup calls onCancel with 'override' instead of 'clicked'.
+            -- This ensures that we actually clicked the cancel button. When hideOnEscape is enabled, this also is set as
+            -- 'clicked' so this can't be enabled when we are using 3 buttons, as ALT is the one that we're using for
+            -- cancel, for UX purposes.
+            if clickType == 'clicked' then
+                Comms:SendGuildPush(false)
+            end
+        end,
+        OnAlt = function(...) -- Third (Cancel)
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+    ['PDKP_RELOAD_UI'] = {
+        text = "You are on a fresh version of PantheonDKP. Please Reload to continue.",
+        button1 = "Reload",
+        button2 = "Cancel",
+        OnAccept = function(self) -- Confirm
+            ReloadUI()
+        end,
+        OnCancel = function() -- Cancel
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    },
+}
+
+for popupName, value in pairs(PDKP_POPUP_DIALOG_SETTINGS) do
+    StaticPopupDialogs[popupName] = value
 end

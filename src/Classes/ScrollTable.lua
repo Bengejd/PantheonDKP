@@ -137,7 +137,11 @@ function ScrollTable:CheckSelect(row, clickType)
     self:UpdateLabelTotals()
 end
 
-function ScrollTable:SelectAll()
+function ScrollTable:ClearAll()
+    self:SelectAll(true)
+end
+
+function ScrollTable:SelectAll(remove)
     for i=1, #self.displayData do
         local row = self.rows[i];
         if not row.isFiltered then
@@ -145,7 +149,9 @@ function ScrollTable:SelectAll()
             local objIndex = row.dataObj[selectOn]
             local isSelected, _ = tfind(self.selected, objIndex)
 
-            if not isSelected then
+            if isSelected and remove then
+                tremove(self.selected, objIndex)
+            elseif not isSelected and not remove then
                 tinsert(self.selected, objIndex)
             end
         end

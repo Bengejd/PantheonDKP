@@ -28,7 +28,7 @@ function DKP_Entry:New(entry_details)
     self.item = entry_details['item'] or 'None Linked'
     self.id = entry_details['id'] or GetServerTime()
     self.other_text = entry_details['other'] or ''
-    self.names = entry_details['names'] or PDKP.memberTable.selected
+    self.names = entry_details['names']
     self.previousTotals = entry_details['previousTotals'] or self:GetPreviousTotals()
     self.formattedNames = self:GetFormattedNames()
     self.change_text = self:GetChangeText()
