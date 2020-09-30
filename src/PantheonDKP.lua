@@ -35,6 +35,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
                 PDKP_UnregisterEvent(events, event);
                 Guild:new();
                 GUI:Init();
+                Raid:new()
                 GUI:UpdateEasyStats()
             else
                 GuildRoster();

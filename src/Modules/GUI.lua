@@ -101,6 +101,24 @@ function GUI:UpdateEasyStats()
 
 end
 
+function GUI:UpdateRaidClassGroups()
+    if Raid.raid == nil or GUI.raid_frame == nil then return end
+
+    local raid_class_names = {'Tank', unpack(Defaults.classes)}
+    local class_icons = GUI.raid_frame.class_groups.class_icons
+    local raid_classes = Raid.raid['classes']
+
+
+    for key, class in pairs(raid_class_names) do
+        local class_icon = class_icons[class]
+        class_icon.label:SetText(#Raid:GetClassNames(class))
+    end
+    -- Set total members
+    class_icons['Total'].label:SetText(#Raid.raid.members)
+
+
+end
+
 function GUI:RefreshTables()
     GUI.memberTable:ClearSelected()
     GUI.memberTable:ClearAll()
@@ -110,6 +128,7 @@ function GUI:RefreshTables()
 
     wipe(GUI.memberTable.selected)
 end
+
 
 ---------------------------
 ---  GLOBAL POP UPS     ---

@@ -39,6 +39,16 @@ local CHAR_INFO_TEXTURE = 'Interface\\CastingBar\\UI-CastingBar-Border-Small'
 
 local adoon_version_hex = '0059c5'
 
+local PaneBackdrop  = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true, tileSize = 16, edgeSize = 16,
+    insets = { left = 3, right = 3, top = 5, bottom = 3 }
+}
+
+local paneColor = {0.1, 0.1, 0.1, 0.5}
+local paneBorderColor = {0.4, 0.4, 0.4}
+
 local filterButtons = {};
 
 local pi = math.pi
@@ -53,6 +63,52 @@ local function setMovable(f)
     f:RegisterForDrag('LeftButton')
     f:SetScript("OnDragStart", f.StartMoving)
     f:SetScript("OnDragStop", f.StopMovingOrSizing)
+end
+
+local function createBackdropFrame(name, parent, title)
+    local f = CreateFrame("Frame", name, parent)
+
+    local title_text = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    title_text:SetPoint("TOPLEFT", 14, 0)
+    title_text:SetPoint("TOPRIGHT", -14, 0)
+    title_text:SetJustifyH("LEFT")
+    title_text:SetHeight(18)
+
+    if title then title_text:SetText(title) end
+
+    local border = CreateFrame("Frame", nil, f)
+    border:SetPoint("TOPLEFT", 0, -17)
+    border:SetPoint("BOTTOMRIGHT", -1, 3)
+
+    border:SetBackdrop(PaneBackdrop)
+    border:SetBackdropColor(unpack(paneColor))
+    border:SetBackdropBorderColor(unpack(paneBorderColor))
+
+    local content = CreateFrame("Frame", nil, border)
+    content:SetPoint("TOPLEFT", 10, -10)
+    content:SetPoint("BOTTOMRIGHT", -10, 10)
+
+    f.border = border
+    f.content = content
+    return f
+end
+
+local function createIcon(parent, label_text)
+    local f = CreateFrame("Frame", nil, parent)
+    f:SetSize(30, 30)
+    local l = f:CreateFontString(nil, "BACKGROUND", "GameFontHighlight")
+    l:SetPoint("BOTTOM", 0, -15)
+
+    if label_text then l:SetText(label_text) end
+
+    local icon = f:CreateTexture(nil, "BACKGROUND")
+    icon:SetSize(25, 25)
+    icon:SetAllPoints(f)
+
+    f.icon = icon
+    f.label = l
+
+    return f
 end
 
 local function createCloseButton(f, mini)
@@ -440,6 +496,8 @@ function Setup:RandomStuff()
     Setup:DKPHistory()
     Setup:RaidTools()
     local scroll_frame = Setup:HistoryTable()
+
+    -- TODO: Use Interface\Buttons\UI-TotemBar and texCoords for the expand / collapse buttons.
 end
 
 function Setup:RaidTools()
@@ -453,8 +511,6 @@ function Setup:RaidTools()
     f:SetFrameStrata("FULLSCREEN")
     f:SetFrameLevel(1)
     f:SetToplevel(true)
-
-
 
     local b = CreateFrame("Button", 'pdkp_raid_frame_button', RaidFrame, 'UIPanelButtonTemplate')
     b:SetHeight(30)
@@ -470,8 +526,88 @@ function Setup:RaidTools()
         --end
     end)
 
+    --- Class Group Section
+
+    local class_group = createBackdropFrame(nil, f, 'Raid Breakdown')
+    class_group:SetPoint("TOPLEFT", 10, -25)
+    class_group:SetPoint("TOPRIGHT", -10, 25)
+    class_group:SetHeight(170)
+
+    local classTexture = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
+
+    -- TODO: Attach Dead Counter to CompactRaidFrameContainerBorderFrame
+    -- TODO: Create MasterLooter using Interface\ICONS\INV_Crate_05 as ICONS
+    -- TODO: Create DKP Officer using Interface\ICONS\INV_MISC_Coin_01 as ICONS
+
+    class_group.class_icons = {}
+    local icon_classes = {'Total','Tank', unpack(Defaults.classes)}
+    for key, class in pairs(icon_classes) do
+        local i_frame = createIcon(class_group.content, '0')
+        i_frame.class = class
+
+        local previous_frame;
+        if key > 1 then
+            previous_frame = class_group.class_icons[icon_classes[key-1]]
+        elseif key > 7 then
+            previous_frame = class_group.class_icons[icon_classes[key-6]]
+        end
+
+        if class == 'Tank' then
+            i_frame.icon:SetTexture('Interface\\ICONS\\Ability_Defend')
+        elseif class == 'Total' then
+            i_frame.icon:SetTexture('Interface\\ICONS\\Achievement_GuildPerk_EverybodysFriend')
+        else
+            local coords = CLASS_ICON_TCOORDS[strupper(class)]; -- The Coords for the class icon via the global object.
+            i_frame.icon:SetTexture(classTexture)
+            i_frame.icon:SetTexCoord(unpack(coords))
+        end
+
+        if key == 1 then
+            i_frame:SetPoint("TOP", -20, 0)
+            i_frame:SetPoint("CENTER", -20, 0)
+        elseif key == 2 then
+            i_frame:SetPoint("LEFT", previous_frame, "RIGHT", 10, 0)
+        elseif key == 3 then
+            i_frame:SetPoint("TOPRIGHT", class_group.class_icons[icon_classes[key-2]], "BOTTOMLEFT", -10, -15)
+        elseif key > 3 and key < 7 then
+            i_frame:SetPoint("LEFT", previous_frame, "RIGHT", 10, 0)
+        elseif key >= 7 then
+            i_frame:SetPoint("TOPLEFT", class_group.class_icons[icon_classes[key - 4]], "BOTTOMLEFT", 0, -15)
+        end
+
+        i_frame:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
+        GameTooltip:ClearLines()
+            local names = Raid.raid['classes'][self.class]
+
+            local tip_text = '';
+
+            for name_key, name in pairs({unpack(names)}) do
+                tip_text = tip_text .. name
+                if name_key < #names then tip_text = tip_text .. '\n' end
+            end
+
+            GameTooltip:AddLine(tip_text)
+            GameTooltip:Show()
+        end)
+
+        -- We don't care about the total hover.
+        if class == 'Total' then i_frame:SetScript("OnEnter", function() end) end
+
+        i_frame:SetScript("OnLeave", function()
+        GameTooltip:ClearLines()
+        GameTooltip:Hide()
+        end)
+
+        class_group.class_icons[class]=i_frame
+    end
+
+    f.class_groups = class_group
 
     GUI.raid_frame = f
+
+    FriendsFrameTab4:Click()
+    pdkp_frame:Hide()
 end
 
 function Setup:TableSearch()

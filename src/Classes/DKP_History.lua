@@ -300,7 +300,6 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.hist_title = self.frame:CreateFontString(f, "OVERLAY", "GameFontHighlightLarge")
     self.hist_title:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 14, 20)
     self.hist_title:SetText(self.default_title)
-    self.hist_title = hist_title;
 
     self.collapse_all = CreateFrame("Button", nil, self.frame)
 
