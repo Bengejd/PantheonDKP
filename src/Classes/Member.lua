@@ -61,7 +61,7 @@ end
 function Member:InitializeDKP()
     if tEmpty(memberDB[self.name]) then
         memberDB[self.name] = {}
-        print('member is empty')
+        Util:Debug("Member is empty " .. self.name)
     end
 
     for _, raid in pairs(Defaults.dkp_raids) do
@@ -82,7 +82,7 @@ function Member:InitRaidDKP(raid)
     }
 
     if raid == 'Molten Core' and self.dkp['Molten Core'].total == 0 then
-        print('Defaulting Molten Core')
+        Util:Debug('Defaulting Molten Core DKP '.. self.name)
         self.dkp['Molten Core'].total = self.guildIndex;
     end
 end

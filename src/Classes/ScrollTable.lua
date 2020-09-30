@@ -7,6 +7,7 @@ local Util = core.Util;
 local Defaults = core.Defaults;
 local Guild = core.Guild;
 local Raid = core.Raid;
+local GUI = core.GUI;
 
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
@@ -231,8 +232,20 @@ end
 
 function ScrollTable:UpdateLabelTotals()
     if self == nil or self.entryLabel == nil then return end
-    self.entryLabel:SetText(#self.displayedRows .. " Players shown | " .. #self.selected .. " selected")
+
+    local notify_history = false
+    local entry_label_text = #self.displayedRows .. " Players shown | " .. #self.selected .. " selected"
+
+    notify_history = not (entry_label_text == self.entryLabel:GetText())
+
+    self.entryLabel:SetText(entry_label_text)
+
     PDKP_ToggleAdjustmentDropdown()
+
+    if GUI.history_frame ~= nil and GUI.history_frame:IsVisible() and notify_history then
+        print('Notifying History')
+        GUI.history_table:HistoryUpdated(true)
+    end
 end
 
 ----- FILTER FUNCTIONS -----

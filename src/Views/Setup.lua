@@ -892,7 +892,6 @@ function Setup:DKPHistory()
         edgeFile = SCROLL_BORDER, edgeSize = 8,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetHeight(225)
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,35)
 
@@ -1262,7 +1261,7 @@ function Setup:HistoryTable()
     local table_settings = {
         ['name']= 'ScrollTable',
         ['parent']=GUI.history_frame,
-        ['height']=GUI.history_frame:GetHeight(),
+        ['height']=GUI.history_frame:GetHeight() - 40,
         ['width']=GUI.history_frame:GetWidth(),
         ['movable']=true,
         ['enableMouse']=true,
@@ -1276,7 +1275,7 @@ function Setup:HistoryTable()
         ['anchor']={
             ['point']='TOPLEFT',
             ['rel_point_x']=0,
-            ['rel_point_y']=0,
+            ['rel_point_y']=-40,
         }
 
     }

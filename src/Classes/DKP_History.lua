@@ -8,6 +8,7 @@ local Defaults = core.Defaults;
 local Guild = core.Guild;
 local Raid = core.Raid;
 local Settings = core.Settings;
+local GUI = core.GUI;
 
 HistoryTable.__index = HistoryTable; -- Set the __index parameter to reference
 
@@ -50,10 +51,18 @@ end
 
 ----- REFRESH FUNCTIONS -----
 
-function HistoryTable:HistoryUpdated()
+function HistoryTable:HistoryUpdated(selectedUpdate)
 
     self.appliedFilters['raid']=Settings.current_raid
     Util:WatchVar(self.appliedFilters, 'HistoryFilters')
+
+    local selected = GUI.memberTable.selected;
+
+    if #selected > 0 then self.appliedFilters['selected']=selected; end
+
+    self:UpdateHistoryLabel(selected)
+
+    if selectedUpdate and self.appliedFilters['selected'] == nil then return end
 
     for i=1, #self.rows do
         local row = self.rows[i]
@@ -63,7 +72,33 @@ function HistoryTable:HistoryUpdated()
     self:RefreshData()
     self:RefreshLayout(true)
 
-    print('HistoryUpdate', #self.displayedRows)
+    if #selected == 0 then self.appliedFilters['selected'] = nil end
+    self:UpdateHistoryLabel(selected)
+end
+
+function HistoryTable:UpdateHistoryLabel(selected)
+    local hex = 'FFBA49'
+    local history_text;
+
+    local selectedName;
+
+    local row_count = #self.displayedRows;
+
+    if #selected == 0 then -- none selected.
+        if row_count == 0 then history_text = 'No History Found'; else history_text = 'Recent History'; end
+    elseif #selected == 1 then -- 1 selected
+        if row_count == 0 then history_text = 'No History Found For ' .. selected[1]
+        else history_text = 'Recent History For ' .. selected[1]
+        end
+    else -- More than 1 selected.
+        if row_count == 0 then history_text = 'No History Found For Selected'
+        elseif row_count >= 1 then history_text = 'Recent History For Selected'
+        end
+    end
+
+    local title = Util:FormatFontTextColor(hex, history_text)
+
+    self.hist_title:SetText(title)
 end
 
 -- Refreshes the data that we are utilizing.
@@ -207,6 +242,8 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.showTableBackdrop = table_settings['showBackdrop'] or false
 
+    self.default_title = Util:FormatFontTextColor('FFBA49', 'Recent History')
+
     --- Generic Settings
     self.displayData = {};
     self.displayedRows = {};
@@ -258,6 +295,14 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.frame:SetHeight(self.height + (self.COL_HEIGHT * 2));
     self.frame:SetWidth(self.width)
     self.frame:SetPoint(self.anchor['point'], self.parent, self.anchor['rel_point_x'], self.anchor['rel_point_y'])
+
+    --- Create History Title
+    self.hist_title = self.frame:CreateFontString(f, "OVERLAY", "GameFontHighlightLarge")
+    self.hist_title:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 14, 20)
+    self.hist_title:SetText(self.default_title)
+    self.hist_title = hist_title;
+
+    self.collapse_all = CreateFrame("Button", nil, self.frame)
 
     if self.showTableBackdrop then
         self.frame:SetBackdrop(backdropSettings)
@@ -346,17 +391,20 @@ function HistoryTable:OnLoad()
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
         collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, 0)
 
+        local expand_tex = collapse_button:CreateTexture('expand', 'BACKGROUND', 'Interface\\Buttons\\UI-PlusButton-Up')
+        local collapse_tex = collapse_button:CreateTexture('collapse', 'BACKGROUND', 'Interface\\Buttons\\UI-Panel-MinimizeButton-Up')
+
         row.collapse_frame = function()
             if row.content:IsVisible() then
                 row.content:Hide()
                 row:SetHeight(50)
-                collapse_button:SetText("O")
+                collapse_button:SetTexture('Interface\\Buttons\\UI-PlusButton-Up')
                 collapse_text:Show()
                 row.collapsed = true
             else
                 row.content:Show()
                 row:SetHeight(row.max_height)
-                collapse_button:SetText("X")
+                collapse_button:SetTexture('Interface\\Buttons\\UI-Panel-MinimizeButton-Up')
                 collapse_text:Hide()
                 row.collapsed = false
             end
@@ -477,12 +525,18 @@ function HistoryTable:OnLoad()
             if dataObj['deleted'] == true then row.isFiltered = true end
 
             local self = row.super;
+            local selected = self.appliedFilters['selected']
 
             for filter, val in pairs(self.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to waste time looping through the rest.
 
                 if filter == 'raid' then
                     row.isFiltered = row.dataObj['raid'] ~= val
+                elseif filter == 'selected' and #selected > 0 then
+                    for _, n in pairs(selected) do
+                        row.isFiltered = not row.dataObj:IsMemberInEntry(n)
+                        if row.isFiltered then break end
+                    end
                 end
             end
 
@@ -509,7 +563,7 @@ function HistoryTable:OnLoad()
     self:RefreshLayout()
 
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
-    HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
+    HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, false);
 end
 
 local eventFunc = {''}

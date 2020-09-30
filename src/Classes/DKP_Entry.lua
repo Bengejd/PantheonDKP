@@ -129,3 +129,7 @@ function DKP_Entry:GetPreviousTotals()
     end
     return previous_totals
 end
+
+function DKP_Entry:IsMemberInEntry(name)
+    return tContains(self.names, name)
+end
