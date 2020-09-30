@@ -247,6 +247,10 @@ function PDKP:HandleSlashCommands(msg, item)
         end
     end
 
+    local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo('Ragged Leather Gloves');
+
+    print(sName, iRarity, sType, sSubType)
+
     local splitMsg, name = strsplit(' ', msg)
 
     local safeFuncs = {

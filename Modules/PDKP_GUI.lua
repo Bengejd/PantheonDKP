@@ -382,169 +382,169 @@ function GUI:ShowSelectedHistory(charObj)
 
     if historyLimit > #historyKeys then historyLimit = #historyKeys; end -- So we don't go out of bounds.
 
-    local function compare(a, b) return a > b end
+    local function compare(a, b) if a == nil then return true elseif b == nil then return false else return a > b end end
 
-    table.sort(historyKeys, compare)
+        table.sort(historyKeys, compare)
 
-    local function loadHistoryEntries()
+        local function loadHistoryEntries()
         GUI.HistoryFrame.scroll:ReleaseChildren() -- Clear the previous entries.
 
         for i = 1, historyLimit do
-            local key = historyKeys[i];
+        local key = historyKeys[i];
 
-            if key ~= nil then
-                local entry = DKP.dkpDB.history.all[key]
-                if entry then
-                    local raid = entry['raid'];
-                    if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end;
+        if key ~= nil then
+        local entry = DKP.dkpDB.history.all[key]
+        if entry then
+        local raid = entry['raid'];
+        if raid == 'Onyxia\'s Lair' then raid = 'Molten Core' end;
 
-                    local dkpChangeText = entry['dkpChangeText']
-                    local lineText = entry['text']
-                    lineText = lineText:gsub('%None', 'Not Linked')
+        local dkpChangeText = entry['dkpChangeText']
+        local lineText = entry['text']
+        lineText = lineText:gsub('%None', 'Not Linked')
 
-                    local hasRaid = raid ~= nil and raid == DKP:GetCurrentDB();
-                    local hasItem = strfind(lineText, 'Item Win') ~= nil
-                    local itemWinChecked = GUI.itemWinsCheck:GetValue()
-                    local onlyShowItems = itemWinChecked and hasItem;
+        local hasRaid = raid ~= nil and raid == DKP:GetCurrentDB();
+        local hasItem = strfind(lineText, 'Item Win') ~= nil
+        local itemWinChecked = GUI.itemWinsCheck:GetValue()
+        local onlyShowItems = itemWinChecked and hasItem;
 
-                    local shouldShow;
+        local shouldShow;
 
-                    if itemWinChecked and hasItem and entry['dkpChange'] < 0 and hasRaid then shouldShow = true;
-                    elseif not itemWinChecked and hasRaid then shouldShow = true;
-                    else shouldShow = false;
-                    end
-
-                    if shouldShow then -- Only show the history for the sheet we're on.
-
-                        local dkpChangeLabel = AceGUI:Create("Label")
-                        dkpChangeLabel:SetWidth(300)
-
-                        local reasonLabel = AceGUI:Create("InteractiveLabel")
-                        reasonLabel:SetWidth(300)
-                        local officerLabel = AceGUI:Create("Label")
-
-                        officerLabel:SetText('Officer: ' .. entry['officer'])
-                        reasonLabel:SetText('Reason: ' .. lineText)
-                        dkpChangeLabel:SetText('Amount: ' .. string.trim(dkpChangeText))
-
-                        local labels = { officerLabel, reasonLabel, dkpChangeLabel }
-
-                        local function labelCallback(self, _, buttonType)
-                            if buttonType == 'RightButton' and Guild:CanEdit() then
-                                StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry = self.entry;
-                                StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_POPUP')
-                            end
-                        end
-
-                        for j = 1, #labels do
-                            local label = labels[j];
-                            label.entry = entry;
-                            label:SetCallback("OnClick", labelCallback)
-                        end
-
-                        if entry['item'] ~= nil and entry['item'] ~= "None" then
-                            reasonLabel:SetCallback("OnEnter", function(self)
-                                GameTooltip:SetOwner(reasonLabel.frame, "ANCHOR_RIGHT")
-                                local tiptext = entry['item']
-                                GameTooltip:SetHyperlink(tiptext);
-                            end)
-                            reasonLabel:SetCallback("OnLeave", function(self)
-                                GameTooltip:Hide()
-                            end)
-                        end
-
-                        reasonLabel:SetFullWidth(false)
-                        dkpChangeLabel:SetFullWidth(false)
-
-                        local ig = AceGUI:Create("InlineGroup")
-
-                        local formattedDate = Util:Format12HrDateTime(entry['datetime'])
-                        local dtitle = formattedDate
-
-                        if entry['raid'] then dtitle = entry['raid'] .. ' | ' .. formattedDate end
-
-                        ig:SetTitle(dtitle)
-                        ig:SetLayout("Flow")
-                        ig:SetFullWidth(true)
-
-                        local officerGroup = AceGUI:Create("SimpleGroup")
-                        local textGroup = AceGUI:Create("SimpleGroup")
-                        local dkpGroup = AceGUI:Create("SimpleGroup")
-
-                        officerGroup:SetFullWidth(true)
-                        textGroup:SetFullWidth(false)
-                        dkpGroup:SetFullWidth(false)
-
-                        officerGroup:AddChild(officerLabel)
-                        textGroup:AddChild(reasonLabel)
-                        dkpGroup:AddChild(dkpChangeLabel)
-
-                        textGroup:SetWidth(300)
-                        dkpGroup:SetWidth(30)
-
-                        ig:AddChild(officerGroup)
-                        ig:AddChild(textGroup)
-                        ig:AddChild(dkpGroup)
-
-                        if charObj == nil then -- List all entries, with the people affected.
-                            local names = entry['names'];
-                            local sg3 = AceGUI:Create("SimpleGroup")
-                            local namesLabel = AceGUI:Create("InteractiveLabel")
-                            namesLabel:SetCallback("OnClick", function(self, _, buttonType)
-                                if IsShiftKeyDown() and buttonType == "LeftButton" then
-                                    local tableData = GUI:GetTableDisplayData(true)
-                                    for _, char_Obj in pairs(tableData) do
-                                        for _, name in pairs(entry['members']) do
-                                            if name == char_Obj.name then
-                                                GUI:AddToSelected(char_Obj)
-                                                break;
-                                            end
-                                        end
-                                    end
-                                end
-                            end)
-                            namesLabel:SetText('Members: ' .. names)
-                            sg3:AddChild(namesLabel)
-                            sg3:SetFullWidth(true)
-                            sg3:SetWidth(325)
-                            namesLabel:SetWidth(295)
-                            ig:AddChild(sg3)
-                        end
-
-                        scroll:AddChild(ig)
-                    end
-                else
-                end
-            end
+        if itemWinChecked and hasItem and entry['dkpChange'] < 0 and hasRaid then shouldShow = true;
+        elseif not itemWinChecked and hasRaid then shouldShow = true;
+        else shouldShow = false;
         end
-    end
 
-    local function addLoadMoreButton()
+        if shouldShow then -- Only show the history for the sheet we're on.
+
+        local dkpChangeLabel = AceGUI:Create("Label")
+        dkpChangeLabel:SetWidth(300)
+
+        local reasonLabel = AceGUI:Create("InteractiveLabel")
+        reasonLabel:SetWidth(300)
+        local officerLabel = AceGUI:Create("Label")
+
+        officerLabel:SetText('Officer: ' .. entry['officer'])
+        reasonLabel:SetText('Reason: ' .. lineText)
+        dkpChangeLabel:SetText('Amount: ' .. string.trim(dkpChangeText))
+
+        local labels = { officerLabel, reasonLabel, dkpChangeLabel }
+
+        local function labelCallback(self, _, buttonType)
+        if buttonType == 'RightButton' and Guild:CanEdit() then
+        StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry = self.entry;
+        StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_POPUP')
+        end
+        end
+
+        for j = 1, #labels do
+        local label = labels[j];
+        label.entry = entry;
+        label:SetCallback("OnClick", labelCallback)
+        end
+
+        if entry['item'] ~= nil and entry['item'] ~= "None" then
+        reasonLabel:SetCallback("OnEnter", function(self)
+        GameTooltip:SetOwner(reasonLabel.frame, "ANCHOR_RIGHT")
+        local tiptext = entry['item']
+        GameTooltip:SetHyperlink(tiptext);
+        end)
+        reasonLabel:SetCallback("OnLeave", function(self)
+        GameTooltip:Hide()
+        end)
+        end
+
+        reasonLabel:SetFullWidth(false)
+        dkpChangeLabel:SetFullWidth(false)
+
+        local ig = AceGUI:Create("InlineGroup")
+
+        local formattedDate = Util:Format12HrDateTime(entry['datetime'])
+        local dtitle = formattedDate
+
+        if entry['raid'] then dtitle = entry['raid'] .. ' | ' .. formattedDate end
+
+        ig:SetTitle(dtitle)
+        ig:SetLayout("Flow")
+        ig:SetFullWidth(true)
+
+        local officerGroup = AceGUI:Create("SimpleGroup")
+        local textGroup = AceGUI:Create("SimpleGroup")
+        local dkpGroup = AceGUI:Create("SimpleGroup")
+
+        officerGroup:SetFullWidth(true)
+        textGroup:SetFullWidth(false)
+        dkpGroup:SetFullWidth(false)
+
+        officerGroup:AddChild(officerLabel)
+        textGroup:AddChild(reasonLabel)
+        dkpGroup:AddChild(dkpChangeLabel)
+
+        textGroup:SetWidth(300)
+        dkpGroup:SetWidth(30)
+
+        ig:AddChild(officerGroup)
+        ig:AddChild(textGroup)
+        ig:AddChild(dkpGroup)
+
+        if charObj == nil then -- List all entries, with the people affected.
+        local names = entry['names'];
+        local sg3 = AceGUI:Create("SimpleGroup")
+        local namesLabel = AceGUI:Create("InteractiveLabel")
+        namesLabel:SetCallback("OnClick", function(self, _, buttonType)
+        if IsShiftKeyDown() and buttonType == "LeftButton" then
+        local tableData = GUI:GetTableDisplayData(true)
+        for _, char_Obj in pairs(tableData) do
+        for _, name in pairs(entry['members']) do
+        if name == char_Obj.name then
+        GUI:AddToSelected(char_Obj)
+        break;
+        end
+        end
+        end
+        end
+        end)
+        namesLabel:SetText('Members: ' .. names)
+        sg3:AddChild(namesLabel)
+        sg3:SetFullWidth(true)
+        sg3:SetWidth(325)
+        namesLabel:SetWidth(295)
+        ig:AddChild(sg3)
+        end
+
+        scroll:AddChild(ig)
+        end
+        else
+        end
+        end
+        end
+        end
+
+        local function addLoadMoreButton()
         local lb = AceGUI:Create("Button")
         lb:SetText("Load More")
         lb:SetFullWidth(true)
         if historyLimit > #historyKeys then
-            lb:SetText("End of history")
-            lb:SetDisabled(true)
+        lb:SetText("End of history")
+        lb:SetDisabled(true)
         end
         lb:SetCallback("OnClick", function()
-            historyLimit = historyLimit + 10;
-            if historyLimit > #historyKeys then
-                lb:SetText("End of history")
-                lb:SetDisabled(true)
-            else
-                loadHistoryEntries()
-                addLoadMoreButton()
-            end
+        historyLimit = historyLimit + 10;
+        if historyLimit > #historyKeys then
+        lb:SetText("End of history")
+        lb:SetDisabled(true)
+        else
+        loadHistoryEntries()
+        addLoadMoreButton()
+        end
         end)
         scroll:AddChild(lb)
+        end
+
+        loadHistoryEntries() -- Run the function.
+
+        if historyLimit ~= #historyKeys or #historyKeys > historyLimit then addLoadMoreButton() end
+        GUI.HistoryObj = charObj
     end
-
-    loadHistoryEntries() -- Run the function.
-
-    if historyLimit ~= #historyKeys or #historyKeys > historyLimit then addLoadMoreButton() end
-    GUI.HistoryObj = charObj
-end
 
 -- Hides the custom textures for entries in the selected table, and then empties the table completely.
 function GUI:ClearSelected()
