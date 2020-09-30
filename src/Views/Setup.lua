@@ -535,8 +535,8 @@ function Setup:RaidTools()
 
     local classTexture = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
 
-    -- TODO: Attach Dead Counter to CompactRaidFrameContainerBorderFrame
-    -- TODO: Create MasterLooter using Interface\ICONS\INV_Crate_05 as ICONS
+    -- TODO: Attach Dead Counter to CompactRaidFrameContainerBorderFrame using Interface\ICONS\INV_Misc_Bone_HumanSkull_01 or Interface\Durability\DeathRecap with TexCoords?
+    -- TODO: Create MasterLooter using Interface\ICONS\INV_Crate_05 as ICONS or Interface\ICONS\INV_Box_03
     -- TODO: Create DKP Officer using Interface\ICONS\INV_MISC_Coin_01 as ICONS
 
     class_group.class_icons = {}
