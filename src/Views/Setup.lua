@@ -528,7 +528,7 @@ function Setup:RaidTools()
     end)
 
     f.content = CreateFrame("Frame", '$parent_content', f)
-    f.content:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -25)
+    f.content:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -28)
     f.content:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -8, 8)
     f.content:SetSize(f:GetWidth(), f:GetHeight())
 
@@ -539,13 +539,6 @@ function Setup:RaidTools()
 
 
     --- Class Group Section
-
-    local testFrames = {}
-    for i=1, 400 do
-        local tFrame = createBackdropFrame('$parent_tFrame' .. i, scrollContent, 'Test Frame '..i)
-        tFrame:SetHeight(33)
-        scrollContent:AddChild(tFrame)
-    end
 
     local class_group = createBackdropFrame(nil, scrollContent, 'Raid Breakdown')
     class_group:SetHeight(170)
@@ -622,7 +615,26 @@ function Setup:RaidTools()
         class_group.class_icons[class]=i_frame
     end
 
+    --- Promote Leadership section.
+    local promote_group = createBackdropFrame(nil, scrollContent, 'Promote Leadership')
+    promote_group:SetHeight(100)
+    scrollContent:AddChild(promote_group)
 
+
+    --- Invite Group Commands
+    local invite_group = createBackdropFrame(nil, scrollContent, 'Invite Commands')
+    invite_group:SetHeight(100)
+    scrollContent:AddChild(invite_group)
+
+    --- Disallow Invite From
+    local disallow_group = createBackdropFrame(nil, scrollContent, 'Disallow Invites')
+    disallow_group:SetHeight(100)
+    scrollContent:AddChild(disallow_group)
+
+    --- Auto Invite Spam
+    local invite_spam_group = createBackdropFrame(nil, scrollContent, 'Invite Spam')
+    invite_spam_group:SetHeight(100)
+    scrollContent:AddChild(invite_spam_group)
 
     f.class_groups = class_group
 

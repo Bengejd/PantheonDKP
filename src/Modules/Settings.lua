@@ -57,6 +57,12 @@ end
 
 function Settings:CanEdit()
     local pName = Util:GetMyName()
+
+    local debugNames = {'Lariese'}
+    if tContains(debugNames, pName) then
+        pName = 'Neekio'
+    end
+
     local member = Guild.members[pName]
 
     if (member and member.canEdit) or Settings:IsDebug() then

@@ -147,8 +147,8 @@ function SimpleScrollFrame:new(parent)
         if sc:GetHeight() > 0 then sc:SetHeight(sc:GetHeight() - childPadding) end
 
         if childCount == 0 then
-            frame:SetPoint("TOPLEFT", 10, -25)
-            frame:SetPoint("TOPRIGHT", -10, 25)
+            frame:SetPoint("TOPLEFT", 10, 0)
+            frame:SetPoint("TOPRIGHT", -10, 0)
         else
             local previous_frame = content.children[childCount]
             frame:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
@@ -169,9 +169,7 @@ function SimpleScrollFrame:new(parent)
 
     sf:SetScrollChild(sc)
 
-
     self.localstatus = { ['scrollvalue'] = 0 }
-
 
     self.scrollFrame = sf
     self.scrollBar = sb
