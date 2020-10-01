@@ -620,6 +620,14 @@ function Setup:RaidTools()
     promote_group:SetHeight(100)
     scrollContent:AddChild(promote_group)
 
+    local promote_button = CreateFrame("Button", nil, promote_group.content, "UIPanelButtonTemplate")
+    promote_button:SetText("Promote Leadership")
+    promote_button:SetScript("OnClick", function()
+        print("Promoting Leadership")
+        -- TODO: Hook up this functionality.
+    end)
+    promote_button:SetPoint("CENTER")
+    promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
 
     --- Invite Group Commands
     local invite_group = createBackdropFrame(nil, scrollContent, 'Invite Commands')

@@ -142,9 +142,6 @@ function SimpleScrollFrame:new(parent)
 
     sc.AddChild = function(content, frame)
         local childCount = #content.children;
-        local childPadding = 50
-
-        if sc:GetHeight() > 0 then sc:SetHeight(sc:GetHeight() - childPadding) end
 
         if childCount == 0 then
             frame:SetPoint("TOPLEFT", 10, 0)
@@ -154,7 +151,7 @@ function SimpleScrollFrame:new(parent)
             frame:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
             frame:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
         end
-        sc:SetHeight(sc:GetHeight() + frame:GetHeight() + childPadding)
+        sc:SetHeight(sc:GetHeight() + frame:GetHeight())
         table.insert(content.children, frame)
     end
 
