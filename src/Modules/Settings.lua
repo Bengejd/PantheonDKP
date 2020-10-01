@@ -60,7 +60,7 @@ function Settings:CanEdit()
 
     local debugNames = {'Lariese'}
     if tContains(debugNames, pName) then
-        pName = 'Neekio'2
+        pName = 'Neekio'
     end
 
     local member = Guild.members[pName]
