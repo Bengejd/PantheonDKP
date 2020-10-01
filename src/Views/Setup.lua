@@ -22,6 +22,7 @@ local ScrollTable = core.ScrollTable;
 local Settings = core.Settings;
 local Loot = core.Loot;
 local HistoryTable = core.HistoryTable;
+local SimpleScrollFrame = core.SimpleScrollFrame;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -508,7 +509,7 @@ function Setup:RaidTools()
     f.title:SetFontObject("GameFontHighlight")
     f.title:SetPoint("CENTER", f.TitleBg, "CENTER", 11, 0)
     f.title:SetText("PDKP Raid Interface")
-    f:SetFrameStrata("FULLSCREEN")
+    f:SetFrameStrata("HIGH")
     f:SetFrameLevel(1)
     f:SetToplevel(true)
 
@@ -526,12 +527,29 @@ function Setup:RaidTools()
         --end
     end)
 
+    f.content = CreateFrame("Frame", '$parent_content', f)
+    f.content:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -25)
+    f.content:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -8, 8)
+    f.content:SetSize(f:GetWidth(), f:GetHeight())
+
+    ----- SimpleScrollFrame
+    local scroll = SimpleScrollFrame:new(f.content)
+    local scrollFrame = scroll.scrollFrame
+    local scrollContent = scrollFrame.content;
+
+
     --- Class Group Section
 
-    local class_group = createBackdropFrame(nil, f, 'Raid Breakdown')
-    class_group:SetPoint("TOPLEFT", 10, -25)
-    class_group:SetPoint("TOPRIGHT", -10, 25)
+    local testFrames = {}
+    for i=1, 400 do
+        local tFrame = createBackdropFrame('$parent_tFrame' .. i, scrollContent, 'Test Frame '..i)
+        tFrame:SetHeight(33)
+        scrollContent:AddChild(tFrame)
+    end
+
+    local class_group = createBackdropFrame(nil, scrollContent, 'Raid Breakdown')
     class_group:SetHeight(170)
+    scrollContent:AddChild(class_group)
 
     local classTexture = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
 
@@ -578,8 +596,10 @@ function Setup:RaidTools()
         i_frame:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
         GameTooltip:ClearLines()
-            local names = Raid.raid['classes'][self.class]
-
+            local names = {}
+            if not tEmpty(Raid.raid) then
+                names = Raid.raid['classes'][self.class]
+            end
             local tip_text = '';
 
             for name_key, name in pairs({unpack(names)}) do
@@ -601,6 +621,8 @@ function Setup:RaidTools()
 
         class_group.class_icons[class]=i_frame
     end
+
+
 
     f.class_groups = class_group
 

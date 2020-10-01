@@ -45,7 +45,7 @@ function Raid:new()
 end
 
 function Raid:Init()
-    local raid_info = self:GetRaidInfo()
+    local raid_info = self:GetRaidInfo() or {}
     self.members = raid_info['names']
     self.classes = raid_info['classes']
     self.MasterLooter = raid_info['ML']
@@ -68,7 +68,8 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
 end
 
 function Raid:GetClassNames(class)
-    local raid_roster = Raid:GetRaidInfo()
+    local raid_roster = Raid:GetRaidInfo() or {}
+    if tEmpty(raid_roster) then return {} end
     return raid_roster['classes'][class]
 end
 
