@@ -89,6 +89,12 @@ local function createBackdropFrame(name, parent, title)
     content:SetPoint("TOPLEFT", 10, -10)
     content:SetPoint("BOTTOMRIGHT", -10, 10)
 
+    local content_desc = content:CreateFontString(content, "OVERLAY", "GameFontHighlightSmall")
+    content_desc:SetPoint("BOTTOMLEFT")
+    content_desc:SetPoint("BOTTOMRIGHT")
+    content_desc:SetJustifyH("LEFT")
+
+    f.desc = content_desc
     f.border = border
     f.content = content
     return f
@@ -616,17 +622,20 @@ function Setup:RaidTools()
     end
 
     --- Promote Leadership section.
-    local promote_group = createBackdropFrame(nil, scrollContent, 'Promote Leadership')
+    local promote_group = createBackdropFrame(nil, scrollContent, 'Raid Control')
     promote_group:SetHeight(100)
     scrollContent:AddChild(promote_group)
+
+    promote_group.desc:SetText("This will give all Officers & Class Leaders in the raid the 'Assist' role.")
 
     local promote_button = CreateFrame("Button", nil, promote_group.content, "UIPanelButtonTemplate")
     promote_button:SetText("Promote Leadership")
     promote_button:SetScript("OnClick", function()
         print("Promoting Leadership")
+        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
         -- TODO: Hook up this functionality.
     end)
-    promote_button:SetPoint("CENTER")
+    promote_button:SetPoint("TOPLEFT")
     promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
 
     --- Invite Group Commands
@@ -634,15 +643,62 @@ function Setup:RaidTools()
     invite_group:SetHeight(100)
     scrollContent:AddChild(invite_group)
 
+    local invite_command_opts = {
+        ['name']='invite_commands',
+        ['parent']=invite_group.content,
+        ['title']='',
+        ['multi']=false,
+        ['max_chars']=225,
+        ['numeric']=false,
+        ['textValidFunc']=function(box)
+            print(box:GetText())
+        end
+    }
+
+    local inv_edit_box = createEditBox(invite_command_opts)
+    inv_edit_box:SetPoint("TOPLEFT", 10, 0)
+    inv_edit_box:SetPoint("TOPRIGHT", 0, 0)
+    inv_edit_box:SetWidth(inv_edit_box:GetParent():GetWidth())
+    inv_edit_box:SetText("inv, invite")
+
+    invite_group.desc:SetText("You will auto-invite when whispered one of the words or phrases above.")
+
     --- Disallow Invite From
     local disallow_group = createBackdropFrame(nil, scrollContent, 'Disallow Invites')
     disallow_group:SetHeight(100)
     scrollContent:AddChild(disallow_group)
 
     --- Auto Invite Spam
-    local invite_spam_group = createBackdropFrame(nil, scrollContent, 'Invite Spam')
-    invite_spam_group:SetHeight(100)
+    local invite_spam_group = createBackdropFrame(nil, scrollContent, 'Guild Invite Spam text')
+    invite_spam_group:SetHeight(200)
     scrollContent:AddChild(invite_spam_group)
+
+    local invite_spam_opts = {
+        ['name']='invite_spam',
+        ['parent']=invite_spam_group.content,
+        ['title']='',
+        ['multi']=true,
+        ['max_chars']=225,
+        ['numeric']=false,
+        ['textValidFunc']=function(box)
+            print(box:GetText())
+        end
+    }
+
+    local invite_spam_box = createEditBox(invite_spam_opts)
+    invite_spam_box:SetPoint("TOPLEFT", 8, -8)
+    invite_spam_box:SetPoint("TOPRIGHT", -8, 8)
+    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for invite.")
+
+    local spam_button = CreateFrame("Button", nil, invite_spam_group.content, "UIPanelButtonTemplate")
+    spam_button:SetText("Start Raid Inv Spam")
+    spam_button:SetScript("OnClick", function()
+        print("Starting Invite Spam")
+        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
+        -- TODO: Hook up this functionality.
+    end)
+    spam_button:SetPoint("TOPLEFT", invite_spam_box.frame, "BOTTOMLEFT")
+    spam_button:SetPoint("TOPRIGHT", invite_spam_box.frame, "BOTTOMRIGHT")
 
     f.class_groups = class_group
 
