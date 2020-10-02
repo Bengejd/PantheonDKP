@@ -23,7 +23,7 @@ local Settings = core.Settings;
 
 
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
-local replace, format, tostring, gsub = string.rep, string.format, tostring, string.gsub
+local replace, format, tostring, gsub, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
 local floor, fmod = math.floor, math.fmod;
 local insert, sort, next = table.insert, table.sort, next;
 local date, type, print = date, type, print
@@ -85,11 +85,6 @@ function Util:RemoveColorFromText(name)
     fName = fName:gsub("%s+", "")
     fName = gsub(fName, "%s+", "")
     return fName
-end
-
-function Util:GetMyName()
-    local pName, _ = UnitName("PLAYER")
-    return pName
 end
 
 -----------------------------
@@ -158,6 +153,11 @@ end
 --     String Functions    --
 -----------------------------
 
+function Util:GetMyName()
+    local pName, _ = UnitName("PLAYER")
+    return pName
+end
+
 -- Utility function to help determine if the string is empty or nil.
 function Util:IsEmpty(string)
     return string == nil or string == '';
@@ -190,6 +190,17 @@ end
 -- Utility function to remove non-numerics (except minus) from a number.
 function Util:RemoveNonNumerics(str)
     return str:gsub("%D+", "")
+end
+
+function Util:SplitString(string, delim)
+    local arr = {split(delim, string)}
+
+    for i=1, #arr do
+        local v = arr[i]
+        arr[i] = trim(v, " \t\r") -- Trims  spaces, tabs or newlines from the left or right of the string.
+    end
+
+    return arr
 end
 
 -----------------------------

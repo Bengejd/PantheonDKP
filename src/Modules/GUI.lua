@@ -25,8 +25,6 @@ GUI.pdkp_frame = nil;
 GUI.sortBy = 'name';
 GUI.sortDir = 'ASC';
 GUI.memberTable = nil;
-
---- Adjustments Section
 GUI.adjustment_frame = nil; -- The DKP Adjustments Frame
 GUI.adjustmentDropdowns = {} -- -- The DKP Adjustment Dropdown Menus names
 GUI.adjustmentDropdowns_names = {}; -- The DKP Adjustment Dropdown Menus names
@@ -35,17 +33,23 @@ GUI.adjustment_submit_button = nil; -- The Submit Button
 GUI.adjustment_entry = {}; -- The Entry info we are creating when hitting submit
 GUI.adjust_buttons = {} -- The Adjustment Buttons
 GUI.boss_loot_frame = nil; -- The DKP Adjustments Boss Loot Frame
-
 GUI.recent_boss_kill = {}; -- The Info regarding our most recent Boss Kill
-
 GUI.filter_frame = nil; -- The Member Table Filter Frame
-
 GUI.history_frame = nil; -- The DKP History Frame
 GUI.history_table = nil; -- The DKP History Table
-
 GUI.raid_frame = nil; -- The PDKP Raid Tools frame.
-
 GUI.popup_entry = nil; -- The popup entry that we are editing/deleting.
+
+GUI.invite_control = {
+    ['commands']={},
+    ['ignore_from']={},
+    ['text']='',
+    ['running']=false,
+    ['counter']=0,
+    ['timer']=nil,
+    ['spamButton']=nil,
+}
+
 
 function GUI:Init()
     Util:Debug('Initializing GUI')

@@ -260,6 +260,7 @@ local function createEditBox(opts)
     box:SetAutoFocus(false)
     box:SetFontObject(GameFontHighlightSmall)
     box:SetMultiLine(multi_line)
+    box.uniqueID = name
 
     box.touched = false
 
@@ -326,6 +327,8 @@ local function createEditBox(opts)
     ed:SetPoint("TOPLEFT", box_frame, "BOTTOMLEFT", 2, 0)
     ed:SetPoint("TOPRIGHT", box_frame, "BOTTOMRIGHT", 0, 0)
     ed:SetJustifyH("LEFT")
+
+    box.init = false;
 
     GUI.editBoxes[name]=box
 
@@ -661,35 +664,44 @@ function Setup:RaidTools()
 
     --- Invite Control Group
     local inv_control_group = createBackdropFrame(nil, scrollContent, 'Invite Control')
-    inv_control_group:SetHeight(350)
+    inv_control_group:SetHeight(360)
     scrollContent:AddChild(inv_control_group)
 
-    local spam_button_desc;
+    local spam_button_desc; -- Define this early so we can detect how far it is from the bottom in the resize.
 
+    -- Automatically resizes the Inv_control_group based on the editBoxes size.
     inv_control_group.resize = function(diff)
-        if diff < -10 then
-            inv_control_group:SetHeight(350 - diff)
+        if diff < -10 then inv_control_group:SetHeight(350 - diff) else inv_control_group:SetHeight(350) end
+        scrollContent.Resize()
+    end
+
+    -- Sets the GUI.invite_control values based on which box it is.
+    local function textValidFunc(box)
+        if not box.touched and box.init then return end
+        box.init = true
+
+        local box_id = box.uniqueID
+
+        local bt = box:GetText()
+
+        local box_funcs = {
+            ['invite_spam']=function()
+                GUI.invite_control['text']=bt
+            end,
+            ['disallow_invite']=function()
+                local text_arr = Util:SplitString(bt, ',')
+                GUI.invite_control['ignore_from']=text_arr
+            end,
+            ['invite_commands']=function()
+                local text_arr = Util:SplitString(bt, ',')
+                GUI.invite_control['commands']=text_arr
+            end,
+        }
+
+        if box_funcs[box_id] then box_funcs[box_id]()
+        else
+            Util:Debug("GUI.Invite_Control box func " .. box_id .. ' was not found!')
         end
-        --local content = inv_control_group.content
-        --local content_children = {content:GetChildren()}
-        --
-        --print('Content Height', content:GetHeight())
-        --print('Group Height', inv_control_group:GetHeight())
-        --
-        --for i=1, #content_children do
-        --    local child_height = 0
-        --    local child = content_children[i]
-        --
-        --    if child ~= nil then
-        --        local child_children = {child:GetChildren()}
-        --        for k=1, #child_children do
-        --            local child_child = child_children[k]
-        --            child_height = child_height + child_child:GetHeight()
-        --        end
-        --        child_height = child_height + child:GetHeight()
-        --    end
-        --    print(child:GetName(), child_height)
-        --end
     end
 
     local invite_command_opts = {
@@ -700,9 +712,7 @@ function Setup:RaidTools()
         ['max_chars']=225,
         ['smallTitle']=true,
         ['numeric']=false,
-        ['textValidFunc']=function(box)
-            --print(box:GetText())
-        end
+        ['textValidFunc']=textValidFunc
     }
 
     local inv_edit_box = createEditBox(invite_command_opts)
@@ -720,9 +730,7 @@ function Setup:RaidTools()
         ['smallTitle']=true,
         ['max_lines']=4,
         ['numeric']=false,
-        ['textValidFunc']=function(box)
-            --print(box:GetText())
-        end
+        ['textValidFunc']=textValidFunc
     }
     local disallow_edit = createEditBox(disallow_opts)
     disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
@@ -741,9 +749,7 @@ function Setup:RaidTools()
         ['smallTitle']=true,
         ['max_lines']=5,
         ['numeric']=false,
-        ['textValidFunc']=function(box)
-            --print(box:GetText())
-        end
+        ['textValidFunc']=textValidFunc
     }
     local invite_spam_box = createEditBox(invite_spam_opts)
     invite_spam_box:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 8, -32)
@@ -754,9 +760,18 @@ function Setup:RaidTools()
     local spam_button = CreateFrame("Button", nil, inv_control_group.content, "UIPanelButtonTemplate")
     spam_button:SetText("Start Raid Inv Spam")
     spam_button:SetScript("OnClick", function()
-        print("Starting Invite Spam")
+        GUI.invite_control['running'] = not GUI.invite_control['running']
+        local running = GUI.invite_control['running']
+
+        local b_text = ''
+
+        if running then b_text = 'Stop Raid Inv Spam' else b_text = 'Start Raid Inv Spam' end
+        spam_button:SetText(b_text)
+
+        Comms:ToggleRaidInviteSpam()
+
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-        -- TODO: Hook up this functionality.]
+        -- TODO: Hook up this functionality.
         -- TODO: Stop spamming after 15 minutes.
         -- TODO: Stop spamming if group is full.
     end)
@@ -766,21 +781,20 @@ function Setup:RaidTools()
     spam_button_desc = spam_button:CreateFontString(spam_button, "OVERLAY", "GameFontHighlightSmall")
     spam_button_desc:SetPoint("TOPLEFT", spam_button, "BOTTOMLEFT", 0, -8)
     spam_button_desc:SetPoint("TOPRIGHT", spam_button, "BOTTOMRIGHT", 0, 8)
-    spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes. Click again to stop the message spam.")
+    spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes or until the raid is full. Click again to stop the message spam.")
     spam_button_desc:SetJustifyH("LEFT")
 
     invite_spam_box.start_height = invite_spam_box:GetHeight() -- Set our starting height for resize purposes.
 
+    -- Resizes the Inv_control_group frame, based on the size of the edit boxes.
     local function editBoxResized(edit_frame, _, h)
-        if not edit_frame.touched or h == edit_frame.start_height then return end
-        edit_frame:SetScript("OnLeave", function()
-            edit_frame:SetScript("OnLeave", nil) -- Remove the script
-            local _, bottom, _, _ = spam_button_desc:GetRect()
-            local diff = floor(bottom + 0.5) - floor(inv_control_group:GetHeight() + 0.5)
-            inv_control_group.resize(diff)
-
-            --scrollContent:Resize() -- Resize the content.
-        end)
+        if not edit_frame.touched then return end
+        local _, button_bottom, _, _ = spam_button_desc:GetRect()
+        local bottom = floor(button_bottom)
+        local diff = floor(bottom) - floor(360)
+        local singles = math.fmod(diff, 10) -- We only care about intervals of 10.
+        diff = diff - singles
+        inv_control_group.resize(diff)
     end
 
     disallow_edit:SetScript("OnSizeChanged", editBoxResized)
@@ -789,6 +803,7 @@ function Setup:RaidTools()
     f.class_groups = class_group
 
     GUI.raid_frame = f
+    GUI.invite_control['spamButton']=spam_button
 
     FriendsFrameTab4:Click()
     pdkp_frame:Hide()

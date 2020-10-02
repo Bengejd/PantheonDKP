@@ -21,6 +21,8 @@ local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local Settings = core.Settings;
 
+local SendChatMessage = SendChatMessage
+
 Comms.commsRegistered = false
 
 --[[ MESSAGE TYPES: "PARTY", "RAID", "GUILD", "OFFICER", "BATTLEGROUND", "WHISPER" ]]
@@ -129,4 +131,54 @@ function Comms:ThrowError(prefix, sender)
     local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
     errMsg = errMsg .. ' an Officer.'
     return Util:ThrowError(errMsg, true)
+end
+
+---------------------------
+--    MISC Functions     --
+---------------------------
+
+
+
+function Comms:ToggleRaidInviteSpam()
+    local invite_control = GUI.invite_control
+    local text = invite_control['text']
+    local timer =  invite_control['timer']
+    local interval = 90
+
+    local spam_channel = 'GUILD'
+    local spam_char = nil
+
+    if Settings:IsDebug() then
+        Util:Debug("Setting Spam Count Interval to 2 for debugging")
+        interval = 2
+        spam_char = 'Lariese'
+        spam_channel = 'WHISPER'
+    end
+
+    if timer then
+        print('Stopping Invite Spam')
+        PDKP:CancelTimer(timer)
+        GUI.invite_control['count']=0;
+        GUI.invite_control['timer']=nil;
+        GUI.invite_control['spamButton']:SetText('Start Raid Inv Spam')
+        return
+    end
+
+    if Util:IsEmpty(text) then return end -- Stop here if the text is empty.
+
+    print("Starting Invite Spam")
+
+    local function sendMsg()
+        SendChatMessage(text, spam_channel, nil, spam_char) -- SendChatMesage(text, 'GUILD', nil, nil);
+    end
+
+    local function timerFeedback()
+        GUI.invite_control['counter'] = GUI.invite_control['counter'] + 1
+        PDKP:Print("Raid Invite Spam Count: " .. tostring(GUI.invite_control['counter']))
+        sendMsg()
+        if  GUI.invite_control['counter'] >= 10 then Comms:ToggleRaidInviteSpam() end
+    end
+
+    sendMsg()
+    GUI.invite_control['timer'] = PDKP:ScheduleRepeatingTimer(timerFeedback, interval) -- Posts it every 90 seconds for 15 mins.
 end

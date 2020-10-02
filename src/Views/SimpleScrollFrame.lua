@@ -161,10 +161,10 @@ function SimpleScrollFrame:new(parent)
         end)
     end)
 
-    sc.Resize = function(content)
+    sc.Resize = function()
         sc:SetHeight(0)
-        for i=1, #content.children do
-            local child_frame = content.children[i]
+        for i=1, #sc.children do
+            local child_frame = sc.children[i]
             sc:SetHeight(sc:GetHeight() + child_frame:GetHeight())
         end
     end
