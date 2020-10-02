@@ -46,7 +46,6 @@ function SimpleScrollFrame:FixScrollOnUpdate()
                 self.content.width = self.content.original_width - 20
             end
         end
-        print(height, viewheight)
 
         local value = (offset / (viewheight - height) * 1000)
         if value > 1000 then value = 1000 end
@@ -161,6 +160,14 @@ function SimpleScrollFrame:new(parent)
             self:FixScrollOnUpdate(value)
         end)
     end)
+
+    sc.Resize = function(content)
+        sc:SetHeight(0)
+        for i=1, #content.children do
+            local child_frame = content.children[i]
+            sc:SetHeight(sc:GetHeight() + child_frame:GetHeight())
+        end
+    end
 
     sf.content = sc
 

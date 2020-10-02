@@ -28,6 +28,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
 local PlaySound = PlaySound
 
+local floor = math.floor
+
 local CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
 local PDKP_TEXTURE_BASE = "Interface\\Addons\\PantheonDKP\\Media\\Main_UI\\PDKPFrame-"
@@ -247,6 +249,8 @@ local function createEditBox(opts)
     local max_chars = opts['max_chars'] or 225
     local textValidFunc = opts['textValidFunc'] or function() end
     local numeric = opts['numeric'] or false
+    local small_title = opts['smallTitle'] or false
+    local max_lines = opts['max_lines'] or false
 
     local box = CreateFrame("EditBox", "$parent_" .. name, parent)
     box:SetHeight(30)
@@ -256,6 +260,8 @@ local function createEditBox(opts)
     box:SetAutoFocus(false)
     box:SetFontObject(GameFontHighlightSmall)
     box:SetMultiLine(multi_line)
+
+    box.touched = false
 
     box.isValid = function()
         if box:IsVisible() then
@@ -283,6 +289,8 @@ local function createEditBox(opts)
         if box.isValid() then textValidFunc(box) end
     end)
 
+    box:SetScript("OnEditFocusGained", function() box.touched = true end)
+
     local box_frame = CreateFrame("Frame", '$parent_edit_frame', box)
     box_frame:SetBackdrop( {
         bgFile = TRANSPARENT_BACKGROUND,
@@ -297,19 +305,32 @@ local function createEditBox(opts)
         box_frame:SetHeight(50)
     else
         box_frame:SetPoint("TOPLEFT", box, "TOPLEFT", -10, 0)
+        box_frame:SetPoint("TOPRIGHT", box, "TOPRIGHT", -10, 0)
         box_frame:SetHeight(30)
     end
 
     box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
 
+    local title_font = 'GameFontNormal'
+
+    if small_title then title_font = 'GameFontNormalSmall' end
+
     -- label
-    local el = box:CreateFontString(box_frame, "OVERLAY", 'GameFontNormal')
+    local el = box:CreateFontString(box_frame, "OVERLAY", title_font)
     el:SetText(box_label_text)
     el:SetPoint("TOPLEFT", box_frame, "TOPLEFT", 5, 10)
+
+    -- Description below the edit box.
+    local ed = box:CreateFontString(box_frame, "OVERLAY", "GameFontHighlightSmall")
+    ed:SetText("")
+    ed:SetPoint("TOPLEFT", box_frame, "BOTTOMLEFT", 2, 0)
+    ed:SetPoint("TOPRIGHT", box_frame, "BOTTOMRIGHT", 0, 0)
+    ed:SetJustifyH("LEFT")
 
     GUI.editBoxes[name]=box
 
     box.frame = box_frame
+    box.desc = ed
     box.title = el
     return box
 end
@@ -638,67 +659,132 @@ function Setup:RaidTools()
     promote_button:SetPoint("TOPLEFT")
     promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
 
-    --- Invite Group Commands
-    local invite_group = createBackdropFrame(nil, scrollContent, 'Invite Commands')
-    invite_group:SetHeight(100)
-    scrollContent:AddChild(invite_group)
+    --- Invite Control Group
+    local inv_control_group = createBackdropFrame(nil, scrollContent, 'Invite Control')
+    inv_control_group:SetHeight(350)
+    scrollContent:AddChild(inv_control_group)
+
+    local spam_button_desc;
+
+    inv_control_group.resize = function(diff)
+        if diff < -10 then
+            inv_control_group:SetHeight(350 - diff)
+        end
+        --local content = inv_control_group.content
+        --local content_children = {content:GetChildren()}
+        --
+        --print('Content Height', content:GetHeight())
+        --print('Group Height', inv_control_group:GetHeight())
+        --
+        --for i=1, #content_children do
+        --    local child_height = 0
+        --    local child = content_children[i]
+        --
+        --    if child ~= nil then
+        --        local child_children = {child:GetChildren()}
+        --        for k=1, #child_children do
+        --            local child_child = child_children[k]
+        --            child_height = child_height + child_child:GetHeight()
+        --        end
+        --        child_height = child_height + child:GetHeight()
+        --    end
+        --    print(child:GetName(), child_height)
+        --end
+    end
 
     local invite_command_opts = {
         ['name']='invite_commands',
-        ['parent']=invite_group.content,
-        ['title']='',
+        ['parent']=inv_control_group.content,
+        ['title']='Auto Invite Commands',
         ['multi']=false,
         ['max_chars']=225,
+        ['smallTitle']=true,
         ['numeric']=false,
         ['textValidFunc']=function(box)
-            print(box:GetText())
+            --print(box:GetText())
         end
     }
 
     local inv_edit_box = createEditBox(invite_command_opts)
-    inv_edit_box:SetPoint("TOPLEFT", 10, 0)
-    inv_edit_box:SetPoint("TOPRIGHT", 0, 0)
-    inv_edit_box:SetWidth(inv_edit_box:GetParent():GetWidth())
+    inv_edit_box:SetPoint("TOPLEFT", inv_control_group.content, "TOPLEFT", 12, -8)
+    inv_edit_box:SetPoint("TOPRIGHT", inv_control_group.content, "TOPRIGHT", 12, 8)
+    inv_edit_box.desc:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
     inv_edit_box:SetText("inv, invite")
 
-    invite_group.desc:SetText("You will auto-invite when whispered one of the words or phrases above.")
+    local disallow_opts = {
+        ['name']='disallow_invite',
+        ['parent']=inv_control_group.content,
+        ['title']='Ignore Auto Invite From',
+        ['multi']=true,
+        ['max_chars']=225,
+        ['smallTitle']=true,
+        ['max_lines']=4,
+        ['numeric']=false,
+        ['textValidFunc']=function(box)
+            --print(box:GetText())
+        end
+    }
+    local disallow_edit = createEditBox(disallow_opts)
+    disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
+    disallow_edit:SetPoint("TOPRIGHT", inv_edit_box.desc, "BOTTOMRIGHT", -10, 32)
+    disallow_edit:SetText("Eguita, Mashay, Ihurricanel, Xorms")
+    disallow_edit.desc:SetText("This will prevent the following members from abusing the automatic raid invite feature.")
 
-    --- Disallow Invite From
-    local disallow_group = createBackdropFrame(nil, scrollContent, 'Disallow Invites')
-    disallow_group:SetHeight(100)
-    scrollContent:AddChild(disallow_group)
-
-    --- Auto Invite Spam
-    local invite_spam_group = createBackdropFrame(nil, scrollContent, 'Guild Invite Spam text')
-    invite_spam_group:SetHeight(200)
-    scrollContent:AddChild(invite_spam_group)
+    disallow_edit.start_height = disallow_edit:GetHeight() -- Set our starting height for resize purposes.
 
     local invite_spam_opts = {
         ['name']='invite_spam',
-        ['parent']=invite_spam_group.content,
-        ['title']='',
+        ['parent']=inv_control_group.content,
+        ['title']='Guild Invite Spam text',
         ['multi']=true,
         ['max_chars']=225,
+        ['smallTitle']=true,
+        ['max_lines']=5,
         ['numeric']=false,
         ['textValidFunc']=function(box)
-            print(box:GetText())
+            --print(box:GetText())
         end
     }
-
     local invite_spam_box = createEditBox(invite_spam_opts)
-    invite_spam_box:SetPoint("TOPLEFT", 8, -8)
-    invite_spam_box:SetPoint("TOPRIGHT", -8, 8)
-    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for invite.")
+    invite_spam_box:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 8, -32)
+    invite_spam_box:SetPoint("TOPRIGHT", disallow_edit.desc, "BOTTOMRIGHT", -10, 32)
+    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for Invite")
+    invite_spam_box.desc:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
 
-    local spam_button = CreateFrame("Button", nil, invite_spam_group.content, "UIPanelButtonTemplate")
+    local spam_button = CreateFrame("Button", nil, inv_control_group.content, "UIPanelButtonTemplate")
     spam_button:SetText("Start Raid Inv Spam")
     spam_button:SetScript("OnClick", function()
         print("Starting Invite Spam")
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-        -- TODO: Hook up this functionality.
+        -- TODO: Hook up this functionality.]
+        -- TODO: Stop spamming after 15 minutes.
+        -- TODO: Stop spamming if group is full.
     end)
-    spam_button:SetPoint("TOPLEFT", invite_spam_box.frame, "BOTTOMLEFT")
-    spam_button:SetPoint("TOPRIGHT", invite_spam_box.frame, "BOTTOMRIGHT")
+    spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
+    spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
+
+    spam_button_desc = spam_button:CreateFontString(spam_button, "OVERLAY", "GameFontHighlightSmall")
+    spam_button_desc:SetPoint("TOPLEFT", spam_button, "BOTTOMLEFT", 0, -8)
+    spam_button_desc:SetPoint("TOPRIGHT", spam_button, "BOTTOMRIGHT", 0, 8)
+    spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes. Click again to stop the message spam.")
+    spam_button_desc:SetJustifyH("LEFT")
+
+    invite_spam_box.start_height = invite_spam_box:GetHeight() -- Set our starting height for resize purposes.
+
+    local function editBoxResized(edit_frame, _, h)
+        if not edit_frame.touched or h == edit_frame.start_height then return end
+        edit_frame:SetScript("OnLeave", function()
+            edit_frame:SetScript("OnLeave", nil) -- Remove the script
+            local _, bottom, _, _ = spam_button_desc:GetRect()
+            local diff = floor(bottom + 0.5) - floor(inv_control_group:GetHeight() + 0.5)
+            inv_control_group.resize(diff)
+
+            --scrollContent:Resize() -- Resize the content.
+        end)
+    end
+
+    disallow_edit:SetScript("OnSizeChanged", editBoxResized)
+    invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
 
     f.class_groups = class_group
 
