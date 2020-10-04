@@ -68,6 +68,14 @@ function GUI:Init()
     end
 end
 
+function GUI:TogglePDKP()
+    if GUI.pdkp_frame and GUI.pdkp_frame:IsVisible() then
+        GUI.pdkp_frame:Hide()
+    elseif GUI.pdkp_frame and not GUI.pdkp_frame:IsVisible() then
+        GUI.pdkp_frame:Show()
+    end
+end
+
 function GUI:Show()
     if GUI.pdkp_frame then
         GUI.pdkp_frame:Show()

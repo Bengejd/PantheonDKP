@@ -25,9 +25,11 @@ local SettingsDB;
 
 Settings.bank_name = 'PantheonBank';
 Settings.current_raid = 'Molten Core';
+Settings.db = nil;
 
 function Settings:InitDB()
     SettingsDB = core.PDKP.db['settingsDB']
+    Settings.db = SettingsDB
     Settings.current_raid = SettingsDB['current_raid'] or 'Molten Core';
 end
 

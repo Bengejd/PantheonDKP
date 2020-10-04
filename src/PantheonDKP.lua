@@ -36,6 +36,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
                 Raid:new();
                 GUI:UpdateEasyStats();
                 Comms:Init();
+                Minimap:Init()
             else
                 GuildRoster();
             end
@@ -102,6 +103,7 @@ function PDKP:InitializeDatabases()
                 ['minimapPos'] = 207,
                 ['debug'] = false,
                 ['ignore_from']={},
+                ['minimap']={},
             },
         }
     end

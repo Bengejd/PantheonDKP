@@ -3,7 +3,13 @@ REWORK:
  TODO: Setup Comms messages
  TODO: Setup Minimap button
  TODO: Setup Interface Options
- 
+    TODO: Shrouding Options
+    TODO: Printing Options
+    TODO: Syncing Options
+    TODO: General Options
+
+ TODO: Setup DKP Officer popup.
+
 
 ESSENTIALS:
     TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
@@ -14,7 +20,6 @@ ESSENTIALS:
     TODO: Save positioning of the shrouding window through states.
     TODO: BUG: Fix the visual issue with dkp updates on boss kills not updating the underlying values of the scroll table.
     TODO: Save shrouding window positioning
-    TODO: Change Officer Interface to say that Class Leaders get promoted too.
 
 LOCAL DESKTOP APP:
     TODO: Figure out how to create a desktop app.

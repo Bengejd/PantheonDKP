@@ -38,16 +38,22 @@ function PDKP_Shroud_OnEvent(self, event, arg1, ...)
 
     scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
-    local compare = function(a, b) return a[Settings.current_raid] < b[Settings.current_raid] end
-    table.sort(Shroud.shrouders, compare)
+    local shroud_keys = {}; -- Member names in a list we can sort.
+    for _, key in pairs(Shroud.shrouders) do table.insert(shroud_keys,key) end
 
-    --- TODO: Figure out how to do pairs in order instead of randomly. It's fucking up the order of things.
+    local compare = function(a, b)
+        local a_mem, b_mem = Shroud.shrouders[a], Shroud.shrouders[b]
+        return a_mem[Settings.current_raid] < b_mem[Settings.current_raid]
+    end
+    table.sort(shroud_keys, compare)
 
-    for name, dkp in pairs(Shroud.shrouders) do
-        local shrouder = scrollContent:CreateFontString(scrollContent, 'OVERLAY', 'GameFontHighlightLeft')
-        shrouder:SetHeight(18)
-        shrouder:SetText(dkp[Settings.current_raid] .. " | " .. name)
-        scrollContent:AddChild(shrouder)
+    for i=1, #shroud_keys do
+        local shroud_name = shroud_keys[i]
+        local shrouder = Shroud.shrouders[shroud_name]
+        local shroud_string = scrollContent:CreateFontString(scrollContent, 'OVERLAY', 'GameFontHighlightLeft')
+        shroud_string:SetHeight(18)
+        shroud_string:SetText(shrouder[Settings.current_raid] .. ' | ' .. name)
+        scrollContent:AddChildd(shroud_string)
     end
 
     local raid_text = Settings.current_raid .. ' Shrouds'

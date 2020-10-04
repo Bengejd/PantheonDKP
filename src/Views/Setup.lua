@@ -527,6 +527,7 @@ function Setup:RandomStuff()
     --Setup:TabView()
     Setup:DKPHistory()
     Setup:RaidTools()
+    Setup:InterfaceOptions()
     local scroll_frame = Setup:HistoryTable()
 
     -- TODO: Use Interface\Buttons\UI-TotemBar and texCoords for the expand / collapse buttons.
@@ -1479,6 +1480,149 @@ function Setup:BossKillLoot()
     t:SetParent(f)
 
     f:Show()
+end
+
+function Setup:InterfaceOptions()
+
+    local AceConfig = LibStub("AceConfig-3.0")
+    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+
+    --name (string|function) - Display name for the option
+    --desc (string|function) - description for the option (or nil for a self-describing name)
+    --descStyle (string) - "inline" if you want the description to show below the option in a GUI (rather than as a tooltip). Currently only supported by AceGUI "Toggle".
+    --validate (methodname|function|false) - validate the input/value before setting it. return a string (error message) to indicate error.
+    --confirm (methodname|function|boolean) - prompt for confirmation before changing a value
+    --true - display "name - desc", or contents of .confirmText
+    --function - return a string (prompt to display) or true (as above), or false to skip the confirmation step
+    --order (number|methodname|function) - relative position of item (default = 100, 0=first, -1=last)
+    --disabled (methodname|function|boolean) - disabled but visible
+    --hidden (methodname|function|boolean) - hidden (but usable if you can get to it, i.e. via commandline)
+    --guiHidden (boolean) - hide this from graphical UIs (dialog, dropdown)
+    --dialogHidden (boolean) - hide this from dialog UIs
+    --dropdownHidden (boolean) - hide this from dropdown UIs
+    --cmdHidden (boolean)- hide this from commandline
+    --Note that only hidden can be a function, the specialized hidden cases cannot.
+    --icon (string|function) - path to icon texture
+    --iconCoords (table|methodname|function) - arguments to pass to SetTexCoord, e.g. {0.1,0.9,0.1,0.9}.
+    --handler (table) - object on which getter/setter functions are called if they are declared as strings rather than function references
+    --type (string) - "execute", "input", "group", etc; see below
+    --width (string) - "double", "half", "full", "normal", or numeric, in a GUI provide a hint for how wide this option needs to be. (optional support in implementations)
+    --default is nil (not set)
+    --double, half - increase / decrease the size of the option
+    --full - make the option the full width of the window
+    --normal - use the default widget width defined for the implementation (useful to overwrite widgets that default to "full")
+    --any number - multiplier of the default width, ie. 0.5 equals "half", 2.0 equals "double"
+
+    local function createSettingsGroup(title, desc)
+        local group = {
+            name=title or '',
+            type="group",
+            desc=desc or '',
+            inline=true,
+            args = {}
+        }
+
+        group.genSetting = function(name, desc, dbSetting, setValFunc, getValFunc)
+            local setting = {
+                name=name or "",
+                type = "toggle",
+                desc = desc or "",
+                set = setValFunc or function(info, val) dbSetting = val end,
+                get = getValFunc or function(info, val) return dbSetting end,
+            }
+            return setting
+        end
+
+        group.genGroup = createSettingsGroup
+
+        return group;
+    end
+
+    local options = {
+        type = "group",
+        args = {}
+    }
+
+    local notifGroup = createSettingsGroup("1. Notifications")
+    notifGroup:genSetting('Enabled', '')
+
+    local options = {
+        type = "group",
+        args = {
+            notificationGroup= {
+                name="1. Notifications",
+                type="group",
+                inline= true,
+                args = {
+                    Silent = {
+                        name = "Enabled",
+                        type = "toggle",
+                        desc="Enables / Disables all messages from the addon. Requires a reload when re-enabling",
+                        set = function(info,val) Defaults:TogglePrinting(not val) end,
+                        get = function(info) return not Defaults.SettingsDB.silent end
+                    },
+                }
+            },
+            SyncGroup= {
+                name="2. Allow DKP syncs to occur in:",
+                type="group",
+                desc='This only controls merge / overwrite syncing. This will not affect DKP updates that occur during a raid.',
+                descStyle='inline',
+                inline= true,
+                args = {
+                    syncInPvP = {
+                        name = "Battlegrounds",
+                        desc = "Enable / Disable sync while in Battlegrounds",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.pvp = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.pvp end
+                    },
+                    syncInRaid = {
+                        name = "Raids",
+                        desc = "Enable / Disable sync while in Raid Instances",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.raids = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.raids end
+                    },
+                    syncInDungeons = {
+                        name = "Dungeons",
+                        desc = "Enable / Disable sync while in Dungeon Instances",
+                        type = "toggle",
+                        set = function(info,val) Defaults.SettingsDB.sync.dungeons = val end,
+                        get = function(info) return Defaults.SettingsDB.sync.dungeons end
+                    },
+                    syncDesc = {
+                        name="These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.",
+                        type='description',
+                        fontSize ='medium'
+                    }
+                }
+            },
+            adminGroup = nil,
+        }
+    }
+
+    if core.canEdit then
+        options.args.adminGroup = {
+            name='3. Officer',
+            type="group",
+            inline= true,
+            args = {
+                debugging = {
+                    name = "Addon Debugging",
+                    type = "toggle",
+                    desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
+                    set = function(info,val) Defaults:ToggleDebugging() end,
+                    get = function(info) return Defaults.SettingsDB.debug end
+                },
+            }
+        }
+    end
+
+    LibStub('AceConfigRegistry-3.0'):RegisterOptionsTable("PantheonDKP", options)
+    AceConfigDialog:AddToBlizOptions('PantheonDKP')
+
+    Defaults.settings_complete = true
 end
 
 function Setup:ShroudingBox()
