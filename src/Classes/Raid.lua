@@ -8,6 +8,7 @@ local Util = core.Util;
 local Char = core.Character;
 local GUI = core.GUI;
 local PDKP = core.PDKP;
+local Guild = core.Guild;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
@@ -241,7 +242,18 @@ function Raid:SetLootCommon()
     PDKP:Print("Loot threshold updated")
 end
 
+function Raid:PromoteLeadership()
+    if not Raid:IsRaidLead() then return end
+    local raid_names = Raid.raid.members
 
+    for _, name in pairs(raid_names) do
+        local m = Guild:GetMemberByName(name)
+    end
+
+
+    PDKP:Print("Promoting Leadership")
+
+end
 
 --- Debug funcs
 function Raid:TestBossKill()

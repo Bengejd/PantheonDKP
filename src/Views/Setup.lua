@@ -655,9 +655,8 @@ function Setup:RaidTools()
     local promote_button = CreateFrame("Button", nil, promote_group.content, "UIPanelButtonTemplate")
     promote_button:SetText("Promote Leadership")
     promote_button:SetScript("OnClick", function()
-        print("Promoting Leadership")
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-        -- TODO: Hook up this functionality.
+        Raid:PromoteLeadership()
     end)
     promote_button:SetPoint("TOPLEFT")
     promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
