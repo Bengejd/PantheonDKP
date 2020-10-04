@@ -15,6 +15,8 @@ local LoggingCombat, SendChatMessage = LoggingCombat, SendChatMessage
 local StaticPopupDialogs, StaticPopup_Show = StaticPopupDialogs, StaticPopup_Show
 local InviteUnit, ConvertToRaid = InviteUnit, ConvertToRaid;
 
+local trim, lower, contains = strtrim, strlower, tContains
+
 local tostring, print, setmetatable, pairs = tostring, print, setmetatable, pairs
 local canEdit, bossIDS = core.canEdit, core.bossIDS;
 
@@ -63,15 +65,15 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
 
     local regular_events = {
         ['CHAT_MSG_WHISPER']=function(arg1, ...)
-            local msg, _, _, _, name, _, _, _, _, _, _, guid, _, _, _, _, _ = arg1, ...
+            local msg, _, _, _, name, _, _, _, _, _, _, _, _, _, _, _, _ = arg1, ...
+            msg = lower(msg)
+            msg = trim(msg)
             local invite_cmds = GUI.invite_control['commands']
-            local lower_msg = strlower(msg)
-            if tContains(invite_cmds, lower_msg) then return Raid:InviteName(name) end
+            if contains(invite_cmds, msg) then return Raid:InviteName(name) end
         end,
     }
 
     if regular_events[event] then return regular_events[event](arg1, ...) end
-
 
     if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
     local raid_size = GetNumGroupMembers()
