@@ -246,13 +246,17 @@ function Raid:PromoteLeadership()
     if not Raid:IsRaidLead() then return end
     local raid_names = Raid.raid.members
 
-    for _, name in pairs(raid_names) do
-        local m = Guild:GetMemberByName(name)
+    for i=1, 40 do
+        local name, _, _, _, _, _, _, _, _, _, isML, _ = GetRaidRosterInfo(i);
+        if name ~= nil then -- The member actually exists in the raid
+            local m = Guild:GetMemberByName(name)
+            if m ~= nil then -- We have the member in the GuildDB
+                if m.isClassLeader or m.isOfficer or isML then
+                    PromoteToAssistant('raid' .. i)
+                end
+            end
+        end
     end
-
-
-    PDKP:Print("Promoting Leadership")
-
 end
 
 --- Debug funcs
