@@ -99,6 +99,7 @@ local function createBackdropFrame(name, parent, title)
     f.desc = content_desc
     f.border = border
     f.content = content
+    f.title = title_text;
     return f
 end
 
@@ -515,7 +516,7 @@ function Setup:Debugging()
 end
 
 function Setup:RandomStuff()
-    --Setup:ShroudingBox()
+    Setup:ShroudingBox()
     Setup:Debugging()
 
     Setup:ScrollTable()
@@ -1481,32 +1482,51 @@ function Setup:BossKillLoot()
 end
 
 function Setup:ShroudingBox()
-    local f = CreateFrame("Frame", "pdkp_shroud_frame", UIParent)
-    f:SetFrameStrata("HIGH")
+    local f = createBackdropFrame('pdkp_shroud_frame', UIParent, 'PDKP Shrouding')
     f:SetPoint("BOTTOMLEFT")
     f:SetHeight(200)
     f:SetWidth(200)
-
-    f:SetBackdrop( {
-        bgFile = TRANSPARENT_BACKGROUND,
-        edgeFile = SHROUD_BORDER, tile = true, tileSize = 64, edgeSize = 16,
-        insets = { left = 5, right = 5, top = 5, bottom = 5 }
-    });
-
     setMovable(f)
 
-    -- mini close button
-    local b = createCloseButton(f, true)
-    b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
+    local scroll = SimpleScrollFrame:new(f.content)
+    local scrollFrame = scroll.scrollFrame
+    local scrollContent = scrollFrame.content;
 
-    -- title
-    local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
-    t:SetPoint("TOPLEFT", 5, -10)
-    t:SetPoint("TOPRIGHT", -10, -30)
-    t:SetText("PDKP Shrouding")
-    t:SetParent(f)
+    local cb = createCloseButton(f, true)
+    cb:SetPoint("TOPRIGHT")
+
+
+    f:SetScript("OnHide", function()
+        print("Shroud box hiding!")
+    end)
+
+    f.scrollContent = scrollContent;
+    f.scroll = scroll;
+    f.scrollFrame = scrollFrame;
+
+    --
+    --setMovable(f)
+    --
+    ---- mini close button
+    --local b = createCloseButton(f, true)
+    --b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
+    --
+    ---- title
+    --local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    --t:SetPoint("TOPLEFT", 5, -10)
+    --t:SetPoint("TOPRIGHT", -10, -30)
+    --t:SetText("PDKP Shrouding")
+    --t:SetParent(f)
+
+    local shroud_events = {'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
+    for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
+    f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
 
     f:Show()
+
+
+
+    GUI.shroud_box = f;
 end
 
 function Setup:ScrollTable()

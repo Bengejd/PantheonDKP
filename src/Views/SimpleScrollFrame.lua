@@ -154,6 +154,17 @@ function SimpleScrollFrame:new(parent)
         table.insert(content.children, frame)
     end
 
+    sc.WipeChildren = function(content)
+        local childCount = #content.children;
+        for i=1, childCount do
+            local child = content.children[i]
+            child:Hide()
+            sc:SetHeight(sc:GetHeight() - child:GetHeight())
+            child = nil;
+        end
+        content.children = {} -- wipe the children.
+    end
+
     sc:SetScript("OnSizeChanged", function(_, value)
         sc:SetScript("OnUpdate", function()
             sc:SetScript("OnUpdate", nil)

@@ -91,6 +91,19 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
 
 end
 
+
+function Raid:RegisterEvents()
+    if Raid.events_frame ~= nil then
+        Util:Debug('Setting up raid events')
+        for _, eventName in pairs(raid_events) do Raid.events_frame:UnregisterEvent(eventName) end
+        Raid.events_frame = nil
+    end
+
+    Raid.events_frame = CreateFrame("Frame", nil, UIParent)
+    for _, eventName in pairs(raid_events) do Raid.events_frame:RegisterEvent(eventName) end
+    Raid.events_frame:SetScript("OnEvent", PDKP_Raid_OnEvent)
+end
+
 function Raid:InviteName(name)
     local ignore_from = GUI.invite_control['ignore_from']
     if contains(ignore_from, name) then
@@ -216,18 +229,6 @@ end
 function Raid:GetInstanceInfo()
     name, instance_type, difficultyIndex, difficultyName, maxPlayers,
     dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
-end
-
-function Raid:RegisterEvents()
-    if Raid.events_frame ~= nil then
-        Util:Debug('Setting up raid events')
-        for _, eventName in pairs(raid_events) do Raid.events_frame:UnregisterEvent(eventName) end
-        Raid.events_frame = nil
-    end
-
-    Raid.events_frame = CreateFrame("Frame", nil, UIParent)
-    for _, eventName in pairs(raid_events) do Raid.events_frame:RegisterEvent(eventName) end
-    Raid.events_frame:SetScript("OnEvent", PDKP_Raid_OnEvent)
 end
 
 function Raid:IsRaidLead()
