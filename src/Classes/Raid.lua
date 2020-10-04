@@ -7,6 +7,7 @@ local Settings = core.Settings;
 local Util = core.Util;
 local Char = core.Character;
 local GUI = core.GUI;
+local PDKP = core.PDKP;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
@@ -90,6 +91,11 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
 end
 
 function Raid:InviteName(name)
+    local ignore_from = GUI.invite_control['ignore_from']
+    if contains(ignore_from, name) then
+        return PDKP:Print("Invite request from " .. name .. " has been ignored")
+    end
+
     if Raid:InRaid() then
         if not (Raid.raid.leader == Char:GetMyName() or tContains(Raid.raid.assistants, Char:GetMyName())) then
             SendChatMessage("Whisper " .. Raid.raid.leader .. " for invite, I don\'t have assist", "WHISPER", nil, name)
@@ -222,6 +228,20 @@ function Raid:RegisterEvents()
     for _, eventName in pairs(raid_events) do Raid.events_frame:RegisterEvent(eventName) end
     Raid.events_frame:SetScript("OnEvent", PDKP_Raid_OnEvent)
 end
+
+function Raid:IsRaidLead()
+    if Raid.raid == nil or not Raid:InRaid() then return false end
+    return Char:GetMyName() == Raid.raid['leader']
+end
+
+function Raid:SetLootCommon()
+    if not Raid:InRaid() or not Raid:IsRaidLead() then return end -- Nothing to set if we're not in a raid and not the leader.
+    local ml = Raid.raid['MasterLooter'] or Char:GetMyName()
+    SetLootMethod("Master", ml, '1')
+    PDKP:Print("Loot threshold updated")
+end
+
+
 
 --- Debug funcs
 function Raid:TestBossKill()

@@ -101,6 +101,7 @@ function PDKP:InitializeDatabases()
                 ['current_version'] = "2.9.5",
                 ['minimapPos'] = 207,
                 ['debug'] = false,
+                ['ignore_from']={},
             },
         }
     end

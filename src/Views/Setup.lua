@@ -662,6 +662,23 @@ function Setup:RaidTools()
     promote_button:SetPoint("TOPLEFT")
     promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
 
+    --- Loot Threshold Group
+    local loot_threshold_group = createBackdropFrame(nil, scrollContent, 'AQ40 Loot Threshold')
+    loot_threshold_group:SetHeight(125)
+    scrollContent:AddChild(loot_threshold_group)
+
+    local loot_warning = Util:FormatFontTextColor('E71D36', 'Note:')
+    loot_threshold_group.desc:SetText("This will set the loot threshold to 'Common' for AQ40 keys. \n\n" .. loot_warning .. ' This action becomes undone if Loot Master is changed.')
+
+    local threshold_button = CreateFrame("Button", nil, loot_threshold_group.content, 'UIPanelButtonTemplate')
+    threshold_button:SetText("Set Loot Common")
+    threshold_button:SetScript("OnClick", function()
+        Raid:SetLootCommon()
+    end)
+    threshold_button:SetPoint("TOPLEFT")
+    threshold_button:SetSize(threshold_button:GetTextWidth() + 20, 30)
+
+
     --- Invite Control Group
     local inv_control_group = createBackdropFrame(nil, scrollContent, 'Invite Control')
     inv_control_group:SetHeight(360)
@@ -691,6 +708,7 @@ function Setup:RaidTools()
             ['disallow_invite']=function()
                 local text_arr = Util:SplitString(bt, ',')
                 GUI.invite_control['ignore_from']=text_arr
+                Settings:UpdateIgnoreFrom(text_arr)
             end,
             ['invite_commands']=function()
                 local text_arr = Util:SplitString(bt, ',')
@@ -724,7 +742,7 @@ function Setup:RaidTools()
     local disallow_opts = {
         ['name']='disallow_invite',
         ['parent']=inv_control_group.content,
-        ['title']='Ignore Auto Invite From',
+        ['title']='Ignore Invite Requests from',
         ['multi']=true,
         ['max_chars']=225,
         ['smallTitle']=true,
@@ -735,8 +753,20 @@ function Setup:RaidTools()
     local disallow_edit = createEditBox(disallow_opts)
     disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
     disallow_edit:SetPoint("TOPRIGHT", inv_edit_box.desc, "BOTTOMRIGHT", -10, 32)
-    disallow_edit:SetText("Eguita, Mashay, Ihurricanel, Xorms")
-    disallow_edit.desc:SetText("This will prevent the following members from abusing the automatic raid invite feature.")
+
+    local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
+    if #ignore_from >= 1 then
+        local names = {unpack(ignore_from)}
+        local ignore_text = ''
+        for k, n in pairs(names) do
+            if k == #names then ignore_text = ignore_text .. n else ignore_text = ignore_text .. n .. ', ' end
+        end
+
+        disallow_edit:SetText(ignore_text)
+
+    end
+
+    disallow_edit.desc:SetText("This will prevent the above members from abusing the automatic raid invite feature.")
 
     disallow_edit.start_height = disallow_edit:GetHeight() -- Set our starting height for resize purposes.
 
