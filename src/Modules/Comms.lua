@@ -27,6 +27,9 @@ Comms.commsRegistered = false
 
 --[[ MESSAGE TYPES: "PARTY", "RAID", "GUILD", "OFFICER", "BATTLEGROUND", "WHISPER" ]]
 
+--- De-register comms via list instead of having them all listened to all the time.
+--- Just ignore the messaage instead of letting it go through?
+
 local OFFICER_COMMS = {
     ['pdkpSyncReq'] = true,
 }
@@ -50,6 +53,12 @@ function Comms:DataEncoder(data)
     local compressed = core.LibDeflate:CompressDeflate(serialized)
     local encoded = core.LibDeflate:EncodeForWoWAddonChannel(compressed)
     return encoded, compressed, serialized;
+end
+
+function Comms:Init()
+    Util:Debug("Comms Init")
+
+    --Comms:RegisterCommCommands()
 end
 
 ---------------------------
@@ -177,6 +186,7 @@ function Comms:ToggleRaidInviteSpam()
         PDKP:Print("Raid Invite Spam Count: " .. tostring(GUI.invite_control['counter']))
         sendMsg()
         if  GUI.invite_control['counter'] >= 10 then Comms:ToggleRaidInviteSpam() end
+        if Raid:GetRaidSize() == 40 then Comms:ToggleRaidInviteSpam() end
     end
 
     sendMsg()

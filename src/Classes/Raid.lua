@@ -73,6 +73,10 @@ function Raid:GetClassNames(class)
     return raid_roster['classes'][class]
 end
 
+function Raid:GetRaidSize()
+    return GetNumGroupMembers()
+end
+
 function Raid:InRaid()
     return UnitInRaid("player") ~= nil
 end

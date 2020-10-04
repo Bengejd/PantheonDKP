@@ -23,8 +23,6 @@ local Settings = core.Settings;
 
 core.firstLogin = nil;
 
--- TODO: Fix Guild members not loading on the initial login.
-
 local function PDKP_OnEvent(self, event, arg1, ...)
 
     local arg2 = ...
@@ -35,8 +33,9 @@ local function PDKP_OnEvent(self, event, arg1, ...)
                 PDKP_UnregisterEvent(events, event);
                 Guild:new();
                 GUI:Init();
-                Raid:new()
-                GUI:UpdateEasyStats()
+                Raid:new();
+                GUI:UpdateEasyStats();
+                Comms:Init();
             else
                 GuildRoster();
             end

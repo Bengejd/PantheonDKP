@@ -771,9 +771,6 @@ function Setup:RaidTools()
         Comms:ToggleRaidInviteSpam()
 
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-        -- TODO: Hook up this functionality.
-        -- TODO: Stop spamming after 15 minutes.
-        -- TODO: Stop spamming if group is full.
     end)
     spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
     spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
