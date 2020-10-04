@@ -1,3 +1,10 @@
+REWORK:
+ TODO: Finish Shrouding Box
+ TODO: Setup Comms messages
+ TODO: Setup Minimap button
+ TODO: Setup Interface Options
+ 
+
 ESSENTIALS:
     TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
     TODO: Settings menu when mini-map is right-clicked.
