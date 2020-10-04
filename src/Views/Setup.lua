@@ -768,7 +768,7 @@ function Setup:RaidTools()
         if running then b_text = 'Stop Raid Inv Spam' else b_text = 'Start Raid Inv Spam' end
         spam_button:SetText(b_text)
 
-        Comms:ToggleRaidInviteSpam()
+        GUI:ToggleRaidInviteSpam()
 
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
     end)
@@ -802,7 +802,10 @@ function Setup:RaidTools()
     GUI.raid_frame = f
     GUI.invite_control['spamButton']=spam_button
 
+    --- This is to ensure that the commands get registered initially.
     FriendsFrameTab4:Click()
+    FriendsFrame:Show()
+    FriendsFrame:Hide()
     pdkp_frame:Hide()
 end
 

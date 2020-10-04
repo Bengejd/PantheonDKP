@@ -5,6 +5,7 @@ local L = core.L;
 local Defaults = core.Defaults;
 local Settings = core.Settings;
 local Util = core.Util;
+local Char = core.Character;
 local GUI = core.GUI;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
@@ -12,6 +13,8 @@ local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceI
 local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
 local LoggingCombat, SendChatMessage = LoggingCombat, SendChatMessage
 local StaticPopupDialogs, StaticPopup_Show = StaticPopupDialogs, StaticPopup_Show
+local InviteUnit, ConvertToRaid = InviteUnit, ConvertToRaid;
+
 local tostring, print, setmetatable, pairs = tostring, print, setmetatable, pairs
 local canEdit, bossIDS = core.canEdit, core.bossIDS;
 
@@ -24,7 +27,7 @@ Raid.recent_boss_kill = {};
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE'}
+local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER'}
 
 function Raid:new()
     local self = {};
@@ -37,6 +40,8 @@ function Raid:new()
     self.MasterLooter = nil;
     self.dkpOfficer = nil;
     self.members = {};
+    self.assistants = {};
+    self.leader = {};
 
     self:RegisterEvents();
     self:Init()
@@ -49,10 +54,25 @@ function Raid:Init()
     self.members = raid_info['names']
     self.classes = raid_info['classes']
     self.MasterLooter = raid_info['ML']
+    self.assistants = raid_info['assist']
+    self.leader = raid_info['leader']
     GUI:UpdateRaidClassGroups()
 end
 
 function PDKP_Raid_OnEvent(self, event, arg1, ...)
+
+    local regular_events = {
+        ['CHAT_MSG_WHISPER']=function(arg1, ...)
+            local msg, _, _, _, name, _, _, _, _, _, _, guid, _, _, _, _, _ = arg1, ...
+            local invite_cmds = GUI.invite_control['commands']
+            local lower_msg = strlower(msg)
+            if tContains(invite_cmds, lower_msg) then return Raid:InviteName(name) end
+        end,
+    }
+
+    if regular_events[event] then return regular_events[event](arg1, ...) end
+
+
     if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
     local raid_size = GetNumGroupMembers()
 
@@ -65,6 +85,18 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
 
     if raid_group_events[event] then raid_group_events[event]() end
 
+end
+
+function Raid:InviteName(name)
+    if Raid:InRaid() then
+        if not (Raid.raid.leader == Char:GetMyName() or tContains(Raid.raid.assistants, Char:GetMyName())) then
+            SendChatMessage("Whisper " .. Raid.raid.leader .. " for invite, I don\'t have assist", "WHISPER", nil, name)
+            return
+        end
+    else
+        ConvertToRaid()
+    end
+    InviteUnit(name)
 end
 
 function Raid:GetClassNames(class)
@@ -94,6 +126,8 @@ function Raid:GetRaidInfo()
         ['ML']=nil,
         ['dkpOfficer']=nil,
         ['dead']={},
+        ['assist']= {},
+        ['leader']='',
     }
 
     for key, class in pairs(Defaults.classes) do raidRoster['classes'][class] = {} end
@@ -110,8 +144,10 @@ function Raid:GetRaidInfo()
                 table.insert(raidRoster['classes'][class], name)
             end
 
-            if isMl then raidRoster['ML']=name end
+            if isML then raidRoster['ML']=name end
             if isDead then table.insert(raidRoster['dead'], name) end
+            if rank == 2 then raidRoster['leader'] = name end
+            if rank == 1 then table.insert(raidRoster['assist'], name) end
         end
     end
     return raidRoster
