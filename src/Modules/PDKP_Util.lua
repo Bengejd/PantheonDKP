@@ -203,6 +203,18 @@ function Util:SplitString(string, delim)
     return arr
 end
 
+function Util:RemoveColorFromname(name)
+    local fixedName = name
+    for _, val in pairs(class_colors) do
+        fixedName = fixedName:gsub('|cff' .. val, '')
+    end
+    local fName = fixedName:sub(1, -3)
+    fName = fName:gsub("%s+", "")
+    fName = string.gsub(fName, "%s+", "")
+
+    return fName
+end
+
 -----------------------------
 --      Class Functions    --
 -----------------------------

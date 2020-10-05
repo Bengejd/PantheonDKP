@@ -115,6 +115,20 @@ function PDKP:InitializeDatabases()
     core.PDKP.officersDB = db.officersDB -- or {};
     core.PDKP.settingsDB = db.settingsDB -- or {};
 
+    local oldGuildDBDefaults = {
+        profile = {
+            name = nil,
+            numOfMembers = 0,
+            members = {},
+            officers = {},
+            migrated = false,
+        }
+    }
+
+    local old_guild_db = LibStub("AceDB-3.0"):New("pdkp_guildDB", oldGuildDBDefaults, true)
+    old_guild_db = old_guild_db.profile
+    core.PDKP.old_guild_db = old_guild_db
+
     core.PDKP.dkpDB = db.dkpDB;
 
     Settings:InitDB()

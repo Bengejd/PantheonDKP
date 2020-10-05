@@ -484,7 +484,11 @@ function Setup:Debugging()
         end,
         ['memory']=function()
             Util:ReportMemory()
-        end
+        end,
+        ['merge_guild_old']=function()
+            Guild:MergeOldData()
+            Util:Debug('Finished Merging old data')
+        end,
     }
     local button_counter_x = 1
     local button_counter_y = 1

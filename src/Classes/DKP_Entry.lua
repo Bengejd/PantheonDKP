@@ -29,6 +29,7 @@ function DKP_Entry:New(entry_details)
     self.id = entry_details['id'] or GetServerTime()
     self.other_text = entry_details['other'] or ''
     self.names = entry_details['names']
+    self.old_entry = entry_details['serverTime'] ~= nil
     self.previousTotals = entry_details['previousTotals'] or self:GetPreviousTotals()
     self.formattedNames = self:GetFormattedNames()
     self.change_text = self:GetChangeText()
@@ -67,11 +68,29 @@ function DKP_Entry:Save()
 end
 
 function DKP_Entry:GetFormattedOfficer()
+    -- Old entries have officer names formatted already.
+    if string.match(self.officer, 'cff') then self.officer = Util:RemoveColorFromname(self.officer) end
+
     local officer = Guild:GetMemberByName(self.officer)
     return officer.formattedName
 end
 
 function DKP_Entry:GetFormattedNames()
+
+    --- Old entries have names formatted differently.
+    if self.old_entry then
+        if type(self.names) == type({}) then
+            for key, name in pairs(self.names) do
+                if string.match(name, 'cff') then self.names[key] = Util:RemoveColorFromname(name) end
+            end
+        elseif type(self.names) == type(" ") then
+            local name = self.names
+            self.names = {}
+            if string.match(name, 'cff') then name = Util:RemoveColorFromname(name) end
+            table.insert(self.names, name)
+        end
+    end
+
     local formattedNames = ''
 
     local function compare(a,b)

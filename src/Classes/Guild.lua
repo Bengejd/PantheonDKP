@@ -149,6 +149,23 @@ local function Guild_OnEvent(self, event, arg1, ...)
 
 end
 
+--- Merging Functions
+function Guild:MergeOldData()
+    local old_db = core.PDKP.old_guild_db
+    local old_members =  old_db['members']
+    local raids = Defaults.dkp_raids
+
+    for name, old_mem in pairs(old_members) do
+        local new_mem = Guild:GetMemberByName(name)
+        if new_mem ~= nil then
+            for key, raid in pairs(raids) do
+                local dkp = old_mem['dkp'][raid]
+                new_mem:UpdateDKPTest(raid, dkp['total'])
+            end
+        end
+    end
+end
+
 --local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");
 --local eventNames = { 'GUILD_ROSTER_UPDATE', 'PLAYER_ENTERING_WORLD', 'CHAT_MSG_GUILD' }
 --for _, event in pairs(eventNames) do

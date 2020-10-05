@@ -80,11 +80,6 @@ function Member:InitRaidDKP(raid)
         entries = {},
         deleted = {}
     }
-
-    if raid == 'Molten Core' and self.dkp['Molten Core'].total == 0 then
-        Util:Debug('Defaulting Molten Core DKP '.. self.name)
-        self.dkp['Molten Core'].total = self.guildIndex;
-    end
 end
 
 function Member:GetDKP(raidName, variableName)
@@ -142,6 +137,13 @@ end
 function Member:Save()
     for _, raid in pairs(Defaults.dkp_raids) do
         local dkp = self.dkp[raid]
+
+        if dkp == nil or (dkp.total == nil) or (dkp.entries) == nil or (dkp.deleted) == nil or (dkp.previousTotal == nil) then
+            self:InitRaidDKP(raid)
+        end
+
+        dkp = self.dkp[raid]
+
         if dkp.total > 0 or #dkp.entries > 0 or dkp.previousTotal > 0 or #dkp.deleted > 0 then
             memberDB[self.name] = memberDB[self.name] or {}
             memberDB[self.name][raid] = dkp
@@ -157,7 +159,12 @@ function Member:UpdateDKPTest(raid, newTotal)
 
     for key, val in pairs({'entries', 'deleted'}) do
         self.dkp[raid][val] = {}
-        memberDB[self.name][raid][val] = {}
+        if self.dkp[raid] ~= nil and memberDB[self.name][raid] ~= nil and memberDB[self.name][raid][val] ~= nil then
+            memberDB[self.name][raid][val] = {}
+        else
+            memberDB[self.name][raid] = {}
+            memberDB[self.name][raid][val] = {}
+        end
     end
 
     self:Save()

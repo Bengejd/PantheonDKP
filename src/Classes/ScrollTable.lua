@@ -243,7 +243,6 @@ function ScrollTable:UpdateLabelTotals()
     PDKP_ToggleAdjustmentDropdown()
 
     if GUI.history_frame ~= nil and GUI.history_frame:IsVisible() and notify_history then
-        print('Notifying History')
         GUI.history_table:HistoryUpdated(true)
     end
 end
