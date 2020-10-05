@@ -20,6 +20,8 @@ function PDKP_Shroud_OnEvent(self, event, arg1, ...)
     if not Raid:InRaid() then return end
     -- If not DKP Officer or Master Looter, ignore event.
 
+    -- TODO: Hookup DKP Officer and send out the list in comms.
+
     local msg, _, _, _, name, _, _, _, _, _, _, _, _, _, _, _, _ = arg1, ...
     msg = lower(trim(msg))
 
@@ -39,21 +41,44 @@ function PDKP_Shroud_OnEvent(self, event, arg1, ...)
     scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
     local shroud_keys = {}; -- Member names in a list we can sort.
-    for _, key in pairs(Shroud.shrouders) do table.insert(shroud_keys,key) end
+    for key, val in pairs(Shroud.shrouders) do table.insert(shroud_keys,key) end
 
     local compare = function(a, b)
         local a_mem, b_mem = Shroud.shrouders[a], Shroud.shrouders[b]
-        return a_mem[Settings.current_raid] < b_mem[Settings.current_raid]
+        return a_mem[Settings.current_raid] > b_mem[Settings.current_raid]
     end
     table.sort(shroud_keys, compare)
 
+    local createShroudStringFrame = function()
+        local f = CreateFrame("Frame", nil, scrollContent, nil)
+        f:SetSize(scrollContent:GetWidth(), 18)
+        f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
+        f.total = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
+        f.name:SetHeight(18)
+        f.total:SetHeight(18)
+        f.name:SetPoint("LEFT")
+        f.total:SetPoint("RIGHT")
+        return f
+    end
+
     for i=1, #shroud_keys do
+        if i == 1 then
+            local winner_frame = createShroudStringFrame()
+            winner_frame.name:SetText("[WINNER]")
+            scrollContent:AddChild(winner_frame)
+        end
+        if i == 2 then
+            local losers_frame = createShroudStringFrame()
+            losers_frame.name:SetText("[SHROUDERS]")
+            scrollContent:AddChild(losers_frame)
+        end
+
         local shroud_name = shroud_keys[i]
         local shrouder = Shroud.shrouders[shroud_name]
-        local shroud_string = scrollContent:CreateFontString(scrollContent, 'OVERLAY', 'GameFontHighlightLeft')
-        shroud_string:SetHeight(18)
-        shroud_string:SetText(shrouder[Settings.current_raid] .. ' | ' .. name)
-        scrollContent:AddChildd(shroud_string)
+        local shroud_frame = createShroudStringFrame()
+        shroud_frame.name:SetText(name)
+        shroud_frame.total:SetText(shrouder[Settings.current_raid])
+        scrollContent:AddChild(shroud_frame)
     end
 
     local raid_text = Settings.current_raid .. ' Shrouds'

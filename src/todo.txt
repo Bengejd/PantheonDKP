@@ -7,6 +7,7 @@ REWORK:
     TODO: Printing Options
     TODO: Syncing Options
     TODO: General Options
+TODO: Fix bug with In-Raid Filter not showing raid members in your raid.
 
  TODO: Setup DKP Officer popup.
 
