@@ -1513,38 +1513,14 @@ function Setup:InterfaceOptions()
     --normal - use the default widget width defined for the implementation (useful to overwrite widgets that default to "full")
     --any number - multiplier of the default width, ie. 0.5 equals "half", 2.0 equals "double"
 
-    local function createSettingsGroup(title, desc)
-        local group = {
-            name=title or '',
-            type="group",
-            desc=desc or '',
-            inline=true,
-            args = {}
+    if Settings.db['sync'] == nil then
+        Settings.db['sync'] = {
+            ['pvp']=true,
+            ['raids']=true,
+            ['dungeons']=true
         }
-
-        group.genSetting = function(name, desc, dbSetting, setValFunc, getValFunc)
-            local setting = {
-                name=name or "",
-                type = "toggle",
-                desc = desc or "",
-                set = setValFunc or function(info, val) dbSetting = val end,
-                get = getValFunc or function(info, val) return dbSetting end,
-            }
-            return setting
-        end
-
-        group.genGroup = createSettingsGroup
-
-        return group;
     end
 
-    local options = {
-        type = "group",
-        args = {}
-    }
-
-    local notifGroup = createSettingsGroup("1. Notifications")
-    notifGroup:genSetting('Enabled', '')
 
     local options = {
         type = "group",
@@ -1559,7 +1535,7 @@ function Setup:InterfaceOptions()
                         type = "toggle",
                         desc="Enables / Disables all messages from the addon. Requires a reload when re-enabling",
                         set = function(info,val) Defaults:TogglePrinting(not val) end,
-                        get = function(info) return not Defaults.SettingsDB.silent end
+                        get = function(info) return not Settings.db.silent end
                     },
                 }
             },
@@ -1574,22 +1550,22 @@ function Setup:InterfaceOptions()
                         name = "Battlegrounds",
                         desc = "Enable / Disable sync while in Battlegrounds",
                         type = "toggle",
-                        set = function(info,val) Defaults.SettingsDB.sync.pvp = val end,
-                        get = function(info) return Defaults.SettingsDB.sync.pvp end
+                        set = function(info,val) Settings.db.sync.pvp = val end,
+                        get = function(info) return Settings.db.sync.pvp end
                     },
                     syncInRaid = {
                         name = "Raids",
                         desc = "Enable / Disable sync while in Raid Instances",
                         type = "toggle",
-                        set = function(info,val) Defaults.SettingsDB.sync.raids = val end,
-                        get = function(info) return Defaults.SettingsDB.sync.raids end
+                        set = function(info,val) Settings.db.sync.raids = val end,
+                        get = function(info) return Settings.db.sync.raids end
                     },
                     syncInDungeons = {
                         name = "Dungeons",
                         desc = "Enable / Disable sync while in Dungeon Instances",
                         type = "toggle",
-                        set = function(info,val) Defaults.SettingsDB.sync.dungeons = val end,
-                        get = function(info) return Defaults.SettingsDB.sync.dungeons end
+                        set = function(info,val) Settings.db.sync.dungeons = val end,
+                        get = function(info) return Settings.db.sync.dungeons end
                     },
                     syncDesc = {
                         name="These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.",
@@ -1613,7 +1589,7 @@ function Setup:InterfaceOptions()
                     type = "toggle",
                     desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
                     set = function(info,val) Defaults:ToggleDebugging() end,
-                    get = function(info) return Defaults.SettingsDB.debug end
+                    get = function(info) return Settings.db.debug end
                 },
             }
         }
@@ -1621,8 +1597,6 @@ function Setup:InterfaceOptions()
 
     LibStub('AceConfigRegistry-3.0'):RegisterOptionsTable("PantheonDKP", options)
     AceConfigDialog:AddToBlizOptions('PantheonDKP')
-
-    Defaults.settings_complete = true
 end
 
 function Setup:ShroudingBox()
