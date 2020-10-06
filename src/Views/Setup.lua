@@ -470,14 +470,6 @@ function Setup:Debugging()
         ['reset DKP']=function()
             DKP:ResetDKP()
         end,
-        ['compressString']=function()
-            local testTime = 1600749114
-            local encoded_time, compressed_time, serialized_time = Comms:DataEncoder(testTime)
-            print(testTime)
-            print(encoded_time)
-            print(compressed_time)
-            print(serialized_time)
-        end,
         ['boss kill']=function()
             local boss_info = Raid:TestBossKill()
             print(boss_info['name'], boss_info['id'], boss_info['raid'])
@@ -486,10 +478,24 @@ function Setup:Debugging()
             Util:ReportMemory()
         end,
         ['merge_guild_old']=function()
-            Util:Debug("Merging Old Guild Total")
             Guild:MergeOldData()
-            Util:Debug("Merging Old Guild Entries")
+        end,
+        ['Overwrite Push']=function()
+            print('Preparing Full Overwrite Push')
+            local members = Guild.members
+            local data = {
+                ['history']=DKP.history,
+                ['dkp']={},
+            }
+            for name, member in pairs(members) do
+                local member_data = member:PreparePushData()
+                if not tEmpty(member_data) then
+                    data['dkp'][name]=member_data
+                end
+            end
+            PDKP:Print("Starting Full Overwrite Push")
 
+            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'ALERT', PDKP_CommsCallback)
         end,
     }
     local button_counter_x = 1
@@ -534,9 +540,41 @@ function Setup:RandomStuff()
     Setup:DKPHistory()
     Setup:RaidTools()
     Setup:InterfaceOptions()
+    Setup:PushProgressBar()
     local scroll_frame = Setup:HistoryTable()
+end
 
-    -- TODO: Use Interface\Buttons\UI-TotemBar and texCoords for the expand / collapse buttons.
+function Setup:PushProgressBar()
+    local pb
+    if GUI.pushbar == nil then
+        pb = CreateFrame("StatusBar", 'pdkp_pushbar', UIParent)
+        setMovable(pb)
+        pb:SetFrameStrata("HIGH")
+        pb:SetPoint("TOP")
+        pb:SetWidth(300)
+        pb:SetHeight(20)
+        pb:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
+        pb:GetStatusBarTexture():SetHorizTile(true)
+        pb:GetStatusBarTexture():SetVertTile(false)
+        pb:SetStatusBarColor(0, 0.65, 0)
+        pb.bg = pb:CreateTexture(nil, "BACKGROUND")
+        pb.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-TargetingFrame-BarFill")
+        pb.bg:SetAllPoints(true)
+        pb.bg:SetVertexColor(0, 0.35, 0)
+
+        pb.value = pb:CreateFontString(nil, "OVERLAY")
+        pb.value:SetPoint("CENTER")
+        pb.value:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+        pb.value:SetJustifyH("LEFT")
+        pb.value:SetShadowOffset(1, -1)
+        pb.value:SetTextColor(0, 1, 0)
+        GUI.pushbar = pb;
+    end
+    if pb == nil then pb = GUI.pushbar end
+    pb.value:SetText("0%")
+    pb.isLocked = false;
+    pb:SetMinMaxValues(0, 100)
+    pb:Hide()
 end
 
 function Setup:RaidTools()
@@ -1646,7 +1684,7 @@ function Setup:ShroudingBox()
     for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
     f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
 
-    f:Show()
+    f:Hide()
 
 
 

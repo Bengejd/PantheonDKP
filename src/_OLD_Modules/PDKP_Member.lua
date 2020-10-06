@@ -131,6 +131,7 @@ function Member:CanEdit()
     return self.canEdit;
 end
 
+
 function Member:Save()
     if self.lvl == nil then return end;
     if (self.lvl < 55 and not self.canEdit) then return end

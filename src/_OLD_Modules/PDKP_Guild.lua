@@ -241,3 +241,7 @@ function Guild:UpdateBankNote(lastEdit, lastSync)
     lastSync = lastSync or DKP.lastSync
     GuildRosterSetOfficerNote(Guild.bankIndex, Guild:FormatNewBankNote(lastEdit, lastSync))
 end
+
+function Guild:PreparePushData()
+
+end

@@ -708,36 +708,32 @@ end
 ---------------------------
 -- TIMER Functions    --
 ---------------------------
-function UpdatePushBar(arg, sent, total)
+function UpdatePushBar(percent, elapsed)
     if GUI.pushbar == nil then
         Setup:PushTimer()
     end
-    GUI.pushbar:Show()
-    local percentage = math.floor((sent / total) * 100)
 
-    local statusText = 'PDKP Push Progress: '
+    local remaining = 100 - percent
+    local pps = percent / elapsed -- Percent per second
+    local eta = remaining * pps
+
+    local statusText = 'PDKP Push Progres: ' .. percent .. '%' .. ' ETA: ' .. eta
+
+    GUI.pushbar:Show()
+
     local statusbar = GUI.pushbar
     local currVal = statusbar:GetValue()
 
-    if Defaults:IsDebug() then
-        if currVal ~= percentage then
-            local _, _, server_time, _ = Util:GetDateTimes()
-            Util:Debug('Time elapsed: ' .. Util:CalculateTimeDifference(DKP.lastSync, server_time))
-        end
-    end
-
     if currVal == nil then currVal = 0 end
     if currVal < percentage and percentage <= 100 then
-        statusbar.value:SetText(statusText .. percentage .. '%');
-        statusbar:SetValue(percentage)
+        statusbar.value:SetText(statusText);
+        statusbar:SetValue(percent)
     end
 
     if percentage >= 100 then
         statusbar:Hide();
         PDKP:CancelTimer(GUI.pushbar)
-        percentage = 0
-        statusbar.value:SetText(statusText .. percentage .. '%');
-        statusbar:SetValue(percentage)
+        statusbar:SetValue(0)
     end
 end
 

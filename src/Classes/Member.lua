@@ -127,6 +127,19 @@ function Member:NewEntry(entry)
     self:Save()
 end
 
+function Member:PreparePushData()
+    local pushData = {}
+    for _, raid in pairs(Defaults.dkp_raids) do
+        pushData[raid] = {}
+        local raid_dkp = self.dkp[raid]
+        if raid_dkp['total'] ~= nil and raid_dkp['total'] > 0 then
+            pushData[raid] = raid_dkp
+        end
+    end
+    return pushData
+end
+
+
 function Member:UpdateDKP(raid, entry)
     raid = raid or Raid:GetCurrentRaid()
     --entry = entry or {};

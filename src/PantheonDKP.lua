@@ -37,6 +37,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
                 GUI:UpdateEasyStats();
                 Comms:Init();
                 Minimap:Init()
+                Comms:RegisterCommCommands()
             else
                 GuildRoster();
             end

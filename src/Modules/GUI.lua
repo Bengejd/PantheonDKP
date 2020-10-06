@@ -196,6 +196,44 @@ function GUI:ToggleRaidInviteSpam()
     GUI.invite_control['timer'] = PDKP:ScheduleRepeatingTimer(timerFeedback, interval) -- Posts it every 90 seconds for 15 mins.
 end
 
+function UpdatePushBar(percent, elapsed)
+    if GUI.pushbar == nil then
+        Setup:PushTimer()
+    end
+
+    local remaining = 100 - percent
+    local pps = percent / elapsed -- Percent per second
+    local eta = (elapsed / percent) * remaining
+    eta = math.floor(eta)
+
+    hours = string.format("%02.f", math.floor(eta/3600));
+    mins = string.format("%02.f", math.floor(eta/60 - (hours*60)));
+    secs = string.format("%02.f", math.floor(eta - hours*3600 - mins *60));
+
+    print('percent: ', percent, 'elapsed:', elapsed, 'hours', hours, 'mins', mins, 'secs', secs)
+
+    local etatext = mins .. ':' .. secs
+
+    local statusText = 'PDKP Push: ' .. percent .. '%' .. ' ETA: ' .. etatext
+
+    GUI.pushbar:Show()
+
+    local statusbar = GUI.pushbar
+    local currVal = statusbar:GetValue()
+
+    if currVal == nil then currVal = 0 end
+    if currVal < percent and percent <= 100 then
+        statusbar.value:SetText(statusText);
+        statusbar:SetValue(percent)
+    end
+
+    if percent >= 100 then
+        statusbar:Hide();
+        PDKP:CancelTimer(GUI.pushbar)
+        statusbar:SetValue(0)
+    end
+end
+
 
 ---------------------------
 ---  GLOBAL POP UPS     ---
