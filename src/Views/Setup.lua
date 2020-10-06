@@ -397,18 +397,6 @@ function Setup:MainUI()
     addon_version:SetText(Util:FormatFontTextColor(adoon_version_hex, "v" .. Settings:GetAddonVersion()))
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
-    local easy_stats = f:CreateTexture('pdkp_easy_stats', 'OVERLAY')
-    easy_stats:SetTexture(CHAR_INFO_TEXTURE)
-    easy_stats:SetSize(240, 72)
-    easy_stats:SetPoint("TOPLEFT", f, "TOPLEFT", 65, -25)
-    easy_stats:SetTexCoord(0, 1, 1, 0)
-
-    local easy_stats_text = f:CreateFontString(f, "OVERLAY", "GameFontNormalLeftYellow")
-    easy_stats_text:SetSize(175, 20)
-    easy_stats_text:SetPoint("LEFT", easy_stats, "LEFT", 35, 0)
-
-    f.easy_stats = easy_stats
-    f.easy_stats.text = easy_stats_text
     f.addon_title = addon_title
     f.addon_version = addon_version
 
@@ -493,7 +481,7 @@ function Setup:Debugging()
                     data['dkp'][name]=member_data
                 end
             end
-            PDKP:Print("Starting Full Overwrite Push")
+            print("Starting Full Overwrite Push")
 
             Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
         end,
@@ -502,7 +490,7 @@ function Setup:Debugging()
             local data = {
                 ['history']=DKP.history,
             }
-            PDKP:Print("Starting Merge Push")
+            print("Starting Merge Push")
 
             Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
         end,
@@ -536,11 +524,39 @@ function Setup:Debugging()
     if not Settings:IsDebug() then f:Hide() end
 end
 
+function Setup:EasyStats()
+    local f = pdkp_frame
+    local table_frame = GUI.memberTable.frame
+    local easy_stats_frame = CreateFrame("Frame", 'pdkp_easy_stats', f)
+    easy_stats_frame:SetPoint("BOTTOM", table_frame, "TOP", 0, -2)
+    easy_stats_frame:SetPoint("CENTER", table_frame, "CENTER", -40, 0)
+    easy_stats_frame:SetSize(240, 25)
+
+
+    local easy_stats = easy_stats_frame:CreateTexture('pdkp_easy_stats_border', 'OVERLAY')
+    easy_stats:SetTexture(CHAR_INFO_TEXTURE)
+    easy_stats:SetSize(240, 72)
+    easy_stats:SetPoint("CENTER")
+    easy_stats:SetTexCoord(0, 1, 1, 0)
+
+    local easy_stats_text = easy_stats_frame:CreateFontString(easy_stats_frame, "OVERLAY", "GameFontNormalLeftYellow")
+    easy_stats_text:SetPoint("CENTER")
+    easy_stats_text:SetHeight(20)
+
+    f.easy_stats = easy_stats
+    f.easy_stats.text = easy_stats_text
+end
+
+function Setup:HistoryButton()
+
+end
+
 function Setup:RandomStuff()
     Setup:ShroudingBox()
     Setup:Debugging()
 
     Setup:ScrollTable()
+    Setup:EasyStats()
     Setup:Filters()
     Setup:DKPAdjustments()
     Setup:RaidDropdown()
@@ -550,7 +566,7 @@ function Setup:RandomStuff()
     Setup:RaidTools()
     Setup:InterfaceOptions()
     Setup:PushProgressBar()
-    local scroll_frame = Setup:HistoryTable()
+    Setup:HistoryTable()
 end
 
 function Setup:PushProgressBar()
@@ -772,7 +788,7 @@ function Setup:RaidTools()
 
         if box_funcs[box_id] then box_funcs[box_id]()
         else
-            Util:Debug("GUI.Invite_Control box func " .. box_id .. ' was not found!')
+            Util:Debug("GUI.Invite_Control box func", box_id, 'was not found!')
         end
     end
 
@@ -1314,21 +1330,63 @@ function Setup:DKPHistory()
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,35)
 
-    local history_button = CreateFrame("Button", "$parent_history_button", pdkp_frame, 'UIPanelButtonTemplate')
-    history_button:SetSize(80, 30)
-    history_button:SetPoint("CENTER", pdkp_frame, "TOP", 0, -50)
-    history_button:SetScript("OnClick", function()
-        if GUI.history_frame:IsVisible() then
-            GUI.history_frame:Hide()
-            GUI.filter_frame:Show()
-            GUI.adjustment_frame:Show()
-        else
-            GUI.history_frame:Show()
-            GUI.filter_frame:Hide()
-            GUI.adjustment_frame:Hide()
-        end
-    end)
-    history_button:SetText("History")
+    local filter_frame = _G['pdkp_frameFilterFrame']
+
+    local buttons = {
+        ['view_history_button']={
+            ['parent']=filter_frame,
+            ['shows']={f},
+            ['hides']={GUI.filter_frame, GUI.adjustment_frame},
+            ['text']='Open History'
+        },
+        ['view_filters_button']={
+          ['parent']=f,
+          ['shows']={GUI.filter_frame, GUI.adjustment_frame},
+          ['hides']={f},
+          ['text']='Close History'
+        },
+    }
+
+    for name, btn in pairs(buttons) do
+        local b = CreateFrame("Button", "$parent_" .. name, btn['parent'])
+        b:SetSize(120, 30)
+        b.hides = btn['hides']
+        b.shows = btn['shows']
+        b:SetPoint("BOTTOMLEFT", btn['parent'], "TOPLEFT", 0, 0)
+        b:SetNormalTexture("Interface\\CHATFRAME\\ChatFrameTab")
+        b:SetScript("OnClick", function()
+            for _, frame in pairs(b.hides) do frame:Hide() end
+            for _, frame in pairs(b.shows) do frame:Show() end
+        end)
+
+        local b_text = b:CreateFontString(b, 'OVERLAY', 'GameFontNormalLeft')
+        b_text:SetPoint("CENTER", 0, -5)
+        b_text:SetText(btn['text'])
+    end
+
+    --local history_button = CreateFrame("Button", "$parent_history_button", f)
+    --history_button:SetSize(120, 30)
+    --history_button:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 0, 0)
+    --history_button:SetNormalTexture("Interface\\CHATFRAME\\ChatFrameTab")
+    --
+    --
+    --local normal_button = CreateFrame("Button", "$parent_normal_view", filter_frame)
+    --
+    ----local history_button = CreateFrame("Button", "$parent_history_button", pdkp_frame, 'UIPanelButtonTemplate')
+    ----history_button:SetSize(80, 30)
+    ----history_button:SetPoint("CENTER", pdkp_frame, "TOP", 0, -50)
+    --history_button:SetScript("OnClick", function()
+    --    if GUI.history_frame:IsVisible() then
+    --        GUI.history_frame:Hide()
+    --        GUI.filter_frame:Show()
+    --        GUI.adjustment_frame:Show()
+    --    else
+    --        GUI.history_frame:Show()
+    --        GUI.filter_frame:Hide()
+    --        GUI.adjustment_frame:Hide()
+    --    end
+    --end)
+    --history_button:SetText("History")
 
     f:Hide()
 
@@ -1337,13 +1395,14 @@ function Setup:DKPHistory()
     local ob = CreateFrame("Button", "$parent_options", f, "UIPanelButtonTemplate")
     ob:SetSize(80, 22) -- width, height
     ob:SetText("Options")
+    ob:Disable()
     ob:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
     ob:SetScript("OnClick", function()
         print('Opening History Options')
         -- TODO: Hookup the options button frame.
     end)
 
-    history_button:Click()
+    --history_button:Click()
 end
 
 function Setup:RaidDropdown()

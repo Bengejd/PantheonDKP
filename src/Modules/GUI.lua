@@ -92,24 +92,23 @@ function GUI:UpdateEasyStats()
     local char_name = Character:GetMyName()
     local member = Guild:GetMemberByName(char_name)
 
-    local char_info_text;
+    local char_info_text = char_name .. ' | ';
+    local dkp_total = '0'
 
-    if member == nil and not Settings:IsDebug() then return end
+    if member ~= nil then dkp_total = member:GetDKP(nil, 'total') end
 
-    if member == nil and Settings:IsDebug() then
-        char_info_text = 'Pamplemousse' .. ' | ' .. '9999 DKP'
-    elseif Settings:IsDebug() then
-        char_info_text = char_name .. ' | ' .. '99999 DKP'
-    else
-        char_info_text = char_name .. ' | ' .. '99999 DKP'
-    end
+    if Settings:IsDebug() and member == nil then dkp_total = '9999' end
 
-    local pdkp_frame = _G['pdkp_frame']
-    --local easy_frame, easy_text = pdkp_frame.easy_stats, pdkp_frame.easy_stats.text
-    local easy_text = pdkp_frame.easy_stats.text
+    char_info_text = char_info_text .. dkp_total .. ' DKP'
 
+    local easy_frame = _G['pdkp_frame'].easy_stats
+    local easy_text = easy_frame.text
     easy_text:SetText(char_info_text)
-    --local text_len = string.len(char_info_text)
+    local padding = 65 -- 20 for the string, 45 for the texture.
+    local stats_width = easy_text:GetStringWidth() + padding
+    easy_frame:SetWidth(stats_width)
+
+    --easy_frame:SetSize(str_width + 45, 72)
     --local border_widths = {[21]=250, [22]=260, [23]=270} -- changes based on characters being displayed.
     --local borderX = border_widths[text_len] or 240
     --
@@ -186,7 +185,7 @@ function GUI:ToggleRaidInviteSpam()
 
     local function timerFeedback()
         GUI.invite_control['counter'] = GUI.invite_control['counter'] + 1
-        PDKP:Print("Raid Invite Spam Count: " .. tostring(GUI.invite_control['counter']))
+        print("Raid Invite Spam Count: " .. tostring(GUI.invite_control['counter']))
         sendMsg()
         if  GUI.invite_control['counter'] >= 10 then Comms:ToggleRaidInviteSpam() end
         if Raid:GetRaidSize() == 40 then Comms:ToggleRaidInviteSpam() end

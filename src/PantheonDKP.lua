@@ -31,13 +31,7 @@ local function PDKP_OnEvent(self, event, arg1, ...)
         ['GUILD_ROSTER_UPDATE']=function()
             if Guild:HasMembers() then
                 PDKP_UnregisterEvent(events, event);
-                Guild:new();
-                GUI:Init();
-                Raid:new();
-                GUI:UpdateEasyStats();
-                Comms:Init();
-                Minimap:Init()
-                Comms:RegisterCommCommands()
+                PDKP:OnDataAvailable()
             else
                 GuildRoster();
             end
@@ -73,6 +67,16 @@ function PDKP:OnInitialize(event, name)
     self:RegisterChatCommand("prio", "HandlePrioCommands")
 
     PDKP:InitializeDatabases()
+end
+
+-- This function is only called when Guild data is ready to be processed.
+function PDKP:OnDataAvailable()
+    Guild:new();
+    GUI:Init();
+    Raid:new();
+    Comms:Init();
+    Minimap:Init()
+    Comms:RegisterCommCommands()
 end
 
 function PDKP:InitializeDatabases()
@@ -189,7 +193,7 @@ end
 function PDKP:HandleSlashCommands(msg)
     if string.len(msg) == 0 then return end -- No command attached.
 
-    Util:Debug('New command received ' .. msg);
+    Util:Debug('New command received ', msg);
 
     local guiCommands = {
         ['show']=function() GUI:Show() end,

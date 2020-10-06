@@ -107,7 +107,7 @@ end
 function Raid:InviteName(name)
     local ignore_from = GUI.invite_control['ignore_from']
     if contains(ignore_from, name) then
-        return PDKP:Print("Invite request from " .. name .. " has been ignored")
+        return print("Invite request from", name, "has been ignored")
     end
 
     if Raid:InRaid() then
@@ -240,7 +240,7 @@ function Raid:SetLootCommon()
     if not Raid:InRaid() or not Raid:IsRaidLead() then return end -- Nothing to set if we're not in a raid and not the leader.
     local ml = Raid.raid['MasterLooter'] or Char:GetMyName()
     SetLootMethod("Master", ml, '1')
-    PDKP:Print("Loot threshold updated")
+    print("Loot threshold updated")
 end
 
 function Raid:PromoteLeadership()

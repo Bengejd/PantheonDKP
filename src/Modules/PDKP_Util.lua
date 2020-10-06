@@ -2,23 +2,8 @@ local _, core = ...;
 local _G = _G;
 local L = core.L;
 
-local DKP = core.DKP;
-local GUI = core.GUI;
-local Item = core.Item;
-local PDKP = core.PDKP;
-local Raid = core.Raid;
 local Util = core.Util;
-local Comms = core.Comms;
-local Setup = core.Setup;
-local Guild = core.Guild;
-local Shroud = core.Shroud;
-local Member = core.Member;
-local Import = core.Import;
-local Officer = core.Officer;
-local Invites = core.Invites;
-local Minimap = core.Minimap;
 local Defaults = core.Defaults;
-local Character = core.Character;
 local Settings = core.Settings;
 
 
@@ -286,7 +271,9 @@ end
 -----------------------------
 
 -- Debugging utility function that only prints debug messages if debugging is enabled.
-function Util:Debug(string)
+function Util:Debug(...)
+    local string = strjoin(" ", tostringall(...))
+
     if Settings:IsDebug() and not Defaults.silent then
         print(Util:FormatFontTextColor(Util.info, string))
     end

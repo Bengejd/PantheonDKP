@@ -147,26 +147,26 @@ end
 -- RAID COMMS FUNCTIONS  --
 ---------------------------
 function Comms:OnRaidCommReceived(prefix, message, distribution, sender)
-    -- This shouldn't ever happen, but who knows.
-    if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
-    if not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
-
-    local raidFuncs = {
-        ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
-        ['pdkpNewShrouds'] = function()
-            Shroud.shrouders = message -- assign the shrouding table that was sent.
-            Shroud:UpdateWindow() -- Update the window.
-        end,
-        ['pdkpDkpOfficer'] = function()
-            if Raid.dkpOfficer ~= message then
-                PDKP:Print(message .. ' is now the DKP Officer')
-            end
-            Raid.dkpOfficer = message
-        end
-    }
-
-    local func = raidFuncs[prefix]
-    if func then return func() end
+    ---- This shouldn't ever happen, but who knows.
+    --if distribution ~= 'RAID' then return Util:Debug('Non-raid comm found in OnRaidCommReceived! '.. prefix) end
+    --if not Guild:CanMemberEdit(sender) then return Comms:ThrowError(prefix, sender) end
+    --
+    --local raidFuncs = {
+    --    ['pdkpClearShrouds'] = function() Shroud:ClearShrouders() end,
+    --    ['pdkpNewShrouds'] = function()
+    --        Shroud.shrouders = message -- assign the shrouding table that was sent.
+    --        Shroud:UpdateWindow() -- Update the window.
+    --    end,
+    --    ['pdkpDkpOfficer'] = function()
+    --        if Raid.dkpOfficer ~= message then
+    --            (message .. ' is now the DKP Officer')
+    --        end
+    --        Raid.dkpOfficer = message
+    --    end
+    --}
+    --
+    --local func = raidFuncs[prefix]
+    --if func then return func() end
 end
 
 ---------------------------
@@ -182,7 +182,7 @@ function Comms:OnGuildCommReceived(prefix, message, distribution, sender)
             DKP:DeleteEntry(message, false)
         end,
         ['pdkpPushReceive'] = function()
-            PDKP:Print("DKP Update received from " .. sender .. ' updating your DKP tables...')
+            --("DKP Update received from " .. sender .. ' updating your DKP tables...')
             Import:AcceptData(message)
         end,
         ['pdkpVersion']= function () return PDKP:CheckForUpdate(message) end

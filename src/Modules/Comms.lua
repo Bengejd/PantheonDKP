@@ -114,7 +114,7 @@ end
 --    Send Functions     --
 ---------------------------
 function OnCommReceived(prefix, message, distribution, sender)
-    Util:Debug(prefix .. ' message received!')
+    Util:Debug(prefix, 'message received!')
 
     --if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
     --    if prefix ~= 'pdkpNewShrouds' then
