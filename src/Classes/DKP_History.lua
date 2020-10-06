@@ -332,10 +332,6 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.ListScrollFrame = listScrollFrame
     self.scrollChild = listScrollFrame.scrollChild;
 
-    self.scrollChild.Resize = function()
-        print(#self.rows)
-    end
-
     ----------------
     --- Set the on_ functions
     self:OnLoad()

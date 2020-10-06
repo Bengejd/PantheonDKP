@@ -101,8 +101,6 @@ function DKP:Submit()
 
     local entry = DKP_Entry:New(GUI.adjustment_entry)
 
-    print(entry['historyText'])
-
     for _, name in pairs(entry['names']) do
         local member = Guild:GetMemberByName(name)
         member:NewEntry(entry)
@@ -116,8 +114,6 @@ end
 
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
-
-    print('Deleting entry', entry['id'])
 
     DkpDB['history']['all'][entry['id']]['deleted']=true -- Mark the entry as having been deleted.
 
@@ -143,7 +139,6 @@ function DKP:TestShroud()
     for _, name in pairs(selectedNames) do
         local member = Guild:GetMemberByName(name)
         local newTotal = member:QuickCalc('Molten Core', nil)
-        print('Old total', member:GetDKP('Molten Core', 'total'), 'New total:', newTotal)
         member:UpdateDKPTest('Molten Core', newTotal)
     end
     memberTable:RaidChanged()

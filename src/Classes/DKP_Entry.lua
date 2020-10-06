@@ -130,10 +130,6 @@ function DKP_Entry:GetFormattedNames()
     local function isGreaterThan(a, b) return a > b end
     table.sort(remove_names, isGreaterThan)
 
-    if #remove_names >= 1 then
-        print('Check out ', self.id)
-    end
-
     for key, name in pairs(remove_names) do table.remove(self.names, key) end
 
     return formattedNames
