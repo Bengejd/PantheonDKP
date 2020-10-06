@@ -356,6 +356,13 @@ function PDKP_UnregisterEvent(self, event)
     events:UnregisterEvent(event);
 end
 
+-- Makes our print statements prettier and uniform.
+function PDKP_PrintHandler(...)
+    PDKP:Print(strjoin(" ", tostringall(...)))
+end
+
+setprinthandler(PDKP_PrintHandler)
+
 local eventNames = {
     "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START", "PLAYER_GUILD_UPDATE",
     "COMBAT_LOG_EVENT_UNFILTERED", "LOOT_OPENED", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_WHISPER",

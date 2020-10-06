@@ -243,13 +243,6 @@ function Util:FindTableIndex(table, key)
     return nil;
 end
 
--- Debugging utility function that only prints debug messages if debugging is enabled.
-function Util:Debug(string)
-    if Settings:IsDebug() and not Defaults.silent then
-        PDKP:Print(Util:FormatFontTextColor(Util.info, string))
-    end
-end
-
 -- Debugging utility function that prints what's inside of a table.
 function Util:PrintTable(tt, indent)
 --    if not Defaults:IsDebug() then return end;
@@ -288,10 +281,27 @@ function Util:HexToRGBA(hex)
     return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, (a ~= "") and (tonumber(a, 16) / 255) or 1
 end
 
+-----------------------------
+--      MISC Functions    --
+-----------------------------
+
+-- Debugging utility function that only prints debug messages if debugging is enabled.
+function Util:Debug(string)
+    if Settings:IsDebug() and not Defaults.silent then
+        print(Util:FormatFontTextColor(Util.info, string))
+    end
+end
+
+
 function Util:ReportMemory()
     UpdateAddOnMemoryUsage()
     print('PDKP Memory: ', math.ceil((GetAddOnMemoryUsage("PantheonDKP") / 1000)) .. 'MB')
 end
+
+-----------------------------
+--     Global Functions    --
+-----------------------------
+
 
 function dumpTable(tbl, indent, depth, currentDepth)
     indent = indent or 0;
@@ -412,9 +422,10 @@ end
 
 function tEmpty(t)
     if type(t) ~= type({}) then return true end
-
     return next(t) == nil;
 end
+
+
 
 
 
