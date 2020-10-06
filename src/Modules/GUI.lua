@@ -210,7 +210,7 @@ function UpdatePushBar(percent, elapsed)
     mins = string.format("%02.f", math.floor(eta/60 - (hours*60)));
     secs = string.format("%02.f", math.floor(eta - hours*3600 - mins *60));
 
-    print('percent: ', percent, 'elapsed:', elapsed, 'hours', hours, 'mins', mins, 'secs', secs)
+    --print('percent: ', percent, 'elapsed:', elapsed, 'hours', hours, 'mins', mins, 'secs', secs)
 
     local etatext = mins .. ':' .. secs
 

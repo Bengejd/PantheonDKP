@@ -495,7 +495,16 @@ function Setup:Debugging()
             end
             PDKP:Print("Starting Full Overwrite Push")
 
-            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'ALERT', PDKP_CommsCallback)
+            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
+        end,
+        ['Merge Push']=function()
+            local members = Guild.members
+            local data = {
+                ['history']=DKP.history,
+            }
+            PDKP:Print("Starting Merge Push")
+
+            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
         end,
     }
     local button_counter_x = 1
