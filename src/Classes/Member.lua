@@ -61,7 +61,7 @@ end
 function Member:InitializeDKP()
     if tEmpty(memberDB[self.name]) then
         memberDB[self.name] = {}
-        Util:Debug("Member is empty " .. self.name)
+        --Util:Debug("Member is empty " .. self.name)
     end
 
     for _, raid in pairs(Defaults.dkp_raids) do
@@ -149,6 +149,24 @@ function Member:Save()
             memberDB[self.name][raid] = dkp
         end
     end
+end
+
+function Member:MergeOldData(dkp)
+    for _, raid in pairs(Defaults.dkp_raids)  do
+        local entries = {}
+        local deleted = {}
+
+        for _, val in pairs(DKPVariables) do
+            self.dkp[raid][val] = dkp[raid][val]
+        end
+
+        for _, id in pairs(self.dkp[raid]['entries']) do table.insert(entries, id) end
+        for _, id in pairs(self.dkp[raid]['deleted']) do table.insert(deleted, id) end
+
+        self.dkp[raid]['entries']=entries;
+        self.dkp[raid]['deleted']=deleted;
+    end
+    self:Save()
 end
 
 --- TESTING FUNCTIONS BELOW

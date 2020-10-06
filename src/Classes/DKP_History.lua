@@ -388,7 +388,7 @@ function HistoryTable:OnLoad()
         local collapse_text, titletext;
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-        collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, 0)
+        collapse_button:SetPoint("TOPRIGHT", row, "TOPRIGHT", -2, 1)
 
         local texture_path_base = "Interface\\Addons\\PantheonDKP\\Media\\"
 
@@ -399,13 +399,13 @@ function HistoryTable:OnLoad()
             if row.content:IsVisible() then
                 row.content:Hide()
                 row:SetHeight(50)
-                collapse_button:SetNormalTexture('Interface\\Buttons\\UI-PlusButton-Up')
+                collapse_button:SetNormalTexture('Interface\\Buttons\\UI-Panel-ExpandButton-Up')
                 collapse_text:Show()
                 row.collapsed = true
             else
                 row.content:Show()
                 row:SetHeight(row.max_height)
-                collapse_button:SetNormalTexture('Interface\\Buttons\\UI-Panel-MinimizeButton-Up')
+                collapse_button:SetNormalTexture('Interface\\Buttons\\UI-Panel-CollapseButton-Up')
                 collapse_text:Hide()
                 row.collapsed = false
             end
@@ -415,7 +415,7 @@ function HistoryTable:OnLoad()
             row:collapse_frame()
             self:RefreshLayout(false)
         end)
-        collapse_button:SetSize(30, 20)
+        collapse_button:SetSize(20, 20)
         --collapse_button:SetText("X")
 
         local border = CreateFrame("Frame", nil, row)

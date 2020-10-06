@@ -129,6 +129,22 @@ function PDKP:InitializeDatabases()
     old_guild_db = old_guild_db.profile
     core.PDKP.old_guild_db = old_guild_db
 
+    local olddkpDBDefaults = {
+        profile = {
+            currentDB = 'Molten Core',
+            members = {},
+            lastEdit = 0,
+            history = {
+                all = {},
+                deleted = {}
+            },
+        }
+    }
+
+    local old_dkp_db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", olddkpDBDefaults, true)
+    old_dkp_db = old_dkp_db.profile
+    core.PDKP.old_dkp_db = old_dkp_db
+
     core.PDKP.dkpDB = db.dkpDB;
 
     Settings:InitDB()

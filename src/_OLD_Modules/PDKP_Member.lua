@@ -121,7 +121,7 @@ function Member:QuickCalculate(type, raid)
 end
 
 function Member:SetDKP(raidName, histObj)
-    if Util:IsEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
+    if Util:IsEmptyEmpty(raidName) then return Util:ThrowError('No raid provided to GetDKP')
     elseif histObj == nil then return Util:ThrowError('History Object is nil!')
     end
 end

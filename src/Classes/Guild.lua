@@ -18,6 +18,7 @@ local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
+local DKP_Entry = core.DKP_Entry;
 
 local GuildDB = PDKP.guildDB;
 
@@ -151,17 +152,45 @@ end
 
 --- Merging Functions
 function Guild:MergeOldData()
-    local old_db = core.PDKP.old_guild_db
-    local old_members =  old_db['members']
+    local old_guild_db = core.PDKP.old_guild_db
+    local old_guild_members =  old_guild_db['members']
     local raids = Defaults.dkp_raids
 
-    for name, old_mem in pairs(old_members) do
+    --- Member data
+    Util:Debug("Merging old Member data")
+    for name, old_mem in pairs(old_guild_members) do
         local new_mem = Guild:GetMemberByName(name)
         if new_mem ~= nil then
-            for key, raid in pairs(raids) do
-                local dkp = old_mem['dkp'][raid]
-                new_mem:UpdateDKPTest(raid, dkp['total'])
-            end
+            local dkp = old_mem['dkp'];
+            new_mem:MergeOldData(dkp)
+        end
+    end
+
+    local old_dkp_db = core.PDKP.old_dkp_db
+    local old_history = old_dkp_db['history']
+    local old_deleted = old_history['deleted']
+    local old_all = old_history['all']
+
+    local currentDB = core.PDKP.dkpDB
+    local current_history = currentDB['history']
+    local current_deleted = current_history['deleted']
+    local current_all = current_history['all']
+
+    --- Deleted History
+    Util:Debug("Merging Old Deleted")
+    for key, ID in pairs(old_deleted) do
+        if not tContains(current_deleted, ID) then
+            table.insert(current_deleted, ID)
+        end
+    end
+
+    --- All History
+    Util:Debug("Merging Old All")
+    for ID, old_entry in pairs(old_all) do
+        local current_entry = current_all[ID]
+        if current_entry == nil then
+            local new_entry = DKP_Entry:New(old_entry)
+            new_entry:Save()
         end
     end
 end
