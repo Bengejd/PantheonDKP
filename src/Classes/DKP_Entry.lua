@@ -17,7 +17,9 @@ function DKP_Entry:New(entry_details)
     local self = {};
     setmetatable(self, DKP_Entry); -- Set the metatable so we used DKP_Entry's __index
 
-    if entry_details['serverTime'] ~= nil then -- It is an old entry, so we have to convert it.
+    -- It is an old entry, so we have to convert it.
+    if entry_details['serverTime'] ~= nil then
+        PDKP:Debug("Old Entry Found, converting to new format")
         entry_details = self:ConvertOldEntry(entry_details)
     end
 
@@ -211,28 +213,3 @@ function DKP_Entry:ConvertOldEntry(entry_details)
     --self.formattedID = Util:Format12HrDateTime(self.id)
     return ned
 end
-
---local test = {
---    [1601528902] = {
---        ["names"] = "|cffFF7D0ATylrswftmend|r, |cffABD473Stellâ|r, |cffABD473Funkorama|r, |cffABD473Primera|r, |cffABD473Huntnori|r, |cff40C7EBOxford|r, |cff40C7EBSuprarz|r, |cff40C7EBZukohere|r, |cff40C7EBFlatulent|r, |cff40C7EBLaird|r, |cff40C7EBBugaboom|r, |cffF58CBALawduk|r, |cffF58CBACaptnutsack|r, |cffF58CBAOnes|r, |cffF58CBADolamroth|r, |cffF58CBADessiola|r, |cffFFFFFFBubblè|r, |cffFFFFFFVrynne|r, |cffFFFFFFVeltrix|r, |cffFFFFFFHoneypot|r, |cffFFFFFFRez|r, |cffFFF569Whisp|r, |cffFFF569Aquamane|r, |cffFFF569Knittie|r, |cffFFF569Inigma|r, |cffFFF569Mystile|r, |cff8787EDLittledubs|r, |cff8787EDThepurple|r, |cff8787EDThenight|r, |cff8787EDGartog|r, |cff8787EDVarix|r, |cff8787EDEdgelawdy|r, |cff8787EDCalixta|r, |cffC79C6EJakemehoff|r, |cffC79C6ESnaildaddy|r, |cffC79C6ENightshelf|r, |cffC79C6ECloverduk|r, |cffC79C6ERetkin|r, |cffC79C6EGoobimus|r, |cffC79C6ELuckerdawg|r",
---        ["dkpChangeText"] = "|cff22bb3310 DKP|r",
---        ["text"] = "|cff22bb33Ahn'Qiraj - Ouro|r",
---    },
---    [1600232214] = {
---        ["names"] = "|cffFFFFFFBubblè|r",
---        ["dkpChangeText"] = "|cffE71D36-456 DKP|r",
---        ["raid"] = "Blackwing Lair",
---        ["id"] = 1600232214,
---        ["text"] = "|cffE71D36Item Win - |rNone",
---        ["members"] = {
---            "Bubblè", -- [1]
---        },
---        ["datetime"] = 1600232219,
---        ["previousTotals"] = {
---            ["Bubblè"] = 912,
---        },
---        ["dkpChange"] = -456,
---        ["item"] = "None",
---        ["officer"] = "|cffC79C6EAcehart|r",
---    },
---}

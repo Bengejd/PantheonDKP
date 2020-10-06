@@ -103,10 +103,11 @@ end
 
 -- Refreshes the data that we are utilizing.
 function HistoryTable:RefreshData()
-     wipe(self.data)
+    wipe(self.data)
 
     self.data = self.retrieveDataFunc();
     wipe(self.displayData);
+
     for i=1, #self.data do
         self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
     end
@@ -258,11 +259,6 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.appliedFilters['raid']=Settings.current_raid
 
-    Util:WatchVar(self.data, 'HistoryTable Data')
-    Util:WatchVar(self.displayData, 'HistoryTable DisplayData')
-    Util:WatchVar(self.displayedRows, 'HistoryTable DisplayedRows')
-    Util:WatchVar(self.rows, 'HistoryTable Rows')
-
     self.total_row_height = 0
 
     self.ROW_HEIGHT = row_settings['height'] or 20
@@ -281,6 +277,8 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.HEADERS = col_settings['headers']
     self.firstSort = col_settings['firstSort'] or nil;
 
+    self.updateNextOpen = false
+
     self:RefreshData()
 
     -------------------------
@@ -295,6 +293,14 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
     self.frame:SetHeight(self.height + (self.COL_HEIGHT * 2));
     self.frame:SetWidth(self.width)
     self.frame:SetPoint(self.anchor['point'], self.parent, self.anchor['rel_point_x'], self.anchor['rel_point_y'])
+
+    self.frame:SetScript("OnShow", function()
+        if self.updateNextOpen then
+            self:HistoryUpdated()
+            self.updateNextOpen = false
+            self.scrollChild:Resize()
+        end
+    end)
 
     --- Create History Title
     self.hist_title = self.frame:CreateFontString(f, "OVERLAY", "GameFontHighlightLarge")
@@ -325,6 +331,10 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.ListScrollFrame = listScrollFrame
     self.scrollChild = listScrollFrame.scrollChild;
+
+    self.scrollChild.Resize = function()
+        print(#self.rows)
+    end
 
     ----------------
     --- Set the on_ functions
@@ -551,7 +561,6 @@ function HistoryTable:OnLoad()
         rawset(t, i, row)
         return row
     end })
-
 
     self.rows = rows
 

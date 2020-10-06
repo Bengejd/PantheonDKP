@@ -1759,7 +1759,6 @@ function Setup:ScrollTable()
     label:SetText("0 Players shown | 0 selected")
 
     st.entryLabel = label
-
 end
 
 function Setup:HistoryTable()

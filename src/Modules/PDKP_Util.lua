@@ -215,6 +215,16 @@ function Util:RemoveColorFromname(name)
     return fName
 end
 
+function Util:ClockSpeed(isEnd)
+    if not isEnd then
+        Util.start = time()
+    end
+    if isEnd then
+        print(time() - Util.start)
+        Util.start = nil
+    end
+end
+
 -----------------------------
 --      Class Functions    --
 -----------------------------

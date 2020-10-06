@@ -140,9 +140,13 @@ end
 function GUI:RefreshTables()
     GUI.memberTable:ClearSelected()
     GUI.memberTable:ClearAll()
-
     GUI.memberTable:RaidChanged()
-    GUI.history_table:HistoryUpdated()
+
+    if GUI.history_table.frame:IsVisible() then
+        GUI.history_table:HistoryUpdated()
+    else
+        GUI.history_table.updateNextOpen = true
+    end
 
     wipe(GUI.memberTable.selected)
 end

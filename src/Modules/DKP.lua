@@ -25,6 +25,7 @@ local DKP_Entry = core.DKP_Entry;
 local DkpDB;
 
 DKP.entries = {};
+DKP.history_entries = {};
 
 function DKP:InitDB()
     DkpDB = core.PDKP.dkpDB
@@ -34,6 +35,36 @@ function DKP:InitDB()
 end
 
 function DKP:GetEntries(keysOnly, id)
+    local history = DkpDB['history']['all']
+    local deleted = DkpDB['history']['deleted']
+
+    if id then
+        local cache_entry = DKP.history_entries[id]
+        if cache_entry == nil then
+            if history[id] ~= nil then
+                cache_entry = DKP_Entry:New(history[id])
+                DKP.history_entries[id] = cache_entry
+            end
+        end
+        return cache_entry
+    end
+
+    keysOnly = keysOnly or false
+    local entry_keys, entries = {}, {};
+
+    for key, _ in pairs(history) do
+        if not tContains(deleted, key) then
+            table.insert(entry_keys, key)
+            if not keysOnly then
+                local dkp_entry = DKP_Entry:New(history[key])
+                if not dkp_entry['deleted'] then
+                    entries[key] = dkp_entry
+                    dkp_entry:Save()
+                end
+            end
+        end
+    end
+
     local compare = function(a,b)
         if type(a) == type({}) and type(b) == type({}) then
             return a['id'] > b['id']
@@ -44,25 +75,6 @@ function DKP:GetEntries(keysOnly, id)
         end
     end
 
-    local history = DkpDB['history']['all']
-
-    if id then
-        local entry = DKP_Entry:New(history[id])
-        return entry;
-    end
-
-    keysOnly = keysOnly or false
-    local entry_keys, entries = {}, {};
-    for key, _ in pairs(history) do
-        local dkp_entry = DKP_Entry:New(history[key])
-        if not dkp_entry['deleted'] then
-            table.insert(entry_keys, key)
-            if not keysOnly then
-                entries[key] = dkp_entry
-                dkp_entry:Save()
-            end
-        end
-    end
     table.sort(entry_keys, compare)
     table.sort(entries, compare)
 
