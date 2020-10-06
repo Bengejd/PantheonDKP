@@ -1306,7 +1306,7 @@ function PDKP_ToggleAdjustmentDropdown()
     GUI.adjustment_entry['names']=PDKP.memberTable.selected
 
     for _, button in pairs(GUI.adjust_buttons) do
-        if selected == 1 then
+        if (reason_val == 'Other' or reason_val == 'Item Win') and selected == 1 then
             button:Enable()
         else
             button:Disable()
