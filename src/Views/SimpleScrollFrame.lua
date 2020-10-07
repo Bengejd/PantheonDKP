@@ -174,13 +174,31 @@ function SimpleScrollFrame:new(parent)
 
     sc.Resize = function()
         sc:SetHeight(0)
+        local temp_children = {}
         for i=1, #sc.children do
             local child_frame = sc.children[i]
+            if child_frame:IsVisible() then
+                table.insert(temp_children, child_frame)
+            end
+        end
+
+        for i=1, #temp_children do
+            local child_frame = temp_children[i]
+            child_frame:ClearAllPoints()
+            if i == 1 then
+                child_frame:SetPoint("TOPLEFT", 2, 0)
+                child_frame:SetPoint("TOPRIGHT", -15, 0)
+            else
+                child_frame:SetPoint("TOPLEFT", temp_children[i-1], "BOTTOMLEFT", 0, 0)
+                child_frame:SetPoint("TOPRIGHT", temp_children[i-1], "BOTTOMRIGHT", 0, 0)
+            end
             sc:SetHeight(sc:GetHeight() + child_frame:GetHeight())
         end
+        sc.children = temp_children;
     end
 
     sf.content = sc
+    sf.scrollBar = sb
 
     sf:SetScrollChild(sc)
 

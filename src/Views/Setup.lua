@@ -1669,17 +1669,89 @@ function Setup:LootFrame(parent)
     local scrollContent = scrollFrame.content;
 
     local cb = createCloseButton(f, true)
+    cb:SetFrameLevel(f:GetFrameLevel() + 4)
+    cb:SetFrameStrata("DIALOG")
 
     cb:SetScript("OnClick", function(self)
         self:GetParent():Hide()
         Loot:ClearLootFrame()
     end)
 
-    cb:SetPoint("TOPRIGHT")
+    cb:SetPoint("TOPRIGHT", -5, 0)
 
     f.scroll = scroll;
     f.scrollFrame  = scrollFrame;
     f.scrollContent = scrollContent;
+
+    scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, -20)
+    scrollFrame.scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -8, 18)
+
+    f.addLootItem = function(self, item_info)
+
+        local loot_frame = CreateFrame("Frame", nil, scrollContent, nil)
+        loot_frame:SetSize(scrollContent:GetWidth(), 18)
+
+        local item_link_string = loot_frame:CreateFontString(loot_frame, 'OVERLAY', 'GameFontHighlightLeft')
+
+        -- TODO: GameTooltip should dispaly here.
+        item_link_string:SetText(item_info['name'])
+        item_link_string:SetPoint("LEFT")
+        item_link_string:SetWidth(loot_frame:GetWidth() - 40)
+        item_link_string:SetHeight(loot_frame:GetHeight())
+
+        loot_frame.item_info = item_info
+
+        local lcb = Setup:CreateCloseButton(loot_frame, true)
+        lcb:SetSize(15, 15);
+        lcb:SetPoint("LEFT", loot_frame, "RIGHT", 0, 0)
+        lcb:SetFrameLevel(loot_frame:GetFrameLevel() + 4)
+        lcb:SetScript("OnClick", function()
+            local lcb_parent = lcb:GetParent()
+            lcb_parent.deleted = true
+            lcb_parent:Hide()
+        end)
+
+        local check = CreateFrame("CheckButton", nil, loot_frame, 'ChatConfigCheckButtonTemplate')
+        check:SetPoint("RIGHT", lcb, "LEFT", -5, 0)
+
+        loot_frame:SetScript("OnHide", function()
+            if loot_frame.deleted then
+                Loot:LootDeleted(loot_frame.item_info)
+                scrollContent.Resize()
+            else
+                --- Do something here? Re-position the siblings, Remove this item from the loot list?
+            end
+        end)
+
+        scrollContent.AddChild(scrollContent, loot_frame)
+
+        if #scrollContent.children == 1 then
+            loot_frame:ClearAllPoints()
+            loot_frame:SetPoint("TOPLEFT", 2, 0)
+            loot_frame:SetPoint("TOPRIGHT", -15, 0)
+        end
+
+        --    --
+        --    --    i_frame:SetScript("OnHide", function ()
+        --    --        local visible_items = f.getVisible()
+        --    --        for key, i_frame in pairs(visible_items) do
+        --    --            i_frame:ClearAllPoints()
+        --    --            if key == 1 then
+        --    --                i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
+        --    --            else
+        --    --                i_frame:SetPoint("TOPLEFT", visible_items[key -1], "TOPLEFT", 0, -20)
+        --    --            end
+        --    --        end
+        --    --    end)
+
+        --f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
+        --f.total = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
+        --f.name:SetHeight(18)
+        --f.total:SetHeight(18)
+        --f.name:SetPoint("LEFT")
+        --f.total:SetPoint("RIGHT")
+
+    end
 
     local loot_events = {'CHAT_MSG_LOOT', 'OPEN_MASTER_LOOT_LIST', 'UPDATE_MASTER_LOOT_LIST', 'LOOT_SLOT_CHANGED',
                          'LOOT_OPENED', 'LOOT_SLOT_CLEARED'}
