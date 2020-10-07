@@ -10,10 +10,10 @@ SimpleScrollFrame.__index = SimpleScrollFrame; -- Set the __index parameter to r
 -- Lua APIs
 local pairs, assert, type = pairs, assert, type
 local min, max, floor = math.min, math.max, math.floor
+local tinsert = table.insert
 
 local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
 local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
-
 
 -- WoW APIs
 local CreateFrame, UIParent = CreateFrame, UIParent
@@ -141,7 +141,6 @@ function SimpleScrollFrame:new(parent)
 
     sc.AddChild = function(content, frame)
         local childCount = #content.children;
-
         if childCount == 0 then
             frame:SetPoint("TOPLEFT", 10, 0)
             frame:SetPoint("TOPRIGHT", -10, 0)
@@ -155,14 +154,37 @@ function SimpleScrollFrame:new(parent)
     end
 
     sc.WipeChildren = function(content)
+        local children_height = 0
         local childCount = #content.children;
         for i=1, childCount do
             local child = content.children[i]
             child:Hide()
-            sc:SetHeight(sc:GetHeight() - child:GetHeight())
+            children_height = children_height + child:GetHeight()
             child = nil;
         end
+        sc:SetHeight(sc:GetHeight() - children_height)
         content.children = {} -- wipe the children.
+    end
+
+    sc.AddBulkChildren = function(content, frames)
+        sc.WipeChildren(content) -- Wipe the children first, before doing a mass add.
+
+        local children_height = 0
+        for i=1, #frames do
+            local child = frames[i]
+            local childCount = #content.children;
+            if childCount == 0 then
+                child:SetPoint("TOPLEFT", 10, 0)
+                child:SetPoint("TOPRIGHT", -10, 0)
+            else
+                local previous_frame = content.children[childCount]
+                child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
+                child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
+            end
+            children_height = children_height + child:GetHeight()
+            tinsert(content.children, child)
+        end
+        sc:SetHeight(sc:GetHeight() + children_height)
     end
 
     sc:SetScript("OnSizeChanged", function(_, value)
