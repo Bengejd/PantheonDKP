@@ -494,6 +494,9 @@ function Setup:Debugging()
 
             Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
         end,
+        ['AQ-Quest Report']=function()
+            Loot:TestGetAQLoots()
+        end,
     }
     local button_counter_x = 1
     local button_counter_y = 1
@@ -1701,7 +1704,20 @@ function Setup:LootFrame(parent)
         return 'None Linked'
     end
 
+    f.checkUnique = function(item_info)
+        for i=1, #scrollContent.children do
+            local child = scrollContent.children[i];
+            if child.item_info == item_info then return false end
+        end
+        return true
+    end
+
     f.addLootItem = function(self, item_info)
+
+        if not f.checkUnique(item_info) then
+            Util:Debug("Duplicate Item Info Found")
+            return
+        end
 
         local loot_frame = CreateFrame("Frame", nil, scrollContent, nil)
         loot_frame:SetSize(scrollContent:GetWidth(), 18)
