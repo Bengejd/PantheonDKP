@@ -298,7 +298,6 @@ function HistoryTable:newHybrid(table_settings, col_settings, row_settings)
         if self.updateNextOpen then
             self:HistoryUpdated()
             self.updateNextOpen = false
-            self.scrollChild:Resize()
         end
     end)
 
@@ -484,6 +483,8 @@ function HistoryTable:OnLoad()
                     col.click_frame = nil;
                 end
 
+
+
                 if header['onClickFunc'] then
                     local cf = col.click_frame;
                     if cf == nil then
@@ -505,6 +506,14 @@ function HistoryTable:OnLoad()
                     col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
                 end
                 col:SetText(display_name .. ": " .. val)
+
+                if string.find(val, 'Item Win -') then
+                    local _, item = strsplit(' - ', val)
+                    item = strtrim(item)
+                    if not string.find(item, 'None Linked') then
+
+                    end
+                end
 
                 row.max_height = row.max_height + col:GetStringHeight() + 12
                 row.cols[key] = col

@@ -1177,6 +1177,7 @@ function Setup:DKPAdjustments()
     sb:SetText("Submit")
     sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
     sb:SetScript("OnClick", function()
+        GUI.adjustment_entry['item']=Loot.frame:getChecked()
         DKP:Submit()
         other_box:SetText("")
         amount_box:SetText("")
@@ -1303,6 +1304,7 @@ function PDKP_ToggleAdjustmentDropdown()
     end
 
     GUI.adjustment_entry['names']=PDKP.memberTable.selected
+    GUI.adjustment_entry['item']=nil;
 
     for _, button in pairs(GUI.adjust_buttons) do
         if (reason_val == 'Other' or reason_val == 'Item Win') and selected == 1 then
@@ -1686,6 +1688,17 @@ function Setup:LootFrame(parent)
     scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, -20)
     scrollFrame.scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -8, 18)
 
+    f.getChecked = function(self)
+        local sc = f.scrollContent;
+        for i=1, #sc.children do
+            local child = sc.children[i]
+            if child:IsVisible() and child.checked then
+                return child.item_info['link']
+            end
+        end
+        return 'None Linked'
+    end
+
     f.addLootItem = function(self, item_info)
 
         local loot_frame = CreateFrame("Frame", nil, scrollContent, nil)
@@ -1701,6 +1714,8 @@ function Setup:LootFrame(parent)
 
         loot_frame.item_info = item_info
 
+        loot_frame.checked = false
+
         local lcb = Setup:CreateCloseButton(loot_frame, true)
         lcb:SetSize(15, 15);
         lcb:SetPoint("LEFT", loot_frame, "RIGHT", 0, 0)
@@ -1714,10 +1729,13 @@ function Setup:LootFrame(parent)
         local check = CreateFrame("CheckButton", nil, loot_frame, 'ChatConfigCheckButtonTemplate')
         check:SetPoint("RIGHT", lcb, "LEFT", -5, 0)
 
+        check:SetScript("OnClick", function() loot_frame.checked = check:GetChecked() end)
+
         loot_frame:SetScript("OnHide", function()
             if loot_frame.deleted then
                 Loot:LootDeleted(loot_frame.item_info)
                 scrollContent.Resize()
+                loot_frame.checked = false
             else
                 --- Do something here? Re-position the siblings, Remove this item from the loot list?
             end
@@ -1730,27 +1748,6 @@ function Setup:LootFrame(parent)
             loot_frame:SetPoint("TOPLEFT", 2, 0)
             loot_frame:SetPoint("TOPRIGHT", -15, 0)
         end
-
-        --    --
-        --    --    i_frame:SetScript("OnHide", function ()
-        --    --        local visible_items = f.getVisible()
-        --    --        for key, i_frame in pairs(visible_items) do
-        --    --            i_frame:ClearAllPoints()
-        --    --            if key == 1 then
-        --    --                i_frame:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -50)
-        --    --            else
-        --    --                i_frame:SetPoint("TOPLEFT", visible_items[key -1], "TOPLEFT", 0, -20)
-        --    --            end
-        --    --        end
-        --    --    end)
-
-        --f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
-        --f.total = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
-        --f.name:SetHeight(18)
-        --f.total:SetHeight(18)
-        --f.name:SetPoint("LEFT")
-        --f.total:SetPoint("RIGHT")
-
     end
 
     local loot_events = {'CHAT_MSG_LOOT', 'OPEN_MASTER_LOOT_LIST', 'UPDATE_MASTER_LOOT_LIST', 'LOOT_SLOT_CHANGED',
@@ -1954,6 +1951,10 @@ function Setup:HistoryTable()
                 ['showSortDirection'] = false,
                 ['display']=false,
                 ['onClickFunc']=function(row, buttonType)
+                    if buttonType == 'LeftButton' then
+
+                    end
+
                     if buttonType == 'RightButton' then
                         GUI.popup_entry = row.dataObj
                         StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')

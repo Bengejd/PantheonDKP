@@ -29,9 +29,7 @@ function PDKP_OnLootEvent(self, event, arg1, ...)
         ['LOOT_OPENED']=function() -- autoLoot, isFromItem
             local loot_info = Loot:RegisterMobLoot()
             for _, item_info in pairs(loot_info['loot']) do
-                for i=1, 20 do
-                    Loot.frame:addLootItem(item_info)
-                end
+                Loot.frame:addLootItem(item_info)
             end
         end,
         -- TODO: Don't have to do anything here?

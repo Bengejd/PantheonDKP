@@ -141,7 +141,7 @@ function DKP_Entry:GetHistoryText()
         ['Completion Bonus']= self.raid .. ' - ' .. self.reason,
         ['Unexcused Absence']= self.raid .. ' - ' .. self.reason,
         ['Boss Kill']= self.raid .. ' - ' .. self.boss,
-        ['Item Win']= 'Item Win - ',
+        ['Item Win']= 'Item Win - ' .. self.item,
         ['Other']= 'Other - ' .. self.other_text,
     }
     local text = texts[self.reason]
