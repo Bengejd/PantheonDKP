@@ -69,6 +69,7 @@ function Loot:RegisterMobLoot()
             local itemLink = select(2, GetItemInfo(item))
             local itemId = select(2, strsplit(":", itemLink, 3))
             local itemRarity = select(3, GetItemInfo(item))
+            local itemTime = GetServerTime()
             --local itemLevel = select(4, GetItemInfo(item))
             --local itemReqLevel = select(5, GetItemInfo(item))
             --local itemType = select(6, GetItemInfo(item))
@@ -79,7 +80,8 @@ function Loot:RegisterMobLoot()
                 ['name']=itemName,
                 ['link']=itemLink,
                 ['quality']=itemRarity,
-                ['id']=itemId
+                ['id']=itemId,
+                ['time']=itemTime,
             }
             table.insert(mob_loot_info['loot'], item_info)
         end

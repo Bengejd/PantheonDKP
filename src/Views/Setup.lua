@@ -1177,7 +1177,15 @@ function Setup:DKPAdjustments()
     sb:SetText("Submit")
     sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
     sb:SetScript("OnClick", function()
-        GUI.adjustment_entry['item']=Loot.frame:getChecked()
+        if GUI.adjustment_entry['shouldHaveItem'] then
+            local item_frame = Loot.frame:getChecked()
+            if item_frame then
+                GUI.adjustment_entry['item'] = item_frame.item_info['link']
+                item_frame.deleted = true
+                item_frame:Hide()
+            end
+        end
+
         DKP:Submit()
         other_box:SetText("")
         amount_box:SetText("")
@@ -1219,13 +1227,6 @@ function Setup:DKPAdjustments()
 
     --- Boss Loot Section
     Setup:LootFrame(f)
-
-    --local loot_close = createCloseButton(boss_loot_frame, true)
-    --loot_close:SetPoint('TOPRIGHT', boss_loot_frame, 'TOPRIGHT', 0, -1)
-
-    --boss_loot_frame:Hide()
-
-    --GUI.boss_loot_frame = boss_loot_frame;
 
     if not Settings:CanEdit() then f:Hide() end
 
@@ -1297,6 +1298,7 @@ function PDKP_ToggleAdjustmentDropdown()
     can_submit = can_submit and selected > 0
 
     if reason_val == 'Item Win' then
+        GUI.adjustment_entry['shouldHaveItem'] = true
         can_submit = can_submit and selected == 1
         Loot.frame:Show()
     else
@@ -1693,7 +1695,7 @@ function Setup:LootFrame(parent)
         for i=1, #sc.children do
             local child = sc.children[i]
             if child:IsVisible() and child.checked then
-                return child.item_info['link']
+                return child
             end
         end
         return 'None Linked'
@@ -1729,7 +1731,24 @@ function Setup:LootFrame(parent)
         local check = CreateFrame("CheckButton", nil, loot_frame, 'ChatConfigCheckButtonTemplate')
         check:SetPoint("RIGHT", lcb, "LEFT", -5, 0)
 
-        check:SetScript("OnClick", function() loot_frame.checked = check:GetChecked() end)
+        -- We can only have 1 checked at a time.
+        local function toggleChecked(ignore_child)
+            for i=1, #scrollContent.children do
+                local child = scrollContent.children[i]
+                if child ~= ignore_child then
+                    child.check_box:SetChecked(false)
+                    child.checked = false
+                end
+            end
+        end
+
+        check:SetScript("OnClick", function(_, buttonType)
+            if buttonType == 'LeftButton' then
+                toggleChecked(loot_frame)
+                loot_frame.checked = check:GetChecked()
+            end
+        end)
+
 
         loot_frame:SetScript("OnHide", function()
             if loot_frame.deleted then
@@ -1748,6 +1767,8 @@ function Setup:LootFrame(parent)
             loot_frame:SetPoint("TOPLEFT", 2, 0)
             loot_frame:SetPoint("TOPRIGHT", -15, 0)
         end
+
+        loot_frame.check_box = check
     end
 
     local loot_events = {'CHAT_MSG_LOOT', 'OPEN_MASTER_LOOT_LIST', 'UPDATE_MASTER_LOOT_LIST', 'LOOT_SLOT_CHANGED',
