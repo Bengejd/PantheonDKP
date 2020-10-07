@@ -1216,16 +1216,15 @@ function Setup:DKPAdjustments()
 
     mainDD:Show()
 
-
     --- Boss Loot Section
-    local boss_loot_frame = Loot:CreateBossLoot(f)
+    Setup:LootFrame(f)
 
-    local loot_close = createCloseButton(boss_loot_frame, true)
-    loot_close:SetPoint('TOPRIGHT', boss_loot_frame, 'TOPRIGHT', 0, -1)
+    --local loot_close = createCloseButton(boss_loot_frame, true)
+    --loot_close:SetPoint('TOPRIGHT', boss_loot_frame, 'TOPRIGHT', 0, -1)
 
     --boss_loot_frame:Hide()
 
-    GUI.boss_loot_frame = boss_loot_frame;
+    --GUI.boss_loot_frame = boss_loot_frame;
 
     if not Settings:CanEdit() then f:Hide() end
 
@@ -1298,9 +1297,9 @@ function PDKP_ToggleAdjustmentDropdown()
 
     if reason_val == 'Item Win' then
         can_submit = can_submit and selected == 1
-        GUI.boss_loot_frame:Show()
+        Loot.frame:Show()
     else
-        GUI.boss_loot_frame:Hide()
+        Loot.frame:Hide()
     end
 
     GUI.adjustment_entry['names']=PDKP.memberTable.selected
@@ -1364,30 +1363,6 @@ function Setup:DKPHistory()
         b_text:SetText(btn['text'])
     end
 
-    --local history_button = CreateFrame("Button", "$parent_history_button", f)
-    --history_button:SetSize(120, 30)
-    --history_button:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 0, 0)
-    --history_button:SetNormalTexture("Interface\\CHATFRAME\\ChatFrameTab")
-    --
-    --
-    --local normal_button = CreateFrame("Button", "$parent_normal_view", filter_frame)
-    --
-    ----local history_button = CreateFrame("Button", "$parent_history_button", pdkp_frame, 'UIPanelButtonTemplate')
-    ----history_button:SetSize(80, 30)
-    ----history_button:SetPoint("CENTER", pdkp_frame, "TOP", 0, -50)
-    --history_button:SetScript("OnClick", function()
-    --    if GUI.history_frame:IsVisible() then
-    --        GUI.history_frame:Hide()
-    --        GUI.filter_frame:Show()
-    --        GUI.adjustment_frame:Show()
-    --    else
-    --        GUI.history_frame:Show()
-    --        GUI.filter_frame:Hide()
-    --        GUI.adjustment_frame:Hide()
-    --    end
-    --end)
-    --history_button:SetText("History")
-
     f:Hide()
 
     GUI.history_frame = f;
@@ -1401,8 +1376,6 @@ function Setup:DKPHistory()
         print('Opening History Options')
         -- TODO: Hookup the options button frame.
     end)
-
-    --history_button:Click()
 end
 
 function Setup:RaidDropdown()
@@ -1568,32 +1541,6 @@ function Setup:SyncStatus()
     --Util:Format12HrDateTime(self.id)
 end
 
-function Setup:BossKillLoot()
-    local f = CreateFrame("Frame", "$parentBossLoot", pdkp_frame)
-    f:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
-    f:SetHeight(225);
-    f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
-    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "RIGHT", -10,0)
-    f:Show()
-
-    -- mini close button
-    local b = createCloseButton(f, true)
-    b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
-
-    -- title
-    local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
-    t:SetPoint("TOPLEFT", 5, -10)
-    t:SetPoint("TOPRIGHT", -10, -30)
-    t:SetText("PDKP Shrouding")
-    t:SetParent(f)
-
-    f:Show()
-end
-
 function Setup:InterfaceOptions()
 
     local AceConfig = LibStub("AceConfig-3.0")
@@ -1711,6 +1658,43 @@ function Setup:InterfaceOptions()
     AceConfigDialog:AddToBlizOptions('PantheonDKP')
 end
 
+function Setup:LootFrame(parent)
+    local f = createBackdropFrame("pdkp_loot_frame", parent, 'Loot Table')
+    f:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
+    f:SetHeight(200)
+    f:SetWidth(200)
+
+    local scroll = SimpleScrollFrame:new(f.content)
+    local scrollFrame = scroll.scrollFrame;
+    local scrollContent = scrollFrame.content;
+
+    local cb = createCloseButton(f, true)
+
+    cb:SetScript("OnClick", function(self)
+        self:GetParent():Hide()
+        Loot:ClearLootFrame()
+    end)
+
+    cb:SetPoint("TOPRIGHT")
+
+    f.scroll = scroll;
+    f.scrollFrame  = scrollFrame;
+    f.scrollContent = scrollContent;
+
+    local loot_events = {'CHAT_MSG_LOOT', 'OPEN_MASTER_LOOT_LIST', 'UPDATE_MASTER_LOOT_LIST', 'LOOT_SLOT_CHANGED',
+                         'LOOT_OPENED', 'LOOT_SLOT_CLEARED'}
+
+    for _, eventName in pairs(loot_events) do f:RegisterEvent(eventName) end
+
+    f:SetScript("OnEvent", PDKP_OnLootEvent)
+
+    Loot.frame = f
+
+    f:Hide()
+
+    return f
+end
+
 function Setup:ShroudingBox()
     local f = createBackdropFrame('pdkp_shroud_frame', UIParent, 'PDKP Shrouding')
     f:SetPoint("BOTTOMLEFT")
@@ -1734,27 +1718,11 @@ function Setup:ShroudingBox()
     f.scroll = scroll;
     f.scrollFrame = scrollFrame;
 
-    --
-    --setMovable(f)
-    --
-    ---- mini close button
-    --local b = createCloseButton(f, true)
-    --b:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -6, -6)
-    --
-    ---- title
-    --local t = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
-    --t:SetPoint("TOPLEFT", 5, -10)
-    --t:SetPoint("TOPRIGHT", -10, -30)
-    --t:SetText("PDKP Shrouding")
-    --t:SetParent(f)
-
     local shroud_events = {'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
     for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
     f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
 
     f:Hide()
-
-
 
     GUI.shroud_box = f;
 end
