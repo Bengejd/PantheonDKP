@@ -31,8 +31,8 @@ local PaneBackdrop  = {
 
 local ROW_COL_HEADERS = {
     { ['variable']='formattedOfficer', ['display']='Officer', },
-    { ['variable']='historyText', ['display']='Reason', ['onClick']=true,},
-    { ['variable']='formattedNames', ['display']='Members', ['onClick']=true, },
+    { ['variable']='historyText', ['display']='Reason', ['OnClick']=true,},
+    { ['variable']='formattedNames', ['display']='Members', ['OnClick']=true, },
     { ['variable']='change_text', ['display']='Amount'}
 }
 
@@ -169,6 +169,11 @@ end
 
 function PDKP_History_OnClick(frame, buttonType)
     print('Frame Clicked')
+
+
+
+    print(frame.value)
+    print(frame.label)
     --
     --if header['onClickFunc'] then
     --    local cf = col.click_frame;
@@ -292,8 +297,10 @@ function HistoryTable:OnLoad()
                 if header['OnClick'] then
                     local cf = col.click_frame;
                     if cf == nil then
-                        cf = CreateFrame("Frame", nil, col)
+                        cf = CreateFrame("Frame", nil, row.content)
                         cf:SetAllPoints(col)
+                        cf.value = val;
+                        cf.label = header['display']
                         cf:SetScript("OnMouseUp", PDKP_History_OnClick)
                         col.click_frame = cf;
                     end
