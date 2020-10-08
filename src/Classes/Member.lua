@@ -116,6 +116,13 @@ function Member:DeleteEntry(entry)
 
     rdkp.total = rdkp.total - entry['dkp_change'] --- Figure out a more elegant way to get previous DKP difference from this value.
     tremoveByKey(rdkp.entries, entry['id'])
+
+    local t_entries = {}
+    for i=1, #rdkp['entries'] do
+        local e = rdkp['entries'][i]
+        if e ~= nil then tinsert(t_entries, e) end
+    end
+    rdkp['entries'] = t_entries
     tinsert(rdkp.deleted, entry['id'])
 end
 
