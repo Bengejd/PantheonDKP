@@ -73,7 +73,7 @@ end
 function PDKP:OnDataAvailable()
     Guild:new();
 
-    if not Settings.db['mergedOld'] then Guild:MergeOldData() end
+    --if not Settings.db['mergedOld'] then Guild:MergeOldData() end
 
     GUI:Init();
     Raid:new();

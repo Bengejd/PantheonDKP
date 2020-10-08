@@ -171,7 +171,7 @@ function Member:Save()
     end
 end
 
-function Member:MergeOldData(dkp)
+function Member:OverwriteDKP(dkp)
     for _, raid in pairs(Defaults.dkp_raids)  do
         local entries = {}
         local deleted = {}
@@ -190,7 +190,6 @@ function Member:MergeOldData(dkp)
 end
 
 --- TESTING FUNCTIONS BELOW
----
 function Member:UpdateDKPTest(raid, newTotal)
     raid = raid or Raid:GetCurrentRaid()
     self.dkp[raid].total = newTotal

@@ -203,7 +203,7 @@ function DKP_Entry:IsMemberInEntry(name)
 end
 
 function DKP_Entry:ConvertOldEntry(entry_details)
-    local ned = {}
+    local ned = {} -- new entry details
     ned['id'] = entry_details['id']
     ned['raid'] = entry_details['raid']
     ned['reason'] = entry_details['reason'] or 'No Valid Reason'
@@ -225,12 +225,6 @@ function DKP_Entry:ConvertOldEntry(entry_details)
         ned['other_text'] = corrected_text
     end
     ned['names'] = entry_details['members']
-    ned['previousTotals'] = entry_details['previousTotals'] -- or self:GetPreviousTotals()
-
-    --self.formattedNames = self:GetFormattedNames()
-    --self.change_text = self:GetChangeText()
-    --self.historyText = self:GetHistoryText()
-    --self.formattedOfficer = self:GetFormattedOfficer()
-    --self.formattedID = Util:Format12HrDateTime(self.id)
+    ned['previousTotals'] = entry_details['previousTotals']
     return ned
 end

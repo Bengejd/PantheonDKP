@@ -163,7 +163,7 @@ function Guild:MergeOldData()
         local new_mem = Guild:GetMemberByName(name)
         if new_mem ~= nil then
             local dkp = old_mem['dkp'];
-            new_mem:MergeOldData(dkp)
+            new_mem:OverwriteDKP(dkp)
         end
     end
 
