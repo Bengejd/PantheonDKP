@@ -36,6 +36,8 @@ local ROW_COL_HEADERS = {
     { ['variable']='change_text', ['display']='Amount'}
 }
 
+local deleted_row = nil;
+
 local ROW_MARGIN_TOP = 16 -- The margin between rows.
 
 --[[                --['headers'] = {
@@ -120,8 +122,13 @@ function HistoryTable:CollapseAllRows(collapse)
 end
 
 function HistoryTable:RefreshData()
+    print('Refreshing History Data')
+    self.scrollContent:WipeChildren(self.scrollContent)
+    wipe(self.entry_keys)
     local keys, _ = DKP:GetEntries(true, nil);
     self.entry_keys = keys;
+
+    print(#self.entry_keys)
 
     wipe(self.entries)
 
@@ -168,26 +175,27 @@ function HistoryTable:UpdateTitleText(selected)
 end
 
 function PDKP_History_OnClick(frame, buttonType)
-    print('Frame Clicked')
+    if not Settings:CanEdit() or not IsShiftKeyDown() then return end
 
+    local label = frame.label;
+    local dataObj = frame:GetParent()['dataObj']
 
+    if label == 'Members' then return GUI.memberTable:SelectNames(dataObj['names'])
+    elseif label == 'Reason' and buttonType == 'RightButton' then
+        GUI.popup_entry = dataObj
+        StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
+        deleted_row = frame:GetParent() -- This only gets used if the deletion goes through.
+    end
+end
 
-    print(frame.value)
-    print(frame.label)
-    --
-    --if header['onClickFunc'] then
-    --    local cf = col.click_frame;
-    --    if cf == nil then
-    --        cf = CreateFrame("Frame", nil, row)
-    --        cf:SetAllPoints(col)
-    --        cf:SetScript("OnMouseUp", function(_, buttonType)
-    --            if row.content:IsVisible() then
-    --                header['onClickFunc'](row, buttonType)
-    --            end
-    --        end)
-    --        col.click_frame = cf;
-    --    end
-    --end
+function PDKP_History_EntryDeleted(id)
+    local self = GUI.history_table;
+
+    local row = self.rows[deleted_row.index]
+    row['dataObj']['deleted'] = true
+
+    GUI.history_table:RefreshData()
+    GUI.history_table:HistoryUpdated()
 end
 
 function HistoryTable:OnLoad()
@@ -297,7 +305,7 @@ function HistoryTable:OnLoad()
                 if header['OnClick'] then
                     local cf = col.click_frame;
                     if cf == nil then
-                        cf = CreateFrame("Frame", nil, row.content)
+                        cf = CreateFrame("Frame", nil, row)
                         cf:SetAllPoints(col)
                         cf.value = val;
                         cf.label = header['display']

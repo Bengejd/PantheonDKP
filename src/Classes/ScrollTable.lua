@@ -148,11 +148,28 @@ function ScrollTable:SelectAll(remove)
         if not row.isFiltered then
             local selectOn = row.selectOn
             local objIndex = row.dataObj[selectOn]
-            local isSelected, _ = tfind(self.selected, objIndex)
+            local isSelected, removeIndex = tfind(self.selected, objIndex)
 
             if isSelected and remove then
-                tremove(self.selected, objIndex)
+                tremove(self.selected, removeIndex)
             elseif not isSelected and not remove then
+                tinsert(self.selected, objIndex)
+            end
+        end
+    end
+    self:RefreshLayout()
+end
+
+function ScrollTable:SelectNames(names)
+    self:ClearAll()
+    for i=1, #self.displayedRows do
+        local row = self.rows[i]
+        local selectOn = row.selectOn
+        local objIndex = row.dataObj[selectOn]
+
+        if tContains(names, objIndex) then
+            local isSelected, _ = tfind(self.selected, objIndex)
+            if not isSelected then
                 tinsert(self.selected, objIndex)
             end
         end
@@ -670,8 +687,6 @@ function ScrollTable:OnLoad()
     -- OPTIONAL: Keep the scrollbar visible even if there's nothing to scroll.
     HybridScrollFrame_SetDoNotHideScrollBar(self.ListScrollFrame, true);
 end
-
-local eventFunc = {''}
 
 
 

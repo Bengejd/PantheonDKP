@@ -312,7 +312,8 @@ PDKP_POPUP_DIALOG_SETTINGS = {
         button1 = "Confirm",
         button2 = "Cancel",
         OnAccept = function(self) -- Confirm
-            DKP:DeleteEntry()
+            local id = DKP:DeleteEntry()
+            PDKP_History_EntryDeleted(id)
         end,
         OnCancel = function() -- Cancel
         end,

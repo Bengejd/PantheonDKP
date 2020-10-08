@@ -124,11 +124,11 @@ function DKP:DeleteEntry()
     tremove(DkpDB['history']['all'], entry['id'])
     DkpDB['history']['all'][entry['id']] = nil;
     tinsert(DkpDB['history']['deleted'], entry['id'])
+    DKP.history_entries[entry['id']] = nil
 
-    GUI.history_table:HistoryUpdated()
     GUI.memberTable:RaidChanged()
-
     GUI.popup_entry = nil;
+    return entry['id']
 end
 
 --- TESTING FUNCTIONS BELOW
