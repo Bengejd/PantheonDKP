@@ -11,6 +11,8 @@ local warning = 'E71D36'
 
 local DKP_Entry = core.DKP_Entry;
 
+local strreplace = string.gsub
+
 DKP_Entry.__index = DKP_Entry
 
 function DKP_Entry:New(entry_details)
@@ -39,6 +41,7 @@ function DKP_Entry:New(entry_details)
     self.formattedNames = self:GetFormattedNames()
     self.change_text = self:GetChangeText()
     self.historyText = self:GetHistoryText()
+    self.collapsedHistoryText = self:GetCollapsedHistoryText()
     self.formattedOfficer = self:GetFormattedOfficer()
     self.formattedID = Util:Format12HrDateTime(self.id)
 
@@ -139,6 +142,24 @@ function DKP_Entry:GetFormattedNames()
     return formattedNames
 end
 
+function DKP_Entry:GetCollapsedHistoryText()
+    local texts = {
+        ['On Time Bonus']= self.reason,
+        ['Completion Bonus']= self.reason,
+        ['Unexcused Absence']= self.reason,
+        ['Boss Kill']= self.boss,
+        ['Item Win']= 'Item Win - ' .. self.item,
+        ['Other'] = tenaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
+    }
+    local text = texts[self.reason]
+
+    if self.dkp_change > 0 then
+        return Util:FormatFontTextColor(success, text)
+    else
+        return Util:FormatFontTextColor(warning, text)
+    end
+end
+
 function DKP_Entry:GetHistoryText()
     local texts = {
         ['On Time Bonus']= self.raid .. ' - ' .. self.reason,
@@ -146,7 +167,7 @@ function DKP_Entry:GetHistoryText()
         ['Unexcused Absence']= self.raid .. ' - ' .. self.reason,
         ['Boss Kill']= self.raid .. ' - ' .. self.boss,
         ['Item Win']= 'Item Win - ' .. self.item,
-        ['Other']= 'Other - ' .. self.other_text,
+        ['Other']= tenaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
     }
     local text = texts[self.reason]
 
