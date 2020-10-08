@@ -151,7 +151,9 @@ function DKP:ResetDKP(selected)
 
         for _, name in pairs(selectedNames) do
             local member = Guild:GetMemberByName(name)
-            member:UpdateDKPTest('Molten Core', member.guildIndex)
+            for _, raid in pairs(Defaults.dkp_raids) do
+                member:UpdateDKPTest(raid, 0)
+            end
         end
 
         DkpDB['history']['all']={}
@@ -161,7 +163,7 @@ function DKP:ResetDKP(selected)
     end
 
 
-    memberTable:RaidChanged()
+    GUI.memberTable:RaidChanged()
 end
 
 function DKP:CalculateButton(b_type)

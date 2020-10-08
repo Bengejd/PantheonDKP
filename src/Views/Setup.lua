@@ -456,7 +456,7 @@ function Setup:Debugging()
             DKP:TestShroud()
         end,
         ['reset DKP']=function()
-            DKP:ResetDKP()
+            DKP:ResetDKP(true)
         end,
         ['boss kill']=function()
             local boss_info = Raid:TestBossKill()
@@ -512,10 +512,13 @@ function Setup:Debugging()
 
         db:SetWidth(width)
 
-        db:SetScript("OnClick", func)
+        db:SetScript("OnClick", function()
+            print('Debug Function:', name)
+            func()
+        end)
 
-        pos_x = 10
-        pos_y = -25
+        local pos_x = 10
+        local pos_y = -25
 
         pos_y = pos_y * button_counter
 

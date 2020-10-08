@@ -31,7 +31,7 @@ function DKP_Entry:New(entry_details)
     self.edited = entry_details['edited'] or false;
     self.deleted = entry_details['deleted'] or false;
     self.officer = entry_details['officer']
-    self.item = entry_details['item'] or 'None Linked'
+    self.item = entry_details['item'] or 'Not Linked'
     self.id = entry_details['id'] or GetServerTime()
     self.other_text = entry_details['other'] or ''
     self.names = entry_details['names']
@@ -65,6 +65,10 @@ function DKP_Entry:Save()
     end
 
     if self.reason == 'Item Win' then
+        if string.find(self.item, 'None Linked') then
+            strreplace(self.item, 'None Linked', 'Not Linked')
+        end
+
         save_details['item'] = self.item
     end
 
