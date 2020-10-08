@@ -158,6 +158,7 @@ function DKP:ResetDKP(selected)
 
         DkpDB['history']['all']={}
         DkpDB['history']['deleted']={}
+        DKP.history_entries = {};
     else
 
     end
