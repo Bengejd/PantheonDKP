@@ -157,7 +157,7 @@ function Guild:MergeOldData()
     local raids = Defaults.dkp_raids
 
     --- Member data
-    Util:Debug("Merging old Member data")
+    Util:Debug("Merging Old Member data")
     for name, old_mem in pairs(old_guild_members) do
         local new_mem = Guild:GetMemberByName(name)
         if new_mem ~= nil then
@@ -177,7 +177,7 @@ function Guild:MergeOldData()
     local current_all = current_history['all']
 
     --- Deleted History
-    Util:Debug("Merging Old Deleted")
+    Util:Debug("Merging Old Deleted Entries")
     for key, ID in pairs(old_deleted) do
         if not tContains(current_deleted, ID) then
             table.insert(current_deleted, ID)
@@ -185,7 +185,7 @@ function Guild:MergeOldData()
     end
 
     --- All History
-    Util:Debug("Merging Old All")
+    Util:Debug("Merging Old Entries")
     for ID, old_entry in pairs(old_all) do
         local current_entry = current_all[ID]
         if current_entry == nil then

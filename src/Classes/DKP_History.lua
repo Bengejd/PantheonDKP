@@ -122,13 +122,10 @@ function HistoryTable:CollapseAllRows(collapse)
 end
 
 function HistoryTable:RefreshData()
-    print('Refreshing History Data')
     self.scrollContent:WipeChildren(self.scrollContent)
     wipe(self.entry_keys)
     local keys, _ = DKP:GetEntries(true, nil);
     self.entry_keys = keys;
-
-    print(#self.entry_keys)
 
     wipe(self.entries)
 

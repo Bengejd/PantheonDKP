@@ -21,7 +21,7 @@ function DKP_Entry:New(entry_details)
 
     -- It is an old entry, so we have to convert it.
     if entry_details['serverTime'] ~= nil then
-        Util:Debug("Old Entry Found, converting to new format")
+        --Util:Debug("Old Entry Found, converting to new format")
         entry_details = self:ConvertOldEntry(entry_details)
     end
 
