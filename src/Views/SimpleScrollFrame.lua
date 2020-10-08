@@ -167,7 +167,7 @@ function SimpleScrollFrame:new(parent)
     end
 
     sc.AddBulkChildren = function(content, frames)
-        sc.WipeChildren(content) -- Wipe the children first, before doing a mass add.
+        content:WipeChildren(content) -- Wipe the children first, before doing a mass add.
 
         local children_height = 0
         for i=1, #frames do
@@ -177,10 +177,11 @@ function SimpleScrollFrame:new(parent)
                 child:SetPoint("TOPLEFT", 0, 0)
                 child:SetPoint("TOPRIGHT", 0, 0)
             else
-                local previous_frame = content.children[childCount]
+                local previous_frame = content.children[i-1]
                 child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
                 child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
             end
+            child:Show()
             children_height = children_height + child:GetHeight()
             tinsert(content.children, child)
         end

@@ -116,17 +116,12 @@ function HistoryTable:RefreshTable()
             row:Show()
         end
     end
+
     self.scrollContent:AddBulkChildren(self.displayedRows)
-
-    print('First', self.displayedRows[1]['index'])
-    print('Last', self.displayedRows[#self.displayedRows]['index'])
-
-    --self.scrollContent:Resize()
 end
 
 -- Refresh the data, resize the table, re-add the children?
 function HistoryTable:HistoryUpdated(selectedUpdate)
-
     self.appliedFilters['raid']=Settings.current_raid
 
     local selected = GUI.memberTable.selected;
@@ -204,7 +199,7 @@ function HistoryTable:OnLoad()
 
         row.collapse_frame = function(_, collapse)
             collapse_button:SetNormalTexture(tenaryAssign(collapse, collapse_tex, expand_tex))
-            row:SetHeight(tenaryAssign(collapse, 25, row.max_height))
+            row:SetHeight(tenaryAssign(collapse, 50, row.max_height + ROW_MARGIN_TOP))
             row.collapsed = tenaryAssign(collapse, true, false)
             if collapse then
                 collapse_text:Show(); row.content:Hide()
@@ -226,9 +221,9 @@ function HistoryTable:OnLoad()
             for filter, val in pairs(self.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to continue the loop.
                 if filter == 'raid' then row.isFiltered = row.dataObj['raid'] ~= val
-                elseif filter == 'selected' and #selected > 0 then
+                elseif filter == 'selected' and selected ~= nil and #selected > 0 then
                     for _, n in pairs(selected) do
-                        row.isFiltered = not tContains(row.dataObj['names'], n)
+                        row.isFiltered = not row.dataObj:IsMemberInEntry(n)
                         if row.isFiltered then break end
                     end
                 end
@@ -290,8 +285,7 @@ function HistoryTable:OnLoad()
         end
 
         function row:UpdateTextValues()
-            local formattedID = row.dataObj['formattedID']
-            --row_title:SetText(formattedID)
+            row_title:SetText(row.dataObj['formattedID'])
             collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
         end
