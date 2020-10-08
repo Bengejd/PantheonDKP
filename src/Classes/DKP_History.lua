@@ -108,11 +108,8 @@ function HistoryTable:RefreshTable()
             row:Show()
         end
     end
-
-    print('Showing', #self.displayedRows)
-    print('First', self.displayedRows[1].index)
-    print('Last', self.displayedRows[#self.displayedRows].index)
-    self.scrollContent:AddBulkChildren(self.displayedRows)
+    local testData = {self.displayedRows[1], self.displayedRows[2], }
+    self.scrollContent:AddBulkChildren(testData)
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -161,14 +158,14 @@ function HistoryTable:OnLoad()
         local collapse_tex = 'Interface\\Buttons\\UI-Panel-ExpandButton-Up'
 
         local border = CreateFrame("Frame", nil, row)
-        border:SetPoint("TOPLEFT", 0, -17)
-        border:SetPoint("BOTTOMRIGHT", -1, 3)
+        border:SetPoint("TOPLEFT", row, "TOPLEFT", 0, 0)
+        border:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -1, 0)
         border:SetBackdrop(PaneBackdrop)
         border:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
         border:SetBackdropBorderColor(0.4, 0.4, 0.4)
 
         row_title = border:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
-        row_title:SetPoint("TOPLEFT", 14, 15)
+        row_title:SetPoint("TOPLEFT", 14, 14)
         row_title:SetHeight(18)
         row_title:SetText(i)
 
@@ -178,14 +175,15 @@ function HistoryTable:OnLoad()
         collapse_text:Hide()
 
         local content = CreateFrame("Frame", nil, border)
-        content:SetPoint("TOPLEFT", 10, -10)
-        content:SetPoint("BOTTOMRIGHT", -10, 10)
+        content:SetPoint("TOPLEFT", 10, 0)
+        content:SetPoint("BOTTOMRIGHT", -10, 0)
+        content:SetFrameLevel(content:GetParent():GetFrameLevel() + 4)
 
         row.border = border
         row.content = content
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-        collapse_button:SetPoint("TOPRIGHT", -2, 1)
+        collapse_button:SetPoint("TOPRIGHT", -2, 15)
         collapse_button:SetNormalTexture(collapse_tex)
         collapse_button:SetSize(20, 20)
 
@@ -244,7 +242,7 @@ function HistoryTable:OnLoad()
                 if header['OnClick'] then
                     local cf = col.click_frame;
                     if cf == nil then
-                        cf = CreateFrame("Frame", nil, row)
+                        cf = CreateFrame("Frame", nil, col)
                         cf:SetAllPoints(col)
                         cf:SetScript("OnMouseUp", PDKP_History_OnClick)
                         col.click_frame = cf;
@@ -252,7 +250,9 @@ function HistoryTable:OnLoad()
                 end
 
                 col:SetSize(row:GetWidth() - 15, 14)
-                if key == 1 then col:SetPoint("TOPLEFT", 5, -5)
+                --col:SetSize(row:GetWidth() - 15, 100)
+                if key == 1 then
+                    col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
                 else
                     col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
                 end
@@ -268,8 +268,9 @@ function HistoryTable:OnLoad()
                 row.max_height = row.max_height + col:GetStringHeight() + 12
                 row.cols[key] = col
             end
-            row:SetHeight(row.max_height)
+            content:SetHeight(row.max_height)
             row:UpdateTextValues()
+
         end
 
         function row:UpdateTextValues()
@@ -279,6 +280,8 @@ function HistoryTable:OnLoad()
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
             row:collapse_frame()
         end
+
+        row.collapse_frame(true)
 
         row:UpdateRowValues()
 
