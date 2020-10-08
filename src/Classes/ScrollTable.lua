@@ -174,6 +174,14 @@ end
 
 function ScrollTable:GetDisplayRows()
     wipe(self.displayedRows); -- Return to initial value.
+
+    local selected_button = _G['pdkp_filter_selected'];
+
+    if self.appliedFilters['selected'] and #self.selected == 0 then
+        self.appliedFilters['selected'] = false
+        selected_button:SetChecked(false)
+    end
+
     for i=1, #self.displayData do
         local row = self.rows[i];
         if not row:ApplyFilters() then
