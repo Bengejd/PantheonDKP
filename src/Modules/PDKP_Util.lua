@@ -412,6 +412,10 @@ function tEmpty(t)
     return next(t) == nil;
 end
 
+function tenaryAssign(cond, T, F)
+    if cond then return T else return F end
+end
+
 
 
 
