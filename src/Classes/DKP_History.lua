@@ -17,6 +17,9 @@ HistoryTable.__index = HistoryTable; -- Set the __index parameter to reference
 local type, floor, strupper, pi, substr = type, math.floor, strupper, math.pi, string.match
 local tinsert, tremove = tinsert, tremove
 
+local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
+local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
+
 local PaneBackdrop  = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -30,6 +33,8 @@ local ROW_COL_HEADERS = {
     { ['variable']='formattedNames', ['display']='Members', ['onClick']=true, },
     { ['variable']='change_text', ['display']='Amount'}
 }
+
+local ROW_MARGIN_TOP = 16 -- The margin between rows.
 
 --[[                --['headers'] = {
                 --    [2] = {
@@ -80,6 +85,9 @@ function HistoryTable:init(table_frame)
         end
     end)
 
+    -- TODO: Change border color on the frame to be dark and the rows to be light.
+    --border:SetBackdropColor(0, 0, 0, 0.4)
+
     self:OnLoad()
 
     self:RefreshData()
@@ -108,8 +116,12 @@ function HistoryTable:RefreshTable()
             row:Show()
         end
     end
-    local testData = {self.displayedRows[1], self.displayedRows[2], }
-    self.scrollContent:AddBulkChildren(testData)
+    self.scrollContent:AddBulkChildren(self.displayedRows)
+
+    print('First', self.displayedRows[1]['index'])
+    print('Last', self.displayedRows[#self.displayedRows]['index'])
+
+    --self.scrollContent:Resize()
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -158,7 +170,7 @@ function HistoryTable:OnLoad()
         local collapse_tex = 'Interface\\Buttons\\UI-Panel-ExpandButton-Up'
 
         local border = CreateFrame("Frame", nil, row)
-        border:SetPoint("TOPLEFT", row, "TOPLEFT", 0, 0)
+        border:SetPoint("TOPLEFT", row, "TOPLEFT", 0, -ROW_MARGIN_TOP)
         border:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -1, 0)
         border:SetBackdrop(PaneBackdrop)
         border:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
@@ -184,9 +196,9 @@ function HistoryTable:OnLoad()
         row.content = content
 
         local collapse_button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-        collapse_button:SetPoint("TOPRIGHT", -2, 15)
+        collapse_button:SetPoint("TOPRIGHT", -2, -2)
         collapse_button:SetNormalTexture(collapse_tex)
-        collapse_button:SetSize(20, 20)
+        collapse_button:SetSize(15, 15)
 
         row.super = self;
 
@@ -272,14 +284,14 @@ function HistoryTable:OnLoad()
                 row.cols[key] = col
             end
 
-            row:SetHeight(row.max_height)
+            row:SetHeight(row.max_height + ROW_MARGIN_TOP)
             row:UpdateTextValues()
 
         end
 
         function row:UpdateTextValues()
             local formattedID = row.dataObj['formattedID']
-            row_title:SetText(formattedID)
+            --row_title:SetText(formattedID)
             collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
         end
