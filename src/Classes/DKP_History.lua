@@ -146,7 +146,7 @@ end
 function HistoryTable:OnLoad()
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Frame", nil, self.scrollContent)
-        row:SetSize(350, 100)
+        row:SetSize(350, 50)
         row.index = i;
         row.dataObj = self.entries[i];
         row.cols = {};
@@ -169,15 +169,16 @@ function HistoryTable:OnLoad()
         row_title:SetHeight(18)
         row_title:SetText(i)
 
+        local content = CreateFrame("Frame", nil, border)
+        content:SetWidth(row:GetWidth() - 20)
+        content:SetPoint("TOPLEFT", border, "TOPLEFT", 5, -5)
+        content:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", -10, 0)
+        content:SetBackdropColor(0.5, 0.5, 0.5, 1)
+
         collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         collapse_text:SetHeight(18)
         collapse_text:SetPoint("LEFT", 14, 0)
         collapse_text:Hide()
-
-        local content = CreateFrame("Frame", nil, border)
-        content:SetPoint("TOPLEFT", 10, 0)
-        content:SetPoint("BOTTOMRIGHT", -10, 0)
-        content:SetFrameLevel(content:GetParent():GetFrameLevel() + 4)
 
         row.border = border
         row.content = content
@@ -189,12 +190,15 @@ function HistoryTable:OnLoad()
 
         row.super = self;
 
-        row.collapse_frame = function(collapse)
+        row.collapse_frame = function(_, collapse)
             collapse_button:SetNormalTexture(tenaryAssign(collapse, collapse_tex, expand_tex))
-            row:SetHeight(tenaryAssign(collapse, 50, row.max_height))
+            row:SetHeight(tenaryAssign(collapse, 25, row.max_height))
             row.collapsed = tenaryAssign(collapse, true, false)
-            tenaryAssign(collapse, collapse_text:Show(), collapse_text:Hide())
-            tenaryAssign(collapse, row.content:Hide(), row.content:Show())
+            if collapse then
+                collapse_text:Show(); row.content:Hide()
+            else
+                collapse_text:Hide(); row.content:Show();
+            end
         end
 
         collapse_button:SetScript("OnClick", function() row:collapse_frame(not row.collapsed) end)
@@ -249,8 +253,7 @@ function HistoryTable:OnLoad()
                     end
                 end
 
-                col:SetSize(row:GetWidth() - 15, 14)
-                --col:SetSize(row:GetWidth() - 15, 100)
+                col:SetWidth(content:GetWidth() - 5)
                 if key == 1 then
                     col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
                 else
@@ -262,13 +265,14 @@ function HistoryTable:OnLoad()
                     local _, item = strsplit(' - ', val)
                     item = strtrim(item)
                     if item then
-                        print('Need to do fancy Tooltip stuff here')
+                        --print('Need to do fancy Tooltip stuff here')
                     end
                 end
-                row.max_height = row.max_height + col:GetStringHeight() + 12
+                row.max_height = row.max_height + col:GetStringHeight() + 6
                 row.cols[key] = col
             end
-            content:SetHeight(row.max_height)
+
+            row:SetHeight(row.max_height)
             row:UpdateTextValues()
 
         end
@@ -277,8 +281,7 @@ function HistoryTable:OnLoad()
             local formattedID = row.dataObj['formattedID']
             row_title:SetText(formattedID)
             collapse_text:SetText(row.dataObj['raid'] .. " | " .. row.dataObj['formattedOfficer']  .. " | " .. row.dataObj['historyText'])
-            if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(325) end
-            row:collapse_frame()
+            if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
         end
 
         row.collapse_frame(true)
@@ -290,6 +293,8 @@ function HistoryTable:OnLoad()
     end})
 
     self.rows = rows
+
+    -- TODO: BUG: When selecting the same raid again in the dropdown, history disappears.
 end
 
 --function HistoryTable:OnLoad()

@@ -570,6 +570,11 @@ function Setup:RandomStuff()
     Setup:InterfaceOptions()
     Setup:PushProgressBar()
     Setup:HistoryTable()
+
+    --- For debugging purposes.
+    pdkp_frame:Show()
+    GUI['view_history_button']:Click()
+    GUI:RefreshTables()
 end
 
 function Setup:PushProgressBar()
@@ -1368,6 +1373,7 @@ function Setup:DKPHistory()
         local b_text = b:CreateFontString(b, 'OVERLAY', 'GameFontNormalLeft')
         b_text:SetPoint("CENTER", 0, -5)
         b_text:SetText(btn['text'])
+        GUI[name] = b
     end
 
     f:Hide()
@@ -1947,6 +1953,8 @@ function Setup:HistoryTable()
     hf:SetPoint("BOTTOMRIGHT", -7, 0)
 
     GUI.history_table = HistoryTable:init(hf)
+
+
 
 
     --f:SetHeight(200)
