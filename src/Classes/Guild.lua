@@ -19,6 +19,7 @@ local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local DKP_Entry = core.DKP_Entry;
+local Settings = core.Settings;
 
 local GuildDB = PDKP.guildDB;
 
@@ -193,6 +194,7 @@ function Guild:MergeOldData()
             new_entry:Save()
         end
     end
+    Settings.db['mergedOld'] = true
 end
 
 --local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");

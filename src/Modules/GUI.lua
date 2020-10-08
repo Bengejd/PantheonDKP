@@ -239,18 +239,18 @@ end
 ---------------------------
 
 PDKP_POPUP_DIALOG_SETTINGS = {
-    ['PDKP_Placeholder']={
-        text = "This method is under construction",
-        button1 = "OK",
-        OnAccept = function()
-        end,
-        OnCancel = function()
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-    },
+    --['PDKP_Placeholder']={
+    --    text = "This method is under construction",
+    --    button1 = "OK",
+    --    OnAccept = function()
+    --    end,
+    --    OnCancel = function()
+    --    end,
+    --    timeout = 0,
+    --    whileDead = true,
+    --    hideOnEscape = true,
+    --    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    --},
     ["PDKP_RAID_BOSS_KILL"]={
         text = "", -- set by the calling function.
         button1 = "Award DKP",
@@ -267,21 +267,21 @@ PDKP_POPUP_DIALOG_SETTINGS = {
         hideOnEscape = false,
         preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
     },
-    ['PDKP_CONFIRM_DKP_CHANGE'] = {
-        text = "",
-        button1 = "Confirm",
-        button2 = "Cancel",
-        OnAccept = function()
-            DKP:UpdateEntries()
-        end,
-        OnCancel = function()
-            StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = false,
-        preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-    },
+    --['PDKP_CONFIRM_DKP_CHANGE'] = {
+    --    text = "",
+    --    button1 = "Confirm",
+    --    button2 = "Cancel",
+    --    OnAccept = function()
+    --        DKP:UpdateEntries()
+    --    end,
+    --    OnCancel = function()
+    --        StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
+    --    end,
+    --    timeout = 0,
+    --    whileDead = true,
+    --    hideOnEscape = false,
+    --    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    --},
 
     ['PDKP_DKP_ENTRY_POPUP']={
         text = "What would you like to do to this entry?",
@@ -322,9 +322,9 @@ PDKP_POPUP_DIALOG_SETTINGS = {
         hideOnEscape = false,
         preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
     },
-    ['PDKP_CONFIRM_DKP_ENTRY_POPUP']={
-
-    },
+    --['PDKP_CONFIRM_DKP_ENTRY_POPUP']={
+    --
+    --},
     ['PDKP_OFFICER_PUSH_CONFIRM'] = {
         text = "WARNING THIS IS GUILD WIDE \n Overwrite is permanent and cannot be reversed. Merge is a safer option.",
         button1 = "Overwrite",

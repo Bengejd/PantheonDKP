@@ -159,12 +159,19 @@ function DKP:ResetDKP(selected)
         DkpDB['history']['all']={}
         DkpDB['history']['deleted']={}
         DKP.history_entries = {};
+
+        Settings.db['mergedOld'] = false
+
+        for i=1, #GUI.history_table.rows do
+            local row = GUI.history_table.rows[i]
+            row.dataObj['deleted'] = true
+        end
     else
 
     end
 
-
     GUI.memberTable:RaidChanged()
+    GUI.history_table:RefreshData()
 end
 
 function DKP:CalculateButton(b_type)

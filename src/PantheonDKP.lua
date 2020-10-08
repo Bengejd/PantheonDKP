@@ -72,6 +72,9 @@ end
 -- This function is only called when Guild data is ready to be processed.
 function PDKP:OnDataAvailable()
     Guild:new();
+
+    if not Settings.db['mergedOld'] then Guild:MergeOldData() end
+
     GUI:Init();
     Raid:new();
     Comms:Init();
@@ -109,6 +112,7 @@ function PDKP:InitializeDatabases()
                 ['debug'] = false,
                 ['ignore_from']={},
                 ['minimap']={},
+                ['mergedOld']=false
             },
         }
     end
