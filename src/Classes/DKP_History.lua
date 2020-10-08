@@ -19,6 +19,8 @@ local tinsert, tremove = tinsert, tremove
 
 local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
 local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
+local EXPAND_ALL = "Interface\\Addons\\PantheonDKP\\Icons\\expand_all.tga"
+local COLLAPSE_ALL = "Interface\\Addons\\PantheonDKP\\Icons\\collapse_all.tga"
 
 local PaneBackdrop  = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -75,6 +77,7 @@ function HistoryTable:init(table_frame)
     self.entries = {};
     self.updateNextOpen = false
     self.displayedRows = {};
+    self.collapsed = false
 
     self.appliedFilters['raid'] = Settings.current_raid
 
@@ -85,6 +88,19 @@ function HistoryTable:init(table_frame)
         end
     end)
 
+    self.frame.title:SetFontObject("GameFontHighlightLarge")
+    self.frame.title:SetTextColor(Util:HexToRGBA('#FFBA49'))
+
+    local collapse_all = CreateFrame("Button", nil, self.frame)
+    collapse_all:SetPoint("TOPRIGHT")
+    collapse_all:SetSize(16, 16)
+    collapse_all:SetNormalTexture(EXPAND_ALL)
+    collapse_all:SetScript("OnClick", function()
+        self.collapsed = not self.collapsed;
+        collapse_all:SetNormalTexture(tenaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
+        self:CollapseAllRows(self.collapsed)
+    end)
+
     -- TODO: Change border color on the frame to be dark and the rows to be light.
     --border:SetBackdropColor(0, 0, 0, 0.4)
 
@@ -93,6 +109,14 @@ function HistoryTable:init(table_frame)
     self:RefreshData()
 
     return self
+end
+
+function HistoryTable:CollapseAllRows(collapse)
+    for i=1, #self.rows do
+        local row = self.rows[i]
+        row:collapse_frame(collapse)
+    end
+    self.scrollContent:Resize(0, 0)
 end
 
 function HistoryTable:RefreshData()
@@ -129,7 +153,18 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     elseif #selected == 0 then self.appliedFilters['selected'] = nil;
     end
 
+    self:UpdateTitleText(selected)
+
     self:RefreshTable()
+end
+
+function HistoryTable:UpdateTitleText(selected)
+    local raid = Settings.current_raid;
+    local text = raid .. ' History'
+
+    if #selected == 1 then text = selected[1] .. ' History'; end
+
+    self.frame.title:SetText(text)
 end
 
 function PDKP_History_OnClick(frame, buttonType)
@@ -206,9 +241,13 @@ function HistoryTable:OnLoad()
             else
                 collapse_text:Hide(); row.content:Show();
             end
+
         end
 
-        collapse_button:SetScript("OnClick", function() row:collapse_frame(not row.collapsed) end)
+        collapse_button:SetScript("OnClick", function()
+            row:collapse_frame(not row.collapsed)
+            self.scrollContent:Resize(0, 0)
+        end)
 
         function row:ApplyFilters()
             local self = row.super;
@@ -221,7 +260,7 @@ function HistoryTable:OnLoad()
             for filter, val in pairs(self.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to continue the loop.
                 if filter == 'raid' then row.isFiltered = row.dataObj['raid'] ~= val
-                elseif filter == 'selected' and selected ~= nil and #selected > 0 then
+                elseif filter == 'selected' and selected ~= nil and #selected == 1 then
                     for _, n in pairs(selected) do
                         row.isFiltered = not row.dataObj:IsMemberInEntry(n)
                         if row.isFiltered then break end

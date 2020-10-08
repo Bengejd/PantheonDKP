@@ -195,8 +195,12 @@ function SimpleScrollFrame:new(parent)
         end)
     end)
 
-    sc.Resize = function()
+    sc.Resize = function(_, offsetX1, offsetX2)
         sc:SetHeight(0)
+
+        offsetX1 = offsetX1 or 2
+        offsetX2 = offsetX2 or -15
+
         local temp_children = {}
         for i=1, #sc.children do
             local child_frame = sc.children[i]
@@ -209,8 +213,8 @@ function SimpleScrollFrame:new(parent)
             local child_frame = temp_children[i]
             child_frame:ClearAllPoints()
             if i == 1 then
-                child_frame:SetPoint("TOPLEFT", 2, 0)
-                child_frame:SetPoint("TOPRIGHT", -15, 0)
+                child_frame:SetPoint("TOPLEFT", offsetX1, 0)
+                child_frame:SetPoint("TOPRIGHT", offsetX2, 0)
             else
                 child_frame:SetPoint("TOPLEFT", temp_children[i-1], "BOTTOMLEFT", 0, 0)
                 child_frame:SetPoint("TOPRIGHT", temp_children[i-1], "BOTTOMRIGHT", 0, 0)
