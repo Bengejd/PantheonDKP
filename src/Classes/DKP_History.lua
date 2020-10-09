@@ -40,27 +40,6 @@ local deleted_row = nil;
 
 local ROW_MARGIN_TOP = 16 -- The margin between rows.
 
---[[                --['headers'] = {
-                --    [2] = {
-                --        ['label']='historyText',
-                --        ['sortable']=false,
-                --        ['point']='LEFT',
-                --        ['displayName']='Reason',
-                --        ['showSortDirection'] = false,
-                --        ['display']=false,
-                --        ['onClickFunc']=function(row, buttonType)
-                --            if buttonType == 'LeftButton' then
-                --
-                --            end
-                --
-                --            if buttonType == 'RightButton' then
-                --                GUI.popup_entry = row.dataObj
-                --                StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
-                --            end
-                --        end
-                --    },
-                --}]]
-
 function HistoryTable:init(table_frame)
     local self = {};
     setmetatable(self, HistoryTable)
@@ -139,6 +118,7 @@ function HistoryTable:RefreshTable()
     for i=1, #self.entry_keys do
         local row = self.rows[i]
         row:Hide()
+        row:ClearAllPoints()
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row)
             row:Show()
@@ -177,7 +157,8 @@ function PDKP_History_OnClick(frame, buttonType)
     local label = frame.label;
     local dataObj = frame:GetParent()['dataObj']
 
-    if label == 'Members' then return GUI.memberTable:SelectNames(dataObj['names'])
+    if label == 'Members' then
+        return GUI.memberTable:SelectNames(dataObj['names'])
     elseif label == 'Reason' and buttonType == 'RightButton' then
         GUI.popup_entry = dataObj
         StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
@@ -218,6 +199,7 @@ function HistoryTable:OnLoad()
 
         row_title = border:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
         row_title:SetPoint("TOPLEFT", 14, 14)
+        row_title:SetPoint("TOPRIGHT", 20, 14)
         row_title:SetHeight(18)
         row_title:SetText(i)
 
@@ -251,7 +233,7 @@ function HistoryTable:OnLoad()
             else
                 collapse_text:Hide(); row.content:Show();
             end
-
+            row:HideColClicks()
         end
 
         collapse_button:SetScript("OnClick", function()
@@ -279,6 +261,19 @@ function HistoryTable:OnLoad()
             end
 
             return row.isFiltered;
+        end
+
+        function row:HideColClicks()
+            for _, c in pairs(row.cols) do
+                local cf = c.click_frame
+                if row.content:IsVisible() then
+                    c:Show()
+                    if cf then cf:Show() end
+                else
+                    c:Hide()
+                    if cf then cf:Hide() end
+                end
+            end
         end
 
         function row:UpdateRowValues(entry)
