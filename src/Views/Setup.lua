@@ -1596,7 +1596,6 @@ function Setup:InterfaceOptions()
         }
     end
 
-
     local options = {
         type = "group",
         args = {
@@ -1608,9 +1607,9 @@ function Setup:InterfaceOptions()
                     Silent = {
                         name = "Enabled",
                         type = "toggle",
-                        desc="Enables / Disables all messages from the addon. Requires a reload when re-enabling",
-                        set = function(info,val) Defaults:TogglePrinting(not val) end,
-                        get = function(info) return not Settings.db.silent end
+                        desc="Enables / Disables all messages from the addon.",
+                        set = function(info,val) return Settings:GetSetInterface('set', 'silent', val) end,
+                        get = function(info) return not Settings:GetSetInterface('get', 'silent', nil) end
                     },
                 }
             },
@@ -1625,22 +1624,22 @@ function Setup:InterfaceOptions()
                         name = "Battlegrounds",
                         desc = "Enable / Disable sync while in Battlegrounds",
                         type = "toggle",
-                        set = function(info,val) Settings.db.sync.pvp = val end,
-                        get = function(info) return Settings.db.sync.pvp end
+                        set = function(info,val) return Settings:GetSetInterface('set', 'pvp', val) end,
+                        get = function(info) return Settings:GetSetInterface('get', 'pvp', nil) end
                     },
                     syncInRaid = {
                         name = "Raids",
                         desc = "Enable / Disable sync while in Raid Instances",
                         type = "toggle",
-                        set = function(info,val) Settings.db.sync.raids = val end,
-                        get = function(info) return Settings.db.sync.raids end
+                        set = function(info,val) return Settings:GetSetInterface('set', 'raids', val) end,
+                        get = function(info) return Settings:GetSetInterface('get', 'raids', nil) end
                     },
                     syncInDungeons = {
                         name = "Dungeons",
                         desc = "Enable / Disable sync while in Dungeon Instances",
                         type = "toggle",
-                        set = function(info,val) Settings.db.sync.dungeons = val end,
-                        get = function(info) return Settings.db.sync.dungeons end
+                        set = function(info,val) return Settings:GetSetInterface('set', 'dungeons', val) end,
+                        get = function(info) return Settings:GetSetInterface('get', 'dungeons', nil) end
                     },
                     syncDesc = {
                         name="These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.",
@@ -1653,7 +1652,7 @@ function Setup:InterfaceOptions()
         }
     }
 
-    if core.canEdit then
+    if Settings:CanEdit() then
         options.args.adminGroup = {
             name='3. Officer',
             type="group",
@@ -1663,8 +1662,9 @@ function Setup:InterfaceOptions()
                     name = "Addon Debugging",
                     type = "toggle",
                     desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
-                    set = function(info,val) Defaults:ToggleDebugging() end,
-                    get = function(info) return Settings.db.debug end
+                    set = function(info,val) return Settings:GetSetInterface('set', 'debug', val) end,
+                    get = function(info) return Settings:GetSetInterface('get', 'debug', nil) end
+
                 },
             }
         }

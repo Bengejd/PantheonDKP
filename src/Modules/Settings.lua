@@ -27,10 +27,14 @@ Settings.bank_name = 'PantheonBank';
 Settings.current_raid = 'Molten Core';
 Settings.db = nil;
 
+Settings.sync = {}
+Settings.settings = {};
+
 function Settings:InitDB()
     SettingsDB = core.PDKP.db['settingsDB']
     Settings.db = SettingsDB
     Settings.current_raid = SettingsDB['current_raid'] or 'Molten Core';
+    Settings:SetSettings()
 end
 
 function Settings:ChangeCurrentRaid(raid)
@@ -44,12 +48,9 @@ function Settings:UpdateIgnoreFrom(ignore_arr, init)
     return SettingsDB['ignore_from']
 end
 
-function Settings:GetSetIgnoreFrom()
-
-end
-
 function Settings:ToggleDebugging()
     SettingsDB['debug'] = not SettingsDB['debug']
+
     local debugText
     if SettingsDB['debug'] == true then
         debugText = 'Debugging Enabled'
@@ -87,6 +88,44 @@ function Settings:GetAddonVersion()
     return GetAddOnMetadata('PantheonDKP', "Version")
 end
 
+function Settings:SetSettings()
+    Settings.settings = {
+        ['silent']=Settings.db.silent,
+        ['pvp']=Settings.db.sync.pvp,
+        ['raids']=Settings.db.sync.raids,
+        ['dungeons']=Settings.db.sync.dunegeons,
+        ['debug']=Settings.db.debug,
+    }
+    return Settings.settings;
+end
+
+function Settings:GetSetInterface(type, setting, value)
+    Settings:SetSettings()
+    local types = {
+        ['get']=function() return Settings.settings[setting] end,
+        ['set']=function()
+            if setting == 'pvp' or setting == 'raids' or setting == 'dungeons' then Settings.db.sync[setting] = value end
+            if setting == 'debug' then Settings:ToggleDebugging() end
+            if setting == 'silent' then Settings.db.silent = not value end
+        end,
+    }
+
+    if types[type] ~= nil then
+        local setting_val = types[type]()
+        Settings:SetSettings()
+        if type == 'set' then Settings:RespectSettings(true) end
+        return setting_val
+    end
+end
+
+function Settings:RespectSettings(clicked)
+    for s_name, s_val in pairs(Settings.settings) do
+        local val = Settings.settings[s_name]
+        if s_name == 'silent' then
+            if val then setprinthandler(PDKP_NoPrintHandler) else setprinthandler(PDKP_PrintHandler) end
+        end
+    end
+end
 
 
 

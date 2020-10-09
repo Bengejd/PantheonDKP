@@ -73,8 +73,10 @@ end
 function PDKP:OnDataAvailable()
     Guild:new();
 
+    -- TODO: Determine if I want this as a popup or not.
     --if not Settings.db['mergedOld'] then Guild:MergeOldData() end
 
+    Settings:RespectSettings(); -- Respect the user's settings.
     GUI:Init();
     Raid:new();
     Comms:Init();
@@ -369,7 +371,11 @@ function PDKP_PrintHandler(...)
     PDKP:Print(strjoin(" ", tostringall(...)))
 end
 
-setprinthandler(PDKP_PrintHandler)
+function PDKP_NoPrintHandler(...)
+
+end
+
+
 
 local eventNames = {
     "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START", "PLAYER_GUILD_UPDATE",
