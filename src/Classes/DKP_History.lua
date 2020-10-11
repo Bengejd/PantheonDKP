@@ -224,16 +224,24 @@ function HistoryTable:OnLoad()
 
         row.super = self;
 
-        row.collapse_frame = function(_, collapse)
-            collapse_button:SetNormalTexture(tenaryAssign(collapse, collapse_tex, expand_tex))
-            row:SetHeight(tenaryAssign(collapse, 50, row.max_height + ROW_MARGIN_TOP))
-            row.collapsed = tenaryAssign(collapse, true, false)
-            if collapse then
-                collapse_text:Show(); row.content:Hide()
-            else
-                collapse_text:Hide(); row.content:Show();
-            end
+        row.content:SetScript("OnShow", function()
+            collapse_button:SetNormalTexture(expand_tex)
+            row:SetHeight(row.max_height + ROW_MARGIN_TOP)
+            row.collapsed = false
+            collapse_text:Hide()
             row:HideColClicks()
+        end)
+
+        row.content:SetScript("OnHide", function()
+            collapse_button:SetNormalTexture(collapse_tex)
+            row:SetHeight(50)
+            row.collapsed = true
+            collapse_text:Show()
+            row:HideColClicks()
+        end)
+
+        row.collapse_frame = function(_, collapse)
+            if collapse then row.content:Hide() else row.content:Show(); end
         end
 
         collapse_button:SetScript("OnClick", function()

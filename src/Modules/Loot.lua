@@ -66,32 +66,37 @@ function Loot:RegisterMobLoot()
         ['mob_name']=mob_name,
         ['loot']={}
     }
+
+    local function getItemId(itemLink) return select(2, GetItemInfo(":", itemLink, 3)) end
+
     for i=1, GetNumLootItems() do
         local item = GetLootSlotLink(i)
-        if item then
+        if item ~= nil then
             local itemName = select(1, GetItemInfo(item))
-            local itemLink = select(2, GetItemInfo(item))
-            local itemId = select(2, strsplit(":", itemLink, 3))
-            local itemRarity = select(3, GetItemInfo(item))
-            local itemTime = GetServerTime()
-            --local itemLevel = select(4, GetItemInfo(item))
-            --local itemReqLevel = select(5, GetItemInfo(item))
-            local itemType = select(6, GetItemInfo(item))
-            local itemSubType = select(7, GetItemInfo(item))
-            --local itemPrice = select(11, GetItemInfo(item))
+            if itemName then
+                local itemLink = select(2, GetItemInfo(item))
+                local itemId = select(2, strsplit(":", itemLink, 3))
+                local itemRarity = select(3, GetItemInfo(item))
+                local itemTime = GetServerTime()
+                --local itemLevel = select(4, GetItemInfo(item))
+                --local itemReqLevel = select(5, GetItemInfo(item))
+                local itemType = select(6, GetItemInfo(item))
+                local itemSubType = select(7, GetItemInfo(item))
+                --local itemPrice = select(11, GetItemInfo(item))
 
-            local item_info = {
-                ['name']=itemName,
-                ['link']=itemLink,
-                ['quality']=itemRarity,
-                ['id']=itemId,
-                ['time']=itemTime,
-                ['type']=itemType,
-                ['subType']=itemSubType,
-                ['slot']=i,
-            }
+                local item_info = {
+                    ['name']=itemName,
+                    ['link']=itemLink,
+                    ['quality']=itemRarity,
+                    ['id']=itemId,
+                    ['time']=itemTime,
+                    ['type']=itemType,
+                    ['subType']=itemSubType,
+                    ['slot']=i,
+                }
 
-            if Loot:CheckForValidLoot(item_info) then table.insert(mob_loot_info['loot'], item_info) end
+                if Loot:CheckForValidLoot(item_info) then table.insert(mob_loot_info['loot'], item_info) end
+            end
         end
     end
 
