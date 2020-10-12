@@ -4,7 +4,7 @@ TODO: Fix bug with In-Raid Filter not showing raid members in your raid.
 TODO: Setup DKP Officer popup.
 TODO: Setup Loot Prio again.
 TODO: Loot Prio Alterations in addon, instead of having to wait for an update.
-TODO: Find what color the original version text was.a
+TODO: Find what color the original version text was.
 
 ESSENTIALS:
     TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
@@ -14,7 +14,7 @@ ESSENTIALS:
     TODO: Disable requests while you are in an instance / raid group.
     TODO: Save positioning of the shrouding window through states.
     TODO: BUG: Fix the visual issue with dkp updates on boss kills not updating the underlying values of the scroll table.
-    TODO: Save shrouding window positioning
+    TODO: Save shrouding window positioning.
 
 LOCAL DESKTOP APP:
     TODO: Figure out how to create a desktop app.
