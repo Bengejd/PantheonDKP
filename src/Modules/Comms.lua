@@ -49,7 +49,8 @@ local GUILD_COMMS = {
 }
 
 local DEBUG_COMMS = {
-    ['pdkpTestPush1234']=true
+    ['pdkpSyncTables']=true,
+    ['placeholder']=true,
 }
 
 function Comms:DataEncoder(data)
@@ -113,8 +114,10 @@ end
 ---------------------------
 --    Send Functions     --
 ---------------------------
-function OnCommReceived(prefix, message, distribution, sender)
+function OnCommReceived(prefix, data, distribution, sender)
     Util:Debug(prefix, 'message received!')
+
+
 
     --if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
     --    if prefix ~= 'pdkpNewShrouds' then
