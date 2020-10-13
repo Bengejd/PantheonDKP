@@ -6,6 +6,10 @@ TODO: Setup Loot Prio again.
 TODO: Loot Prio Alterations in addon, instead of having to wait for an update.
 TODO: Find what color the original version text was.
 
+TODO: Comms when Creating an entry
+TODO: Comms when deleting an entry
+TODO: Comms when receiving an entry change.
+
 ESSENTIALS:
     TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
     TODO: Settings menu when mini-map is right-clicked.

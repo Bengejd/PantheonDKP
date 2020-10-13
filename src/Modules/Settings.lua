@@ -30,6 +30,9 @@ Settings.db = nil;
 Settings.sync = {}
 Settings.settings = {};
 
+Settings.smallSyncAvailable = true;
+Settings.longSyncAvailable = true;
+
 function Settings:InitDB()
     SettingsDB = core.PDKP.db['settingsDB']
     Settings.db = SettingsDB

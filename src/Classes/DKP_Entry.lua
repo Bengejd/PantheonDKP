@@ -44,6 +44,7 @@ function DKP_Entry:New(entry_details)
     self.collapsedHistoryText = self:GetCollapsedHistoryText()
     self.formattedOfficer = self:GetFormattedOfficer()
     self.formattedID = Util:Format12HrDateTime(self.id)
+    self.edited_fields = entry_details['edited_fields'] or {}
 
     return self
 end
@@ -78,6 +79,44 @@ function DKP_Entry:Save()
     core.PDKP.dkpDB['history']['all'][self.id] = save_details
 end
 
+function DKP_Entry:PreparePushData()
+    if self.deleted == true then return nil end
+
+    local push_details = {
+        ['reason']=self.reason,
+        ['dkp_change']=self.dkp_change,
+        ['boss']=self.boss,
+        ['adjust_type'] = self.adjust_type,
+        ['edited']=self.edited,
+        ['deleted']=self.deleted,
+        ['officer']=self.officer,
+        ['id']=self.id,
+        ['raid']=self.raid,
+        ['names']=self.names,
+        ['previousTotals']=self.previousTotals,
+        ['item']=self.item,
+        ['other_text']=self.other_text,
+    }
+    if self.reason == 'Item Win' and self.item ~= 'Not Linked' then push_details['item']=self.item end
+    if self.other_text ~= nil and self.other_text ~= '' then push_details['other_text']=self.other_text end
+
+    return push_details
+end
+
+function DKP_Entry:PrepareDeletedPushData()
+    local push_details = {
+        ['reason']=self.reason,
+        ['dkp_change']=self.dkp_change,
+        ['deleted']=true,
+        ['officer']=self.officer,
+        ['id']=self.id,
+        ['raid']=self.raid,
+        ['names']=self.names,
+        ['previousTotals']=self.previousTotals,
+    }
+    return push_details
+end
+
 function DKP_Entry:GetFormattedOfficer()
     -- Old entries have officer names formatted already.
     if string.match(self.officer, 'cff') then self.officer = Util:RemoveColorFromname(self.officer) end
@@ -88,7 +127,7 @@ end
 
 function DKP_Entry:GetFormattedNames()
 
-    --- Old entries have names formatted differently.
+    -- Old entries have names formatted differently.
     if self.old_entry then
         if type(self.names) == type({}) then
             for key, name in pairs(self.names) do

@@ -14,13 +14,15 @@ local Guild = core.Guild; -- Uppercase is the file
 local guild = core.guild; -- Lowercase is the object
 local Shroud = core.Shroud;
 local Member = core.Member;
-local Import = core.Import;
 local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local Settings = core.Settings;
 local DKP_Entry = core.DKP_Entry;
+
+local Export = core.Export;
+local Import = core.Import;
 
 local DkpDB;
 
@@ -110,6 +112,8 @@ function DKP:Submit()
     core.PDKP.dkpDB['history']['lastEdit']=entry.id
 
     GUI:RefreshTables()
+
+    Export:New('push-add', entry)
 end
 
 function DKP:DeleteEntry()
@@ -128,6 +132,11 @@ function DKP:DeleteEntry()
 
     GUI.memberTable:RaidChanged()
     GUI.popup_entry = nil;
+
+    entry['deleted']=true
+
+    Export:New('push-delete', entry)
+
     return entry['id']
 end
 

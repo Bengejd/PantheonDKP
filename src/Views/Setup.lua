@@ -13,7 +13,6 @@ local Setup = core.Setup;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
 local Member = core.Member;
-local Import = core.Import;
 local Officer = core.Officer;
 local Invites = core.Invites;
 local Minimap = core.Minimap;
@@ -23,6 +22,9 @@ local Settings = core.Settings;
 local Loot = core.Loot;
 local HistoryTable = core.HistoryTable;
 local SimpleScrollFrame = core.SimpleScrollFrame;
+
+local Export = core.Export;
+local Import = core.Import;
 
 local AceGUI = LibStub("AceGUI-3.0")
 local pdkp_frame = nil
@@ -469,37 +471,16 @@ function Setup:Debugging()
             Guild:MergeOldData()
         end,
         ['Overwrite Push']=function()
-            print('Preparing Full Overwrite Push')
-            local members = Guild.members
-            local data = {
-                ['history']=DKP.history,
-                ['dkp']={},
-            }
-            for name, member in pairs(members) do
-                local member_data = member:PreparePushData()
-                if not tEmpty(member_data) then
-                    data['dkp'][name]=member_data
-                end
-            end
-            print("Starting Full Overwrite Push")
-
-            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
+            Export:New('push-overwrite')
         end,
         ['Merge Push']=function()
-            local members = Guild.members
-            local data = {
-                ['history']=DKP.history,
-            }
-            print("Starting Merge Push")
-
-            Comms:SendCommsMessage('pdkpTestPush1234', data, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
+            Export:New('push-merge')
         end,
         ['AQ-Quest Report']=function()
             Loot:TestGetAQLoots()
         end,
     }
-    local button_counter_x = 1
-    local button_counter_y = 1
+
     local button_counter = 1
     for name, func in pairs(buttons) do
         local db = CreateFrame("Button", nil, f, "UiPanelButtonTemplate")

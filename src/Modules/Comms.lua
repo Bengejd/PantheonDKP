@@ -28,24 +28,24 @@ Comms.commsRegistered = false
 --[[ MESSAGE TYPES: "PARTY", "RAID", "GUILD", "OFFICER", "BATTLEGROUND", "WHISPER" ]]
 
 --- De-register comms via list instead of having them all listened to all the time.
---- Just ignore the messaage instead of letting it go through?
+----- Just ignore the messaage instead of letting it go through?
 
 local OFFICER_COMMS = {
-    ['pdkpSyncReq'] = true,
+    ['pdkpSyncReq'] = true, -- When someone Requests a merge
 }
 
 local RAID_COMMS = {
-    ['pdkpClearShrouds']=true, -- Officer check
-    ['pdkpNewShrouds']=true, -- Officer check
-    ['pdkpDkpOfficer']=true, -- Officer check
+    ['pdkpClearShrouds']=true, -- Officer check -- When the DKP Officer clears the Shrouding Window.
+    ['pdkpNewShrouds']=true, -- Officer check -- When someone new shrouds, comes from DKP Officer.
+    ['pdkpDkpOfficer']=true, -- Officer check -- Sets the DKP officer for everyone.
 }
 
 local GUILD_COMMS = {
-    ['pdkp_placeholder']=true,
-    ['pdkpPushReceive'] = true, -- Officer check
-    ['pdkpEntryDelete'] = true, -- Officer check
-    ['pdkpSyncRes']=true,
-    ['pdkpVersion']=true,
+    ['pdkp_placeholder']=true, -- Placeholder.
+    ['pdkpPushReceive'] = true, -- Officer check -- When a new push is received.
+    ['pdkpEntryDelete'] = true, -- Officer check -- When an entry is deleted.
+    ['pdkpSyncRes']=true, -- When an officer's sync request goes through.
+    ['pdkpVersion']=true, -- When someone requests the latest version of the addon.
 }
 
 local DEBUG_COMMS = {

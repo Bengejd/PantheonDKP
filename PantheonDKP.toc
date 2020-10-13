@@ -11,25 +11,21 @@
 src\embed.xml
 #@end-no-lib-strip@
 
-# Init file
-
+# Init files
 src\init.lua
-
-# This should be last in the file, so that the previous modules had time to load first.
 src\PantheonDKP.xml
-
-# Module files
 
 # Classes
 src\Classes\Member.lua
-src\Classes\Guild.lua
-src\Classes\Raid.lua
-src\Classes\ScrollTable.lua
 src\Classes\DKP_Entry.lua
-src\Classes\DKP_History.lua
-src\Views\SimpleScrollFrame.lua
 
-# Database files
+# Controllers
+src\Controllers\Guild.lua
+src\Controllers\Raid.lua
+src\Controllers\Import.lua
+src\Controllers\Export.lua
+
+# Module files
 src\Modules\Character.lua
 src\Modules\Defaults.lua
 src\Modules\PDKP_Util.lua
@@ -42,4 +38,7 @@ src\Modules\GUI.lua
 src\Modules\DKP.lua
 
 # Views
+src\Views\ScrollTable.lua
+src\Views\DKP_History.lua
+src\Views\SimpleScrollFrame.lua
 src\Views\Setup.lua
