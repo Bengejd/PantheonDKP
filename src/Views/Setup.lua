@@ -439,24 +439,15 @@ function Setup:Debugging()
     t:SetParent(f)
 
     local buttons = {
-        ['reload']=function()
-            ReloadUI()
-        end,
-        ['show']=function()
-            GUI:Show()
-        end,
-        ['hide']=function()
-            GUI:Hide()
-        end,
-        ['debug']=function()
-            Settings:ToggleDebugging()
-        end,
-        ['shroud']=function()
-            DKP:TestShroud()
-        end,
-        ['roll']=function()
-            DKP:TestShroud()
-        end,
+        --['reload']=function()
+        --    ReloadUI()
+        --end,
+        --['show']=function()
+        --    GUI:Show()
+        --end,
+        --['hide']=function()
+        --    GUI:Hide()
+        --end,
         ['reset DKP']=function()
             DKP:ResetDKP(true)
         end,
@@ -559,6 +550,8 @@ function Setup:RandomStuff()
     pdkp_frame:Show()
     GUI['view_history_button']:Click()
     GUI:RefreshTables()
+
+    Setup:DKPOfficer()
 end
 
 function Setup:PushProgressBar()
@@ -2032,4 +2025,56 @@ function Setup:HistoryTable()
     --GUI.history_table = ht]]
 end
 
+function Setup:DKPOfficer()
+    if not Settings:CanEdit() then return end
+    local dropdownList = _G['DropDownList1']
+    dropdownList:HookScript('OnShow', function()
+        local charName = strtrim(_G['DropDownList1Button1']:GetText())
+        local member = Guild:GetMemberByName(charName)
 
+        if not (member and Raid:MemberIsInRaid(charName) and member.canEdit) then return end
+
+        local dkpOfficer = Raid.raid.dkpOfficer;
+        local isDkpOfficer = charName == dkpOfficer
+
+        local dkpOfficerText = tenaryAssign(isDkpOfficer, 'Demote from DKP Officer', 'Promote to DKP Officer')
+
+        _G['UIDropDownMenu_AddSeparator'](1)
+        _G['UIDropDownMenu_AddButton']({
+            hasArrow = false;
+            text = 'PDKP',
+            isTitle = true;
+            isUninteractable = true;
+            notCheckable = true;
+            iconOnly = false;
+            tCoordLeft = 0;
+            tCoordRight = 1;
+            tCoordTop = 0;
+            tCoordBottom = 1;
+            tSizeX = 0;
+            tSizeY = 8;
+            tFitDropDownSizeX = true;
+        }, 1) -- Title
+        _G['UIDropDownMenu_AddButton']({ -- Actual button
+            hasArrow = false;
+            text = dkpOfficerText,
+            isTitle = false;
+            isUninteractable = false;
+            notCheckable = true;
+            iconOnly = false;
+            keepShownOnClick=false,
+            tCoordLeft = 0;
+            tCoordRight = 1;
+            tCoordTop = 0;
+            tCoordBottom = 1;
+            tSizeX = 0;
+            tSizeY = 8;
+            tFitDropDownSizeX = true;
+            func=function(...)
+                Raid:SetDkpOfficer(isDkpOfficer, charName);
+                Comms:SendCommsMessage('pdkpDkpOfficer', Raid.raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
+            end
+        }, 1)
+        _G['UIDropDownMenu_AddSeparator'](1)
+    end)
+end

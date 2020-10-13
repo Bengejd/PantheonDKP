@@ -76,7 +76,6 @@ function PDKP:OnDataAvailable()
     -- TODO: Determine if I want this as a popup or not.
     --if not Settings.db['mergedOld'] then Guild:MergeOldData() end
 
-    Settings:RespectSettings(); -- Respect the user's settings.
     GUI:Init();
     Raid:new();
     Comms:Init();

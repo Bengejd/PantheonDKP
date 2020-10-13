@@ -38,6 +38,7 @@ function Settings:InitDB()
     Settings.db = SettingsDB
     Settings.current_raid = SettingsDB['current_raid'] or 'Molten Core';
     Settings:SetSettings()
+    Settings:RespectSettings();
 end
 
 function Settings:ChangeCurrentRaid(raid)

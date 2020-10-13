@@ -9,6 +9,7 @@ local Char = core.Character;
 local GUI = core.GUI;
 local PDKP = core.PDKP;
 local Guild = core.Guild;
+local Comms = core.Comms;
 
 local IsInRaid, GetRaidRosterInfo = IsInRaid, GetRaidRosterInfo
 local GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo = GetInstanceInfo, GetNumSavedInstances, GetSavedInstanceInfo
@@ -31,7 +32,7 @@ Raid.recent_boss_kill = {};
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER'}
+local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER', 'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
 
 function Raid:new()
     local self = {};
@@ -48,7 +49,9 @@ function Raid:new()
     self.leader = {};
 
     self:RegisterEvents();
-    self:Init()
+    self:Init();
+
+
 
     return self
 end
@@ -61,6 +64,10 @@ function Raid:Init()
     self.assistants = raid_info['assist']
     self.leader = raid_info['leader']
     GUI:UpdateRaidClassGroups()
+
+    if Raid:InRaid() and self.dkpOfficer == nil then
+        Comms:SendCommsMessage('pdkpWhoIsDKP', nil, 'RAID', nil, nil, nil)
+    end
 end
 
 function PDKP_Raid_OnEvent(self, event, arg1, ...)
@@ -85,12 +92,17 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
             if not GetRaidRosterInfo(raid_size) then return end
             Raid.raid:Init()
         end,
+        ['CHAT_MSG_RAID']=function()
+            print('Raid Message');
+        end,
+        ['CHAT_MSG_RAID_LEADER']=function()
+            print('Leader Message');
+        end,
     }
 
     if raid_group_events[event] then raid_group_events[event]() end
 
 end
-
 
 function Raid:RegisterEvents()
     if Raid.events_frame ~= nil then
@@ -236,6 +248,13 @@ function Raid:IsRaidLead()
     return Char:GetMyName() == Raid.raid['leader']
 end
 
+function Raid:IsAssist()
+    local myName = Char:GetMyName()
+    local assists = Raid.raid['assistants']
+    local member = Guild:GetMemberByName(myName)
+
+end
+
 function Raid:SetLootCommon()
     if not Raid:InRaid() or not Raid:IsRaidLead() then return end -- Nothing to set if we're not in a raid and not the leader.
     local ml = Raid.raid['MasterLooter'] or Char:GetMyName()
@@ -257,6 +276,21 @@ function Raid:PromoteLeadership()
                 end
             end
         end
+    end
+end
+
+function Raid:MemberIsInRaid(name)
+    if Raid.raid == nil then return false end
+    return tContains(Raid.raid['members'], name)
+end
+
+function Raid:SetDkpOfficer(isDkpOfficer, charName)
+    if isDkpOfficer then
+        Raid.raid.dkpOfficer = nil
+        PDKP:Print(charName .. ' is no longer the DKP Officer')
+    else
+        Raid.raid.dkpOfficer = charName;
+        PDKP:Print(charName .. ' is now the DKP Officer')
     end
 end
 

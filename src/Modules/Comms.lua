@@ -20,6 +20,7 @@ local Invites = core.Invites;
 local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local Settings = core.Settings;
+local Char = core.Character;
 
 local SendChatMessage = SendChatMessage
 
@@ -35,9 +36,10 @@ local OFFICER_COMMS = {
 }
 
 local RAID_COMMS = {
-    ['pdkpClearShrouds']=true, -- Officer check -- When the DKP Officer clears the Shrouding Window.
-    ['pdkpNewShrouds']=true, -- Officer check -- When someone new shrouds, comes from DKP Officer.
+    --['pdkpClearShrouds']=true, -- Officer check -- When the DKP Officer clears the Shrouding Window.
+    --['pdkpNewShrouds']=true, -- Officer check -- When someone new shrouds, comes from DKP Officer.
     ['pdkpDkpOfficer']=true, -- Officer check -- Sets the DKP officer for everyone.
+    ['pdkpWhoIsDKP']=true, -- Requests who the DKP officer is.
 }
 
 local GUILD_COMMS = {
@@ -49,7 +51,9 @@ local GUILD_COMMS = {
 }
 
 local DEBUG_COMMS = {
-    ['pdkpSyncTables']=true,
+    ['pdkpSyncSmall']=true,
+    ['pdkpSyncLarge']=true,
+
     ['placeholder']=true,
 }
 
@@ -75,9 +79,10 @@ function Comms:RegisterCommCommands()
     if Settings:IsDebug() then
         for key, _ in pairs(DEBUG_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- Debug Comms
     end
+    for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
 
     --for key, _ in pairs(GUILD_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General guild comms
-    --for key, _ in pairs(RAID_COMMS) do PDKP:RegisterComm(key, OnCommReceived) end -- General Raid comms
+
     --
     --if core.canEdit then -- Only register officers to the officer_comms.
     --    Util:Debug('Register Officer Comms')
@@ -117,7 +122,9 @@ end
 function OnCommReceived(prefix, data, distribution, sender)
     Util:Debug(prefix, 'message received!')
 
+    --- Ignore comms from yourself, except under certain circumstances?
 
+    if RAID_COMMS[prefix] then return Comms:OnRaidCommReceived(prefix, data, distribution, sender) end
 
     --if sender == Util:GetMyName() then -- Don't need to respond to our own messages...
     --    if prefix ~= 'pdkpNewShrouds' then
@@ -134,6 +141,36 @@ function OnCommReceived(prefix, data, distribution, sender)
     --else
     --    Util:Debug("Unknown Prefix " .. prefix, " found in request...")
     --end
+end
+
+function Comms:OnRaidCommReceived(prefix, data, distro, sender)
+
+    --local myName = Char:GetMyName()
+    ----local assists = Raid.raid['assistants']
+    ----local member = Guild:GetMemberByName(myName)
+
+    local RAID_COMMS_NO_AUTH = {
+        ['pdkpWhoIsDKP']=function()
+            if Settings:CanEdit() and Raid.raid.dkpOfficer ~= nil then
+                Comms:SendCommsMessage('pdkpDkpOfficer', Raid.raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
+            elseif Settings:IsDebug() then
+                Comms:SendCommsMessage('pdkpDkpOfficer', 'Karenbaskins', 'RAID', nil, 'BULK', nil)
+            end
+        end
+    }
+
+    if RAID_COMMS_NO_AUTH[prefix] then return RAID_COMMS_NO_AUTH[prefix]() end
+
+    local sender_member = Guild:GetMemberByName(sender)
+    if sender_member then
+
+    else
+
+    end
+
+    local Raid_No_Auth_Funcs = {
+        ['pdkpDkpOfficer']=function() end,
+    }
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
