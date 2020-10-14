@@ -108,12 +108,6 @@ function GUI:UpdateEasyStats()
     local stats_width = easy_text:GetStringWidth() + padding
     easy_frame:SetWidth(stats_width)
 
-    --easy_frame:SetSize(str_width + 45, 72)
-    --local border_widths = {[21]=250, [22]=260, [23]=270} -- changes based on characters being displayed.
-    --local borderX = border_widths[text_len] or 240
-    --
-    --easy_frame:SetSize(borderX, 72);
-
 end
 
 function GUI:UpdateRaidClassGroups()
@@ -146,6 +140,8 @@ function GUI:RefreshTables()
     else
         GUI.history_table.updateNextOpen = true
     end
+
+    -- TODO: When changing raids, and shroud box is open, have the DKP master send out the updated DKP Shrouds for that raid.
 
     wipe(GUI.memberTable.selected)
 end

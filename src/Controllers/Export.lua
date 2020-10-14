@@ -81,5 +81,17 @@ function Export:New(sync_type, entry)
         return
     end
 
-    Comms:SendCommsMessage('pdkpTestPush1234', self.details, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
+    local prefix = nil
+    if self.type == 'push-add' or self.type == 'push-delete' then
+        prefix = 'pdkpSyncSmall'
+    elseif self.type == 'push-overwrite' or self.type == 'push-merge' then
+        prefix = 'pdkpSyncLarge'
+    end
+
+    if prefix == nil then
+        print('Error occurred while sending data')
+        return
+    end
+
+    Comms:SendCommsMessage(prefix, self.details, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
 end

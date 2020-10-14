@@ -545,10 +545,11 @@ function Setup:RandomStuff()
     Setup:InterfaceOptions()
     Setup:PushProgressBar()
     Setup:HistoryTable()
+    Setup:DKPOfficer()
 
     --- For debugging purposes.
+    pdkp_frame:Show()
 
-    Setup:DKPOfficer()
 end
 
 function Setup:PushProgressBar()
@@ -1927,99 +1928,6 @@ function Setup:HistoryTable()
     hf:SetPoint("BOTTOMRIGHT", -7, 0)
 
     GUI.history_table = HistoryTable:init(hf)
-
-
-
-
-    --f:SetHeight(200)
-    --f:SetWidth(200)
-    --setMovable(f)
-
-
---[[    --local ht = {};
-    --
-    --local table_settings = {
-    --    ['name']= 'ScrollTable',
-    --    ['parent']=GUI.history_frame,
-    --    ['height']=GUI.history_frame:GetHeight() - 40,
-    --    ['width']=GUI.history_frame:GetWidth(),
-    --    ['movable']=true,
-    --    ['enableMouse']=true,
-    --    ['retrieveDataFunc']=function()
-    --        local keys, entries = DKP:GetEntries(true, nil)
-    --        return keys
-    --    end,
-    --    ['retrieveDisplayDataFunc']=function(self, id)
-    --        return DKP:GetEntries(false, id)
-    --    end,
-    --    ['anchor']={
-    --        ['point']='TOPLEFT',
-    --        ['rel_point_x']=0,
-    --        ['rel_point_y']=-40,
-    --    }
-    --
-    --}
-    --local col_settings = {
-    --    ['height']=0,
-    --    ['width']=200,
-    --    ['firstSort']=1, -- Denotes the header we want to sort by originally.
-    --    ['stacked']=true,
-    --    ['headers'] = {
-    --        [1] = {
-    --            ['label']='formattedOfficer',
-    --            ['sortable']=false,
-    --            ['displayName']='Officer',
-    --            ['point']='LEFT',
-    --            ['showSortDirection'] = false,
-    --            ['display']=false,
-    --        },
-    --        [2] = {
-    --            ['label']='historyText',
-    --            ['sortable']=false,
-    --            ['point']='LEFT',
-    --            ['displayName']='Reason',
-    --            ['showSortDirection'] = false,
-    --            ['display']=false,
-    --            ['onClickFunc']=function(row, buttonType)
-    --                if buttonType == 'LeftButton' then
-    --
-    --                end
-    --
-    --                if buttonType == 'RightButton' then
-    --                    GUI.popup_entry = row.dataObj
-    --                    StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
-    --                end
-    --            end
-    --        },
-    --        [4] = {
-    --            ['label']='formattedNames',
-    --            ['sortable']=false,
-    --            ['point']='LEFT',
-    --            ['displayName']='Members',
-    --            ['showSortDirection'] = false,
-    --            ['display']=false,
-    --        },
-    --        [3] = {
-    --            ['label']='change_text',
-    --            ['sortable']=false,
-    --            ['point']='LEFT',
-    --            ['displayName']='Amount',
-    --            ['showSortDirection'] = false,
-    --            ['display']=false,
-    --        },
-    --    }
-    --}
-    --local row_settings = {
-    --    ['height']=100,
-    --    ['width']=350,
-    --    ['max_values'] = 1000,
-    --    ['showbackdrop']=true,
-    --    ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
-    --}
-    --
-    --ht = HistoryTable:newHybrid(table_settings, col_settings, row_settings)
-    --
-    --GUI.history_table = ht]]
 end
 
 function Setup:DKPOfficer()
