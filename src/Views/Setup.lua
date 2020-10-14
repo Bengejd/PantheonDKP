@@ -1794,10 +1794,10 @@ function Setup:ShroudingBox()
 
     local cb = createCloseButton(f, true)
     cb:SetPoint("TOPRIGHT")
-
-
+    
     f:SetScript("OnHide", function()
-        print("Shroud box hiding!")
+        -- TODO: If DKP Officer, clear everyone elses shroud box.
+        --print("Shroud box hiding!")
     end)
 
     f.scrollContent = scrollContent;

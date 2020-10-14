@@ -123,12 +123,17 @@ function SimpleScrollFrame:new(parent)
     self.waiting_on_update = false;
     self.elapsed_update = 0
 
+    --- The next 3 functions handle changing the positioning of the scroll child, and the slider bar respectively.
+
+    -- Handles mouse wheel events on the frame. Moving the content up or down depending on the direction.
     sf:SetScript("OnMouseWheel", function(_, value)
         self.waiting_on_update = false;
         self.elapsed_update = 0;
         self:MoveScroll(value) end)
 
-    sb:SetScript("OnValueChanged", function(_, value, control)
+    -- Handles dragging the scroll bar to change what content is being shown currently.
+    -- Only allows content updates every 0.05 seconds to prevent tearing while manually dragging the scroll bar.
+    sb:SetScript("OnValueChanged", function(_, value)
         if not self.waiting_on_update then
             self:SetScroll(value)
             self.waiting_on_update = true
@@ -139,6 +144,8 @@ function SimpleScrollFrame:new(parent)
         end
     end)
 
+    -- Creates an internal "timer" of sorts, that only updates the frame every 0.05 seconds.
+    -- This is necessary, because otherwise the content gets updated every time the slider
     sb:SetScript("OnUpdate", function(_, elapsed)
         if self.waiting_on_update then self.elapsed_update = self.elapsed_update + elapsed end
     end)

@@ -1,4 +1,4 @@
-local _, core = ...;
+local addonFolder, core = ...;
 local _G = _G;
 local L = core.L;
 
@@ -22,6 +22,7 @@ local Defaults = core.Defaults;
 local Settings = core.Settings;
 
 core.firstLogin = nil;
+core.originalPrint = getprinthandler()
 
 local function PDKP_OnEvent(self, event, arg1, ...)
 
@@ -367,7 +368,9 @@ end
 
 -- Makes our print statements prettier and uniform.
 function PDKP_PrintHandler(...)
-    PDKP:Print(strjoin(" ", tostringall(...)))
+    if addonFolder == 'PantheonDKP' then
+        PDKP:Print(strjoin(" ", tostringall(...)))
+    end
 end
 
 function PDKP_NoPrintHandler(...)
