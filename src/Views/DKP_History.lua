@@ -129,12 +129,9 @@ function HistoryTable:RefreshTable()
     wipe(self.displayedRows)
     for i=1, #self.entry_keys do
         local row = self.rows[i]
-
-        --row.collapsed = true
-
         row:Hide()
-        row.content:Hide()
         row:ClearAllPoints()
+
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row)
             row:Show()
@@ -207,7 +204,7 @@ function HistoryTable:OnLoad()
         row.dataObj = self.entries[i];
         row.cols = {};
 
-        row.isFiltered, row.collapsed, row.max_width, row.max_height = false, false, 0, 0
+        row.isFiltered, row.collapsed, row.max_width, row.max_height = false, true, 0, 0
 
         local collapse_text, row_title;
         local expand_tex = 'Interface\\Buttons\\UI-Panel-CollapseButton-Up'
@@ -247,29 +244,26 @@ function HistoryTable:OnLoad()
 
         row.super = self;
 
-        row.content:SetScript("OnShow", function()
-            collapse_button:SetNormalTexture(expand_tex)
-            row:SetHeight(row.max_height + ROW_MARGIN_TOP)
-            row.collapsed = false
-            collapse_text:Hide()
-            row:HideColClicks()
-        end)
-
-        row.content:SetScript("OnHide", function()
-            collapse_button:SetNormalTexture(collapse_tex)
-            row:SetHeight(50)
-            row.collapsed = true
-            collapse_text:Show()
-            row:HideColClicks()
-        end)
-
         row.collapse_frame = function(_, collapse)
-            if collapse then row.content:Hide() else row.content:Show(); end
+            if collapse then
+                row.content:Hide()
+                collapse_button:SetNormalTexture(collapse_tex)
+                row:SetHeight(50)
+                row.collapsed = true
+                collapse_text:Show()
+                row:HideColClicks()
+            else
+                collapse_button:SetNormalTexture(expand_tex)
+                row.content:Show()
+                row:SetHeight(row.max_height + ROW_MARGIN_TOP)
+                row.collapsed = false
+                collapse_text:Hide()
+                row:HideColClicks()
+            end
         end
 
         collapse_button:SetScript("OnClick", function()
             row:collapse_frame(not row.collapsed)
-            --self.scrollContent:Resize(0, 0)
             self.scrollContent:ResizeByChild(0, 0, row.display_index)
         end)
 
@@ -372,8 +366,6 @@ function HistoryTable:OnLoad()
         end
 
         row:UpdateRowValues()
-
-        row:Hide()
 
         rawset(t, i, row)
         return row
