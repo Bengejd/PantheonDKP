@@ -65,7 +65,7 @@ function HistoryTable:init(table_frame)
 
     self.previous_raid = Settings.current_raid;
     self.collapsed_raids = {
-        ['Molten Core']=false, ['Blackwing Lair']=false, ['Ahn\'Qiraj']=false
+        ['Molten Core']=true, ['Blackwing Lair']=true, ['Ahn\'Qiraj']=true
     }
 
     self.frame.title:SetFontObject("GameFontHighlightLarge")
@@ -77,9 +77,12 @@ function HistoryTable:init(table_frame)
     collapse_all:SetNormalTexture(EXPAND_ALL)
     collapse_all:SetScript("OnClick", function()
         self.collapsed = not self.collapsed;
-        collapse_all:SetNormalTexture(tenaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
         self:CollapseAllRows(self.collapsed)
     end)
+
+    collapse_all.UpdateTexture = function()
+        collapse_all:SetNormalTexture(tenaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
+    end
 
     self.collapse_all = collapse_all;
 
@@ -95,7 +98,6 @@ function HistoryTable:init(table_frame)
     end)
 
     -- TODO: Change border color on the frame to be dark and the rows to be light.
-    --border:SetBackdropColor(0, 0, 0, 0.4)
 
     self:OnLoad()
 
@@ -109,7 +111,17 @@ function HistoryTable:CollapseAllRows(collapse)
         local row = self.rows[i]
         row:collapse_frame(collapse)
     end
+
+    self.collapsed_raids[Settings.current_raid] = self.collapsed;
     self.scrollContent:ResizeByChild(0, 0)
+    self.collapse_all:UpdateTexture()
+end
+
+function HistoryTable:ToggleRows()
+    for i=1, #self.displayedRows do
+        local row = self.displayedRows[i]
+        row:collapse_frame(row.collapsed)
+    end
 end
 
 function HistoryTable:RefreshData()
@@ -155,7 +167,14 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     end
     self:UpdateTitleText(selected)
 
+    local collapse_rows = false
+    if self.collapsed ~= self.collapsed_raids[Settings.current_raid] then collapse_rows = true end
+    self.collapsed = self.collapsed_raids[Settings.current_raid];
+    if collapse_rows then self:CollapseAllRows(self.collapsed) end
+
     self:RefreshTable()
+
+    self:ToggleRows()
 
     if not self.table_init then self.table_init = true end
     self.previous_raid = Settings.current_raid
