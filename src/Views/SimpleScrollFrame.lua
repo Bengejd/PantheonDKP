@@ -91,6 +91,12 @@ function SimpleScrollFrame:SetScroll(value)
     self.content:SetPoint("TOPRIGHT", self.scrollFrame, "TOPRIGHT", 0, offset)
     status.offset = offset
     status.scrollvalue = value
+    self.waiting_on_update = false;
+    self.elapsed_update = 0
+end
+
+function PDKP_SimpleScroll_SetScroll(self, value)
+
 end
 
 function SimpleScrollFrame:new(parent)
@@ -114,9 +120,28 @@ function SimpleScrollFrame:new(parent)
     sb:SetWidth(16)
     sb:Hide()
 
-    sf:SetScript("OnMouseWheel", function(_, value) self:MoveScroll(value) end)
+    self.waiting_on_update = false;
+    self.elapsed_update = 0
 
-    sb:SetScript("OnValueChanged", function(_, value) self:SetScroll(value) end)
+    sf:SetScript("OnMouseWheel", function(_, value)
+        self.waiting_on_update = false;
+        self.elapsed_update = 0;
+        self:MoveScroll(value) end)
+
+    sb:SetScript("OnValueChanged", function(_, value, control)
+        if not self.waiting_on_update then
+            self:SetScroll(value)
+            self.waiting_on_update = true
+        elseif self.elapsed_update >= 0.05 then
+            self:SetScroll(value)
+            self.waiting_on_update = false
+            self.elapsed_update = 0;
+        end
+    end)
+
+    sb:SetScript("OnUpdate", function(_, elapsed)
+        if self.waiting_on_update then self.elapsed_update = self.elapsed_update + elapsed end
+    end)
 
     sf.scrollBar = sb
 
