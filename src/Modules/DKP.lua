@@ -36,7 +36,54 @@ function DKP:InitDB()
     Util:WatchVar(DkpDB['history']['all'], 'DkpDB')
 end
 
-function DKP:GetEntries(keysOnly, id)
+function DKP:GetEntriesFromRaid(keysOnly, id)
+    local history = DkpDB['history']['all']
+    local deleted = DkpDB['history']['deleted']
+
+    if id then
+        local cache_entry = DKP.history_entries[id]
+        if cache_entry == nil then
+            if history[id] ~= nil then
+                cache_entry = DKP_Entry:New(history[id])
+                DKP.history_entries[id] = cache_entry
+            end
+        end
+        return cache_entry
+    end
+
+    keysOnly = keysOnly or false
+    local entry_keys, entries = {}, {};
+
+    for key, db_entry in pairs(history) do
+        if not tContains(deleted, key) and db_entry['raid'] == Settings.current_raid then
+            table.insert(entry_keys, key)
+            if not keysOnly then
+                local dkp_entry = DKP_Entry:New(history[key])
+                if not dkp_entry['deleted'] then
+                    entries[key] = dkp_entry
+                    dkp_entry:Save()
+                end
+            end
+        end
+    end
+
+    local compare = function(a,b)
+        if type(a) == type({}) and type(b) == type({}) then
+            return a['id'] > b['id']
+        else
+            if type(a) == type(1) and type(b) == type(1) then
+                return a > b
+            end
+        end
+    end
+
+    table.sort(entry_keys, compare)
+    table.sort(entries, compare)
+
+    return entry_keys, entries;
+end
+
+function DKP:GetEntries(keysOnly, id, raid)
     local history = DkpDB['history']['all']
     local deleted = DkpDB['history']['deleted']
 

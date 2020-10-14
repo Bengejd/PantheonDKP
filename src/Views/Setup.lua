@@ -547,9 +547,6 @@ function Setup:RandomStuff()
     Setup:HistoryTable()
 
     --- For debugging purposes.
-    pdkp_frame:Show()
-    GUI['view_history_button']:Click()
-    GUI:RefreshTables()
 
     Setup:DKPOfficer()
 end

@@ -58,16 +58,15 @@ function HistoryTable:init(table_frame)
     self.entries = {};
     self.updateNextOpen = false
     self.displayedRows = {};
-    self.collapsed = false
+    self.collapsed = false;
+    self.table_init = false;
 
     self.appliedFilters['raid'] = Settings.current_raid
 
-    self.frame:SetScript("OnShow", function()
-        if self.updateNextOpen then
-            self:HistoryUpdated()
-            self.updateNextOpen = false
-        end
-    end)
+    self.previous_raid = Settings.current_raid;
+    self.collapsed_raids = {
+        ['Molten Core']=false, ['Blackwing Lair']=false, ['Ahn\'Qiraj']=false
+    }
 
     self.frame.title:SetFontObject("GameFontHighlightLarge")
     self.frame.title:SetTextColor(Util:HexToRGBA('#FFBA49'))
@@ -80,6 +79,19 @@ function HistoryTable:init(table_frame)
         self.collapsed = not self.collapsed;
         collapse_all:SetNormalTexture(tenaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
         self:CollapseAllRows(self.collapsed)
+    end)
+
+    self.collapse_all = collapse_all;
+
+    self.frame:SetScript("OnShow", function()
+        if self.updateNextOpen then
+            self:HistoryUpdated()
+            self.updateNextOpen = false
+        end
+        if not self.collapse_init then
+            self.collapse_all:Click()
+            self.collapse_init = true
+        end
     end)
 
     -- TODO: Change border color on the frame to be dark and the rows to be light.
@@ -97,7 +109,7 @@ function HistoryTable:CollapseAllRows(collapse)
         local row = self.rows[i]
         row:collapse_frame(collapse)
     end
-    self.scrollContent:Resize(0, 0)
+    self.scrollContent:ResizeByChild(0, 0)
 end
 
 function HistoryTable:RefreshData()
@@ -117,11 +129,16 @@ function HistoryTable:RefreshTable()
     wipe(self.displayedRows)
     for i=1, #self.entry_keys do
         local row = self.rows[i]
+
+        --row.collapsed = true
+
         row:Hide()
+        row.content:Hide()
         row:ClearAllPoints()
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row)
             row:Show()
+            row.display_index = #self.displayedRows
         end
     end
 
@@ -130,16 +147,21 @@ end
 
 -- Refresh the data, resize the table, re-add the children?
 function HistoryTable:HistoryUpdated(selectedUpdate)
+    -- Don't do unnecessary updates.
+    if self.previous_raid == Settings.current_raid and self.table_init and not selectedUpdate then return end
+
     self.appliedFilters['raid']=Settings.current_raid
 
     local selected = GUI.memberTable.selected;
     if #selected > 0 then self.appliedFilters['selected']=selected;
     elseif #selected == 0 then self.appliedFilters['selected'] = nil;
     end
-
     self:UpdateTitleText(selected)
 
     self:RefreshTable()
+
+    if not self.table_init then self.table_init = true end
+    self.previous_raid = Settings.current_raid
 end
 
 function HistoryTable:UpdateTitleText(selected)
@@ -181,6 +203,7 @@ function HistoryTable:OnLoad()
         local row = CreateFrame("Frame", nil, self.scrollContent)
         row:SetSize(350, 50)
         row.index = i;
+        row.display_index = nil;
         row.dataObj = self.entries[i];
         row.cols = {};
 
@@ -246,7 +269,8 @@ function HistoryTable:OnLoad()
 
         collapse_button:SetScript("OnClick", function()
             row:collapse_frame(not row.collapsed)
-            self.scrollContent:Resize(0, 0)
+            --self.scrollContent:Resize(0, 0)
+            self.scrollContent:ResizeByChild(0, 0, row.display_index)
         end)
 
         function row:ApplyFilters()
@@ -347,19 +371,15 @@ function HistoryTable:OnLoad()
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
         end
 
-        row.collapse_frame(true)
-
         row:UpdateRowValues()
+
+        row:Hide()
 
         rawset(t, i, row)
         return row
     end})
 
     self.rows = rows
-
-    -- TODO: BUG: When selecting the same raid again in the dropdown, history disappears.
 end
-
-
 
 pdkp_HistoryTableMixin = core.History_Table;

@@ -64,6 +64,16 @@ function Comms:DataEncoder(data)
     return encoded
 end
 
+function Comms:DataDecoder(data)
+    local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
+    local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
+    if decompressed == nil then -- It wasn't a message that can be decompressed.
+        return Comms:Deserialize(detransmit) -- Return the regular deserialized messge
+    end
+    local deserialized = Comms:Deserialize(decompressed)
+    return deserialized -- Deserialize the compressed message
+end
+
 function Comms:Init()
     Util:Debug("Comms Init")
 
@@ -100,29 +110,26 @@ function Comms:Deserialize(string)
     local success, data = PDKP:Deserialize(string)
 
     if success == false or success == nil then
-        Util:ThrowError('An error occured Deserializing the data...');
+        --Util:ThrowError('An error occured Deserializing the data...');
         return nil;
     end
     return data;
 end
 
-function Comms:DataDecoder(data)
-    local detransmit = core.LibDeflate:DecodeForWoWAddonChannel(data)
-    local decompressed = core.LibDeflate:DecompressDeflate(detransmit)
-    if decompressed == nil then -- It wasn't a message that can be decompressed.
-        return Comms:Deserialize(detransmit) -- Return the regular deserialized messge
-    end
-    local deserialized = Comms:Deserialize(decompressed)
-    return deserialized -- Deserialize the compressed message
-end
+
 
 ---------------------------
 --    Send Functions     --
 ---------------------------
-function OnCommReceived(prefix, data, distribution, sender)
+function OnCommReceived(prefix, message, distribution, sender)
+    if sender == Char:GetMyName() then -- Don't need to respond to our own messges...
+        Util:Debug('Ignoring message from self', prefix)
+        return
+    end
+
     Util:Debug(prefix, 'message received!')
 
-    --- Ignore comms from yourself, except under certain circumstances?
+    local data = Comms:DataDecoder(message)
 
     if RAID_COMMS[prefix] then return Comms:OnRaidCommReceived(prefix, data, distribution, sender) end
 
@@ -145,16 +152,10 @@ end
 
 function Comms:OnRaidCommReceived(prefix, data, distro, sender)
 
-    --local myName = Char:GetMyName()
-    ----local assists = Raid.raid['assistants']
-    ----local member = Guild:GetMemberByName(myName)
-
     local RAID_COMMS_NO_AUTH = {
         ['pdkpWhoIsDKP']=function()
             if Settings:CanEdit() and Raid.raid.dkpOfficer ~= nil then
                 Comms:SendCommsMessage('pdkpDkpOfficer', Raid.raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
-            elseif Settings:IsDebug() then
-                Comms:SendCommsMessage('pdkpDkpOfficer', 'Karenbaskins', 'RAID', nil, 'BULK', nil)
             end
         end
     }
@@ -162,15 +163,15 @@ function Comms:OnRaidCommReceived(prefix, data, distro, sender)
     if RAID_COMMS_NO_AUTH[prefix] then return RAID_COMMS_NO_AUTH[prefix]() end
 
     local sender_member = Guild:GetMemberByName(sender)
-    if sender_member then
+    if sender_member == nil or not sender_member.canEdit then return end
 
-    else
-
-    end
-
-    local Raid_No_Auth_Funcs = {
-        ['pdkpDkpOfficer']=function() end,
+    local RAID_COMMS_AUTH = {
+        ['pdkpDKPOfficer']=function()
+            if data ~= nil then Raid:SetDkpOfficer(false, data) end
+            print(Raid.raid.dkpOfficer)
+        end,
     }
+    if RAID_COMMS_AUTH[prefix] then return RAID_COMMS_AUTH[prefix]() end
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
@@ -200,7 +201,7 @@ end
 function Comms:ThrowError(prefix, sender)
     local errMsg = sender .. ' is attempting to use an unsafe communication method: ' .. prefix .. ' Please contact'
     errMsg = errMsg .. ' an Officer.'
-    return Util:ThrowError(errMsg, true)
+    --return Util:ThrowError(errMsg, true)
 end
 
 ---------------------------

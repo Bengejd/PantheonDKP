@@ -195,6 +195,19 @@ function SimpleScrollFrame:new(parent)
         end)
     end)
 
+    sc.ResizeByChild = function(_, offsetX1, offsetX2)
+        offsetX1 = offsetX1 or 2
+        offsetX2 = offsetX2 or -15
+
+        sc:SetHeight(0)
+        local new_height = 0
+        for i=1, #sc.children do
+            local child = sc.children[i]
+            new_height = child:GetHeight() + new_height;
+        end
+        sc:SetHeight(new_height)
+    end
+
     sc.Resize = function(_, offsetX1, offsetX2)
         sc:SetHeight(0)
 
