@@ -153,6 +153,11 @@ function DKP_Entry:GetFormattedNames()
             return false
         end
 
+        if a_member == nil or b_member == nil then
+            print('ERROR', a, b)
+            print(a_member.name, b_member.name)
+        end
+
         if b_member.class == a_member.class then
             return b_member.name > a_member.name
         else

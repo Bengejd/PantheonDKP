@@ -38,8 +38,8 @@ local OFFICER_COMMS = {
 }
 
 local RAID_COMMS = {
-    --['pdkpClearShrouds']=true, -- Officer check -- When the DKP Officer clears the Shrouding Window.
-    --['pdkpNewShrouds']=true, -- Officer check -- When someone new shrouds, comes from DKP Officer.
+    ['pdkpClearShrouds']=true, -- Officer check -- When the DKP Officer clears the Shrouding Window.
+    ['pdkpUpdateShroud']=true, -- Officer check -- When someone new shrouds, comes from DKP Officer.
     ['pdkpDkpOfficer']=true, -- Officer check -- Sets the DKP officer for everyone.
     ['pdkpWhoIsDKP']=true, -- Requests who the DKP officer is.
 }
@@ -55,6 +55,7 @@ local GUILD_COMMS = {
 local SYNC_COMMS = {
     ['pdkpSyncSmall']=true, -- Single adds/deletes
     ['pdkpSyncLarge']=true, -- Large merges / overwrites.
+    ['pdkpSyncProgress']=true,
 }
 
 local DEBUG_COMMS = {
@@ -62,6 +63,10 @@ local DEBUG_COMMS = {
     --['pdkpSyncLarge']=true,
 
     ['placeholder']=true,
+}
+
+local ALLOW_FROM_SELF = {
+    'pdkpSyncSmall', 'pdkpClearShrouds', 'pdkpUpdateShroud'
 }
 
 function Comms:DataEncoder(data)
@@ -129,7 +134,7 @@ end
 --    Send Functions     --
 ---------------------------
 function OnCommReceived(prefix, message, distribution, sender)
-    if sender == Char:GetMyName() then -- Don't need to respond to our own messges...
+    if sender == Char:GetMyName() and not tContains(ALLOW_FROM_SELF, prefix) then -- Don't need to respond to our own messges...
         Util:Debug('Ignoring message from self', prefix)
         return
     end
@@ -167,36 +172,38 @@ end
 function Comms:OnRaidCommReceived(prefix, data, distro, sender)
     -- TODO: Finish this
     local RAID_COMMS_NO_AUTH = {
-        ['pdkpWhoIsDKP']=function()
-            if Settings:CanEdit() and Raid.raid.dkpOfficer ~= nil then
-                Comms:SendCommsMessage('pdkpDkpOfficer', Raid.raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
-            end
-        end
+        --['pdkpWhoIsDKP']=function()
+        --    if Settings:CanEdit() and Raid.raid.dkpOfficer ~= nil then
+        --        Comms:SendCommsMessage('pdkpDkpOfficer', Raid.raid.dkpOfficer, 'RAID', nil, 'BULK', nil)
+        --    end
+        --end
     }
 
     if RAID_COMMS_NO_AUTH[prefix] then return RAID_COMMS_NO_AUTH[prefix]() end
 
     local sender_member = Guild:GetMemberByName(sender)
-    if sender_member == nil or not sender_member.canEdit then return end
+    if (sender_member == nil or not sender_member.canEdit) and not Settings:IsDebug() then return end
 
     local RAID_COMMS_AUTH = {
-        ['pdkpDKPOfficer']=function()
+        ['pdkpDkpOfficer']=function()
             if data ~= nil then Raid:SetDkpOfficer(false, data) end
-            print(Raid.raid.dkpOfficer)
         end,
+
+        ['pdkpClearShrouds']=function() Shroud:ClearShrouders() end,
+        ['pdkpUpdateShroud']=function() Shroud:UpdateShrouders(data) end,
     }
     if RAID_COMMS_AUTH[prefix] then return RAID_COMMS_AUTH[prefix]() end
 end
 
 function Comms:OnSyncCommReceived(prefix, data, distro, sender)
-    Import:New(prefix, data, sender)
-    --['pdkpSyncSmall']=true, -- Single adds/deletes
-    --['pdkpSyncLarge']=true, -- Large merges / overwrites.
+    if prefix == 'pdkpSyncProgress' then
+        return UpdatePushBar(data['percentage'], data['elapsed'])
+    else
+        Import:New(prefix, data, sender)
+    end
 end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    Comms.start_time = time()
-    Comms.progress = 0
     --if distro == 'GUILD' and IsInGuild() == nil then return end; -- Stop guildless players from sending messages.
     --if distro == 'WHISPER' then Util:Debug('Sending message ' .. prefix .. ' to' .. sendTo) end
     --
@@ -212,9 +219,17 @@ end
 function PDKP_CommsCallback(arg, sent, total)
     local percentage = math.floor((sent / total) * 100)
 
+    if Comms.start_time == nil then Comms.start_time = time() end
+
     if Comms.progress ~= percentage then
         Comms.progress = percentage
-        UpdatePushBar(percentage, time() - Comms.start_time)
+        local elapsed = time() - Comms.start_time
+        UpdatePushBar(percentage, elapsed)
+    end
+
+    if Comms.progress == nil or Comms.progress >= 100 then
+        Comms.progress = 0
+        Comms.start_time = nil
     end
 end
 

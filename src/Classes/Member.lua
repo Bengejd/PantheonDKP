@@ -91,6 +91,15 @@ function Member:GetDKP(raidName, variableName)
     end
 end
 
+function Member:GetShroudDKP()
+    local shroud_dkp = {}
+    for _, raid in pairs(Defaults.dkp_raids) do
+        shroud_dkp[raid] = self.dkp[raid]['total']
+        print(shroud_dkp[raid])
+    end
+    return shroud_dkp
+end
+
 function Member:QuickCalc(raid, calc_name)
     local dkpTotal = self.dkp[raid].total
     if dkpTotal > 0 then
@@ -173,18 +182,24 @@ end
 
 function Member:OverwriteDKP(dkp)
     for _, raid in pairs(Defaults.dkp_raids)  do
-        local entries = {}
-        local deleted = {}
+        self:InitRaidDKP(raid) -- Reset their DKP and Whatnot.
 
-        for _, val in pairs(DKPVariables) do
-            self.dkp[raid][val] = dkp[raid][val]
+        if dkp[raid] ~= nil then
+            local entries = {}
+            local deleted = {}
+            for _, val in pairs(DKPVariables) do
+                local dkpVarVal = dkp[raid][val]
+                if dkpVarVal ~= nil then
+                    self.dkp[raid][val] = dkp[raid][val]
+                end
+            end
+
+            for _, id in pairs(self.dkp[raid]['entries']) do table.insert(entries, id) end
+            for _, id in pairs(self.dkp[raid]['deleted']) do table.insert(deleted, id) end
+
+            self.dkp[raid]['entries']=entries;
+            self.dkp[raid]['deleted']=deleted;
         end
-
-        for _, id in pairs(self.dkp[raid]['entries']) do table.insert(entries, id) end
-        for _, id in pairs(self.dkp[raid]['deleted']) do table.insert(deleted, id) end
-
-        self.dkp[raid]['entries']=entries;
-        self.dkp[raid]['deleted']=deleted;
     end
     self:Save()
 end
@@ -207,4 +222,8 @@ function Member:UpdateDKPTest(raid, newTotal)
     end
 
     self:Save()
+end
+
+function Member:DataOverwrite(memberData)
+
 end

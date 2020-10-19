@@ -9,30 +9,46 @@ local PDKP = core.PDKP;
 local Util = core.Util;
 local Settings = core.Settings;
 local GUI = core.GUI;
+local Comms = core.Comms;
 
 local trim, lower = strtrim, strlower
 
 local shroud_commands = {'shroud', 'thirst'}
+local SHROUD_EVENTS = {'CHAT_MSG_WHISPER', 'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
+
+Shroud.events_frame = nil;
 
 Shroud.shrouders = {};
 
 function PDKP_Shroud_OnEvent(self, event, arg1, ...)
-    if not Raid:InRaid() then return end
-    -- If not DKP Officer or Master Looter, ignore event.
-
-    -- TODO: Hookup DKP Officer and send out the list in comms.
+    if not Raid:InRaid() or not Raid:IsDkpOfficer() then return end
 
     local msg, _, _, _, name, _, _, _, _, _, _, _, _, _, _, _, _ = arg1, ...
     msg = lower(trim(msg))
 
     if not tContains(shroud_commands, msg) then return end -- Not a shrouding message.
 
-    if not Shroud.shrouders[name] then
-        Shroud.shrouders[name .. ' ' .. tostring(random(0, 9999))] = {
-            ['Molten Core']=math.floor(random(0, 9999)),
-            ['Blackwing Lair']=math.floor(random(0, 9999)),
-            ['Ahn\'Qiraj']=math.floor(random(0, 9999)),
-        }
+    Shroud:NewShrouder(name)
+end
+
+function Shroud:NewShrouder(name) -- Only the DKP Officer gets this.
+    local shroud_data = {};
+    if name ~= nil then
+        local shroud_member = Guild:GetMemberByName(name)
+        shroud_data['name']=name
+        shroud_data['dkp']=shroud_member:GetShroudDKP()
+    end
+    shroud_data['raid']=Settings.current_raid
+    return Comms:SendCommsMessage('pdkpUpdateShroud', shroud_data, 'RAID', nil, nil, nil)
+end
+
+function Shroud:UpdateShrouders(shrouder_data)
+    local name = shrouder_data['name']
+    local dkp = shrouder_data['dkp']
+    local raid = shrouder_data['raid']
+
+    if name ~= nil and dkp ~= nil then
+        Shroud.shrouders[name] = dkp;
     end
 
     local shroud_box = GUI.shroud_box;
@@ -41,11 +57,11 @@ function PDKP_Shroud_OnEvent(self, event, arg1, ...)
     scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
     local shroud_keys = {}; -- Member names in a list we can sort.
-    for key, val in pairs(Shroud.shrouders) do table.insert(shroud_keys,key) end
+    for key, _ in pairs(Shroud.shrouders) do table.insert(shroud_keys,key) end
 
     local compare = function(a, b)
         local a_mem, b_mem = Shroud.shrouders[a], Shroud.shrouders[b]
-        return a_mem[Settings.current_raid] > b_mem[Settings.current_raid]
+        return a_mem[raid] > b_mem[raid]
     end
     table.sort(shroud_keys, compare)
 
@@ -64,61 +80,35 @@ function PDKP_Shroud_OnEvent(self, event, arg1, ...)
     for i=1, #shroud_keys do
         if i == 1 then
             local winner_frame = createShroudStringFrame()
-            winner_frame.name:SetText("[WINNER]")
+            local winner_text = Util:FormatFontTextColor('00FF96', '[WINNER]')
+            winner_frame.name:SetText(winner_text)
             scrollContent:AddChild(winner_frame)
         end
         if i == 2 then
             local losers_frame = createShroudStringFrame()
-            losers_frame.name:SetText("[SHROUDERS]")
+            local loser_text = Util:FormatFontTextColor('FF3F40', '[SHROUDERS]')
+            losers_frame.name:SetText(loser_text)
             scrollContent:AddChild(losers_frame)
         end
 
         local shroud_name = shroud_keys[i]
         local shrouder = Shroud.shrouders[shroud_name]
         local shroud_frame = createShroudStringFrame()
-        shroud_frame.name:SetText(name)
-        shroud_frame.total:SetText(shrouder[Settings.current_raid])
+        shroud_frame.name:SetText(shroud_name)
+        shroud_frame.total:SetText(shrouder[raid])
         scrollContent:AddChild(shroud_frame)
     end
 
-    local raid_text = Settings.current_raid .. ' Shrouds'
+    local raid_text = raid .. ' Shrouds'
     GUI.shroud_box.title:SetText(raid_text)
 
-
-
-    --Raid.events_frame = CreateFrame("Frame", nil, UIParent)
-    --for _, eventName in pairs(raid_events) do Raid.events_frame:RegisterEvent(eventName) end
-    --Raid.events_frame:SetScript("OnEvent", PDKP_Raid_OnEvent)
-    --
-    --function PDKP_Raid_OnEvent(self, event, arg1, ...)
-    --
-    --    local regular_events = {
-    --        ['CHAT_MSG_WHISPER']=function(arg1, ...)
-    --            local msg, _, _, _, name, _, _, _, _, _, _, _, _, _, _, _, _ = arg1, ...
-    --            msg = lower(msg)
-    --            msg = trim(msg)
-    --            local invite_cmds = GUI.invite_control['commands']
-    --            if contains(invite_cmds, msg) then return Raid:InviteName(name) end
-    --        end,
-    --    }
-    --
-    --    if regular_events[event] then return regular_events[event](arg1, ...) end
-    --
-    --    if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
-    --    local raid_size = GetNumGroupMembers()
-    --
-    --    local raid_group_events = {
-    --        ['GROUP_ROSTER_UPDATE']=function()
-    --            if not GetRaidRosterInfo(raid_size) then return end
-    --            Raid.raid:Init()
-    --        end,
-    --    }
-    --
-    --    if raid_group_events[event] then raid_group_events[event]() end
-    --
-    --end
+    GUI.shroud_box:Show()
 end
 
-function Shroud:Setup()
-
+function Shroud:ClearShrouders()
+    print('Clearing shrouders')
+    GUI.shroud_box.scrollContent:WipeChildren()
+    Shroud.shrouders = {};
+    wipe(Shroud.shrouders)
+    GUI.shroud_box:Hide()
 end

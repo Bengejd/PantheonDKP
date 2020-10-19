@@ -292,7 +292,7 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     if filterOn == 'online' and checkedStatus then
         self.online = Guild:UpdateOnlineStatus()
     elseif filterOn == 'raid' and checkedStatus then
-        self.raid = Raid:GetRaidInfo()
+        self.raid_members = Raid.raid.members or {};
     end
 
     self.displayedRows = {};
@@ -363,7 +363,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.lastSelect = nil;
 
     self.online = {};
-    self.raid = {};
+    self.raid_members = {};
 
     self.cols = {};
     self.data = {};
@@ -529,7 +529,7 @@ function ScrollTable:OnLoad()
                     elseif filter == 'Select_All' then
 
                     elseif filter == 'raid' then
-                        row.isFiltered = not tContains(super.raid, dataObj['name'])
+                        row.isFiltered = not tContains(super.raid_members, dataObj['name'])
                     elseif filter == 'name' then
                         row.isFiltered = not Util:StringsMatch(dataObj['name'], super.searchText)
                     end

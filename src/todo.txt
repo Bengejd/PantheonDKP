@@ -1,22 +1,13 @@
 REWORK:
-TODO: Fix bug with In-Raid Filter not showing raid members in your raid.
+
+TODO: BUG: DKP Officer requests way too much.
+TODO: BUG: In-Raid not working properly.
+
 TODO: Setup DKP Officer popup.
 TODO: Setup Loot Prio again.
 TODO: Loot Prio Alterations in addon, instead of having to wait for an update.
 TODO: Find what color the original version text was.
-TODO: Check out AceBucket for event handling?1111
-
-TODO: Comms when receiving an entry change.
-
-ESSENTIALS:
-    TODO: Record who was online in the fight when the encounter begins as well as when the boss is killed.
-    TODO: Settings menu when mini-map is right-clicked.
-        TODO: Allow Disable print messages.
-    TODO: Disable pushes when you are in an instance / raid group.
-    TODO: Disable requests while you are in an instance / raid group.
-    TODO: Save positioning of the shrouding window through states.
-    TODO: BUG: Fix the visual issue with dkp updates on boss kills not updating the underlying values of the scroll table.
-    TODO: Save shrouding window positioning.
+TODO: Check out AceBucket for event handling?
 
 LOCAL DESKTOP APP:
     TODO: Figure out how to create a desktop app.

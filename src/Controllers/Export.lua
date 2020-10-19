@@ -69,7 +69,7 @@ function Export:New(sync_type, entry)
             end
         end
         --- Delete
-    elseif self.type == 'push-delete' and self.entry ~= nil and self.entry['deleted'] == true then
+    elseif self.type == 'push-delete' and self.entry ~= nil then
         local entry_push_data = self.entry:PrepareDeletedPushData()
         self.details['data']['entry']=entry_push_data;
         --- Add

@@ -195,6 +195,7 @@ function Guild:MergeOldData()
         end
     end
     Settings.db['mergedOld'] = true
+    GUI:RefreshTables()
 end
 
 --local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");

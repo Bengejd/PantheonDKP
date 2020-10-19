@@ -61,8 +61,6 @@ function GUI:Init()
 
     GUI:UpdateEasyStats()
 
-    Shroud:Setup()
-
     if Settings:IsDebug() then
         Util:Debug('Debugging Mode Active')
     end
@@ -130,9 +128,13 @@ function GUI:UpdateRaidClassGroups()
 
 end
 
-function GUI:RefreshTables()
-    GUI.memberTable:ClearSelected()
-    GUI.memberTable:ClearAll()
+function GUI:RefreshTables(pushUpdate)
+
+    if pushUpdate == nil then
+        GUI.memberTable:ClearSelected()
+        GUI.memberTable:ClearAll()
+    end
+
     GUI.memberTable:RaidChanged()
 
     if GUI.history_table.frame:IsVisible() then
@@ -143,7 +145,7 @@ function GUI:RefreshTables()
 
     -- TODO: When changing raids, and shroud box is open, have the DKP master send out the updated DKP Shrouds for that raid.
 
-    wipe(GUI.memberTable.selected)
+    --wipe(GUI.memberTable.selected)
 end
 
 function GUI:ToggleRaidInviteSpam()
@@ -189,6 +191,12 @@ function GUI:ToggleRaidInviteSpam()
 
     sendMsg()
     GUI.invite_control['timer'] = PDKP:ScheduleRepeatingTimer(timerFeedback, interval) -- Posts it every 90 seconds for 15 mins.
+end
+
+function GUI:UpdateInRaidFilter()
+    local filter = _G['pdkp_filter_raid']
+    filter:Click()
+    filter:Click()
 end
 
 function UpdatePushBar(percent, elapsed)

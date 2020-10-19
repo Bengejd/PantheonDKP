@@ -1,6 +1,0 @@
-ESSENTIALS:
-
-REMOVE:
-    - Lib.st -- Doesn't work.
-
-RemoveChatWindowChannel

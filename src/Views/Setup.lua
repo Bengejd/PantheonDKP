@@ -1163,9 +1163,11 @@ function Setup:DKPAdjustments()
         if GUI.adjustment_entry['shouldHaveItem'] then
             local item_frame = Loot.frame:getChecked()
             if item_frame then
-                GUI.adjustment_entry['item'] = item_frame.item_info['link']
-                item_frame.deleted = true
-                item_frame:Hide()
+                if item_frame['item_info'] ~= nil then
+                    GUI.adjustment_entry['item'] = item_frame.item_info['link']
+                    item_frame.deleted = true
+                    item_frame:Hide()
+                end
             end
         end
 
@@ -1381,6 +1383,9 @@ function Setup:RaidDropdown()
             Settings:ChangeCurrentRaid(dropdown_val);
             GUI:RefreshTables()
             PDKP_ToggleAdjustmentDropdown()
+            if GUI.shroud_box:IsVisible() then
+                Shroud:NewShrouder(nil)
+            end
         end
     }
     local raid_dd = createDropdown(raid_opts)
@@ -1795,10 +1800,10 @@ function Setup:ShroudingBox()
 
     local cb = createCloseButton(f, true)
     cb:SetPoint("TOPRIGHT")
-    
-    f:SetScript("OnHide", function()
-        -- TODO: If DKP Officer, clear everyone elses shroud box.
-        --print("Shroud box hiding!")
+
+    cb:SetScript("OnClick", function()
+        f:Hide()
+        if Raid:IsDkpOfficer() then Comms:SendCommsMessage('pdkpClearShrouds', {}, 'RAID', nil, nil, nil) end
     end)
 
     f.scrollContent = scrollContent;

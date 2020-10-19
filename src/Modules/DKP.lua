@@ -149,41 +149,17 @@ function DKP:Submit()
     GUI.adjustment_entry['names'] = { unpack(PDKP.memberTable.selected) }
 
     local entry = DKP_Entry:New(GUI.adjustment_entry)
-
-    for _, name in pairs(entry['names']) do
-        local member = Guild:GetMemberByName(name)
-        member:NewEntry(entry)
-    end
-
-    entry:Save()
-    core.PDKP.dkpDB['history']['lastEdit']=entry.id
-
-    GUI:RefreshTables()
-
     Export:New('push-add', entry)
+
+    
+
+    core.PDKP.dkpDB['history']['lastEdit']=entry.id
 end
 
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
-
-    DkpDB['history']['all'][entry['id']]['deleted']=true -- Mark the entry as having been deleted.
-
-    for key, name in pairs(entry['names']) do
-        local member = Guild:GetMemberByName(name)
-        member:DeleteEntry(entry)
-    end
-    tremove(DkpDB['history']['all'], entry['id'])
-    DkpDB['history']['all'][entry['id']] = nil;
-    tinsert(DkpDB['history']['deleted'], entry['id'])
-    DKP.history_entries[entry['id']] = nil
-
-    GUI.memberTable:RaidChanged()
-    GUI.popup_entry = nil;
-
-    entry['deleted']=true
-
     Export:New('push-delete', entry)
-
+    GUI.popup_entry = nil;
     return entry['id']
 end
 

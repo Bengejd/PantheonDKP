@@ -32,7 +32,7 @@ Raid.recent_boss_kill = {};
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER', 'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
+local raid_events = {'GROUP_ROSTER_UPDATE'}
 
 function Raid:new()
     local self = {};
@@ -91,17 +91,11 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
         ['GROUP_ROSTER_UPDATE']=function()
             if not GetRaidRosterInfo(raid_size) then return end
             Raid.raid:Init()
-        end,
-        ['CHAT_MSG_RAID']=function()
-            print('Raid Message');
-        end,
-        ['CHAT_MSG_RAID_LEADER']=function()
-            print('Leader Message');
+            GUI:UpdateInRaidFilter()
         end,
     }
 
     if raid_group_events[event] then raid_group_events[event]() end
-
 end
 
 function Raid:RegisterEvents()
@@ -188,42 +182,42 @@ function Raid:GetRaidInfo()
 end
 
 function Raid:BossKill()
-    if not canEdit then return end; -- If you can't edit, then you shoudln't be here.
-
-    local bk
-    for raidName, raidObj in pairs(bossIDS) do
-        if bk == nil then
-            for pdkpBossID, pdkpBossName in pairs(raidObj) do
-                if pdkpBossID == bossID or pdkpBossName == bossName then
-                    bk = {
-                        name=pdkpBossName,
-                        id=pdkpBossID,
-                        raid=raidName,
-                    }
-                    break
-                end
-            end
-        else
-            break
-        end
-    end
-
-    if bk == nil then return end; -- We should have found the boss kill by now.
-
-    -- You are the DKP Officer
-    -- There is no dkp Officer, but you're the master looter
-
-    local dkpOfficer = Raid.dkpOfficer
-
-    if ( ( dkpOfficer and Raid:IsDkpOfficer() ) or ( not dkpOfficer and RaidIsMasterLooter() ) ) then
-        Util:Debug('You are not the master looter, and not dkpOffcier.')
-        return
-    end
-
-    local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    popup.text = bk.name .. ' was killed! Award 10 DKP?'
-    popup.bossInfo = bk;
-    StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+    --if not canEdit then return end; -- If you can't edit, then you shoudln't be here.
+    --
+    --local bk
+    --for raidName, raidObj in pairs(bossIDS) do
+    --    if bk == nil then
+    --        for pdkpBossID, pdkpBossName in pairs(raidObj) do
+    --            if pdkpBossID == bossID or pdkpBossName == bossName then
+    --                bk = {
+    --                    name=pdkpBossName,
+    --                    id=pdkpBossID,
+    --                    raid=raidName,
+    --                }
+    --                break
+    --            end
+    --        end
+    --    else
+    --        break
+    --    end
+    --end
+    --
+    --if bk == nil then return end; -- We should have found the boss kill by now.
+    --
+    ---- You are the DKP Officer
+    ---- There is no dkp Officer, but you're the master looter
+    --
+    --local dkpOfficer = Raid.dkpOfficer
+    --
+    --if ( ( dkpOfficer and Raid:IsDkpOfficer() ) or ( not dkpOfficer and RaidIsMasterLooter() ) ) then
+    --    Util:Debug('You are not the master looter, and not dkpOffcier.')
+    --    return
+    --end
+    --
+    --local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
+    --popup.text = bk.name .. ' was killed! Award 10 DKP?'
+    --popup.bossInfo = bk;
+    --StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
 function Raid:GetCurrentRaid()
@@ -285,6 +279,7 @@ function Raid:MemberIsInRaid(name)
 end
 
 function Raid:SetDkpOfficer(isDkpOfficer, charName)
+    print(isDkpOfficer, charName)
     if isDkpOfficer then
         Raid.raid.dkpOfficer = nil
         PDKP:Print(charName .. ' is no longer the DKP Officer')
@@ -292,6 +287,17 @@ function Raid:SetDkpOfficer(isDkpOfficer, charName)
         Raid.raid.dkpOfficer = charName;
         PDKP:Print(charName .. ' is now the DKP Officer')
     end
+end
+
+function Raid:IsDkpOfficer()
+    local dkpOfficer = Raid.raid.dkpOfficer
+    if dkpOfficer == nil then return false end
+    return dkpOfficer == Char:GetMyName()
+end
+
+function Raid:IsMasterLooter()
+    if Raid.raid.MasterLooter == nil then return false end
+    return Char:GetMyName() == Raid.raid.MasterLooter
 end
 
 --- Debug funcs

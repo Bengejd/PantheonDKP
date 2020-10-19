@@ -56,7 +56,7 @@ function HistoryTable:init(table_frame)
     self.rows = {};
     self.entry_keys = {}; -- Our Entry Keys from the history table.
     self.entries = {};
-    self.updateNextOpen = false
+    self.updateNextOpen = false;
     self.displayedRows = {};
     self.collapsed = false;
     self.table_init = false;
@@ -88,7 +88,11 @@ function HistoryTable:init(table_frame)
 
     self.frame:SetScript("OnShow", function()
         if self.updateNextOpen then
-            self:HistoryUpdated()
+            --- hmmmm. Table size isn't being updated properly.
+            self:OnLoad()
+            self:RefreshData(true)
+            self:HistoryUpdated(true)
+            self:CollapseAllRows(self.collapsed)
             self.updateNextOpen = false
         end
         if not self.collapse_init then
@@ -124,7 +128,7 @@ function HistoryTable:ToggleRows()
     end
 end
 
-function HistoryTable:RefreshData()
+function HistoryTable:RefreshData(justData)
     self.scrollContent:WipeChildren(self.scrollContent)
     wipe(self.entry_keys)
     local keys, _ = DKP:GetEntries(true, nil);
@@ -134,7 +138,9 @@ function HistoryTable:RefreshData()
 
     for i=1, #self.entry_keys do self.entries[i] = DKP:GetEntries(nil, self.entry_keys[i]) end
 
-    self:RefreshTable()
+    if justData == nil then
+        self:RefreshTable()
+    end
 end
 
 function HistoryTable:RefreshTable()
@@ -294,6 +300,8 @@ function HistoryTable:OnLoad()
 
             local selected = self.appliedFilters['selected']
 
+
+
             for filter, val in pairs(self.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to continue the loop.
                 if filter == 'raid' then row.isFiltered = row.dataObj['raid'] ~= val
@@ -332,7 +340,7 @@ function HistoryTable:OnLoad()
                 local header = ROW_COL_HEADERS[key]
                 local variable, displayName = header['variable'], header['display']
                 local col = row.cols[key]
-                local val = row.dataObj[variable]
+                local val = row.dataObj[variable] or ''
 
                 if col == nil then
                     col = content:CreateFontString(nil, 'OVERLAY', "GameFontHighlightLeft")
@@ -376,9 +384,9 @@ function HistoryTable:OnLoad()
 
         function row:UpdateTextValues()
             row_title:SetText(row.dataObj['formattedID'])
-            local c_raid = row.dataObj['raid']
-            local c_officer = row.dataObj['formattedOfficer']
-            local c_hist = row.dataObj['collapsedHistoryText']
+            local c_raid = row.dataObj['raid'] or ''
+            local c_officer = row.dataObj['formattedOfficer'] or ''
+            local c_hist = row.dataObj['collapsedHistoryText'] or ''
             local c_text = c_raid .. ' | ' .. c_officer .. ' | ' .. c_hist
             collapse_text:SetText(c_text)
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
