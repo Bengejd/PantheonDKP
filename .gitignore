@@ -1,3 +1,4 @@
-.idea\*
-.idea
-'.idea' 
+.idea/
+.idea/*.xml
+.idea/workspace.xml
+.idea/PantheonDKP.iml

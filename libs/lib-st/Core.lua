@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "ScrollingTable", tonumber("@project-timestamp@") or 40300;
+local MAJOR, MINOR = "ScrollingTable", tonumber("1541543953");
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR);
 if not lib then
 	return; -- Already loaded and no upgrade necessary.
@@ -22,15 +22,20 @@ do
 
 	local SetHeight = function(self)
 		self.frame:SetHeight( (self.displayRows * self.rowHeight) + 10);
-		self:Refresh();
+		self:Refresh()self:Refresh();
 	end
 
 	local SetWidth = function(self)
 		local width = 13;
 		for num, col in pairs(self.cols) do
-			width = width + 35 --col.width;
+      if type(col) == type({}) then
+        col.width = col.width or 50;
+        width = width + col.width;
+      else
+        width = width + 50
+      end
 		end
-		self.frame:SetWidth(width+50);
+		self.frame:SetWidth(width+20);
 		self:Refresh();
 	end
 
@@ -159,11 +164,10 @@ do
 					col:SetPoint("LEFT", row, "LEFT", 2, 0);
 				end
 				col:SetHeight(rowHeight);
-				col:SetWidth(20);
+				col:SetWidth(self.cols[j].width);
 				col.text:SetPoint("TOP", col, "TOP", 0, 0);
 				col.text:SetPoint("BOTTOM", col, "BOTTOM", 0, 0);
-        col.text:SetWidth(20 -2*lrpadding)
---				col.text:SetWidth(self.cols[j].width - 2*lrpadding);
+				col.text:SetWidth(self.cols[j].width - 2*lrpadding);
 			end
 			j = #self.cols + 1;
 			col = row.cols[j];
@@ -248,8 +252,7 @@ do
 				col:SetPoint("LEFT", row, "LEFT", 2, 0);
 			end
 			col:SetHeight(self.rowHeight);
-      col:SetWidth(20);
---			col:SetWidth(cols[i].width);
+			col:SetWidth(cols[i].width);
 
 			local color = cols[i].bgcolor;
 			if (color) then
