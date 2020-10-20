@@ -200,6 +200,12 @@ function GUI:UpdateInRaidFilter()
     local filter = _G['pdkp_filter_raid']
     filter:Click()
     filter:Click()
+
+    local selectAllFilter = _G['pdkp_filter_Select_All']
+    if selectAllFilter:GetChecked() then
+        selectAllFilter:Click()
+        selectAllFilter:Click()
+    end
 end
 
 function GUI:UpdateSyncStatus()
