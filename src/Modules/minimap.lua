@@ -98,8 +98,8 @@ function Minimap:HandleIconClicks(buttonType)
             GUI:TogglePDKP()
         end
     elseif buttonType == 'RightButton' then
-        if hasShift and true then -- Can Edit.
-            --StaticPopup_Show() -- Officer Confirm Push.
+        if hasShift and Settings:CanEdit() then -- Can Edit.
+            StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM') -- Officer Confirm Push.
         else
             --Open Interface Options.
             InterfaceOptionsFrame_OpenToCategory("PantheonDKP");

@@ -20,6 +20,7 @@ local Minimap = core.Minimap;
 local Defaults = core.Defaults;
 local Character = core.Character;
 local Settings = core.Settings;
+local Export = core.Export;
 
 local SendChatMessage = SendChatMessage
 
@@ -157,7 +158,7 @@ function GUI:ToggleRaidInviteSpam()
     local spam_channel = 'GUILD'
     local spam_char = nil
 
-    if Settings:IsDebug() then
+    if Settings:IsDebug() and false then -- disabled for now.
         Util:Debug("Setting Spam Count Interval to 2 for debugging")
         interval = 2
         spam_char = 'Lariese'
@@ -174,8 +175,6 @@ function GUI:ToggleRaidInviteSpam()
     end
 
     if Util:IsEmpty(text) then return end -- Stop here if the text is empty.
-
-    print("Starting Invite Spam")
 
     local function sendMsg()
         SendChatMessage(text, spam_channel, nil, spam_char) -- SendChatMesage(text, 'GUILD', nil, nil);
@@ -335,16 +334,12 @@ PDKP_POPUP_DIALOG_SETTINGS = {
         button3 = 'Cancel',
         button2 = "Merge",
         OnAccept = function(...) -- First (Overwrite)
-            Comms:SendGuildPush(true)
+            Export:New('push-overwrite')
         end,
         OnCancel = function(...) -- Second (Merge)
             local _, _, clickType = ...
-            -- Because creating another instance of the popup calls onCancel with 'override' instead of 'clicked'.
-            -- This ensures that we actually clicked the cancel button. When hideOnEscape is enabled, this also is set as
-            -- 'clicked' so this can't be enabled when we are using 3 buttons, as ALT is the one that we're using for
-            -- cancel, for UX purposes.
             if clickType == 'clicked' then
-                Comms:SendGuildPush(false)
+                Export:New('push-merge')
             end
         end,
         OnAlt = function(...) -- Third (Cancel)

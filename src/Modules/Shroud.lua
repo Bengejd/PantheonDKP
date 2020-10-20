@@ -106,7 +106,6 @@ function Shroud:UpdateShrouders(shrouder_data)
 end
 
 function Shroud:ClearShrouders()
-    print('Clearing shrouders')
     GUI.shroud_box.scrollContent:WipeChildren()
     Shroud.shrouders = {};
     wipe(Shroud.shrouders)

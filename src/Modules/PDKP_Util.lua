@@ -365,7 +365,6 @@ function __genOrderedIndex( t )
         if type(key) == type(1) then
             insert( orderedIndex, key )
         else
-            print(key)
         end
     end
     sort( orderedIndex )
@@ -379,7 +378,6 @@ function orderedNext(t, state)
     -- table being iterated.
 
     local key = nil
-    --print("orderedNext: state = "..tostring(state) )
     if state == nil then
         -- the first time, generate the index
         t.__orderedIndex = __genOrderedIndex( t )

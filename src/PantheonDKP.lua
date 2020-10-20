@@ -46,9 +46,6 @@ local function PDKP_OnEvent(self, event, arg1, ...)
             Util:WatchVar(core, 'PDKP');
             Guild.updateCalled = false;
         end,
-        ['ZONE_CHANGED_NEW_AREA']=function()
-
-        end,
         ['ADDON_LOADED']=function()
             PDKP:OnInitialize(event, arg1)
         end,
@@ -74,8 +71,7 @@ end
 function PDKP:OnDataAvailable()
     Guild:new();
 
-    -- TODO: Determine if I want this as a popup or not.
-    --if not Settings.db['mergedOld'] then Guild:MergeOldData() end
+    if not Settings.db['mergedOld'] then pcall(PDKP_Merge_Old_Guild_Data) end
 
     GUI:Init();
     Raid:new();
@@ -178,23 +174,6 @@ function PDKP:HandleShroudCommands(item)
     --end
 end
 
-function PDKP:HandlePrioCommands(itemLink)
-    --itemLink = itemLink or nil;
-    --if itemLink ~= nil and itemLink ~= '' then
-    --    local prio = item:GetPriority(itemLink)
-    --
-    --    if prio == nil then -- Possibly we have an item link.
-    --        local itemName = item:GetItemInfo(itemLink)
-    --        if itemName then
-    --            prio = item:GetPriority(itemName)
-    --        end
-    --    end
-    --
-    --    if prio then print(itemLink .. ' PRIO: ' .. prio) end
-    --else
-    --end
-end
-
 -- Generic function that handles all the slash commands.
 function PDKP:HandleSlashCommands(msg)
     if string.len(msg) == 0 then return end -- No command attached.
@@ -221,33 +200,14 @@ function PDKP:HandleSlashCommands(msg)
         end,
     }
 
-    if officerCommands[msg]  then return officerCommands[msg]() end
+    if not Settings:CanEdit() then
+        return Util:Debug('Cannot process this command because you are not an officer')
+    end;
+
+    if officerCommands[msg] then return officerCommands[msg]() end
 
     print('Unknown PDKP command:', msg)
 
-
-    --local splitMsg, name = strsplit(' ', msg)
-    --
-    --local safeFuncs = {
-    --    ['show']=function() return PDKP:Show() end,
-    --    ['hide']=function() return GUI:Hide() end,
-    --    ['shroud']=function() return PDKP:MessageRecieved('shroud', Util:GetMyName()) end,
-    --    ['']=function() end,
-    --}
-    --
-    --local splitFuncs = {
-    --    ['report']=function()
-    --        local dkp = DKP:GetPlayerDKP(name)
-    --        if dkp == 0 then
-    --            PDKP:Print(name .. ' has 0 dkp or was not found')
-    --        else
-    --            PDKP:Print(name .. ' has: ' .. dkp .. ' DKP')
-    --        end
-    --    end,
-    --}
-    --
-    --if safeFuncs[msg] then return safeFuncs[msg]() end
-    --if splitFuncs[splitMsg] then return splitMsg[msg]() end
     --
     --if msg == 'professionTracking' then
     --    if not _G['pdkpProf'] then local f, t ,c = CreateFrame("Frame", "pdkpProf"), 2383,0
@@ -264,44 +224,8 @@ function PDKP:HandleSlashCommands(msg)
     --    if _G['pdkpProf']:IsVisible() then _G['pdkpProf']:Hide() else _G['pdkpProf']:Show() end
     --end
     --
-    --if msg == 'pdkpTestWho' then
-    --    SendWho('bob z-"Teldrassil" r-"Night Elf" c-"Rogue" 10-15');
-    --end
-    --
     ---- OFFICER ONLY COMMANDS
-    if not Settings:CanEdit() then
-        return Util:Debug('Cannot process this command because you are not an officer')
-    end;
 
-
-    --
-    --if msg == 'pdkpTestAutoSync' then
-    --    Comms:DatabaseSyncRequest()
-    --end
-    --
-    --if msg == 'item' and item then
-    --    return Item:LinkItem();
-    --end
-    --
-    --if msg == 'historyEdit' then
-    --    Setup:HistoryEdit()
-    --end
-    --
-    --if msg == 'invite' then
-    --    return Invites:Show();
-    --    --        local tempInvites = {'Sparklenips', 'Annaliese'}
-    --    --        for i=1, #tempInvites do
-    --    --            InviteUnit(tempInvites[i]);
-    --    --        end
-    --end
-    --
-    --if msg == 'pdkpPrioWindow' then
-    --    --        Setup:PrioList()
-    --end
-    --
-    --if msg == 'officer' then
-    --    Officer:Show()
-    --end
     --
     --if msg == 'raidChecker' then
     --    Raid:IsInInstance()
@@ -317,46 +241,6 @@ function PDKP:HandleSlashCommands(msg)
     --
     --if msg == 'bossKill' then
     --    return Raid:BossKill(669, 'Sulfuron Harbinger');
-    --end
-    --
-    --if msg == 'classes' then
-    --    return Guild:GetClassBreakdown();
-    --end
-    --
-    --if msg == 'timer' then
-    --    return GUI:CreateTimer()
-    --end
-    --
-    --if msg == 'pdkp_reset_all_db' and core.Defaults:IsDebug() then
-    --    DKP:ResetDB()
-    --    Guild:ResetDB()
-    --end
-    --
-    --if msg == 'enableDebugging' then
-    --    core.defaults:ToggleDebugging()
-    --end
-    --
-    --if msg == 'validateTables' then
-    --    DKP:ValidateTables()
-    --end
-end
-
-function PDKP:MessageRecieved(msg, name) -- Global handler of Messages
-
-    --if Shroud.shroudPhrases[string.lower(msg)] and Raid:IsAssist() then
-    --    -- This should send the list to everyone in the raid, so that it just automatically pops up.
-    --    if Raid.dkpOfficer and Raid:IsDkpOfficer() then -- We have the DKP officer established
-    --        Util:Debug('DKP Officer is updating shrouders with ' .. name)
-    --        return Shroud:UpdateShrouders(name)
-    --    elseif Raid.dkpOfficer == nil and Raid:isMasterLooter() then
-    --        Util:Debug('Master Looter is updating shrouders with ' .. name)
-    --        return Shroud:UpdateShrouders(name)
-    --    end
-    --elseif core.inviteTextCommands[string.lower(msg)] and Raid:IsAssist() then -- Sends an invite to the player
-    --    if not Raid:IsInRaid() then
-    --        ConvertToRaid()
-    --    end
-    --    InviteUnit(name)
     --end
 end
 
@@ -380,9 +264,7 @@ end
 
 
 local eventNames = {
-    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START", "PLAYER_GUILD_UPDATE",
-    "COMBAT_LOG_EVENT_UNFILTERED", "LOOT_OPENED", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_WHISPER",
-    "CHAT_MSG_GUILD", "CHAT_MSG_LOOT", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA","BOSS_KILL", "CHAT_MSG_SYSTEM"
+    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_LOGIN"
 }
 
 for _, eventName in pairs(eventNames) do

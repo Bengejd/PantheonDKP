@@ -152,10 +152,14 @@ local function Guild_OnEvent(self, event, arg1, ...)
 end
 
 --- Merging Functions
+
+function PDKP_Merge_Old_Guild_Data()
+    return Guild:MergeOldData()
+end
+
 function Guild:MergeOldData()
     local old_guild_db = core.PDKP.old_guild_db
     local old_guild_members =  old_guild_db['members']
-    local raids = Defaults.dkp_raids
 
     --- Member data
     Util:Debug("Merging Old Member data")
@@ -179,7 +183,7 @@ function Guild:MergeOldData()
 
     --- Deleted History
     Util:Debug("Merging Old Deleted Entries")
-    for key, ID in pairs(old_deleted) do
+    for _, ID in pairs(old_deleted) do
         if not tContains(current_deleted, ID) then
             table.insert(current_deleted, ID)
         end
@@ -197,23 +201,3 @@ function Guild:MergeOldData()
     Settings.db['mergedOld'] = true
     GUI:RefreshTables()
 end
-
---local events = CreateFrame("Frame", "PDKP_GuildEventsFrame");
---local eventNames = { 'GUILD_ROSTER_UPDATE', 'PLAYER_ENTERING_WORLD', 'CHAT_MSG_GUILD' }
---for _, event in pairs(eventNames) do
---   events:RegisterEvent(event)
---end
---events:SetScript("OnEvent", Guild_OnEvent)
-
---
---local eventNames = {
---    "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "ENCOUNTER_START",
---    "COMBAT_LOG_EVENT_UNFILTERED", "LOOT_OPENED", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_WHISPER",
---    "CHAT_MSG_GUILD", "CHAT_MSG_LOOT", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA","BOSS_KILL", "CHAT_MSG_SYSTEM"
---}
---
---for _, eventName in pairs(eventNames) do
---    events:RegisterEvent(eventName);
---end
---
---events:SetScript("OnEvent", PDKP_OnEvent); -- calls the above MonDKP_OnEvent function to determine what to do with the event

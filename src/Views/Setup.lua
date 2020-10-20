@@ -604,11 +604,6 @@ function Setup:RaidTools()
     b:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0)
     b:SetScript("OnClick", function()
         if f:IsVisible() then f:Hide() else f:Show() end
-
-        --if Raid.spamText == nil and raidSpamTime ~= nil then
-        --    raidSpamTime:SetText("[TIME] [RAID] invites going out. Pst for invite")
-        --    Raid.spamText = raidSpamTime:GetText()
-        --end
     end)
 
     f.content = CreateFrame("Frame", '$parent_content', f)
@@ -708,10 +703,7 @@ function Setup:RaidTools()
 
     local promote_button = CreateFrame("Button", nil, promote_group.content, "UIPanelButtonTemplate")
     promote_button:SetText("Promote Leadership")
-    promote_button:SetScript("OnClick", function()
-        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-        Raid:PromoteLeadership()
-    end)
+    promote_button:SetScript("OnClick", function() Raid:PromoteLeadership() end)
     promote_button:SetPoint("TOPLEFT")
     promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
 
@@ -725,9 +717,7 @@ function Setup:RaidTools()
 
     local threshold_button = CreateFrame("Button", nil, loot_threshold_group.content, 'UIPanelButtonTemplate')
     threshold_button:SetText("Set Loot Common")
-    threshold_button:SetScript("OnClick", function()
-        Raid:SetLootCommon()
-    end)
+    threshold_button:SetScript("OnClick", function() Raid:SetLootCommon() end)
     threshold_button:SetPoint("TOPLEFT")
     threshold_button:SetSize(threshold_button:GetTextWidth() + 20, 30)
 

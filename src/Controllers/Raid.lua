@@ -51,8 +51,6 @@ function Raid:new()
     self:RegisterEvents();
     self:Init();
 
-
-
     return self
 end
 
