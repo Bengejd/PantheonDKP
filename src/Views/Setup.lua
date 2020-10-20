@@ -539,13 +539,13 @@ function Setup:RandomStuff()
     Setup:DKPAdjustments()
     Setup:RaidDropdown()
     --Setup:BossKillLoot()
-    --Setup:TabView()
     Setup:DKPHistory()
     Setup:RaidTools()
     Setup:InterfaceOptions()
     Setup:PushProgressBar()
     Setup:HistoryTable()
     Setup:DKPOfficer()
+    Setup:SyncStatus()
 
     --- For debugging purposes.
     pdkp_frame:Show()
@@ -1519,9 +1519,37 @@ function Setup:TabView()
 end
 
 function Setup:SyncStatus()
+    local f = createBackdropFrame('sync_status', GUI.filter_frame, 'DKP Sync Status')
+    f:SetPoint("TOPLEFT", GUI.filter_frame, "BOTTOMLEFT")
+    f:SetPoint("BOTTOMRIGHT", GUI.adjustment_frame, "TOPRIGHT")
 
+    GUI.sync_frame = f;
+    f.children = {};
 
-    --Util:Format12HrDateTime(self.id)
+    local function createSyncLabel(label_text)
+        local label = f.content:CreateFontString('OVERLAY', nil, 'GameFontNormalLeft')
+        label:SetText(label_text)
+        local sync_text = f.content:CreateFontString('OVERLAY', nil, 'GameFontHighlightSmall')
+        sync_text:SetPoint("LEFT", label, 'RIGHT', 5, 0)
+        label.desc = sync_text;
+
+        if #f.children == 0 then
+            label:SetPoint("TOPLEFT", 0, -10);
+        else
+            label:SetPoint("TOPLEFT", f.children[#f.children], "BOTTOMLEFT", 0, -10)
+        end
+        table.insert(f.children, label)
+        return label
+    end
+    local syncStatus = createSyncLabel('Sync Status:')
+    local guildSync = createSyncLabel('Latest Guild Push:');
+    local lastSync = createSyncLabel('Latest Push Received:');
+    local timeSinceSync = createSyncLabel('Time Since Latest Sync:')
+
+    f.syncStatus = syncStatus;
+    f.guildSync = guildSync;
+    f.lastSync = lastSync;
+    f.timeSinceSync = timeSinceSync;
 end
 
 function Setup:InterfaceOptions()

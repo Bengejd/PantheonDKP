@@ -42,6 +42,7 @@ GUI.history_frame = nil; -- The DKP History Frame
 GUI.history_table = nil; -- The DKP History Table
 GUI.raid_frame = nil; -- The PDKP Raid Tools frame.
 GUI.popup_entry = nil; -- The popup entry that we are editing/deleting.
+GUI.sync_frame = nil;
 
 GUI.shroud_box = nil;
 
