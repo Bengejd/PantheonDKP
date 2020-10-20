@@ -1373,6 +1373,7 @@ function Setup:RaidDropdown()
             Settings:ChangeCurrentRaid(dropdown_val);
             GUI:RefreshTables()
             PDKP_ToggleAdjustmentDropdown()
+            GUI:UpdateEasyStats()
             if GUI.shroud_box:IsVisible() then
                 Shroud:NewShrouder(nil)
             end

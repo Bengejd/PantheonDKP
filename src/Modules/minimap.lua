@@ -37,7 +37,7 @@ function Minimap:Init()
         icon = "Interface\\AddOns\\PantheonDKP\\icons\\icon.tga",
         OnTooltipShow = function(tooltip)
             tooltip:SetText("PantheonDKP " .. "v" .. Settings:GetAddonVersion()) -- First line
-            tooltip:AddLine('Sync Status: '.. ' Out of date', 1, 1, 1, 1) -- text, r,g,b flag to wrap text.
+            --tooltip:AddLine('Sync Status: '.. ' Out of date', 1, 1, 1, 1) -- text, r,g,b flag to wrap text.
             tooltip:AddLine(" ", 1,1,1,1)
             tooltip:AddLine(clickText, 1,1,1)
             tooltip:AddLine(rightClickText, 1, 1, 1)

@@ -98,7 +98,7 @@ function GUI:UpdateEasyStats()
     local char_info_text = char_name .. ' | ';
     local dkp_total = '0'
 
-    if member ~= nil then dkp_total = member:GetDKP(nil, 'total') end
+    if member ~= nil then dkp_total = member:GetDKP(Settings.current_raid, 'total') end
 
     if Settings:IsDebug() and member == nil then dkp_total = '9999' end
 
