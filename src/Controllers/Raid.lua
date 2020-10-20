@@ -32,7 +32,7 @@ Raid.recent_boss_kill = {};
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE'}
+local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER'}
 
 function Raid:new()
     local self = {};
