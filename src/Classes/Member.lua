@@ -94,7 +94,6 @@ function Member:GetShroudDKP()
     local shroud_dkp = {}
     for _, raid in pairs(Defaults.dkp_raids) do
         shroud_dkp[raid] = self.dkp[raid]['total']
-        print(shroud_dkp[raid])
     end
     return shroud_dkp
 end

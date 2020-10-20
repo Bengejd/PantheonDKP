@@ -84,6 +84,7 @@ function Import:New(prefix, data, sender)
         end
     end
     GUI:RefreshTables(true)
+    GUI:UpdateEasyStats()
 end
 
 function Import:ProcessAdd(new_entry)
