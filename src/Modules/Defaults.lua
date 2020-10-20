@@ -6,7 +6,7 @@ local Defaults = core.Defaults;
 
 Defaults.addon_version = GetAddOnMetadata('PantheonDKP', "Version")
 Defaults.addon_name = 'PantheonDKP'
-Defaults.bank_name = 'Pantheonbank'
+Defaults.bank_name = 'Pantheonbank';
 Defaults.addon_latest_version = GetAddOnMetadata('PantheonDKP', "Version")
 Defaults.print_name = '|cff33ff99PDKP|r:'
 

@@ -1534,7 +1534,7 @@ function Setup:SyncStatus()
         label.desc = sync_text;
 
         if #f.children == 0 then
-            label:SetPoint("TOPLEFT", 0, -10);
+            label:SetPoint("TOPLEFT", 0, -2);
         else
             label:SetPoint("TOPLEFT", f.children[#f.children], "BOTTOMLEFT", 0, -10)
         end
@@ -1542,14 +1542,20 @@ function Setup:SyncStatus()
         return label
     end
     local syncStatus = createSyncLabel('Sync Status:')
-    local guildSync = createSyncLabel('Latest Guild Push:');
-    local lastSync = createSyncLabel('Latest Push Received:');
-    local timeSinceSync = createSyncLabel('Time Since Latest Sync:')
+    local guildPush = createSyncLabel('Last DKP Edit:');
+    local lastPush = createSyncLabel('Last Push Received:');
+    local guildSync = createSyncLabel('Last Sync Request:');
+    --local timeSinceSync = createSyncLabel('Time Since Latest Sync:')
 
     f.syncStatus = syncStatus;
     f.guildSync = guildSync;
-    f.lastSync = lastSync;
-    f.timeSinceSync = timeSinceSync;
+    f.guildPush = guildPush;
+    f.lastPush = lastPush;
+    --f.timeSinceSync = timeSinceSync;
+
+    pdkp_frame:HookScript("OnShow", function()
+        GUI:UpdateSyncStatus()
+    end)
 end
 
 function Setup:InterfaceOptions()

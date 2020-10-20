@@ -28,10 +28,16 @@ local DkpDB;
 
 DKP.entries = {};
 DKP.history_entries = {};
+DKP.bankLastEdit = nil;
+DKP.bankLastSync = nil;
+DKP.lastEdit = nil;
+
 
 function DKP:InitDB()
     DkpDB = core.PDKP.dkpDB
     DKP.history = DkpDB['history']
+
+    DKP.lastEdit = core.PDKP.dkpDB['lastEdit']
 
     Util:WatchVar(DkpDB['history']['all'], 'DkpDB')
 end

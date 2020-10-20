@@ -24,6 +24,9 @@ local Export = core.Export;
 
 local SendChatMessage = SendChatMessage
 
+local success = '22bb33'
+local warning = 'E71D36'
+
 GUI.pdkp_frame = nil;
 GUI.sortBy = 'name';
 GUI.sortDir = 'ASC';
@@ -197,6 +200,26 @@ function GUI:UpdateInRaidFilter()
     local filter = _G['pdkp_filter_raid']
     filter:Click()
     filter:Click()
+end
+
+function GUI:UpdateSyncStatus()
+    local f = GUI.sync_frame;
+    local myLastEdit = core.PDKP.dkpDB['lastEdit']
+
+    local syncText = Util:FormatFontTextColor(success, 'Up to date');
+
+    if myLastEdit < DKP.bankLastEdit then syncText = Util:FormatFontTextColor(warning, 'Out of date'); end
+
+    local guildSyncDate = Util:Format12HrDateTime(DKP.bankLastSync)
+    local guildPushDate = Util:Format12HrDateTime(DKP.bankLastEdit)
+    local myLastSync = Util:Format12HrDateTime(myLastEdit)
+
+    f.syncStatus.desc:SetText(syncText)
+    f.guildSync.desc:SetText(guildSyncDate)
+    f.guildPush.desc:SetText(guildPushDate)
+    f.lastPush.desc:SetText(myLastSync)
+
+    --f.timeSinceSync = timeSinceSync;
 end
 
 function UpdatePushBar(percent, elapsed)

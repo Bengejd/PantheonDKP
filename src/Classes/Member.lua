@@ -11,7 +11,6 @@ local setmetatable, strsplit, pairs, next = setmetatable, strsplit, pairs, next
 
 local Defaults, Util = core.Defaults, core.Util;
 local Character = core.Character;
-local bank_name = Defaults.bank_name;
 
 local guildDB, memberDB;
 
@@ -38,7 +37,7 @@ function Member:new(guildIndex)
     self.name = strsplit('-', self.name) -- Remove the server name from their name.
     self.isClassLeader = self.rankIndex == 4;
     self.formattedName, self.coloredClass = Util:ColorTextByClass(self.name, self.class) -- Color their name & class.
-    self.isBank = self.name == bank_name
+    self.isBank = self.name == Defaults.bank_name
     if self.name == Character:GetMyName() then core.canEdit = self.canEdit end
     self.visible = true
 
@@ -155,6 +154,14 @@ function Member:PreparePushData()
     return pushData
 end
 
+function Member:GetGuildBankSync()
+    if self.name ~= Defaults.bank_name then Util:Debug('Error getting bank data', self.name) return end
+
+    local lastEdit, lastSync = strsplit(',', self.officerNote)
+    if lastEdit ~= nil then lastEdit = tonumber(lastEdit) end
+    if lastSync ~= nil then lastSync = tonumber(lastSync) end
+    return lastEdit, lastSync
+end
 
 function Member:UpdateDKP(raid, entry)
     raid = raid or Raid:GetCurrentRaid()

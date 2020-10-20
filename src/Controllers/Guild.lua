@@ -33,6 +33,8 @@ Guild.sortDir = nil;
 Guild.sortBy = nil;
 Guild.currentRaid = 'Molten Core';
 
+Guild.bank = nil;
+
 -- Init the Databse.
 local function initDB()
     GuildDB = PDKP.guildDB
@@ -93,7 +95,6 @@ function Guild:GetMembers()
             if member.isBank then Guild:InitBankInfo(i, member) end -- Init bank info.
             if member.isOfficer then Guild.officers[member.name]=member end -- Init Officers
             if member.isClassLeader then insert(Guild.classLeaders, member) end; -- Init class classLeaders
-            -- Add member to the table only if it's new, to allow object persistence.
             if isNew then
                 table.insert(Guild.members, member)
                 Guild.members[member.name] = member;
@@ -124,7 +125,16 @@ end
 
 function Guild:InitBankInfo(index, member)
     Guild.bankIndex = index
-    DKP.bankID, DKP.lastSync = Guild:GetBankData(member.officerNote)
+    Guild.bank = member;
+    Guild:GetSyncStatus()
+end
+
+function Guild:GetSyncStatus()
+    if Guild.bank == nil or Guild.bank.name ~= Defaults.bank_name then
+        Util:Debug("Error getting Sync Status from bank info", Guild.bank, Guild.bank.name);
+        return
+    end
+    DKP.bankLastEdit, DKP.bankLastSync = Guild.bank:GetGuildBankSync()
 end
 
 function Guild:GetMemberByName(name)
@@ -133,21 +143,7 @@ function Guild:GetMemberByName(name)
     end
 end
 
---['PLAYER_ENTERING_WORLD']=function()
---    Guild:GetMembers();
---    PDKP:Print(#Guild.members .. ' members found')
---    Setup:MainInterface()
---end
-
-local function Guild_OnEvent(self, event, arg1, ...)
-    local ADDON_EVENTS = {
-        ['PLAYER_ENTERING_WORLD']=function() Guild:GetMembers() end
-    }
-
-    if ADDON_EVENTS[event] then
---        print('Guild Event!')
-        return ADDON_EVENTS[event]()
-    end
+function Guild:UpdateBankNote()
 
 end
 
@@ -198,6 +194,12 @@ function Guild:MergeOldData()
             new_entry:Save()
         end
     end
+
+    --- Last Edit
+    if old_dkp_db['lastEdit'] then
+        core.PDKP.dkpDB['lastEdit'] = old_dkp_db['lastEdit']
+    end
+
     Settings.db['mergedOld'] = true
     GUI:RefreshTables()
 end
