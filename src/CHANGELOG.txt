@@ -9,6 +9,8 @@
     - Added disabled text to officer edits.
     - Raid invites now ignore character casing when on blacklisted list.
     - Fixed DKP History title edge cases.
+    - Fixed History description not showing up on "Other" DKP adjustments.
+    - Fixed blacklist not updating when completely cleared.
 [Features]:
     - Select All check re-selects everyone when a new person joins the raid, if "in-raid" is checked.
     - Added Loot Prio back in

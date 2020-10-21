@@ -269,6 +269,7 @@ local function createEditBox(opts)
     box.isValid = function()
         if box:IsVisible() then
             local box_text = box:GetText()
+            if name == 'other' then return true end
             if box_text and box_text ~= "" and box_text ~= 0 then
                 return true
             else
