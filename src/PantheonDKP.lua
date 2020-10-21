@@ -177,7 +177,7 @@ end
 -- Generic function that handles all the slash commands.
 function PDKP:HandleSlashCommands(msg)
     if string.len(msg) == 0 then
-        GUI:TogglePDKP()
+        return GUI:TogglePDKP()
     end -- No command attached.
 
     Util:Debug('New command received ', msg);
