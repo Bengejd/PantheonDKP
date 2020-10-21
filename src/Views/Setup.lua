@@ -1518,13 +1518,11 @@ function Setup:SyncStatus()
     local guildPush = createSyncLabel('Last DKP Edit:');
     local lastPush = createSyncLabel('Last Push Received:');
     local guildSync = createSyncLabel('Last Sync Request:');
-    --local timeSinceSync = createSyncLabel('Time Since Latest Sync:')
 
     f.syncStatus = syncStatus;
     f.guildSync = guildSync;
     f.guildPush = guildPush;
     f.lastPush = lastPush;
-    --f.timeSinceSync = timeSinceSync;
 
     pdkp_frame:HookScript("OnShow", function()
         GUI:UpdateSyncStatus()

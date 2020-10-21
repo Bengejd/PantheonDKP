@@ -58,12 +58,8 @@ end
 function PDKP:OnInitialize(event, name)
     if (name ~= "PantheonDKP") then return end
 
-    -----------------------------
-    -- Register Slash Commands --
-    -----------------------------
+    --- Register Slash Commands
     self:RegisterChatCommand("pdkp", "HandleSlashCommands")
-    self:RegisterChatCommand("shroud", "HandleShroudCommands")
-    self:RegisterChatCommand("prio", "HandlePrioCommands")
 
     PDKP:InitializeDatabases()
 end

@@ -63,6 +63,7 @@ GUI.invite_control = {
 function GUI:Init()
     Util:Debug('Initializing GUI')
     GUI.pdkp_frame = Setup:MainUI()
+    GUI.pdkp_frame:Hide()
 
     GUI:UpdateEasyStats()
 
