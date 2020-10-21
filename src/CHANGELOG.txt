@@ -13,6 +13,7 @@
     - Fixed blacklist not updating when completely cleared.
     - Fixed Select All Button not de-selecting when un-checked.
     - History now updates when de-selecting someone, even when closed.
+    - Fixed bug with PDKP overriding other addon's print statements.
 [Features]:
     - Select All check re-selects everyone when a new person joins the raid, if "in-raid" is checked.
     - Added Loot Prio back in
