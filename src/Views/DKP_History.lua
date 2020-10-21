@@ -70,6 +70,7 @@ function HistoryTable:init(table_frame)
 
     self.frame.title:SetFontObject("GameFontHighlightLarge")
     self.frame.title:SetTextColor(Util:HexToRGBA('#FFBA49'))
+    self.frame.title:SetText(Settings.current_raid)
 
     local collapse_all = CreateFrame("Button", nil, self.frame)
     collapse_all:SetPoint("TOPRIGHT")
@@ -98,6 +99,12 @@ function HistoryTable:init(table_frame)
         if not self.collapse_init then
             self.collapse_all:Click()
             self.collapse_init = true
+        end
+    end)
+
+    self.frame:HookScript("OnShow", function()
+        if #GUI.memberTable.selected == 1 then
+            self:HistoryUpdated(true)
         end
     end)
 
