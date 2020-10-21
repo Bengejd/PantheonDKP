@@ -71,6 +71,8 @@ end
 function PDKP:OnDataAvailable()
     Guild:new();
 
+    if GUI.pdkp_frame ~= nil then return end;
+
     if not Settings.db['mergedOld'] then pcall(PDKP_Merge_Old_Guild_Data) end
 
     GUI:Init();
