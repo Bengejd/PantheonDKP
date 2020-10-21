@@ -169,19 +169,6 @@ function DKP:DeleteEntry()
     return entry['id']
 end
 
---- TESTING FUNCTIONS BELOW
-
-function DKP:TestShroud()
-    local memberTable = PDKP.memberTable
-    local selectedNames = memberTable.selected;
-    for _, name in pairs(selectedNames) do
-        local member = Guild:GetMemberByName(name)
-        local newTotal = member:QuickCalc('Molten Core', nil)
-        member:UpdateDKPTest('Molten Core', newTotal)
-    end
-    memberTable:RaidChanged()
-end
-
 function DKP:ResetDKP(selected)
     if selected then
         local memberTable = PDKP.memberTable

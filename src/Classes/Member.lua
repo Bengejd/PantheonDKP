@@ -229,7 +229,3 @@ function Member:UpdateDKPTest(raid, newTotal)
 
     self:Save()
 end
-
-function Member:DataOverwrite(memberData)
-
-end

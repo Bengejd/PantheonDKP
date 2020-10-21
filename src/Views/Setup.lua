@@ -410,7 +410,6 @@ function Setup:MainUI()
     return pdkp_frame
 end
 
-
 function Setup:Debugging()
     local f = CreateFrame("Frame", "pdkp_debug_frame", UIParent)
     f:SetFrameStrata("HIGH")
@@ -522,10 +521,6 @@ function Setup:EasyStats()
 
     f.easy_stats = easy_stats
     f.easy_stats.text = easy_stats_text
-end
-
-function Setup:HistoryButton()
-
 end
 
 function Setup:RandomStuff()
