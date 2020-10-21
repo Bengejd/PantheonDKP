@@ -94,4 +94,8 @@ function Export:New(sync_type, entry)
     end
 
     Comms:SendCommsMessage(prefix, self.details, 'GUILD', nil, 'BULK', PDKP_CommsCallback)
+
+    if self.type == 'push-delete' then
+        return self.details['data']['entry']['edited_time']
+    end
 end

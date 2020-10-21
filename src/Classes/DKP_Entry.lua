@@ -37,6 +37,7 @@ function DKP_Entry:New(entry_details)
     self.id = entry_details['id'] or GetServerTime()
     self.other_text = entry_details['other_text'] or ''
     self.names = entry_details['names']
+    self.edited_time = entry_details['edited_time'] or nil
     self.previousTotals = entry_details['previousTotals'] or self:GetPreviousTotals()
     self.formattedNames = self:GetFormattedNames()
     self.change_text = self:GetChangeText()
@@ -110,6 +111,7 @@ function DKP_Entry:PrepareDeletedPushData()
         ['deleted']=true,
         ['officer']=self.officer,
         ['id']=self.id,
+        ['edited_time']=GetServerTime(),
         ['raid']=self.raid,
         ['names']=self.names,
         ['previousTotals']=self.previousTotals,

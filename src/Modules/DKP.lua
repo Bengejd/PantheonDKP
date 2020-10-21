@@ -158,11 +158,14 @@ function DKP:Submit()
     Export:New('push-add', entry)
 
     core.PDKP.dkpDB['history']['lastEdit']=entry.id
+
+    Guild:UpdateBankNote(entry.id)
 end
 
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
-    Export:New('push-delete', entry)
+    local edited_time = Export:New('push-delete', entry)
+    Guild:UpdateBankNote(edited_time)
     GUI.popup_entry = nil;
     return entry['id']
 end

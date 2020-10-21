@@ -39,7 +39,6 @@ function Import:New(prefix, data, sender)
         elseif self.data_details.type == 'push-delete' and not entryDeleted then
             self:ProcessDelete(entry_data)
         else
-            --print('EntryNew', entryNew, 'EntryDeleted', entryDeleted, 'Skipping this entry')
         end
     elseif prefix == 'pdkpSyncLarge' then -- Merges or Overwrites.
         print('Sync received from', sender)
@@ -122,6 +121,10 @@ function Import:ProcessDelete(entry)
     if entry['id'] > DKP.lastEdit then
         core.PDKP.dkpDB['lastEdit'] = entry['id']
         DKP.lastEdit = entry['id']
+    end
+    if entry['edited_time'] ~= nil and entry['edited_time'] > DKP.lastEdit then
+        core.PDKP.dkpDB['lastEdit'] = entry['edited_time']
+        DKP.lastEdit = entry['edited_time']
     end
 
     DKP:GetEntries(false, entry['id'])

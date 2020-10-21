@@ -143,7 +143,14 @@ function Guild:GetMemberByName(name)
     end
 end
 
-function Guild:UpdateBankNote()
+function Guild:UpdateBankNote(lastEdit, lastSync)
+    if not Settings:CanEdit() then return end
+    Guild:GetMembers()
+    local gbankLastEdit, gbankLastSync = Guild.bank:GetGuildBankSync()
+    lastEdit = lastEdit or gbankLastEdit;
+    lastSync = lastSync or gbankLastSync;
+    GuildRosterSetOfficerNote(Guild.bank.guildIndex, tostring(lastEdit) .. ',' .. tostring(lastSync))
+    Guild:GetMembers()
 
 end
 
