@@ -318,11 +318,11 @@ PDKP_POPUP_DIALOG_SETTINGS = {
 
     ['PDKP_DKP_ENTRY_POPUP']={
         text = "What would you like to do to this entry?",
-        button1 = "Edit",
+        button1 = "Edit (Disabled)",
         button3 = 'Cancel',
         button2 = "Delete",
         OnAccept = function(self) -- Edit
-            print('Edit Clicked')
+            --print('Edit Clicked')
         end,
         OnCancel = function(self) -- Delete
             StaticPopup_Show('PDKP_CONFIRM_DKP_ENTRY_DELETE')

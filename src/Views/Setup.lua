@@ -587,9 +587,9 @@ function Setup:PushProgressBar()
 end
 
 function Setup:RaidTools()
-    local f = CreateFrame("Frame", 'pdkp_raid_frame', FriendsFrame, 'BasicFrameTemplateWithInset')
+    local f = CreateFrame("Frame", 'pdkp_raid_frame', RaidFrame, 'BasicFrameTemplateWithInset')
     f:SetSize(300, 425)
-    f:SetPoint("LEFT", FriendsFrame, "RIGHT", 0, 0)
+    f:SetPoint("LEFT", RaidFrame, "RIGHT", 0, 0)
     f.title = f:CreateFontString(nil, "OVERLAY")
     f.title:SetFontObject("GameFontHighlight")
     f.title:SetPoint("CENTER", f.TitleBg, "CENTER", 11, 0)
@@ -598,11 +598,11 @@ function Setup:RaidTools()
     f:SetFrameLevel(1)
     f:SetToplevel(true)
 
-    local b = CreateFrame("Button", 'pdkp_raid_frame_button', FriendsFrame, 'UIPanelButtonTemplate')
+    local b = CreateFrame("Button", 'pdkp_raid_frame_button', RaidFrame, 'UIPanelButtonTemplate')
     b:SetHeight(30)
     b:SetWidth(80)
     b:SetText("Raid Tools")
-    b:SetPoint("TOPRIGHT", FriendsFrame, "TOPRIGHT", 80, 0)
+    b:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0)
     b:SetScript("OnClick", function()
         if f:IsVisible() then f:Hide() else f:Show() end
     end)
@@ -879,13 +879,6 @@ function Setup:RaidTools()
     --- This is to ensure that the commands get registered initially.
     f:Show()
     f:Hide()
-end
-
-function PDKP_Toggle_Friends_Frame()
-    print('This was called')
-    --FriendsFrameTab4:Click()
-    --FriendsFrame:Show()
-    --FriendsFrame:Hide()
 end
 
 function Setup:TableSearch()

@@ -80,6 +80,8 @@ function PDKP:OnDataAvailable()
     Comms:Init();
     Minimap:Init()
     Comms:RegisterCommCommands()
+
+    GameTooltip:HookScript( "OnTooltipSetItem", PDKP_SetToolTipPrio)
 end
 
 function PDKP:InitializeDatabases()
