@@ -48,6 +48,7 @@ end
 
 function Settings:UpdateIgnoreFrom(ignore_arr, init)
     if init then return SettingsDB['ignore_from'] end
+
     SettingsDB['ignore_from']=ignore_arr
     return SettingsDB['ignore_from']
 end

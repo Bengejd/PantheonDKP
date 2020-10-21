@@ -1,10 +1,10 @@
 local _, core = ...;
 local _G = _G;
-local L = core.L;
+--local L = core.L;
 
 local DKP = core.DKP;
 local GUI = core.GUI;
-local Item = core.Item;
+--local Item = core.Item;
 local PDKP = core.PDKP;
 local Raid = core.Raid;
 local Util = core.Util;
@@ -12,10 +12,13 @@ local Comms = core.Comms;
 local Setup = core.Setup;
 local Guild = core.Guild;
 local Shroud = core.Shroud;
-local Member = core.Member;
-local Officer = core.Officer;
-local Invites = core.Invites;
-local Minimap = core.Minimap;
+--local Member = core.Member;
+--local Officer = core.Officer;
+--local Invites = core.Invites;
+--local Minimap = core.Minimap;
+--local Import = core.Import;
+
+--local AceGUI = LibStub("AceGUI-3.0")
 local Defaults = core.Defaults;
 local ScrollTable = core.ScrollTable;
 local Settings = core.Settings;
@@ -24,11 +27,11 @@ local HistoryTable = core.HistoryTable;
 local SimpleScrollFrame = core.SimpleScrollFrame;
 
 local Export = core.Export;
-local Import = core.Import;
 
-local AceGUI = LibStub("AceGUI-3.0")
-local pdkp_frame = nil
-local PlaySound = PlaySound
+local pdkp_frame;
+
+local CreateFrame, strlower = CreateFrame, strlower
+local GameFontNormalSmall = GameFontNormalSmall
 
 local floor = math.floor
 
@@ -36,10 +39,7 @@ local CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 local TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
 local PDKP_TEXTURE_BASE = "Interface\\Addons\\PantheonDKP\\Media\\Main_UI\\PDKPFrame-"
 local SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
-local HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 local SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
-local ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
-local ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 local CHAR_INFO_TEXTURE = 'Interface\\CastingBar\\UI-CastingBar-Border-Small'
 
 local adoon_version_hex = '0059c5'
@@ -174,7 +174,7 @@ local function createDropdown(opts)
     local hide = opts['hide'] or false
     local showFunc = opts['showFunc'] or function() end
     local hideFunc = opts['hideFunc'] or function() end
-    local change_func = opts['changeFunc'] or function (dropdown_val) end
+    local change_func = opts['changeFunc'] or function () end
 
 
     local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
@@ -216,7 +216,7 @@ local function createDropdown(opts)
     UIDropDownMenu_SetText(dropdown, default_val)
     dd_title:SetText(title_text)
 
-    UIDropDownMenu_Initialize(dropdown, function(self, level, _)
+    UIDropDownMenu_Initialize(dropdown, function()
         local info = UIDropDownMenu_CreateInfo()
 
         for key, val in pairs(menu_items) do
@@ -253,7 +253,6 @@ local function createEditBox(opts)
     local textValidFunc = opts['textValidFunc'] or function() end
     local numeric = opts['numeric'] or false
     local small_title = opts['smallTitle'] or false
-    local max_lines = opts['max_lines'] or false
 
     local box = CreateFrame("EditBox", "$parent_" .. name, parent)
     box:SetHeight(30)
@@ -803,12 +802,15 @@ function Setup:RaidTools()
         local names = {unpack(ignore_from)}
         local ignore_text = ''
         for k, n in pairs(names) do
+            n = strlower(n)
             if k == #names then ignore_text = ignore_text .. n else ignore_text = ignore_text .. n .. ', ' end
         end
-
         disallow_edit:SetText(ignore_text)
-
     end
+
+    disallow_edit:HookScript("OnEditFocusLost", function()
+        disallow_edit:SetText(strlower(disallow_edit:GetText()))
+    end)
 
     disallow_edit.desc:SetText("This will prevent the above members from abusing the automatic raid invite feature.")
 
@@ -858,7 +860,7 @@ function Setup:RaidTools()
     invite_spam_box.start_height = invite_spam_box:GetHeight() -- Set our starting height for resize purposes.
 
     -- Resizes the Inv_control_group frame, based on the size of the edit boxes.
-    local function editBoxResized(edit_frame, _, h)
+    local function editBoxResized(edit_frame, _, _)
         if not edit_frame.touched then return end
         local _, button_bottom, _, _ = spam_button_desc:GetRect()
         local bottom = floor(button_bottom)
@@ -1118,7 +1120,7 @@ function Setup:DKPAdjustments()
         ['multi']=false,
         ['max_chars']=7,
         ['numeric']=true,
-        ['textValidFunc']=function(box)
+        ['textValidFunc']=function()
             PDKP_ToggleAdjustmentDropdown()
         end
     }
@@ -1135,7 +1137,7 @@ function Setup:DKPAdjustments()
         ['parent']= mainDD,
         ['title']='Other',
         ['multi']=true,
-        ['textValidFunc']=function(box)
+        ['textValidFunc']=function()
             PDKP_ToggleAdjustmentDropdown()
         end
     }
@@ -1368,7 +1370,7 @@ function Setup:RaidDropdown()
         ['items']= Defaults.dkp_raids,
         ['defaultVal']=Settings.current_raid,
         ['dropdownTable']=GUI.adjustmentDropdowns,
-        ['changeFunc']=function(dropdown, dropdown_val)
+        ['changeFunc']=function(_, dropdown_val)
             Settings:ChangeCurrentRaid(dropdown_val);
             GUI:RefreshTables()
             PDKP_ToggleAdjustmentDropdown()
@@ -1405,7 +1407,6 @@ function Setup:TabView()
     header:SetText("My Frame")
 
     local tab_pages = {}
-    local tab_buttons = {}
 
     local tab_page_opts = {
         [1]={
@@ -1438,28 +1439,11 @@ function Setup:TabView()
 
         local textures = {'LeftDisabled', 'MiddleDisabled', 'RightDisabled', 'Left', 'Middle', 'Right'}
 
-        local text_down = {'LeftDisabled', 'Left'}
-        local text_left = {'MiddleDisabled', 'Middle'}
-        local text_up = {'RightDisabled', 'Right'}
-
-        local rotate_270 = (pi / 180) * 270
-        local rotate_90 = (pi / 180) * 90
-        local rotate_360 = (pi / 180) * 360
         local rotate_180 = (pi / 180) * 180
 
-        for _, tex in pairs(textures) do
-            _G[t:GetName() .. tex]:SetRotation(rotate_180)
-        end
+        for _, tex in pairs(textures) do _G[t:GetName() .. tex]:SetRotation(rotate_180) end
 
-        --_G[t:GetName() .. 'LeftDisabled']:SetTexCoord(0, 0.15625, 0, 0.546875)
         _G[t:GetName() .. 'Left']:SetTexCoord(0, 0.84375, 1, 0)
-        --_G[t:GetName() .. 'MiddleDisabled']:SetTexCoord(0.15625, 0.84375, 0, 0.546875)
-        --_G[t:GetName() .. 'Middle']:SetTexCoord(0.15625, 0.84375, 0, 1.0)
-        --_G[t:GetName() .. 'RightDisabled']:SetTexCoord(0.84375, 1.0, 0, 0.546875)
-        --_G[t:GetName() .. 'Right']:SetTexCoord(0.84375, 1.0, 0, 1.0)
-
-        --local midTex = _G[t:GetName() .. 'Middle']:SetRotation()
-        --midTex:SetRotation(rotate_left)
 
         PanelTemplates_TabResize(t, 0, nil, 36, 60);
 
@@ -1467,10 +1451,6 @@ function Setup:TabView()
         tab_text:SetAllPoints(t)
 
         return t
-    end
-
-    local function rotateTab(tab)
-        --rotate_down
     end
 
     local function toggleTab(t)
@@ -1560,7 +1540,7 @@ end
 
 function Setup:InterfaceOptions()
 
-    local AceConfig = LibStub("AceConfig-3.0")
+    --local AceConfig = LibStub("AceConfig-3.0")
     local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
     --name (string|function) - Display name for the option
@@ -1609,8 +1589,8 @@ function Setup:InterfaceOptions()
                         name = "Enabled",
                         type = "toggle",
                         desc="Enables / Disables all messages from the addon.",
-                        set = function(info,val) return Settings:GetSetInterface('set', 'silent', val) end,
-                        get = function(info) return not Settings:GetSetInterface('get', 'silent', nil) end
+                        set = function(_,val) return Settings:GetSetInterface('set', 'silent', val) end,
+                        get = function() return not Settings:GetSetInterface('get', 'silent', nil) end
                     },
                 }
             },
@@ -1625,22 +1605,22 @@ function Setup:InterfaceOptions()
                         name = "Battlegrounds",
                         desc = "Enable / Disable sync while in Battlegrounds",
                         type = "toggle",
-                        set = function(info,val) return Settings:GetSetInterface('set', 'pvp', val) end,
-                        get = function(info) return Settings:GetSetInterface('get', 'pvp', nil) end
+                        set = function(_,val) return Settings:GetSetInterface('set', 'pvp', val) end,
+                        get = function() return Settings:GetSetInterface('get', 'pvp', nil) end
                     },
                     syncInRaid = {
                         name = "Raids",
                         desc = "Enable / Disable sync while in Raid Instances",
                         type = "toggle",
-                        set = function(info,val) return Settings:GetSetInterface('set', 'raids', val) end,
-                        get = function(info) return Settings:GetSetInterface('get', 'raids', nil) end
+                        set = function(_,val) return Settings:GetSetInterface('set', 'raids', val) end,
+                        get = function() return Settings:GetSetInterface('get', 'raids', nil) end
                     },
                     syncInDungeons = {
                         name = "Dungeons",
                         desc = "Enable / Disable sync while in Dungeon Instances",
                         type = "toggle",
-                        set = function(info,val) return Settings:GetSetInterface('set', 'dungeons', val) end,
-                        get = function(info) return Settings:GetSetInterface('get', 'dungeons', nil) end
+                        set = function(_,val) return Settings:GetSetInterface('set', 'dungeons', val) end,
+                        get = function() return Settings:GetSetInterface('get', 'dungeons', nil) end
                     },
                     syncDesc = {
                         name="These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.",
@@ -1663,8 +1643,8 @@ function Setup:InterfaceOptions()
                     name = "Addon Debugging",
                     type = "toggle",
                     desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
-                    set = function(info,val) return Settings:GetSetInterface('set', 'debug', val) end,
-                    get = function(info) return Settings:GetSetInterface('get', 'debug', nil) end
+                    set = function(_,val) return Settings:GetSetInterface('set', 'debug', val) end,
+                    get = function() return Settings:GetSetInterface('get', 'debug', nil) end
 
                 },
             }
@@ -1703,7 +1683,7 @@ function Setup:LootFrame(parent)
     scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, -20)
     scrollFrame.scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -8, 18)
 
-    f.getChecked = function(self)
+    f.getChecked = function()
         local sc = f.scrollContent;
         for i=1, #sc.children do
             local child = sc.children[i]
@@ -1722,7 +1702,7 @@ function Setup:LootFrame(parent)
         return true
     end
 
-    f.addLootItem = function(self, item_info)
+    f.addLootItem = function(_, item_info)
 
         if not f.checkUnique(item_info) then
             Util:Debug("Duplicate Item Info Found")
@@ -1884,7 +1864,7 @@ function Setup:ScrollTable()
             Guild:GetMembers()
             return Guild.memberNames
         end,
-        ['retrieveDisplayDataFunc']=function(self, name)
+        ['retrieveDisplayDataFunc']=function(_, name)
             return Guild:GetMemberByName(name)
         end,
         ['anchor']={

@@ -109,6 +109,7 @@ function Raid:RegisterEvents()
 end
 
 function Raid:InviteName(name)
+    name = strlower(name)
     local ignore_from = GUI.invite_control['ignore_from']
     if contains(ignore_from, name) then
         return print("Invite request from", name, "has been ignored")
