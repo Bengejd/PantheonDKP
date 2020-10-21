@@ -1928,7 +1928,7 @@ end
 
 function Setup:HistoryTable()
     local hf = createBackdropFrame('$parent_Table_Frame', GUI.history_frame)
-    hf:SetPoint("TOPLEFT", GUI.memberTable.frame, 'TOPRIGHT', 0, -30)
+    hf:SetPoint("TOPLEFT", GUI.memberTable.frame, 'TOPRIGHT', 0, -10)
     hf:SetPoint("BOTTOMRIGHT", -7, 0)
 
     GUI.history_table = HistoryTable:init(hf)
