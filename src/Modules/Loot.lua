@@ -53,6 +53,10 @@ function PDKP_OnLootEvent(self, event, arg1, ...)
     if loot_event_funcs[event] then loot_event_funcs[event]() end
 end
 
+function PDKP_Register_Mob_Loot()
+
+end
+
 function Loot:RegisterMobLoot()
     local loot_time = GetServerTime()
     local mob_uid = UnitGUID("target")
