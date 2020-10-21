@@ -1,4 +1,5 @@
 ## Interface: 11305
+## X-Interface: 11305
 ## Title: PantheonDKP
 ## Author: Neekio
 ## Version: 3.0.5

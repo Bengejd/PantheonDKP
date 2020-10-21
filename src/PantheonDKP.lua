@@ -80,9 +80,16 @@ function PDKP:OnDataAvailable()
 
     GameTooltip:HookScript( "OnTooltipSetItem", PDKP_SetToolTipPrio)
 
+    PDKP:CheckTOCVersion()
+end
+
+function PDKP:CheckTOCVersion()
     if Settings:IsDebug() then
-        local _, _, _, TocVersion = GetBuildInfo()
-        PDKP:Print('Check that PDKP TOC is:', TocVersion)
+        local _, _, _, game_toc_version = GetBuildInfo()
+        local addon_toc_version = GetAddOnMetadata('PantheonDKP', "X-Interface")
+        if tonumber(addon_toc_version) ~= tonumber(game_toc_version) then
+            PDKP:Print('Update Addon TOC Interface from', addon_toc_version, 'to', game_toc_version)
+        end
     end
 end
 

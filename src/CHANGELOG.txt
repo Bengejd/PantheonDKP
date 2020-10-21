@@ -19,6 +19,7 @@
     - Added Loot Prio back in
 [Optimization]:
     - Removed some unnecessary function calls.
+    - Updated TOC #
 
 ====== Version 3.0.0 ======
 [Rework]:
