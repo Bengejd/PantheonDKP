@@ -548,8 +548,9 @@ function Setup:RandomStuff()
     Setup:SyncStatus()
 
     --- For debugging purposes.
-    pdkp_frame:Show()
-
+    if Settings:IsDebug() then
+        pdkp_frame:Show()
+    end
 end
 
 function Setup:PushProgressBar()
