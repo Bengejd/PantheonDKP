@@ -155,7 +155,7 @@ function DKP:Submit()
     GUI.adjustment_entry['names'] = { unpack(PDKP.memberTable.selected) }
 
     local entry = DKP_Entry:New(GUI.adjustment_entry)
-    Export:New('push-add', entry)
+    --Export:New('push-add', entry)
 
     
 

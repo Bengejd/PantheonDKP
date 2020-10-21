@@ -1,5 +1,22 @@
+====== Version 3.0.5 ======
+[Bug Fixes]:
+    - Character DKP Updates when switching between raids
+    - Removed "Out of date" line on Minimap.
+    - Removed random debugging print statements.
+    - Added in /pdkp command
+    - Fixed RaidFrames not being available when in combat.
+    - Removed PDKP from popping up when /reloading or logging in.
+    - Added disabled text to officer edits.
+    - Raid invites now ignore character casing when on blacklisted list.
+    - Fixed DKP History title edge cases.
+[Features]:
+    - Select All check re-selects everyone when a new person joins the raid, if "in-raid" is checked.
+    - Added Loot Prio back in
+
+
 ====== Version 3.0.0 ======
 [Rework]:
+    - Complete overhaul of the UI and functionality. BIG update.
 
 [Features]:
     - Sorting by class will now also sort the names in alphabetical order.

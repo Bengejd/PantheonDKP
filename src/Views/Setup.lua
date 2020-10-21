@@ -248,7 +248,7 @@ local function createEditBox(opts)
     local name = opts['name'] or 'edit_box'
     local parent = opts['parent'] or pdkp_frame
     local box_label_text = opts['title'] or ''
-    local multi_line = opts['multi']
+    local multi_line = opts['multi'] or false
     local max_chars = opts['max_chars'] or 225
     local textValidFunc = opts['textValidFunc'] or function() end
     local numeric = opts['numeric'] or false
@@ -1115,9 +1115,7 @@ function Setup:DKPAdjustments()
         ['multi']=false,
         ['max_chars']=7,
         ['numeric']=true,
-        ['textValidFunc']=function()
-            PDKP_ToggleAdjustmentDropdown()
-        end
+        ['textValidFunc']=PDKP_ToggleAdjustmentDropdown
     }
     amount_box = createEditBox(amount_opts)
 
@@ -1132,13 +1130,16 @@ function Setup:DKPAdjustments()
         ['parent']= mainDD,
         ['title']='Other',
         ['multi']=true,
-        ['textValidFunc']=function()
-            PDKP_ToggleAdjustmentDropdown()
-        end
+        ['numeric']=false,
+        ['textValidFunc']=PDKP_ToggleAdjustmentDropdown
     }
     other_box = createEditBox(other_opts)
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
     other_box:Hide()
+
+    other_box:HookScript("OnEditFocusLost", function()
+        print(other_box:GetText())
+    end)
 
     --- Submit button
     local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
@@ -1246,7 +1247,7 @@ function PDKP_ToggleAdjustmentDropdown()
     if adjust_amount_setting ~= nil then amount_box:SetText(adjust_amount_setting) end
 
     GUI.adjustment_entry['dkp_change']=amount_box:getValue()
-    GUI.adjustment_entry['other_text']=other_box:getValue()
+    GUI.adjustment_entry['other_text']=other_box:GetText()
 
     for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD}) do
         if b_dd:IsVisible() then

@@ -35,7 +35,7 @@ function DKP_Entry:New(entry_details)
     self.officer = entry_details['officer']
     self.item = entry_details['item'] or 'Not Linked'
     self.id = entry_details['id'] or GetServerTime()
-    self.other_text = entry_details['other'] or ''
+    self.other_text = entry_details['other_text'] or ''
     self.names = entry_details['names']
     self.previousTotals = entry_details['previousTotals'] or self:GetPreviousTotals()
     self.formattedNames = self:GetFormattedNames()
