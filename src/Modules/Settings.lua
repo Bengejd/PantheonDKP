@@ -29,6 +29,7 @@ Settings.db = nil;
 
 Settings.sync = {}
 Settings.settings = {};
+Settings.silent = false;
 
 Settings.smallSyncAvailable = true;
 Settings.longSyncAvailable = true;
@@ -127,7 +128,10 @@ function Settings:RespectSettings(clicked)
     for s_name, s_val in pairs(Settings.settings) do
         local val = Settings.settings[s_name]
         if s_name == 'silent' then
-            if val then setprinthandler(PDKP_NoPrintHandler) else setprinthandler(PDKP_PrintHandler) end
+            if val then
+                --setprinthandler(PDKP_NoPrintHandler) else setprinthandler(PDKP_PrintHandler)
+                PDKP:Print('FUck')
+            end
         end
     end
 end

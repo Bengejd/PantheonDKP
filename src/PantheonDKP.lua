@@ -22,7 +22,8 @@ local Defaults = core.Defaults;
 local Settings = core.Settings;
 
 core.firstLogin = nil;
-core.originalPrint = getprinthandler()
+
+local print_name = '|cff32A8A0PDKP|r:'
 
 local function PDKP_OnEvent(self, event, arg1, ...)
 
@@ -82,6 +83,8 @@ function PDKP:OnDataAvailable()
     Comms:RegisterCommCommands()
 
     GameTooltip:HookScript( "OnTooltipSetItem", PDKP_SetToolTipPrio)
+
+    PDKP:Print('Testing', '123')
 end
 
 function PDKP:InitializeDatabases()
@@ -212,7 +215,7 @@ function PDKP:HandleSlashCommands(msg)
 
     if officerCommands[msg] then return officerCommands[msg]() end
 
-    print('Unknown PDKP command:', msg)
+    PDKP:Print('Unknown PDKP command:', msg)
 
     --
     --if msg == 'professionTracking' then
@@ -256,15 +259,8 @@ function PDKP_UnregisterEvent(self, event)
     events:UnregisterEvent(event);
 end
 
--- Makes our print statements prettier and uniform.
-function PDKP_PrintHandler(...)
-    if addonFolder == 'PantheonDKP' then
-        PDKP:Print(strjoin(" ", tostringall(...)))
-    end
-end
-
-function PDKP_NoPrintHandler(...)
-
+function PDKP:Print(...)
+    print('|cff44e3e0[PDKP]|r:', strjoin(" ", tostringall(...)))
 end
 
 

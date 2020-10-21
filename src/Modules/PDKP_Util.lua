@@ -5,6 +5,7 @@ local L = core.L;
 local Util = core.Util;
 local Defaults = core.Defaults;
 local Settings = core.Settings;
+local PDKP = core.PDKP;
 
 
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
@@ -205,7 +206,7 @@ function Util:ClockSpeed(isEnd)
         Util.start = time()
     end
     if isEnd then
-        print(time() - Util.start)
+        PDKP:Print(time() - Util.start)
         Util.start = nil
     end
 end
@@ -275,14 +276,14 @@ function Util:Debug(...)
     local string = strjoin(" ", tostringall(...))
 
     if Settings:IsDebug() and not Defaults.silent then
-        print(Util:FormatFontTextColor(Util.info, string))
+        PDKP:Print(Util:FormatFontTextColor(Util.info, string))
     end
 end
 
 
 function Util:ReportMemory()
     UpdateAddOnMemoryUsage()
-    print('PDKP Memory: ', math.ceil((GetAddOnMemoryUsage("PantheonDKP") / 1000)) .. 'MB')
+    PDKP:Print('PDKP Memory: ', math.ceil((GetAddOnMemoryUsage("PantheonDKP") / 1000)) .. 'MB')
 end
 
 -----------------------------

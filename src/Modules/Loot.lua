@@ -39,7 +39,7 @@ function PDKP_OnLootEvent(self, event, arg1, ...)
         end,
         -- TODO: Don't have to do anything here?
         ['LOOT_SLOT_CHANGED']=function() -- lootSlot
-            --print(event, arg1, args)
+            --PDKP:Print(event, arg1, args)
         end,
         -- TODO: Update Boss Kill List.
         ['LOOT_SLOT_CLEARED']=function() -- lootSlot
@@ -47,7 +47,7 @@ function PDKP_OnLootEvent(self, event, arg1, ...)
         end,
         -- TODO: Maybe do something with "Forgotten Loot" where loot wasn't given to anyone, later on?
         ['CHAT_MSG_LOOT']=function() -- https://wow.gamepedia.com/CHAT_MSG_LOOT
-            --print(event, args)
+            --PDKP:Print(event, args)
         end,
     }
     if loot_event_funcs[event] then loot_event_funcs[event]() end

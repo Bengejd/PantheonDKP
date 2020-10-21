@@ -452,7 +452,7 @@ function Setup:Debugging()
         end,
         ['boss kill']=function()
             local boss_info = Raid:TestBossKill()
-            print(boss_info['name'], boss_info['id'], boss_info['raid'])
+            PDKP:Print(boss_info['name'], boss_info['id'], boss_info['raid'])
         end,
         ['memory']=function()
             Util:ReportMemory()
@@ -484,7 +484,7 @@ function Setup:Debugging()
         db:SetWidth(width)
 
         db:SetScript("OnClick", function()
-            print('Debug Function:', name)
+            PDKP:Print('Debug Function:', name)
             func()
         end)
 
@@ -1347,7 +1347,7 @@ function Setup:DKPHistory()
     ob:Disable()
     ob:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
     ob:SetScript("OnClick", function()
-        print('Opening History Options')
+        PDKP:Print('Opening History Options')
         -- TODO: Hookup the options button frame.
     end)
 end

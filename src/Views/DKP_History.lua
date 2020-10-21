@@ -378,7 +378,7 @@ function HistoryTable:OnLoad()
                     local _, item = strsplit(' - ', val)
                     item = strtrim(item)
                     if item then
-                        --print('Need to do fancy Tooltip stuff here')
+                        --PDKP:Print('Need to do fancy Tooltip stuff here')
                     end
                 end
                 row.max_height = row.max_height + col:GetStringHeight() + 6
