@@ -79,6 +79,11 @@ function PDKP:OnDataAvailable()
     Comms:RegisterCommCommands()
 
     GameTooltip:HookScript( "OnTooltipSetItem", PDKP_SetToolTipPrio)
+
+    if Settings:IsDebug() then
+        local _, _, _, TocVersion = GetBuildInfo()
+        PDKP:Print('Check that PDKP TOC is:', TocVersion)
+    end
 end
 
 function PDKP:InitializeDatabases()
