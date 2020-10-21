@@ -83,8 +83,6 @@ function PDKP:OnDataAvailable()
     Comms:RegisterCommCommands()
 
     GameTooltip:HookScript( "OnTooltipSetItem", PDKP_SetToolTipPrio)
-
-    PDKP:Print('Testing', '123')
 end
 
 function PDKP:InitializeDatabases()
@@ -164,21 +162,7 @@ function PDKP:InitializeDatabases()
     Settings:InitDB()
     DKP:InitDB()
 
-
-
     Util:Debug("Database finished Initializing")
-end
-
-function PDKP:HandleShroudCommands(item)
-    ---- Normal shrouding command send by a non officer, bidding on an item.
-    --if item == nil or string.len(item) == 0 then
-    --    return PDKP:MessageRecieved('shroud', Util:GetMyName())
-    --    -- Item linked by the officer.
-    --elseif core.canEdit then -- NEED TO CHECK IF THEY ARE THE ML AS WELL.
-    --    -- Check to see if the GUI is open or not.
-    --    if not GUI.shown then PDKP:Show() end
-    --    GUI:UpdateShroudItemLink(Item:GetItemByName(item));
-    --end
 end
 
 -- Generic function that handles all the slash commands.
@@ -260,7 +244,9 @@ function PDKP_UnregisterEvent(self, event)
 end
 
 function PDKP:Print(...)
-    print('|cff44e3e0[PDKP]|r:', strjoin(" ", tostringall(...)))
+    if not Settings.silent then
+        print('|cff44e3e0[PDKP]|r:', strjoin(" ", tostringall(...)))
+    end
 end
 
 
