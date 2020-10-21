@@ -43,7 +43,6 @@ function ScrollTable:HighlightRow(row, shouldHighlight)
     else
         row:UnlockHighlight()
     end
-    self.UpdateLabelTotals()
 end
 
 ----- SELECT FUNCTIONS -----
@@ -53,7 +52,6 @@ function ScrollTable:ClearSelected()
     self.lastSelect = nil
     _G['pdkp_filter_Select_All']:SetChecked(false)
 
-    self:UpdateLabelTotals()
 end
 
 function ScrollTable:UpdateLastSelect(objIndex, isSelected)
@@ -66,7 +64,6 @@ function ScrollTable:UpdateLastSelect(objIndex, isSelected)
     else
         self.lastSelect = nil;
     end
-    self.UpdateLabelTotals()
 end
 
 function ScrollTable:RowShiftClicked(objIndex, selectIndex)
@@ -94,7 +91,6 @@ function ScrollTable:RowShiftClicked(objIndex, selectIndex)
             self:HighlightRow(betweenRows[i], true)
         end
     end
-    self:UpdateLabelTotals()
 end
 
 function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear, select_all)
@@ -126,7 +122,6 @@ function ScrollTable:CheckSelect(row, clickType)
             self:RowShiftClicked(objIndex, selectIndex)
         else -- Control or Regular Click.
             self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl, select_all)
-            self:UpdateLabelTotals()
         end
 
         return self:RefreshLayout()
@@ -135,7 +130,6 @@ function ScrollTable:CheckSelect(row, clickType)
     local isSelected, _ = tfind(self.selected, objIndex)
     self:HighlightRow(row, isSelected)
 
-    self:UpdateLabelTotals()
 end
 
 function ScrollTable:ClearAll()
@@ -270,8 +264,12 @@ function ScrollTable:UpdateLabelTotals()
 
     PDKP_ToggleAdjustmentDropdown()
 
-    if GUI.history_frame ~= nil and GUI.history_frame:IsVisible() and notify_history then
-        GUI.history_table:HistoryUpdated(true)
+    if GUI.history_frame ~= nil then
+        if GUI.history_frame:IsVisible() then
+            GUI.history_table:HistoryUpdated(true)
+        else
+            GUI.history_table.updateNextOpen = true
+        end
     end
 end
 
@@ -303,8 +301,12 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
         end
     end
 
-    if filterOn == 'Select_All' and checkedStatus then
-        self:SelectAll()
+    if filterOn == 'Select_All' then
+        if checkedStatus then
+            self:SelectAll()
+        else
+            self:ClearAll()
+        end
     end
 
     self:RefreshTableSize();

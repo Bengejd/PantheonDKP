@@ -11,10 +11,13 @@
     - Fixed DKP History title edge cases.
     - Fixed History description not showing up on "Other" DKP adjustments.
     - Fixed blacklist not updating when completely cleared.
+    - Fixed Select All Button not de-selecting when un-checked.
+    - History now updates when de-selecting someone, even when closed.
 [Features]:
     - Select All check re-selects everyone when a new person joins the raid, if "in-raid" is checked.
     - Added Loot Prio back in
-
+[Optimization]:
+    - Removed some unnecessary function calls.
 
 ====== Version 3.0.0 ======
 [Rework]:
