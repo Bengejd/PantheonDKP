@@ -1137,10 +1137,6 @@ function Setup:DKPAdjustments()
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
     other_box:Hide()
 
-    other_box:HookScript("OnEditFocusLost", function()
-        print(other_box:GetText())
-    end)
-
     --- Submit button
     local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
     sb:SetSize(80, 22) -- width, height
