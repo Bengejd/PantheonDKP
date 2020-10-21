@@ -1,4 +1,4 @@
-====== Version 3.0.5 ======
+====== Version 3.0.6 ======
 [Bug Fixes]:
     - Character DKP Updates when switching between raids
     - Removed "Out of date" line on Minimap.
