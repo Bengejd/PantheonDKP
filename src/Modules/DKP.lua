@@ -162,6 +162,33 @@ function DKP:Submit()
     Guild:UpdateBankNote(entry.id)
 end
 
+function DKP:AwardBossKill()
+    local killInfo = Raid:GetRecentBossKill()
+
+    local pName = Util:GetMyName()
+    if Settings:IsDebug() then
+        pName = 'Neekio'
+    end
+
+    local entry_details = {
+        ['reason']='Boss Kill',
+        ['boss']=killInfo['name'],
+        ['raid']=killInfo['raid'],
+        ['officer']=pName,
+        ['names']={ unpack(killInfo['members']) },
+        ['dkp_change']=killInfo['amount'],
+    }
+
+    local entry = DKP_Entry:New(entry_details)
+    Export:New('push-add', entry)
+
+    core.PDKP.dkpDB['history']['lastEdit']=entry.id
+
+    Guild:UpdateBankNote(entry.id)
+
+    Raid.raid.recent_boss_kill = nil;
+end
+
 function DKP:DeleteEntry()
     local entry = GUI.popup_entry;
     local edited_time = Export:New('push-delete', entry)

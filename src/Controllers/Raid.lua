@@ -28,11 +28,11 @@ local Raid = core.Raid;
 Raid.raid = nil;
 Raid.events_frame = nil;
 
-Raid.recent_boss_kill = {};
+Raid.recent_boss_kill = nil;
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER'}
+local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER', 'BOSS_KILL'}
 
 function Raid:new()
     local self = {};
@@ -86,14 +86,18 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
     local raid_size = GetNumGroupMembers()
 
     local raid_group_events = {
-        ['GROUP_ROSTER_UPDATE']=function()
+        ['GROUP_ROSTER_UPDATE']=function(_, _)
             if not GetRaidRosterInfo(raid_size) then return end
             Raid.raid:Init()
             GUI:UpdateInRaidFilter()
         end,
+        ['BOSS_KILL']=function(arg1, arg2)
+            local bossID, bossName = arg1, arg2
+            Raid:BossKill(bossID, bossName)
+        end,
     }
 
-    if raid_group_events[event] then raid_group_events[event]() end
+    if raid_group_events[event] then raid_group_events[event](arg1, ...) end
 end
 
 function Raid:RegisterEvents()
@@ -140,10 +144,6 @@ function Raid:InRaid()
     return UnitInRaid("player") ~= nil
 end
 
-function Raid:NewBossKill()
-    --return Raid:BossKill(669, 'Sulfuron Harbinger');
-end
-
 function Raid:GetRaidInfo()
     if not Raid:InRaid() then return end
 
@@ -178,45 +178,6 @@ function Raid:GetRaidInfo()
         end
     end
     return raidRoster
-end
-
-function Raid:BossKill()
-    --if not canEdit then return end; -- If you can't edit, then you shoudln't be here.
-    --
-    --local bk
-    --for raidName, raidObj in pairs(bossIDS) do
-    --    if bk == nil then
-    --        for pdkpBossID, pdkpBossName in pairs(raidObj) do
-    --            if pdkpBossID == bossID or pdkpBossName == bossName then
-    --                bk = {
-    --                    name=pdkpBossName,
-    --                    id=pdkpBossID,
-    --                    raid=raidName,
-    --                }
-    --                break
-    --            end
-    --        end
-    --    else
-    --        break
-    --    end
-    --end
-    --
-    --if bk == nil then return end; -- We should have found the boss kill by now.
-    --
-    ---- You are the DKP Officer
-    ---- There is no dkp Officer, but you're the master looter
-    --
-    --local dkpOfficer = Raid.dkpOfficer
-    --
-    --if ( ( dkpOfficer and Raid:IsDkpOfficer() ) or ( not dkpOfficer and RaidIsMasterLooter() ) ) then
-    --    Util:Debug('You are not the master looter, and not dkpOffcier.')
-    --    return
-    --end
-    --
-    --local popup = StaticPopupDialogs["PDKP_RAID_BOSS_KILL"];
-    --popup.text = bk.name .. ' was killed! Award 10 DKP?'
-    --popup.bossInfo = bk;
-    --StaticPopup_Show('PDKP_RAID_BOSS_KILL')
 end
 
 function Raid:GetCurrentRaid()
@@ -299,6 +260,63 @@ function Raid:IsMasterLooter()
     return Char:GetMyName() == Raid.raid.MasterLooter
 end
 
+function Raid:GetRecentBossKill()
+    return Raid.recent_boss_kill
+end
+
+function Raid:BossKill(bossID, bossName)
+    if not Settings:CanEdit() then return end -- If you can't edit, you should not continue.
+
+    local bossInfo = {
+        ['name']=bossName,
+        ['id']=bossID,
+        ['raid']=nil
+    }
+
+    for raidName, raidObj in pairs(Defaults.bossIDS) do
+        if bossInfo['raid'] ~= nil then break end
+        for objBossID, objBossName in pairs(raidObj) do
+            if objBossID == bossID or objBossName == bossName then
+                bossInfo['raid']=raidName
+                break
+            end
+        end
+    end
+
+    if bossInfo['raid'] == nil then  -- We should have found the boss info by now.
+        Util:Debug('No boss info found for', bossName)
+        return
+    elseif Raid.raid.dkpOfficer ~= nil and not Raid:IsDkpOfficer() then
+        Util:Debug('Not the DKP Officer');
+        return
+    elseif Raid.raid.dkpOfficer == nil and not Raid:IsMasterLooter() then
+        Util:Debug('No DKP Officer found, Not the Loot Master');
+        return
+    else
+        Util:Debug('Boss Kill found: ', bossName, bossID)
+    end
+
+    local raid_filter = _G['pdkp_filter_raid']
+    local select_all_filter = _G['pdkp_filter_Select_All']
+
+    raid_filter:SetChecked(true)
+    select_all_filter:SetChecked(true)
+
+    GUI:UpdateInRaidFilter()
+
+    local award_amount = Defaults.adjustment_amounts[bossInfo['raid']]['Boss Kill']
+    bossInfo['amount']=award_amount;
+    bossInfo['members']=GUI.memberTable.selected
+
+    local formatted_text = string.format('%s was killed! Award %d DKP?', bossName, award_amount)
+    Raid.recent_boss_kill = bossInfo
+
+    StaticPopupDialogs['PDKP_RAID_BOSS_KILL'].text=formatted_text
+    local award_dkp = StaticPopup_Show('PDKP_RAID_BOSS_KILL')
+
+    print('Awarding DKP: ', award_dkp)
+end
+
 --- Debug funcs
 function Raid:TestBossKill()
     local raids = Defaults.bossIDS
@@ -307,7 +325,6 @@ function Raid:TestBossKill()
         return {
             ['name']=name,
             ['id']=id,
-            ['raid']=Settings.current_raid
         }
     end
 end

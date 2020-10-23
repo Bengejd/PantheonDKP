@@ -286,16 +286,18 @@ PDKP_POPUP_DIALOG_SETTINGS = {
     --    preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
     --},
     ["PDKP_RAID_BOSS_KILL"]={
-        text = "", -- set by the calling function.
+        text=nil,
         button1 = "Award DKP",
         button2 = "Cancel",
         bossID = nil,
         bossName = nil,
         OnAccept = function()
-            pdkp_template_function_call('pdkp_boss_kill_dkp', StaticPopupDialogs["PDKP_RAID_BOSS_KILL"].bossInfo);
             StaticPopup_Hide('PDKP_RAID_BOSS_KILL')
+            DKP:AwardBossKill()
         end,
-        OnCancel = function() end,
+        OnCancel = function()
+            Raid.recent_boss_kill = nil;
+        end,
         timeout = 0,
         whileDead = true,
         hideOnEscape = false,

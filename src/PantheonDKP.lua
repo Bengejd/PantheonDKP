@@ -188,10 +188,7 @@ function PDKP:HandleSlashCommands(msg)
 
     if guiCommands[msg] then return guiCommands[msg]() end
 
-    local debugCommands = {
-        ['boss Kill']=function()
-        end
-    }
+    local debugCommands = {}
 
     if debugCommands[msg] and Settings:IsDebug() then return debugCommands[msg]() end
 

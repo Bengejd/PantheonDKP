@@ -36,19 +36,19 @@ Defaults.adjustment_amounts = {
         ['On Time Bonus']=10,
         ['Completion Bonus']=10,
         ['Boss Kill']=10,
-        ['Unexcused Absence']=0.15
+        ['Unexcused Absence']=0
     },
     ['Ahn\'Qiraj']={
         ['On Time Bonus']=5,
         ['Completion Bonus']=5,
         ['Boss Kill']=10,
-        ['Unexcused Absence']=0.15
+        ['Unexcused Absence']=0
     },
     ['Naxxramas']={
         ['On Time Bonus']=5,
         ['Completion Bonus']=5,
         ['Boss Kill']=6,
-        ['Unexcused Absence']=0.15
+        ['Unexcused Absence']=0
     },
 
 }

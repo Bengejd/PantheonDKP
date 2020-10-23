@@ -452,7 +452,7 @@ function Setup:Debugging()
         end,
         ['boss kill']=function()
             local boss_info = Raid:TestBossKill()
-            PDKP:Print(boss_info['name'], boss_info['id'], boss_info['raid'])
+            Raid:BossKill(boss_info['id'], boss_info['name'])
         end,
         ['memory']=function()
             Util:ReportMemory()
@@ -460,14 +460,17 @@ function Setup:Debugging()
         ['merge_guild_old']=function()
             Guild:MergeOldData()
         end,
-        ['Overwrite Push']=function()
-            Export:New('push-overwrite')
-        end,
-        ['Merge Push']=function()
-            Export:New('push-merge')
-        end,
+        --['Overwrite Push']=function()
+        --    Export:New('push-overwrite')
+        --end,
+        --['Merge Push']=function()
+        --    Export:New('push-merge')
+        --end,
         ['AQ-Quest Report']=function()
             Loot:TestGetAQLoots()
+        end,
+        ['verify_DKP']=function()
+
         end,
     }
 
@@ -1246,6 +1249,14 @@ function PDKP_ToggleAdjustmentDropdown()
     GUI.adjustment_entry['dkp_change']=amount_box:getValue()
     GUI.adjustment_entry['other_text']=other_box:GetText()
 
+    local selected = #PDKP.memberTable.selected
+
+    if reason_val == 'Unexcused Absence' and selected == 1 then
+        local unexcused_amount = DKP:CalculateButton('Unexcused Absence')
+        amount_box:SetText("-" .. unexcused_amount)
+        GUI.adjustment_entry['dkp_change']=amount_box:getValue()
+    end
+
     for _, b_dd in pairs({bwlDD, mcDD, aqDD, naxxDD}) do
         if b_dd:IsVisible() then
             GUI.adjustment_entry['boss']=UIDropDownMenu_GetSelectedValue(b_dd)
@@ -1261,7 +1272,9 @@ function PDKP_ToggleAdjustmentDropdown()
         can_submit = can_submit and frame.isValid()
     end
 
-    local selected = #PDKP.memberTable.selected
+    if reason_val == 'Unexcused Absence' and selected ~= 1 then
+        can_submit = false
+    end
 
     --- Selection check
     can_submit = can_submit and selected > 0
