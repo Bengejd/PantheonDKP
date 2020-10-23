@@ -1,3 +1,8 @@
+====== Version 3.1.0 ======
+[Features]:
+    - Boss Kill Popup re-enabled.
+[Bug Fixes]:
+    - Unexcused Absence now calculates properly.
 ====== Version 3.0.6 ======
 [Bug Fixes]:
     - Character DKP Updates when switching between raids
