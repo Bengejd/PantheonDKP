@@ -139,13 +139,15 @@ function OnCommReceived(prefix, message, distribution, sender)
         return
     end
 
+    Util:Debug(prefix, 'message received!')
+
     if not Comms.commsOpen then
-        Util:Debug("Adding message to cache");
+        PDKP:Print("PDKP message received, waiting for combat to drop to process it!")
         table.insert(Comms.cache, {['prefix']=prefix, ['message']=message, ['distribution']=distribution, ['sender']=sender})
         return
     end
 
-    Util:Debug(prefix, 'message received!')
+
 
     local data = Comms:DataDecoder(message)
 
