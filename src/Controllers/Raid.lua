@@ -234,7 +234,7 @@ function Raid:PromoteLeadership()
 end
 
 function Raid:MemberIsInRaid(name)
-    if Raid.raid == nil then return false end
+    if Raid.raid == nil or #Raid.raid['members'] == 0 then return false end
     return tContains(Raid.raid['members'], name)
 end
 
