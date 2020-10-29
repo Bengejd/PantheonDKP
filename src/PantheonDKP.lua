@@ -74,7 +74,6 @@ function PDKP:OnDataAvailable()
 
     GUI:Init();
     Raid:new();
-    Comms:Init();
     Minimap:Init()
     Comms:RegisterCommCommands()
 
