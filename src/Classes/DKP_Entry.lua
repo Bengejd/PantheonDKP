@@ -156,8 +156,9 @@ function DKP_Entry:GetFormattedNames()
         end
 
         if a_member == nil or b_member == nil then
-            print('ERROR', a, b)
+            print('ERROR sorting entry names: ', a, b)
             print(a_member.name, b_member.name)
+            return false
         end
 
         if b_member.class == a_member.class then
@@ -165,7 +166,9 @@ function DKP_Entry:GetFormattedNames()
         else
             return b_member.class > a_member.class
         end
+        return false
     end
+    --pcall(table.sort(self.names, compare))
     table.sort(self.names, compare)
 
     local remove_names = {};
