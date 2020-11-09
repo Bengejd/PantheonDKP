@@ -214,18 +214,27 @@ function Member:RemoveOutdatedEntries(search_time)
     local deleted_count = 0
     for _, raid in pairs(Defaults.dkp_raids) do
         local dkp = self.dkp[raid]
-        for key_index, key in pairs(dkp['entries']) do
-            if key < search_time then
-                deleted_count = deleted_count + 1
-                tremove(dkp['entries'], key_index)
+
+        local good_entries = {}
+        local good_deleted = {}
+
+        local entries = dkp['entries']
+        local deleted_entries = dkp['deleted']
+
+        for _, key in pairs(entries) do
+            if key >= search_time then
+                table.insert(good_entries, key)
             end
         end
-        for key_index, key in pairs(dkp['deleted']) do
-            if key < search_time then
-                deleted_count = deleted_count + 1
-                tremove(dkp['deleted'], key_index)
+        for _, key in pairs(deleted_entries) do
+            if key >= search_time then
+                table.insert(good_deleted, key)
             end
         end
+
+        deleted_count = (#entries - #good_entries) + (#deleted_entries - #good_deleted)
+        dkp['entries'] = good_entries
+        dkp['deleted'] = good_deleted
     end
     return deleted_count
 end

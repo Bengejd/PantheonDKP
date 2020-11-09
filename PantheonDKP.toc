@@ -2,11 +2,11 @@
 ## X-Interface: 11305
 ## Title: PantheonDKP
 ## Author: Neekio
-## Version: 3.1.2
+## Version: 3.2.0
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: pdkp_DB, pdkp_guildDB, pdkp_raidHistory, pdkp_characterDB, pdkp_dkpHistory, pdkp_itemHistory, pdkp_editHistory, pdkp_minimap, pdkp_settingsDB, pdkp_test
+## SavedVariables: pdkp_DB
 
 #@no-lib-strip@
 src\embed.xml

@@ -72,6 +72,8 @@ function PDKP:OnDataAvailable()
 
     if not Settings.db['mergedOld'] then pcall(PDKP_Merge_Old_Guild_Data) end
 
+    end
+
     GUI:Init();
     Raid:new();
     Minimap:Init()
@@ -134,35 +136,39 @@ function PDKP:InitializeDatabases()
     core.PDKP.officersDB = db.officersDB -- or {};
     core.PDKP.settingsDB = db.settingsDB -- or {};
 
-    local oldGuildDBDefaults = {
-        profile = {
-            name = nil,
-            numOfMembers = 0,
-            members = {},
-            officers = {},
-            migrated = false,
+    if not db.settingsDB['mergedOld'] then
+        local oldGuildDBDefaults = {
+            profile = {
+                name = nil,
+                numOfMembers = 0,
+                members = {},
+                officers = {},
+                migrated = false,
+            }
         }
-    }
 
-    local old_guild_db = LibStub("AceDB-3.0"):New("pdkp_guildDB", oldGuildDBDefaults, true)
-    old_guild_db = old_guild_db.profile
-    core.PDKP.old_guild_db = old_guild_db
+        local old_guild_db = LibStub("AceDB-3.0"):New("pdkp_guildDB", oldGuildDBDefaults, true)
+        old_guild_db = old_guild_db.profile
+        core.PDKP.old_guild_db = old_guild_db
 
-    local olddkpDBDefaults = {
-        profile = {
-            currentDB = 'Molten Core',
-            members = {},
-            lastEdit = 0,
-            history = {
-                all = {},
-                deleted = {}
-            },
+        local olddkpDBDefaults = {
+            profile = {
+                currentDB = 'Molten Core',
+                members = {},
+                lastEdit = 0,
+                history = {
+                    all = {},
+                    deleted = {}
+                },
+            }
         }
-    }
 
-    local old_dkp_db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", olddkpDBDefaults, true)
-    old_dkp_db = old_dkp_db.profile
-    core.PDKP.old_dkp_db = old_dkp_db
+        local old_dkp_db = LibStub("AceDB-3.0"):New("pdkp_dkpHistory", olddkpDBDefaults, true)
+        old_dkp_db = old_dkp_db.profile
+        core.PDKP.old_dkp_db = old_dkp_db
+    end
+
+
 
     core.PDKP.dkpDB = db.dkpDB;
 
@@ -194,6 +200,9 @@ function PDKP:HandleSlashCommands(msg)
     local officerCommands = {
         ['debug']=function()
             Settings:ToggleDebugging()
+        end,
+        ['cleanup']=function()
+            DKP:DeleteOldEntries()
         end,
     }
 

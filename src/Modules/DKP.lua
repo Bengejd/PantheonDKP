@@ -251,34 +251,34 @@ function DKP:DeleteOldEntries()
 
     local search_time = current_time - month_ago
 
-    local history = DkpDB['history']['all']
-    local deleted = DkpDB['history']['deleted']
+    PDKP:Print(search_time)
 
-    local old_entries = {}
-    local old_deleted = {}
+    local good_entries = {}
+    local good_deleted = {}
 
-    for key, _ in pairs(history) do
-        if key < search_time then table.insert(old_entries, key) end
+
+    for key, entry in pairs(DkpDB['history']['all']) do
+        if key >= search_time then good_entries[key] = entry; end
     end
-    for key_index, key in pairs(deleted) do
-        if key < search_time then table.insert(old_deleted, key_index) end
+    for _, key in pairs(DkpDB['history']['deleted']) do
+        if key >= search_time then table.insert(good_deleted, key) end
     end
 
-    for _, key in pairs(old_entries) do
-        tremove(core.PDKP.dkpDB['history']['all'], key)
-        core.PDKP.dkpDB['history']['all'][key] = nil;
-    end
-    for _, key in pairs(old_deleted) do
-        tremove(core.PDKP.dkpDB['history']['deleted'], key)
-        core.PDKP.dkpDB['history']['all'][key] = nil;
-    end
+    local old_entries = #DkpDB['history']['all'] - #good_entries
+    local old_deleted = #DkpDB['history']['deleted'] - #good_deleted
+
+    local total_old = old_entries + old_deleted
 
     local deleted_count = 0
     for _, member in pairs(Guild.members) do
         deleted_count = deleted_count + member:RemoveOutdatedEntries(search_time)
     end
-    if deleted_count > 0 or #old_entries + #old_deleted > 0 then
+
+    DkpDB['history']['all'] = good_entries
+    DkpDB['history']['deleted'] = good_deleted
+
+    if deleted_count > 0 or total_old > 0 then
         PDKP:Print('Pruning database...')
-        PDKP:Print(#old_entries + #old_deleted, 'Entries pruned', deleted_count, 'references removed')
+        PDKP:Print(total_old, 'Entries pruned', deleted_count, 'references removed')
     end
 end
