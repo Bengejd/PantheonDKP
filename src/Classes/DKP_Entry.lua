@@ -143,50 +143,42 @@ function DKP_Entry:GetFormattedNames()
         end
     end
 
-    local formattedNames = ''
+    local memberTable = {}
+    for key, name in ipairs(self.names) do
+        local member = Guild:GetMemberByName(name)
+        if member ~= nil then
+            table.insert(memberTable, member)
+        end
+    end
 
     local function compare(a,b)
-        local a_member = Guild:GetMemberByName(a)
-        local b_member = Guild:GetMemberByName(b)
-
-        if a_member == nil then
-            return true
-        elseif b_member == nil then
-            return false
-        end
-
-        if a_member == nil or b_member == nil then
-            print('ERROR sorting entry names: ', a, b)
-            print(a_member.name, b_member.name)
-            return false
-        end
-
-        if b_member.class == a_member.class then
-            return b_member.name > a_member.name
+        if b.class == a.class then
+            return b.name > a.name
         else
-            return b_member.class > a_member.class
+            return b.class > a.class
         end
-        return false
     end
+
     --pcall(table.sort(self.names, compare))
-    table.sort(self.names, compare)
+    table.sort(memberTable, compare)
 
-    local remove_names = {};
-    for key, name in pairs(self.names) do
-        local member = Guild:GetMemberByName(name)
-
-        if member ~= nil then
-            formattedNames = formattedNames .. member.formattedName
-            if key ~= #self.names then formattedNames = formattedNames .. ', ' end
-        else
-            remove_names[key] = name
-        end
+    local formattedNames = ''
+    for key, member in pairs(memberTable) do
+        if key ~= 1 then formattedNames = formattedNames .. ', ' end
+        formattedNames = formattedNames .. member.formattedName
     end
 
-    local function isGreaterThan(a, b) return a > b end
-    table.sort(remove_names, isGreaterThan)
+    --overwrite self.names with memberTable and remove non-members from the end
+    local index = 1
+    while index <= #memberTable do
+        self.names[index] = memberTable[index].name
+        index = index + 1
+    end
 
-    for key, name in pairs(remove_names) do table.remove(self.names, key) end
+    local size = #self.names
+    while size >= index do -- index is one past the last item
+        size = size - 1
+    end
 
     return formattedNames
 end
