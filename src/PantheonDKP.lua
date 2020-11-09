@@ -72,8 +72,6 @@ function PDKP:OnDataAvailable()
 
     if not Settings.db['mergedOld'] then pcall(PDKP_Merge_Old_Guild_Data) end
 
-    end
-
     GUI:Init();
     Raid:new();
     Minimap:Init()
@@ -167,8 +165,6 @@ function PDKP:InitializeDatabases()
         old_dkp_db = old_dkp_db.profile
         core.PDKP.old_dkp_db = old_dkp_db
     end
-
-
 
     core.PDKP.dkpDB = db.dkpDB;
 
