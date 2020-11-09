@@ -63,6 +63,8 @@ function Guild:new()
     Guild.online, Guild.members = Guild:GetMembers()
     Guild.initiated = true;
 
+    DKP:DeleteOldEntries()
+
     return Guild
 end
 

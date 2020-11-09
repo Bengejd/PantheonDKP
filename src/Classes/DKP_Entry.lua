@@ -159,7 +159,6 @@ function DKP_Entry:GetFormattedNames()
         end
     end
 
-    --pcall(table.sort(self.names, compare))
     table.sort(memberTable, compare)
 
     local formattedNames = ''

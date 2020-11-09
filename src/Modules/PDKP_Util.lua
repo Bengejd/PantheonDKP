@@ -7,7 +7,6 @@ local Defaults = core.Defaults;
 local Settings = core.Settings;
 local PDKP = core.PDKP;
 
-
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
 local replace, format, tostring, gsub, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
 local floor, fmod = math.floor, math.fmod;

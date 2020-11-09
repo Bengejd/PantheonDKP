@@ -210,6 +210,26 @@ function Member:OverwriteDKP(dkp)
     self:Save()
 end
 
+function Member:RemoveOutdatedEntries(search_time)
+    local deleted_count = 0
+    for _, raid in pairs(Defaults.dkp_raids) do
+        local dkp = self.dkp[raid]
+        for key_index, key in pairs(dkp['entries']) do
+            if key < search_time then
+                deleted_count = deleted_count + 1
+                tremove(dkp['entries'], key_index)
+            end
+        end
+        for key_index, key in pairs(dkp['deleted']) do
+            if key < search_time then
+                deleted_count = deleted_count + 1
+                tremove(dkp['deleted'], key_index)
+            end
+        end
+    end
+    return deleted_count
+end
+
 --- TESTING FUNCTIONS BELOW
 function Member:UpdateDKPTest(raid, newTotal)
     raid = raid or Raid:GetCurrentRaid()

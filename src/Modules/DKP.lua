@@ -244,3 +244,41 @@ function DKP:CalculateButton(b_type)
         end
     end
 end
+
+function DKP:DeleteOldEntries()
+    local month_ago = Util:SecondsToDays(31)
+    local current_time = GetServerTime()
+
+    local search_time = current_time - month_ago
+
+    local history = DkpDB['history']['all']
+    local deleted = DkpDB['history']['deleted']
+
+    local old_entries = {}
+    local old_deleted = {}
+
+    for key, _ in pairs(history) do
+        if key < search_time then table.insert(old_entries, key) end
+    end
+    for key_index, key in pairs(deleted) do
+        if key < search_time then table.insert(old_deleted, key_index) end
+    end
+
+    for _, key in pairs(old_entries) do
+        tremove(core.PDKP.dkpDB['history']['all'], key)
+        core.PDKP.dkpDB['history']['all'][key] = nil;
+    end
+    for _, key in pairs(old_deleted) do
+        tremove(core.PDKP.dkpDB['history']['deleted'], key)
+        core.PDKP.dkpDB['history']['all'][key] = nil;
+    end
+
+    local deleted_count = 0
+    for _, member in pairs(Guild.members) do
+        deleted_count = deleted_count + member:RemoveOutdatedEntries(search_time)
+    end
+    if deleted_count > 0 or #old_entries + #old_deleted > 0 then
+        PDKP:Print('Pruning database...')
+        PDKP:Print(#old_entries + #old_deleted, 'Entries pruned', deleted_count, 'references removed')
+    end
+end

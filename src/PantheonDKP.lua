@@ -253,8 +253,6 @@ function PDKP:Print(...)
     end
 end
 
-
-
 local eventNames = {
     "ADDON_LOADED", "GUILD_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_LOGIN"
 }
