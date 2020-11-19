@@ -154,6 +154,16 @@ function GUI:RefreshTables(pushUpdate)
     --wipe(GUI.memberTable.selected)
 end
 
+function GUI:UpdateInRaidFilter()
+    local filter = _G['pdkp_filter_raid']
+    if filter:GetChecked() then
+        filter:Click()
+        filter:Click()
+    else
+        filter:Click()
+    end
+end
+
 function GUI:ToggleRaidInviteSpam()
     local invite_control = GUI.invite_control
     local text = invite_control['text']

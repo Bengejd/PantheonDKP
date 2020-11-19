@@ -32,7 +32,7 @@ Raid.recent_boss_kill = nil;
 
 Raid.__index = Raid; -- Set the __index parameter to reference Raid
 
-local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER', 'BOSS_KILL'}
+local raid_events = {'GROUP_ROSTER_UPDATE', 'CHAT_MSG_WHISPER', 'BOSS_KILL', 'ZONE_CHANGED_NEW_AREA'}
 
 function Raid:new()
     local self = {};
@@ -95,6 +95,11 @@ function PDKP_Raid_OnEvent(self, event, arg1, ...)
             local bossID, bossName = arg1, arg2
             Raid:BossKill(bossID, bossName)
         end,
+        ['ZONE_CHANGED_NEW_AREA']=function()
+            if not UnitIsDeadOrGhost("player") then
+                Raid:CheckCombatLogging()
+            end
+        end
     }
 
     if raid_group_events[event] then raid_group_events[event](arg1, ...) end
@@ -236,6 +241,18 @@ end
 function Raid:MemberIsInRaid(name)
     if Raid.raid == nil or Raid.raid['members'] == nil or #Raid.raid['members'] == 0 then return false end
     return tContains(Raid.raid['members'], name)
+end
+
+function Raid:IsInRaidInstance()
+    local name, type, difficultyIndex, _ = Raid:GetInstanceInfo()
+    return type == 'raid' and difficultyIndex >= 1;
+end
+
+function Raid:CheckCombatLogging()
+    local isInRaid = Raid:IsInRaidInstance()
+    if not isInRaid then return end;
+    local isLoggingCombat = LoggingCombat(true)
+    PDKP:Print("Combat logging is now " .. tostring(isLoggingCombat and "ON" or "OFF"));
 end
 
 function Raid:SetDkpOfficer(isDkpOfficer, charName)
