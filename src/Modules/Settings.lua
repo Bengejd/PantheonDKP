@@ -95,6 +95,15 @@ function Settings:GetAddonVersion()
 end
 
 function Settings:SetSettings()
+
+    if Settings.db.sync == nil then
+        Settings.db.sync = {
+            ['pvp']=true,
+            ['dungeons']=true,
+            ['raids']=true,
+        }
+    end
+
     Settings.settings = {
         ['silent']=Settings.db.silent,
         ['pvp']=Settings.db.sync.pvp,
