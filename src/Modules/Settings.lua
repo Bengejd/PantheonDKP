@@ -77,7 +77,7 @@ end
 function Settings:CanEdit()
     local pName = Util:GetMyName()
 
-    local debugNames = {'Lariese'}
+    local debugNames = {'Lariese', 'Taylorswifty', 'Karenbaskins', 'Maebelieve', 'Haia', 'Honkforheals'}
     if tContains(debugNames, pName) then
         pName = 'Neekio'
     end

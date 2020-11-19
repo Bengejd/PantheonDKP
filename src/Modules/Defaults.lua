@@ -58,12 +58,13 @@ Defaults.raids = {
     'Molten Core',
     'Blackwing Lair',
     'Ahn\'Qiraj',
-    --    'Naxxramas',
+    'Naxxramas',
 };
 Defaults.dkp_raids = {
     'Molten Core',
     'Blackwing Lair',
-    'Ahn\'Qiraj'
+    'Ahn\'Qiraj',
+    'Naxxramas'
 };
 Defaults.raidBosses = {
     ["Onyxia's Lair"] = {
@@ -93,7 +94,7 @@ Defaults.raidBosses = {
     },
     ['Ahn\'Qiraj']={
         "The Prophet Skeram",
-        "Bug Trio",
+        "Silithid Royalty",
         "Battleguard Satura",
         "Fankriss the Unyeilding",
         "Viscidus",
@@ -148,7 +149,7 @@ Defaults.bossIDS = {
     },
     ['Ahn\'Qiraj']={
         [709] = 'The Prophet Skeram',
-        --[710] = 'Bug Trio', -- We don't give DKP for the Bug Trio
+        [710] = 'Silithid Royalty',
         [711] = 'Battleguard Satura',
         [712] = 'Fankriss the Unyeilding',
         [713] = 'Viscidus',

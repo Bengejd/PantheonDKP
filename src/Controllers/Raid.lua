@@ -296,13 +296,13 @@ function Raid:BossKill(bossID, bossName)
         Util:Debug('Boss Kill found: ', bossName, bossID)
     end
 
+    GUI:ClearFilters()
+
     local raid_filter = _G['pdkp_filter_raid']
     local select_all_filter = _G['pdkp_filter_Select_All']
 
-    raid_filter:SetChecked(true)
-    select_all_filter:SetChecked(true)
-
-    GUI:UpdateInRaidFilter()
+    if not raid_filter:GetChecked() then raid_filter:Click() end
+    if not select_all_filter:GetChecked() then select_all_filter:Click() end
 
     local award_amount = Defaults.adjustment_amounts[bossInfo['raid']]['Boss Kill']
     bossInfo['amount']=award_amount;

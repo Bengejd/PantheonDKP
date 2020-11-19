@@ -197,15 +197,16 @@ function GUI:ToggleRaidInviteSpam()
     GUI.invite_control['timer'] = PDKP:ScheduleRepeatingTimer(timerFeedback, interval) -- Posts it every 90 seconds for 15 mins.
 end
 
-function GUI:UpdateInRaidFilter()
-    local filter = _G['pdkp_filter_raid']
-    filter:Click()
-    filter:Click()
+function GUI:ClearFilters()
+    GUI.memberTable:ClearSelected()
+    GUI.memberTable:ClearAll()
 
-    local selectAllFilter = _G['pdkp_filter_Select_All']
-    if selectAllFilter:GetChecked() then
-        selectAllFilter:Click()
-        selectAllFilter:Click()
+    for _, filter in pairs({'Select_All', 'online', 'raid', 'selected', 'Class_All'}) do
+        local f = _G['pdkp_filter_'..filter]
+        if f:GetChecked() then f:Click() end
+        if filter == 'Class_All' and not f:GetChecked() then
+            f:Click()
+        end
     end
 end
 
