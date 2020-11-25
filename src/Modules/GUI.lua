@@ -218,6 +218,9 @@ function GUI:ClearFilters()
             f:Click()
         end
     end
+
+    -- Reset the search container, just to be safe.
+    GUI.memberTable.searchFrame.clearButton:Click()
 end
 
 function GUI:UpdateSyncStatus()
