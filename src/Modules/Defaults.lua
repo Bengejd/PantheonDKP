@@ -45,12 +45,11 @@ Defaults.adjustment_amounts = {
         ['Unexcused Absence']=0
     },
     ['Naxxramas']={
-        ['On Time Bonus']=5,
-        ['Completion Bonus']=5,
+        ['On Time Bonus']=0,
+        ['Completion Bonus']=10,
         ['Boss Kill']=6,
         ['Unexcused Absence']=0
     },
-
 }
 
 Defaults.raids = {
