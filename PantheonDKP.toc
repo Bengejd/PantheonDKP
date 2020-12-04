@@ -2,7 +2,7 @@
 ## X-Interface: 11306
 ## Title: PantheonDKP
 ## Author: Neekio
-## Version: 3.2.3
+## Version: 3.2.4
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
