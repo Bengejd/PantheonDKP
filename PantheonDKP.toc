@@ -1,5 +1,5 @@
-## Interface: 11307
-## X-Interface: 11306
+## Interface: 20501
+## X-Interface: 20501
 ## Title: PantheonDKP
 ## Author: Neekio
 ## Version: 3.3.5
