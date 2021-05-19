@@ -229,7 +229,7 @@ end
 
 function HistoryTable:OnLoad()
     local rows = setmetatable({}, { __index = function(t, i)
-        local row = CreateFrame("Frame", nil, self.scrollContent)
+        local row = CreateFrame("Frame", nil, self.scrollContent, BackdropTemplateMixin and "BackdropTemplate")
         row:SetSize(350, 50)
         row.index = i;
         row.display_index = nil;
@@ -242,7 +242,7 @@ function HistoryTable:OnLoad()
         local expand_tex = 'Interface\\Buttons\\UI-Panel-CollapseButton-Up'
         local collapse_tex = 'Interface\\Buttons\\UI-Panel-ExpandButton-Up'
 
-        local border = CreateFrame("Frame", nil, row)
+        local border = CreateFrame("Frame", nil, row, BackdropTemplateMixin and "BackdropTemplate")
         border:SetPoint("TOPLEFT", row, "TOPLEFT", 0, -ROW_MARGIN_TOP)
         border:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -1, 0)
         border:SetBackdrop(PaneBackdrop)
@@ -255,7 +255,7 @@ function HistoryTable:OnLoad()
         row_title:SetHeight(18)
         row_title:SetText(i)
 
-        local content = CreateFrame("Frame", nil, border)
+        local content = CreateFrame("Frame", nil, border, BackdropTemplateMixin and "BackdropTemplate")
         content:SetWidth(row:GetWidth() - 20)
         content:SetPoint("TOPLEFT", border, "TOPLEFT", 5, -5)
         content:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", -10, 0)

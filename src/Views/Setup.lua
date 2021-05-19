@@ -81,7 +81,7 @@ local function createBackdropFrame(name, parent, title)
 
     if title then title_text:SetText(title) end
 
-    local border = CreateFrame("Frame", nil, f)
+    local border = CreateFrame("Frame", nil, f, BackdropTemplateMixin and "BackdropTemplate")
     border:SetPoint("TOPLEFT", 0, -17)
     border:SetPoint("BOTTOMRIGHT", -1, 3)
 
@@ -295,7 +295,8 @@ local function createEditBox(opts)
 
     box:SetScript("OnEditFocusGained", function() box.touched = true end)
 
-    local box_frame = CreateFrame("Frame", '$parent_edit_frame', box)
+    local box_frame = CreateFrame("Frame", '$parent_edit_frame', box, BackdropTemplateMixin and "BackdropTemplate")
+
     box_frame:SetBackdrop( {
         bgFile = TRANSPARENT_BACKGROUND,
         edgeFile = SHROUD_BORDER, tile = true, tileSize = 17, edgeSize = 16,
@@ -412,7 +413,7 @@ function Setup:MainUI()
 end
 
 function Setup:Debugging()
-    local f = CreateFrame("Frame", "pdkp_debug_frame", UIParent)
+    local f = CreateFrame("Frame", "pdkp_debug_frame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     f:SetFrameStrata("HIGH")
     f:SetPoint("BOTTOMLEFT")
     f:SetHeight(500)
@@ -949,7 +950,7 @@ function Setup:TableSearch()
 end
 
 function Setup:Filters()
-    local f = CreateFrame("Frame", "$parentFilterFrame", pdkp_frame)
+    local f = CreateFrame("Frame", "$parentFilterFrame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
 
     f:SetBackdrop({
         tile = true, tileSize = 0,
@@ -1063,11 +1064,12 @@ end
 function Setup:DKPAdjustments()
     local f = CreateFrame("Frame", "$parent_adjustment_frame", pdkp_frame)
 
-    f:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
+        -- todo: TBC UPDATE CHANGE REQUIRED
+    --f:SetBackdrop({
+    --    tile = true, tileSize = 0,
+    --    edgeFile = SCROLL_BORDER, edgeSize = 8,
+    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --})
     f:SetHeight(225)
     f:SetPoint("BOTTOMLEFT", PDKP.memberTable.frame, "BOTTOMRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,0)
@@ -1307,11 +1309,11 @@ end
 function Setup:DKPHistory()
     local f = CreateFrame("Frame", "$parent_history_frame", pdkp_frame)
 
-    f:SetBackdrop({
-        tile = true, tileSize = 0,
-        edgeFile = SCROLL_BORDER, edgeSize = 8,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
+    --f:SetBackdrop({
+    --    tile = true, tileSize = 0,
+    --    edgeFile = SCROLL_BORDER, edgeSize = 8,
+    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --})
     f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, 0)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,35)
 
@@ -1400,12 +1402,12 @@ function Setup:TabView()
     tc:EnableMouse(true)
     tc:SetParent(UIParent)
 
-    tc:SetBackdrop({
-        tile = true, tileSize = 32,
-        edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border', edgeSize = 32,
-        bgFile= 'Interface\\DialogFrame\\UI-DialogBox-Background',
-        insets = { left = 11, right = 12, top = 12, bottom = 11 },
-    })
+    --tc:SetBackdrop({
+    --    tile = true, tileSize = 32,
+    --    edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border', edgeSize = 32,
+    --    bgFile= 'Interface\\DialogFrame\\UI-DialogBox-Background',
+    --    insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    --})
 
     local header = tc:CreateFontString(tc, 'OVERLAY', 'GameFontNormal')
     header:SetSize(356, 64)

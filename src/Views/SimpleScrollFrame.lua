@@ -111,7 +111,7 @@ function SimpleScrollFrame:new(parent)
 
     sf:EnableMouseWheel(1)
 
-    local sb = CreateFrame("Slider", '$parent_scrollBar', sf, "UIPanelScrollBarTemplate")
+    local sb = CreateFrame("Slider", '$parent_scrollBar', sf, "UIPanelScrollBarTemplate", BackdropTemplateMixin and "BackdropTemplate")
     sb:SetPoint("TOPLEFT", sf, "TOPRIGHT", 2, -20)
     sb:SetPoint("BOTTOMLEFT", sf, "BOTTOMRIGHT", -2, 18)
     sb:SetMinMaxValues(0, 1000)
@@ -155,11 +155,11 @@ function SimpleScrollFrame:new(parent)
     local sbg = sb:CreateTexture(nil, "BACKGROUND")
     sbg:SetAllPoints(sb)
     sbg:SetColorTexture(0, 0, 0, 0.4)
-    sb:SetBackdrop({
-        bgFile = TRANSPARENT_BACKGROUND,
-        edgeFile = SHROUD_BORDER, tile = true, tileSize = 4, edgeSize = 4,
-        insets = { left = 5, right = 5, top = 5, bottom = 5 }
-    })
+    --sb:SetBackdrop({
+    --    bgFile = TRANSPARENT_BACKGROUND,
+    --    edgeFile = SHROUD_BORDER, tile = true, tileSize = 4, edgeSize = 4,
+    --    insets = { left = 5, right = 5, top = 5, bottom = 5 }
+    --})
 
     sf.scrollBar.bg = sbg
 

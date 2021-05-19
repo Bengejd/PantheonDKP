@@ -386,7 +386,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     -------------------------
 
     -- Create our base frame.
-    self.frame = CreateFrame("Frame", self.name, self.parent)
+    self.frame = CreateFrame("Frame", self.name, self.parent, BackdropTemplateMixin and "BackdropTemplate")
     self.frame:EnableMouse(self.enableMouse)
     self.frame:SetMovable(self.movable)
     self.frame:SetSize(self.width, self.height)

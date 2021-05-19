@@ -229,7 +229,7 @@ function GUI:UpdateSyncStatus()
 
     local syncText = Util:FormatFontTextColor(success, 'Up to date');
 
-    if myLastEdit < DKP.bankLastEdit then syncText = Util:FormatFontTextColor(warning, 'Out of date'); end
+    --if myLastEdit < DKP.bankLastEdit then syncText = Util:FormatFontTextColor(warning, 'Out of date'); end
 
     local guildSyncDate = Util:Format12HrDateTime(DKP.bankLastSync)
     local guildPushDate = Util:Format12HrDateTime(DKP.bankLastEdit)
