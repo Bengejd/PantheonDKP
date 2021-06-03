@@ -1,46 +1,46 @@
-REWORK:
+TBC UPDATES:
+    
+    TODO: One Singular DKP sheet, for all raids.
+    TODO: DKP will only apply to 25 mans.
+    TODO: No on-time bonus (remove button).
 
-TODO: BUG: DKP Officer requests way too much.
-TODO: BUG: In-Raid not working properly.
+    TODO: 10 DKP per boss kill.
+    TODO: Everyone will have 30 DKP automatically in the TBC Update Including Alts, and new guild members.
+    TODO: Benched DKP is full DKP.
 
-TODO: Setup DKP Officer popup.
-TODO: Setup Loot Prio again.
-TODO: Loot Prio Alterations in addon, instead of having to wait for an update.
-TODO: Find what color the original version text was.
-TODO: Check out AceBucket for event handling?
+    TODO: Decay is set at 10% per week, on Tuesdays, rounded down.
+    TODO: Manual DKP decay of 50% at the start of a new raid tier.
+    TODO: Bids will be hidden until the countdown is finalized. This can be manually overridden by the DKP master, Master looter or Raid Leader.
+    TODO: Bids of 9 or less will not carry any loot priority.
 
-LOCAL DESKTOP APP:
-    TODO: Figure out how to create a desktop app.
-    TODO: Allow edits to be checked within your local game files.
-    TODO: Allow additions to be marked.
+    TODO: Alt-standby list
+    TODO: Alt associations
+    TODO: Sync library: https://github.com/SamMousa/lua-eventsourcing
+    TODO: No longer allow deletes to occur in the database, mark them as deleted and add a new sync entry?
+    TODO: "Deleted" entries should be moved to a "deleted" DB that is load-on-demand?
+    TODO: Update PDKP GUI to be more "sexy" and slimming.
+
+
+TBC UPDATES DONE:
+    
+    - Added boss/raid ID's
+    - Added Shaman Class
+    - Fixed Class Checkbox layout to be 3x3 instead of 4x2
+
 
 TRY TO FIX:
+    
     TODO: Throttle the shrouding window updates, so that people don't get lost / overwritten.
-    TODO: Allow people to be selected by shift-clicking the people in the raid.
     TODO: Allow edits of entries.
 
 NICE TO HAVES:
+    
     TODO: Whisper command !pdkp that will send back the player's DKP totals.
-    TODO: Decay (No call / no-show: 20%)
-    TODO: Excused absence: 15%
     TODO: Add an edit box in the settings window, that takes you to the issue tracker.
     TODO: Roster list in addon screen.
 
-RAID ASSIGNMENTS:
-   Allows you to assign particular people to healing (MainTank, RaidHealers, etc...)
-   Interface of what healers are in the raid (Paladins, Priests, Druids)
-   Recommended healers based on what their class is / how many healers are already assigned.
-   RaidWarning when certain healers are dead ("MainTank Healer XYX is down")
-   Allows healing assignments to change per fight / boss
-   Allow assignments for dispels, decurses, deposions.
-   Allow assignments for sheep / hibernates.
-   Auto mark targets based on name and mouse-overs (Hibernates / Sheeps based on target name).
-
-   - Go to Other, If you put the amount before you put the text in, So it doesn't lock up.
-   -
-
-
 MAKING IT MORE PUBLIC:
+    
     TODO: Enable PUGS
     TODO: Make PDKP More Generic, so that other guilds can use it.
     TODO: Allow name change
@@ -58,3 +58,17 @@ MAKING IT MORE PUBLIC:
     TODO: No call / No show: 20% (int or %)
     TODO: Absence (Excuse): 15%
     TODO: Options table for changing Raid DKP amounts.
+
+NEAT ADDON IDEAS:
+    
+    RAID ASSIGNMENTS:
+       Allows you to assign particular people to healing (MainTank, RaidHealers, etc...)
+       Interface of what healers are in the raid (Paladins, Priests, Druids)
+       Recommended healers based on what their class is / how many healers are already assigned.
+       RaidWarning when certain healers are dead ("MainTank Healer XYX is down")
+       Allows healing assignments to change per fight / boss
+       Allow assignments for dispels, decurses, deposions.
+       Allow assignments for sheep / hibernates.
+       Auto mark targets based on name and mouse-overs (Hibernates / Sheeps based on target name).
+
+       - Go to Other, If you put the amount before you put the text in, So it doesn't lock up.
