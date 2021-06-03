@@ -12,4 +12,4 @@ _G.PDKP = PDKP
 
 PDKP.GUI, PDKP.DKP, PDKP.Settings, PDKP.Guild, PDKP.Util, PDKP.Character, PDKP.Raid, PDKP.Defaults, PDKP.Member,
 PDKP.Setup, PDKP.Loot, PDKP.Shroud, PDKP.Comms, PDKP.ScrollTable, PDKP.DKP_Entry, PDKP.HistoryTable,
-PDKP.SimpleScrollFrame, PDKP.Minimap, PDKP.Export, PDKP.Import = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {};
+PDKP.SimpleScrollFrame, PDKP.Minimap, PDKP.Export, PDKP.Import, PDKP.Media = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {};
