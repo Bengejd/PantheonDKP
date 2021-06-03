@@ -1,15 +1,15 @@
 ## Interface: 20501
-## X-Interface: 20501
-## Title: PantheonDKP
-## Author: Neekio
+## Author: Neekio - Blaumeux (Bengejd)
 ## Version: 3.3.6
+## Title: |cff33ff99PantheonDKP|r
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
-## LoadOnDemand: 0
 ## SavedVariables: pdkp_DB
+## LoadOnDemand: 0
+## X-Interface: 20501
 
 #@no-lib-strip@
-src\embed.xml
+Libraries\Load_Libraries.xml
 #@end-no-lib-strip@
 
 # Init files
