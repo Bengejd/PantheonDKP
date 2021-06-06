@@ -11,7 +11,7 @@ Media.SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
 Media.SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 Media.CHAR_INFO_TEXTURE = 'Interface\\CastingBar\\UI-CastingBar-Border-Small'
 
-Media.adoon_version_hex = '0059c5'
+Media.adoon_version_hex = '0059C5'
 
 Media.PaneBackdrop  = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
