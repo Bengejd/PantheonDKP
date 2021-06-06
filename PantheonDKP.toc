@@ -7,6 +7,7 @@
 ## SavedVariables: pdkp_DB
 ## LoadOnDemand: 0
 ## X-Interface: 20501
+## X-Phase: 1
 
 #@no-lib-strip@
 Libraries\Load_Libraries.xml
