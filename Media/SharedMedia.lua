@@ -1,8 +1,7 @@
-local _, PDKP = ...;
+local _, core = ...;
 local _G = _G;
-local L = PDKP.L;
 
-local Media = PDKP.Media
+local Media = core.PDKP.Media
 
 Media.CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 Media.TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
