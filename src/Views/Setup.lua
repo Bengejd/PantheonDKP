@@ -1,3 +1,10 @@
-local _, PDKP = ...;
 local _G = _G;
-local L = PDKP.L;
+local _, core = ...;
+
+local PDKP = core.PDKP;
+
+local Setup = PDKP.Setup;
+
+function Setup:Init()
+    print('Setup Init started');
+end

@@ -1,3 +1,11 @@
+### Benched Logic
+Players can set themselves as being "benched" in game, this requires them to login onto their main character, and mark themselves as "benched".
+They can then, play any other character on their account that has the PDKP addon enabled, and is in the guild. They must be online within +- 5 minutes of a boss kill in order to receive DKP for that kill.
+Officers can request that they join the raid group via a "request" button. The benched list will be accessible via the raid-tools frame.
+
+- [ ] Enable marking one's self as "benched".
+
+
 TBC UPDATES:
     
     TODO: One Singular DKP sheet, for all raids.
