@@ -1,34 +1,35 @@
-local _G = _G;
-local AddonName, core = ...;
+local _G = _G
+local AddonName, core = ...
 
 local AceAddon, AceAddonMinor = _G.LibStub('AceAddon-3.0')
 
 local PDKP = AceAddon:NewAddon(AddonName, "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0")
 
-core.PDKP = PDKP;
-_G.PDKP = PDKP;
+core.PDKP = PDKP
+_G.PDKP = PDKP
 
-PDKP.GUI = {};
-PDKP.DKP = {};
-PDKP.Settings = {};
-PDKP.Guild = {};
-PDKP.Util = {};
-PDKP.Character = {};
-PDKP.Raid = {};
-PDKP.Defaults = {};
-PDKP.Member = {};
-PDKP.Setup = {};
-PDKP.Loot = {};
-PDKP.Shroud = {};
-PDKP.Comms = {};
-PDKP.ScrollTable = {};
-PDKP.DKP_Entry = {};
-PDKP.HistoryTable = {};
-PDKP.SimpleScrollFrame = {};
-PDKP.Minimap = {};
-PDKP.Export = {};
-PDKP.Import = {};
-PDKP.Events = {};
+PDKP.Media = {}
+PDKP.GUI = {}
+PDKP.DKP = {}
+PDKP.Settings = {}
+PDKP.Guild = {}
+PDKP.Util = {}
+PDKP.Character = {}
+PDKP.Raid = {}
+PDKP.Defaults = {}
+PDKP.Member = {}
+PDKP.Setup = {}
+PDKP.Loot = {}
+PDKP.Shroud = {}
+PDKP.Comms = {}
+PDKP.ScrollTable = {}
+PDKP.DKP_Entry = {}
+PDKP.HistoryTable = {}
+PDKP.SimpleScrollFrame = {}
+PDKP.Minimap = {}
+PDKP.Export = {}
+PDKP.Import = {}
+PDKP.Events = {}
 
 PDKP.ldb = _G.LibStub:GetLibrary("LibDataBroker-1.1")
 PDKP.cbh = _G.LibStub("CallbackHandler-1.0"):New(PDKP)
