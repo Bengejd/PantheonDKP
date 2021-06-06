@@ -34,3 +34,37 @@ PDKP.Events = {}
 PDKP.ldb = _G.LibStub:GetLibrary("LibDataBroker-1.1")
 PDKP.cbh = _G.LibStub("CallbackHandler-1.0"):New(PDKP)
 PDKP.LibDeflate = _G.LibStub:GetLibrary("LibDeflate")
+
+local PDKP_Instances = {
+    ['PDKP']=PDKP,
+    ['Media']=PDKP.Media,
+    ['GUI']=PDKP.GUI,
+    ['DKP']=PDKP.DKP,
+    ['Settings']=PDKP.Settings,
+    ['Guild']=PDKP.Guild,
+    ['Util']=PDKP.Util,
+    ['Character']=PDKP.Character,
+    ['Raid']=PDKP.Raid,
+    ['Member']=PDKP.Member,
+    ['Setup']=PDKP.Setup,
+    ['Loot']=PDKP.Loot,
+    ['Shroud']=PDKP.Shroud,
+    ['Comms']=PDKP.Comms,
+    ['ScrollTable']=PDKP.ScrollTable,
+    ['DKP_Entry']=PDKP.DKP_Entry,
+    ['HistoryTable']=PDKP.HistoryTable,
+    ['SimpleScrollFrame']=PDKP.SimpleScrollFrame,
+    ['Minimap']=PDKP.Minimap,
+    ['Import']=PDKP.Import,
+    ['Events']=PDKP.Events,
+}
+
+function PDKP:GetInst(...)
+    local reqInstances = {}
+    for _, val in pairs({...}) do
+        local inst = PDKP_Instances[val]
+        if inst == nil then inst = nil end
+        table.insert(reqInstances, inst)
+    end
+    return unpack(reqInstances)
+end
