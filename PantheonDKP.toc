@@ -1,6 +1,6 @@
 ## Interface: 20501
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 3.3.6
+## Version: 4.0.0
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
@@ -16,8 +16,6 @@ Libraries\Load_Libraries.xml
 # Init files
 src\init.lua
 Media\Load_Media.xml
-
-src\PantheonDKP.xml
 
 # Classes
 src\Classes\Member.lua
@@ -47,3 +45,5 @@ src\Views\ScrollTable.lua
 src\Views\DKP_History.lua
 src\Views\SimpleScrollFrame.lua
 src\Views\Setup.lua
+
+src\PantheonDKP.xml
