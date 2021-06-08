@@ -1,5 +1,6 @@
 local _G = _G;
 local AddonName, core = ...;local Comms = PDKP:GetInst('Comms')
+local Comms = PDKP:GetInst('Comms')
 
 function Comms:Serialize(data)
     return PDKP:Serialize(data);
