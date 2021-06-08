@@ -1,5 +1,7 @@
 local _G = _G;
-local _, PDKP = ...;
+local _, core = ...;
+
+local PDKP = core.PDKP
 
 local Dev, Defaults, Util, Guild, Comms = PDKP:GetInst('Dev', 'Defaults', 'Util', 'Guild', 'Comms')
 
