@@ -1,8 +1,6 @@
-local _, core = ...;
 local _G = _G;
+local PDKP = _G.PDKP
 
-local PDKP = core.PDKP;
-local Guild, Defaults, Util, Character, GUI = PDKP:GetInst('Guild', 'Defaults', 'Util', 'Character', 'GUI')
 local Guild, Defaults, Util, Character, GUI, Dev = PDKP:GetInst('Guild', 'Defaults', 'Util', 'Character', 'GUI', 'Dev')
 local IsInGuild, GuildRoster = IsInGuild, GuildRoster
 local strlen, next = string.len, next

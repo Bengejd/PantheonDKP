@@ -1,5 +1,5 @@
-local _G = _G
-local AddonName, core = ...
+local _G = _G;
+local PDKP = _G.PDKP
 
 local Guild, GUI, Util, Member, Dev = PDKP:GetInst('Guild', 'GUI', 'Util', 'Member', 'Dev')
 

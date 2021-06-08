@@ -1,8 +1,7 @@
 local _G = _G;
-local AddonName, core = ...;
+local PDKP = _G.PDKP
 
-local Events = core.PDKP.Events;
-local Utils = core.PDKP.Utils;
+local Events, Util = PDKP:GetInst('Events', 'Util')
 
 local eventsCache = {};
 

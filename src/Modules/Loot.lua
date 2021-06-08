@@ -1,2 +1,2 @@
 local _G = _G;
-local AddonName, core = ...;
+local PDKP = _G.PDKP

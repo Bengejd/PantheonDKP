@@ -1,6 +1,6 @@
 local _G = _G;
-local AddonName, core = ...;
-local PDKP = core.PDKP;
+local PDKP = _G.PDKP
+
 local Member, Raid, Guild, Defaults, Util, Character = PDKP:GetInst('Member', 'Raid', 'Guild', 'Defaults', 'Util', 'Character')
 
 local GetGuildRosterInfo = GetGuildRosterInfo

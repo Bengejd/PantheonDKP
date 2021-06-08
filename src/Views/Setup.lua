@@ -1,7 +1,5 @@
 local _G = _G;
-local _, core = ...;
-
-local PDKP = core.PDKP;
+local PDKP = _G.PDKP
 
 local Setup, Media, Raid, DKP, Util, Comms, Guild, Defaults, ScrollTable = PDKP:GetInst('Setup', 'Media', 'Raid', 'DKP', 'Util', 'Comms', 'Guild', 'Defaults', 'ScrollTable')
 local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud')

@@ -1,9 +1,7 @@
 local _G = _G;
-local AddonName, core = ...;
+local PDKP = _G.PDKP
 
 local GetGuildInfo = GetGuildInfo
-
-local PDKP = core.PDKP
 local Character, Util, Defaults, Dev = PDKP:GetInst('Character', 'Util', 'Defaults', 'Dev')
 
 function Character:init()

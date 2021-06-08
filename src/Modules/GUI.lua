@@ -1,7 +1,6 @@
 local _G = _G;
-local AddonName, core = ...;
+local PDKP = _G.PDKP
 
-local PDKP = core.PDKP
 local GUI, Util, Defaults, Character, Setup, Dev = PDKP:GetInst('GUI', 'Util', 'Defaults', 'Character', 'Setup', 'Dev')
 
 --local DKP = core.DKP;

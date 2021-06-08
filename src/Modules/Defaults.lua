@@ -1,7 +1,5 @@
-local _G = _G
-local AddonName, core = ...
-
-local PDKP = core.PDKP
+local _G = _G;
+local PDKP = _G.PDKP
 
 -- Set the global functions to local instances.
 local GetAddonMetadata = GetAddOnMetadata

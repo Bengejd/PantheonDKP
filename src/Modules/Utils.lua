@@ -1,7 +1,5 @@
-local _, core = ...;
 local _G = _G;
-
-local PDKP = core.PDKP
+local PDKP = _G.PDKP
 local Defaults, Util = PDKP:GetInst('Defaults', 'Util')
 
 local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
