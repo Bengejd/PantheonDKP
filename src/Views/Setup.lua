@@ -18,8 +18,6 @@ local UIDropDownMenu_GetSelectedValue, UIDropDownMenu_SetWidth, UIDropDownMenu_S
 UIDropDownMenu_SetSelectedValue, UIDropDownMenu_AddButton = UIDropDownMenu_GetSelectedValue, UIDropDownMenu_SetWidth,
 UIDropDownMenu_SetText, UIDropDownMenu_Initialize, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetSelectedValue, UIDropDownMenu_AddButton
 
-
-
 --------------------------
 -- Local      Functions --
 --------------------------
@@ -351,7 +349,7 @@ function Setup:MainUI()
             t:SetDrawLayer("Background", -8)
             t:SetPoint('TOPLEFT', f, 5, -15)
             t:SetPoint('BOTTOMRIGHT', f, -5, 15)
-            t:SetAlpha(0)
+            t:SetAlpha(0.8)
         else
             t:SetPoint(tex['dir'], f, x, y)
         end
@@ -398,7 +396,7 @@ function Setup:MainUI()
     addon_version:SetText(Util:FormatFontTextColor(Media.addon_version_hex, "v" .. Defaults.addon_version))
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
-    --- Addon Version
+    --- Addon Author
     local addon_author = f:CreateFontString(f, "Overlay", "Game11Font")
     addon_author:SetSize(200, 20)
     addon_author:SetText("Author: Neekio-Blaumeux")
@@ -417,7 +415,8 @@ function Setup:MainUI()
 end
 
 function Setup:RandomStuff()
-    Setup:BidBox()
+
+    Setup:ScrollTable()
 
 
     --Setup:ShroudingBox()
@@ -443,6 +442,104 @@ function Setup:RandomStuff()
     end
 end
 
-function Setup:BidBox()
+function Setup:ScrollTable()
+    local st = {};
 
+    local function compare(a,b)
+        local sortDir = st.sortDir;
+        local sortBy = st.sortBy;
+        -- Set the data object explicitly here
+        -- Since this is pointing to a row
+        -- Not a member object.
+        a = a.dataObj;
+        b = b.dataObj;
+
+        if sortBy == 'name' then
+            a, b = a['name'], b['name']
+        elseif sortBy == 'class' then
+            if a['class'] == b['class'] then return a['name'] < b['name'] end
+            a, b = a['class'], b['class']
+        elseif sortBy == 'dkp' then
+            a, b = a:GetDKP(nil, 'total'), b:GetDKP(nil, 'total')
+        end
+
+        if sortDir == 'ASC' then return a > b else return a < b end
+    end
+
+    local table_settings = {
+        ['name']= 'ScrollTable',
+        ['parent']=pdkp_frame,
+        ['height']=500,
+        ['width']=330,
+        ['movable']=true,
+        ['enableMouse']=true,
+        ['retrieveDataFunc']=function()
+            Guild:GetMembers()
+            return Guild.memberNames
+        end,
+        ['retrieveDisplayDataFunc']=function(_, name)
+            return Guild:GetMemberByName(name)
+        end,
+        ['anchor']={
+            ['point']='TOPLEFT',
+            ['rel_point_x']=8,
+            ['rel_point_y']=-71,
+        }
+    }
+    local col_settings = {
+        ['height']=14,
+        ['width']=90,
+        ['firstSort']=1, -- Denotes the header we want to sort by originally.
+        ['headers'] = {
+            [1] = {
+                ['label']='name',
+                ['sortable']=true,
+                ['point']='LEFT',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare
+            },
+            [2] = {
+                ['label']='class',
+                ['sortable']=true,
+                ['point']='CENTER',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare,
+                ['colored']=true,
+            },
+            [3] = {
+                ['label']='dkp',
+                ['sortable']=true,
+                ['point']='RIGHT',
+                ['showSortDirection'] = true,
+                ['compareFunc']=compare,
+                ['getValueFunc']= function (member)
+                    return member:GetDKP(nil, 'total')
+                end,
+            },
+        }
+    }
+    local row_settings = {
+        ['height']=20,
+        ['width']=285,
+        ['max_values'] = 425,
+        ['showHighlight']=true,
+        ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
+    }
+
+    st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
+    st.cols[1]:Click()
+
+    PDKP.memberTable = st;
+    GUI.memberTable = st;
+
+    --st.searchFrame = Setup:TableSearch()
+    --
+    ---- Entries label
+    ---- 0 Entries shown | 0 selected
+    --local label = st.searchFrame:CreateFontString(st.searchFrame, 'OVERLAY', 'GameFontNormalLeftYellow')
+    --label:SetSize(200, 14)
+    --label:SetPoint("LEFT", st.searchFrame.clearButton, "LEFT", 60, 0)
+    --label:SetText("0 Players shown | 0 selected")
+    --
+    --st.entryLabel = label
 end

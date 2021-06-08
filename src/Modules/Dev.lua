@@ -20,6 +20,10 @@ function Dev:Print(...)
     end
 end
 
+function Dev:IsDev()
+    return Defaults.development or Defaults.debug
+end
+
 function Dev:ClockSpeed(isEnd, funcName)
     if not isEnd then
         Dev.clockStartTime = time()

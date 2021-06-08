@@ -10,6 +10,9 @@ Media.PDKP_TEXTURE_BASE = "Interface\\Addons\\PantheonDKP\\Media\\New_UI\\PDKPFr
 Media.SHROUD_BORDER = "Interface\\DialogFrame\\UI-DialogBox-Border"
 Media.SCROLL_BORDER = "Interface\\Tooltips\\UI-Tooltip-Border"
 Media.CHAR_INFO_TEXTURE = 'Interface\\CastingBar\\UI-CastingBar-Border-Small'
+Media.HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
+Media.ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
+Media.ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
 Media.addon_version_hex = '0059C5'
 

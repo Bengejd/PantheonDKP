@@ -1,7 +1,7 @@
 local _G = _G;
 local PDKP = _G.PDKP
 
-local Member, Raid, Guild, Defaults, Util, Character = PDKP:GetInst('Member', 'Raid', 'Guild', 'Defaults', 'Util', 'Character')
+local Member, Raid, Guild, Defaults, Util, Character, Dev = PDKP:GetInst('Member', 'Raid', 'Guild', 'Defaults', 'Util', 'Character', 'Dev')
 
 local GetGuildRosterInfo = GetGuildRosterInfo
 local setmetatable, strsplit, pairs, next = setmetatable, strsplit, pairs, next
@@ -45,8 +45,11 @@ function Member:IsRaidReady()
 end
 
 function Member:CanEdit()
-
-
     self.canEdit = self.rankIndex <= 3;
     self.isOfficer = self.canEdit;
+end
+
+function Member:GetDKP()
+    -- TODO: Finish Member.GetDKP
+    return 30
 end

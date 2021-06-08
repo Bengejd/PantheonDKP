@@ -36,7 +36,7 @@ function Guild:New()
 end
 
 function Guild:IsNewMemberObject(name)
-    return tContains(Guild.memberNames, name)
+    return not tContains(Guild.memberNames, name)
 end
 
 function Guild:GetMembers()
@@ -61,7 +61,7 @@ function Guild:GetMembers()
 
             if isNew then
                 Guild.members[member.name] = member;
-                Guild.member[#Guild.memberNames + 1] = member.name
+                Guild.memberNames[#Guild.memberNames + 1] = member.name
             end
 
             if member.online then Guild.online[member.name] = member end
@@ -69,6 +69,12 @@ function Guild:GetMembers()
     end
 
     return Guild.online, Guild.members; -- Always return, even if it's empty.
+end
+
+function Guild:GetMemberByName(name)
+    if tContains(Guild.memberNames, name) then return Guild.members[name]
+    else return nil
+    end
 end
 
 function Guild:initBankInfo(index, member)
