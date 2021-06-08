@@ -39,6 +39,7 @@ src\Modules\Shroud.lua
 src\Modules\GUI.lua
 src\Modules\DKP.lua
 src\Modules\Events.lua
+src\Modules\Dev.lua
 
 # Views
 src\Views\ScrollTable.lua
