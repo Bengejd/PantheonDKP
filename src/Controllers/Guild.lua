@@ -1,8 +1,7 @@
 local _G = _G
 local AddonName, core = ...
 
-local PDKP = _G.PDKP
-local Guild, GUI, Util, Member = PDKP:GetInst('Guild', 'GUI', 'Util', 'Member')
+local Guild, GUI, Util, Member, Dev = PDKP:GetInst('Guild', 'GUI', 'Util', 'Member', 'Dev')
 
 local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
 local strsplit, tonumber, tostring, pairs, type, next = strsplit, tonumber, tostring, pairs, type, next -- Global lua functions.
@@ -42,13 +41,12 @@ end
 
 function Guild:GetMembers()
 
-    PDKP:PrintDev('Running Guild:GetMembers()')
+    Dev:Print('Running Guild:GetMembers()')
 
     GuildRoster()
     Guild.classLeaders, Guild.officers = {}, {};
     Guild.online = {};
     Guild.numOfMembers, Guild.numOnlineMembers, _ = GetNumGuildMembers();
-
 
     --if Guild.numOfMembers > 0 then Guild:UpdateNumOfMembers(Guild.numOfMembers) else Guild.numOfMembers = GuildDB.numOfMembers; end
     for i=1, Guild.numOfMembers do

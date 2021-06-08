@@ -29,6 +29,7 @@ PDKP.Minimap = {}
 PDKP.Export = {}
 PDKP.Import = {}
 PDKP.Events = {}
+PDKP.Dev = {}
 
 PDKP.ldb = _G.LibStub:GetLibrary("LibDataBroker-1.1")
 PDKP.cbh = _G.LibStub("CallbackHandler-1.0"):New(PDKP)
@@ -57,6 +58,7 @@ local PDKP_Instances = {
     ['Export']=PDKP.Export,
     ['Import']=PDKP.Import,
     ['Events']=PDKP.Events,
+    ['Dev']=PDKP.Dev
 }
 
 local waitTable = {};
