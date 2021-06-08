@@ -100,13 +100,12 @@ do
 
     --- Because Blizzard hates us, we have to figure out how many hours until reset occurs... stupid...
 
-    Util.isResetDay = true
     if Util.isResetDay then
         local seconds_until_hour = fmod(Util.timeUntilReset, secondsInHour)
         local seconds_until_reset = Util.timeUntilReset - seconds_until_hour
         local hours_until_reset = seconds_until_reset / 60 / 60
 
-        if hours_until_reset >= 12 then
+        if hours_until_reset >= 10 then
             Util.serverReset = true
         end
     end

@@ -11,7 +11,9 @@ TBC UPDATES:
     TODO: One Singular DKP sheet, for all raids.
     TODO: DKP will only apply to 25 mans.
     TODO: No on-time bonus (remove button).
-
+    
+    TODO: Minimum Bid is 1
+    TODO: If no other bids, bid is minimum.
     TODO: 10 DKP per boss kill.
     TODO: Everyone will have 30 DKP automatically in the TBC Update Including Alts, and new guild members.
     TODO: Benched DKP is full DKP.

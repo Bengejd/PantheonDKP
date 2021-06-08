@@ -392,7 +392,7 @@ function Setup:MainUI()
     addon_title:SetText("PantheonDKP")
     addon_title:SetSize(200, 25)
     addon_title:SetPoint("CENTER", f, "TOP", 0, -28)
-    addon_title:SetScale(0.9)
+    addon_title:SetScale(0.8)
 
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
@@ -406,9 +406,6 @@ function Setup:MainUI()
     addon_author:SetText("Author: Neekio-Blaumeux")
     addon_author:SetPoint("TOPLEFT", f, "TOPLEFT", 40, -15)
 
-
-
-
     f.addon_title = addon_title
     f.addon_version = addon_version
 
@@ -416,7 +413,38 @@ function Setup:MainUI()
 
     tinsert(UISpecialFrames, f:GetName())
 
-    --Setup:RandomStuff()
+    Setup:RandomStuff()
 
     return pdkp_frame
+end
+
+function Setup:RandomStuff()
+    Setup:BidBox()
+
+
+    --Setup:ShroudingBox()
+    --Setup:Debugging()
+    --
+    --Setup:ScrollTable()
+    --Setup:EasyStats()
+    --Setup:Filters()
+    --Setup:DKPAdjustments()
+    --Setup:RaidDropdown()
+    ----Setup:BossKillLoot()
+    --Setup:DKPHistory()
+    --Setup:RaidTools()
+    --Setup:InterfaceOptions()
+    --Setup:PushProgressBar()
+    --Setup:HistoryTable()
+    --Setup:DKPOfficer()
+    --Setup:SyncStatus()
+
+    --- For debugging purposes.
+    if Defaults.development then
+        pdkp_frame:Show()
+    end
+end
+
+function Setup:BidBox()
+
 end

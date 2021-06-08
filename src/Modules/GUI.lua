@@ -3,6 +3,7 @@ local AddonName, core = ...;
 
 local PDKP = core.PDKP
 local GUI, Util, Defaults, Character, Setup = PDKP:GetInst('GUI', 'Util', 'Defaults', 'Character', 'Setup')
+local GUI, Util, Defaults, Character, Setup, Dev = PDKP:GetInst('GUI', 'Util', 'Defaults', 'Character', 'Setup', 'Dev')
 
 --local DKP = core.DKP;
 --local Raid = core.Raid;
@@ -35,14 +36,15 @@ GUI.sync_frame = nil;
 GUI.shroud_box = nil;
 
 function GUI:Init()
-    PDKP:PrintDev('Initializing GUI')
+    Dev:Print('Initializing GUI')
     GUI.pdkp_frame = Setup:MainUI()
     GUI.pdkp_frame:Hide()
 
     --GUI:UpdateEasyStats()
 
     if Defaults.development then
-        PDKP:PrintDev('Development Mode Active')
+        Dev:Print('Development Mode Active')
+        GUI.pdkp_frame:Show()
     end
 end
 

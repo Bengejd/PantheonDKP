@@ -14,6 +14,7 @@ Defaults.success = '22bb33'
 Defaults.info = 'F4A460'
 
 Defaults.addon_version = GetAddonMetadata('PantheonDKP', "Version") -- Retrieves the addon version in the .toc
+Defaults.addon_interface_version = GetAddonMetadata('PantheonDKP', "X-Interface") -- Retrieves the addon's Interface #
 Defaults.addon_name = 'PantheonDKP' -- Addon's name.
 Defaults.colored_name = '|cff33ff99PDKP|r' -- Colored formatting for "PDKP" in addon.
 Defaults.print_name = '|cff33ff99PDKP|r:' -- Colored formatting for "PDKP" in chat messages.

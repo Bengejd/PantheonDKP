@@ -4,10 +4,10 @@ local AddonName, core = ...;
 local GetGuildInfo = GetGuildInfo
 
 local PDKP = core.PDKP
-local Character, Util, Defaults = PDKP:GetInst('Character', 'Util', 'Defaults')
+local Character, Util, Defaults, Dev = PDKP:GetInst('Character', 'Util', 'Defaults', 'Dev')
 
 function Character:init()
-    PDKP:PrintDev('Character:init()')
+    Dev:Print('Character:init()')
 
     Character.name, Character.server = UnitName("PLAYER")
     Character.class = UnitClass("PLAYER") -- Character class name
