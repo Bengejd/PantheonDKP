@@ -4,7 +4,7 @@ local PDKP = _G.PDKP
 local GetGuildInfo = GetGuildInfo
 local Character, Util, Defaults, Dev = PDKP:GetInst('Character', 'Util', 'Defaults', 'Dev')
 
-function Character:init()
+function Character:Init()
     Dev:Print('Character:init()')
 
     Character.name, Character.server = UnitName("PLAYER")

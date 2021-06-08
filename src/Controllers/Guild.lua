@@ -19,7 +19,7 @@ function Guild:GetNumMembers()
     return total_members, online_members, online_and_mobile
 end
 
-function Guild:new()
+function Guild:New()
     if IsInGuild() == false or Guild.initiated then return end
 
     Guild.bankIndex = nil -- TODO: Should be checking the PDKP setting of BankName.

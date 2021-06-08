@@ -1,11 +1,8 @@
 local _G = _G
-local AddonName, core = ...
+local AddonName, _ = ...
 
 local AceAddon, AceAddonMinor = _G.LibStub('AceAddon-3.0')
-
 local PDKP = AceAddon:NewAddon(AddonName, "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0")
-
-core.PDKP = PDKP
 
 PDKP.Media = {}
 PDKP.GUI = {}
@@ -62,14 +59,94 @@ local PDKP_Instances = {
     ['Dev']=PDKP.Dev
 }
 
+-- Assign a variable tableName to all of our instances, for easier debugging.
+do
+    for key, instTable in pairs(PDKP_Instances) do
+        instTable.instTableName = key
+    end
+end
+
 local unpack, pairs = unpack, pairs
 
-_G.PDKP = core.PDKP
+PDKP.dbDefaults = {
+    global = {
+        ['db'] = {
+            ['guildDB'] = {
+                ['members'] = {},
+                ['numOfMembers'] = 0
+            },
+            ['pugDB'] = {},
+            ['officersDB'] = {},
+            ['dkpDB'] = {
+                ['lastEdit'] = 0,
+                ['history'] = {},
+                ['old_entries']= {},
+            },
+            ['settingsDB'] = {
+                ['minimapPos'] = 207,
+                ['debug'] = false,
+                ['ignore_from']={},
+                ['minimap']={},
+            },
+            ['testDB']={},
+        }
+    }
+}
 
+_G.PDKP = PDKP
 
+function PDKP:InitializeDatabases()
+    local Dev = PDKP:GetInst('Dev')
 
+    local database = PDKP.AceDB:New("pdkp_DB", PDKP.dbDefaults, true)
+
+    if database['global'] == nil or next(database.global) == nil then
+        Dev:Print('Creating PDKP Database with default values')
+        database.global = PDKP.dbDefaults['global']
+    end
+
+    local db = database.global['db']
+    PDKP.db = db
+
+    PDKP.guildDB = db.guildDB -- or {};
+    PDKP.officersDB = db.officersDB -- or {};
+    PDKP.settingsDB = db.settingsDB -- or {};
+    PDKP.dkpDB = db.dkpDB
+    PDKP.testDB = db.testDB
+    PDKP.pugDB = db.pugDB
+
+    Dev:Print("Databases finished Initializing")
+end
+
+-- Simple way of initializing a bunch of different modules, instead of going through them line by line.
+function PDKP:InitializeAddonModules()
+    PDKP.Dev:Print('InitializingAddonModules')
+    local InitModules = {
+        PDKP.Util,
+        PDKP.Settings, PDKP.DKP, PDKP.Character, PDKP.Guild, PDKP.GUI, PDKP.Raid, PDKP.Minimap,
+    }
+
+    for _, instance in ipairs(InitModules) do
+        local funcs = { instance.InitDB, instance.Init, instance.New }
+        for _, func in pairs(funcs) do
+            if func then
+                func()
+                instance.initialized = true
+                break
+            end
+        end
+
+        if not instance.initialized then
+            --PDKP.Dev:Print('No initializer found for:', instance.instTableName)
+        end
+    end
+end
+
+-- Retrieves the requested module instances and sends them back in the order you asked for them.
+-- This helps us cleanup the top of files, instead of them being 30 lines long just for module references.
 function PDKP:GetInst(...)
     local reqInstances = {}
     for key, val in pairs({...}) do reqInstances[key] = PDKP_Instances[val] end
     return unpack(reqInstances)
 end
+

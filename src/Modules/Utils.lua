@@ -70,19 +70,22 @@ end
 --     Time Functions      --
 -----------------------------
 
-do
-    local day = date("*t", GetServerTime())
+function Util:Init()
     local daysInWeek = 7
     local daysInYear = 365
     local secondsInHour = 60 * 60
     local secondsInDay = 60 * 60 * 24
     -- Sunday (1), Monday (2), Tuesday (3), Wednesday (4), Thursday (5), Friday (6), Saturday (7)
     local resetDay = 3
+    local day = date("*t", GetServerTime())
     local wday = day.wday
     local yday = day.yday
 
-    if wday <= resetDay then
+    if wday < resetDay then
         Util.daysUntilReset = resetDay - wday
+    elseif wday == resetDay then
+        Util.daysUntilReset = 7
+        Util.isResetDay = true
     else
         Util.daysUntilReset = daysInWeek - wday
     end
@@ -94,10 +97,9 @@ do
     end
 
     Util.timeUntilReset = GetQuestResetTime() -- Seconds until daily quests reset.
-    Util.isResetDay = yday == Util.dayOfReset
+    Util.isResetDay = Util.isResetDay or yday == Util.dayOfReset
 
     --- Because Blizzard hates us, we have to figure out how many hours until reset occurs... stupid...
-
     if Util.isResetDay then
         local seconds_until_hour = fmod(Util.timeUntilReset, secondsInHour)
         local seconds_until_reset = Util.timeUntilReset - seconds_until_hour
