@@ -640,11 +640,11 @@ function ScrollTable:OnLoad()
                     col.dir = (col.dir == nil or col.dir == 'ASC') and 'DESC' or 'ASC' -- Tenary
 
                     local deg = col.dir == 'DESC' and rotate_down or rotate_up
-                    point = col.dir == 'DESC' and -3 or 2
+                    point = col.dir == 'DESC' and -1 or 2
 
                     -- Gives us uniform arrow spacing, based on label length.
                     -- Base is based off of length of "Name" and "Class" when they are uppercase.
-                    local baseLength = 55
+                    local baseLength = 45
                     local arrow_x = floor((fsLength - baseLength) / 2 - 1)
 
                     if col.arrow ~= nil then

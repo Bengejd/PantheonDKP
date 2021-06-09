@@ -22,3 +22,6 @@ Media.PaneBackdrop  = {
     tile = true, tileSize = 16, edgeSize = 16,
     insets = { left = 3, right = 3, top = 5, bottom = 3 }
 }
+
+Media.PaneColor = { 0.1, 0.1, 0.1, 0.5 }
+Media.PaneBorderColor = { 0.4, 0.4, 0.4 }

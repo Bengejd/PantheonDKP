@@ -87,6 +87,8 @@ PDKP.dbDefaults = {
                 ['debug'] = false,
                 ['ignore_from']={},
                 ['minimap']={},
+                ['sync'] = {},
+
             },
             ['testDB']={},
         }

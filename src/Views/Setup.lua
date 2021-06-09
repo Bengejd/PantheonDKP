@@ -50,8 +50,8 @@ local function createBackdropFrame(name, parent, title)
     border:SetPoint("BOTTOMRIGHT", -1, 3)
 
     border:SetBackdrop(Media.PaneBackdrop)
-    border:SetBackdropColor(unpack(Media.paneColor))
-    border:SetBackdropBorderColor(unpack(Media.paneBorderColor))
+    border:SetBackdropColor(unpack(Media.PaneColor))
+    border:SetBackdropBorderColor(unpack(Media.PaneBorderColor))
 
     local content = CreateFrame("Frame", nil, border)
     content:SetPoint("TOPLEFT", 10, -10)
@@ -394,7 +394,7 @@ function Setup:MainUI()
     addon_title:SetText("PantheonDKP")
     addon_title:SetSize(200, 25)
     addon_title:SetPoint("CENTER", f, "TOP", 0, -28)
-    addon_title:SetScale(0.8)
+    addon_title:SetScale(0.9)
 
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
@@ -425,9 +425,12 @@ function Setup:RandomStuff()
     local randomFuncs = {
         Setup.ScrollTable,
         Setup.Filters,
+        Setup.Options,
+        Setup.DKPAdjustments,
+        Setup.PDKPTabs,
 
         --- Unfinished Functions
-        Setup.ShroudingBox, Setup.Debugging, Setup.EasyStats, Setup.DKPAdjustments,
+        Setup.ShroudingBox, Setup.Debugging, Setup.EasyStats,
         Setup.RaidDropdown, Setup.DKPHistory, Setup.RaidTools, Setup.InterfaceOptions, Setup.PushProgressbar,
         Setup.HistoryTable, Setup.DKPOfficer, Setup.SyncStatus
     }
@@ -441,6 +444,368 @@ function Setup:RandomStuff()
     --- For debugging purposes.
     if Defaults.development then
         pdkp_frame:Show()
+    end
+end
+
+function Setup:Options()
+
+    local test = false
+
+    local option_types = {
+        'group', 'toggle',
+    }
+
+
+    local options = {
+        {
+            ['name'] = 'notifications',
+            ['title'] = '1. Notifications',
+            ['type'] = 'toggle',
+            ['desc'] = 'Enables / Disables all messages from the addon.',
+            ['value'] = true,
+        },
+        {
+            ['name'] = 'sync',
+            ['title'] = '2. Allow DKP syncs to occur in:',
+            ['desc'] = 'These options only control when a DKP merge-push is allowed to occur. This will not affect DKP updates that occur during a raid.',
+            ['type'] = 'group',
+            ['values'] = {
+                ['pvp'] = {
+                    ['name']='Battlegrounds',
+                    ['desc'] = 'Enable / Disable sync while in Battlegrounds',
+                    ['type'] = 'toggle',
+                    ['value'] = true,
+                },
+                ['raids'] = {
+                    ['name']='Raids',
+                    ['desc'] = 'Enable / Disable sync while in Raid Instances',
+                    ['type'] = 'toggle',
+                    ['value'] = true,
+                },
+                ['dungeons'] = {
+                    ['name']='Dungeons',
+                    ['desc'] = 'Enable / Disable sync while in Dungeon Instances',
+                    ['type'] = 'toggle',
+                    ['value'] = true,
+                },
+            }
+        },
+        {
+            ['name'] = 'admin',
+            ['title'] = '3. Addon Debugging',
+            ['type'] = 'toggle',
+            ['desc'] = 'Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.',
+        }
+    }
+
+    local f = CreateFrame("Frame", "$parentOptionsFrame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
+
+    print(f:GetParent():GetWidth())
+
+    f:SetHeight(400)
+    f:SetWidth(300)
+
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", 0, 0)
+    f:SetPoint("BOTTOMLEFT", GUI.filter_frame, "BOTTOMRIGHT", 0, 0)
+
+    local opt_frames = {}
+
+    for index, opt in pairs(options) do
+        -- name, parent, title
+        local opt_name = "$parentOption" .. opt['name']
+
+        local optFrame = createBackdropFrame(opt_name, f, opt['title'])
+        optFrame.desc:SetText(opt['desc'])
+
+        optFrame:SetAlpha(1)
+
+        if index == 1 then
+            optFrame:SetHeight(200)
+            optFrame:SetWidth(200)
+            optFrame:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
+            optFrame:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
+
+            opt_frames[index] = optFrame
+        else
+            optFrame:SetHeight(200)
+            optFrame:SetWidth(200)
+            optFrame:SetPoint("TOPLEFT", opt_frames[index -1], "BOTTOMLEFT", 0, 0)
+            optFrame:SetPoint("TOPRIGHT", opt_frames[index -1], "BOTTOMRIGHT", 0, 0)
+        end
+
+
+    end
+
+    if test then
+        if Settings:CanEdit() then
+            options.args.adminGroup = {
+                name='3. Officer',
+                type="group",
+                inline= true,
+                args = {
+                    debugging = {
+                        name = "Addon Debugging",
+                        type = "toggle",
+                        desc="Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.",
+                        set = function(_,val) return Settings:GetSetInterface('set', 'debug', val) end,
+                        get = function() return Settings:GetSetInterface('get', 'debug', nil) end
+
+                    },
+                }
+            }
+        end
+    end
+
+
+    GUI.optionsFrame = f
+end
+
+--------------------------
+-- Random     Functions --
+--------------------------
+
+function Setup:DKPAdjustments()
+    local f = CreateFrame("Frame", "$parent_adjustment_frame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
+
+    -- todo: TBC UPDATE CHANGE REQUIRED
+    --f:SetBackdrop({
+    --    tile = true, tileSize = 0,
+    --    edgeFile = Media.SCROLL_BORDER, edgeSize = 8,
+    --    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --})
+    f:SetHeight(225)
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", -3, -10)
+    f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMRIGHT", -10,-50)
+
+    local adjustHeader = f:CreateFontString(f, "OVERLAY", 'GameFontNormalLarge')
+    adjustHeader:SetText("DKP Adjustments")
+    adjustHeader:SetPoint("CENTER", f, "TOP", 0, -5)
+
+    local mainDD, amount_box, other_box;
+
+    --- Main Dropdown
+
+    local reason_opts = {
+        ['name']='reasons',
+        ['parent']=f,
+        ['title']='Reason',
+        ['items']= {'On Time Bonus', 'Completion Bonus', 'Boss Kill', 'Unexcused Absence', 'Item Win', 'Other'},
+        ['defaultVal']='',
+        ['dropdownTable']=GUI.adjustmentDropdowns,
+        ['changeFunc']=PDKP_ToggleAdjustmentDropdown
+    }
+
+    mainDD = createDropdown(reason_opts)
+    mainDD:SetPoint("TOPLEFT", f, "TOPLEFT", -3, -50)
+
+
+    --- Bosses section
+
+    --for raid, _ in pairs(Defaults.raidBosses) do
+    --    local boss_opts = {
+    --        ['name']='boss_' .. raid,
+    --        ['parent']=mainDD,
+    --        ['title']='Boss',
+    --        ['hide']=true,
+    --        ['dropdownTable']=GUI.adjustmentDropdowns,
+    --        ['showOnValue']=raid,
+    --        ['changeFunc']=PDKP_ToggleAdjustmentDropdown,
+    --        ['items']=Defaults.raidBosses[raid],
+    --    }
+    --    local bossDD = createDropdown(boss_opts)
+    --    bossDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
+    --end
+
+    --- Amount section
+    local amount_opts = {
+        ['name']='amount',
+        ['parent']=mainDD,
+        ['title']='Amount',
+        ['multi']=false,
+        ['max_chars']=7,
+        ['numeric']=true,
+        ['textValidFunc']=PDKP_ToggleAdjustmentDropdown
+    }
+    amount_box = createEditBox(amount_opts)
+
+    amount_box.frame:SetWidth(75)
+    amount_box:SetWidth(60)
+    amount_box:SetPoint("TOPLEFT", mainDD, "BOTTOMLEFT", 25, -20)
+
+    --- Other Edit Box Section
+
+    local other_opts = {
+        ['name']= 'other',
+        ['parent']= mainDD,
+        ['title']='Other',
+        ['multi']=true,
+        ['numeric']=false,
+        ['textValidFunc']=PDKP_ToggleAdjustmentDropdown
+    }
+    other_box = createEditBox(other_opts)
+    other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
+    other_box:Hide()
+
+    --- Submit button
+    local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    sb:SetSize(80, 22) -- width, height
+    sb:SetText("Submit")
+    sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 4, -22)
+    sb:SetScript("OnClick", function()
+        if GUI.adjustment_entry['shouldHaveItem'] then
+            local item_frame = Loot.frame:getChecked()
+            if item_frame then
+                if item_frame['item_info'] ~= nil then
+                    GUI.adjustment_entry['item'] = item_frame.item_info['link']
+                    item_frame.deleted = true
+                    item_frame:Hide()
+                end
+            end
+        end
+
+        DKP:Submit()
+        other_box:SetText("")
+        amount_box:SetText("")
+        other_box:ClearFocus()
+        amount_box:ClearFocus()
+
+        --PDKP_ToggleAdjustmentDropdown()
+    end)
+    sb.canSubmit = false
+    sb.toggle = function()
+        if sb.canSubmit then sb:Enable() else sb:Disable() end
+    end
+    sb:Disable()
+
+    GUI.adjustment_submit_button = sb
+
+    --- Minimum Bid button
+    local minimum_bid = CreateFrame("Button", "$parent_shroud", f, "UIPanelButtonTemplate")
+    minimum_bid:SetSize(75, 25)
+    minimum_bid:SetText("Min Bid")
+    minimum_bid:SetPoint("TOPLEFT", amount_box, "BOTTOMLEFT", -10, -10)
+    minimum_bid:SetScript("OnClick", function()
+        local amount = 1
+        amount_box:SetText("-" .. amount)
+    end)
+
+    GUI.adjust_buttons = {shroud, roll}
+
+    mainDD:Show()
+
+    --- Boss Loot Section
+    --Setup:LootFrame(f)
+
+    if not PDKP.canEdit then f:Hide() end
+
+    GUI.adjustment_frame = f;
+end
+
+function Setup:PDKPTabs()
+    local f = CreateFrame("Frame", "$parentRightFrame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = Media.SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+
+    f:SetHeight(500)
+    f:SetWidth(395)
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "TOPRIGHT", 0, 0)
+    f:SetPoint("BOTTOMLEFT", GUI.filter_frame, "BOTTOMRIGHT", 0, 0)
+
+    local tabs = {
+        ['adjust_dkp_button'] = {
+            ['parent'] = f,
+            ['text'] = 'Adjust DKP',
+            ['hides'] = {GUI.optionsFrame, },
+            ['shows'] = {GUI.adjustment_frame},
+        },
+        ['view_history_button'] = {
+            ['parent'] = f,
+            ['text'] = 'History',
+            ['hides'] = {GUI.adjustment_frame, GUI.optionsFrame},
+            ['shows'] = {},
+        },
+        ['view_loot_button'] = {
+            ['parent'] = f,
+            ['text'] = 'Loot',
+            ['hides'] = {GUI.adjustment_frame, GUI.optionsFrame},
+            ['shows'] = {},
+        },
+        ['view_options_button'] = {
+            ['parent'] = f,
+            ['text'] = 'Options',
+            ['hides'] = {GUI.adjustment_frame},
+            ['shows'] = {GUI.optionsFrame},
+        },
+    }
+
+    local tabNames = { 'view_history_button', 'view_loot_button', 'view_options_button' }
+
+    if PDKP.canEdit then
+        tabNames = {'adjust_dkp_button', unpack(tabNames)}
+    end
+
+    local tab_buttons = {}
+
+    for i = 1, #tabNames do
+        local name = tabNames[i]
+        local btn = tabs[name]
+
+        local b = CreateFrame("Button", "$parent_" .. name, btn['parent'])
+        b:SetSize(100, 30)
+        b.hides = btn['hides']
+        b.shows = btn['shows']
+
+        if i == 1 then
+            b:SetPoint("BOTTOMLEFT", btn['parent'], "TOPLEFT", 0, 0)
+        else
+            b:SetPoint("TOPLEFT", tab_buttons[i - 1], "TOPRIGHT", 0, 0)
+            b:SetAlpha(0.5)
+        end
+
+        b:SetNormalTexture("Interface\\CHATFRAME\\ChatFrameTab")
+        b:SetScript("OnClick", function()
+
+            for _, frame in pairs(b.hides) do
+                frame:Hide()
+            end
+            for _, frame in pairs(b.shows) do
+                frame:Show()
+            end
+        end)
+
+        local b_text = b:CreateFontString(b, 'OVERLAY', 'GameFontNormalLeft')
+        b_text:SetPoint("CENTER", 0, -5)
+        b_text:SetText(btn['text'])
+
+        b:SetWidth(b_text:GetWidth() + 40)
+
+        GUI[name] = b
+        tab_buttons[i] = b
+    end
+
+    for key, b in pairs(tab_buttons) do
+        b:SetScript("OnClick", function()
+            for _, frame in pairs(b.hides) do
+                frame:Hide()
+            end
+            for _, frame in pairs(b.shows) do
+                frame:Show()
+            end
+            for _, tab_button in pairs(tab_buttons) do
+                if tab_button ~= b then
+                    tab_button:SetAlpha(0.5)
+                else
+                    tab_button:SetAlpha(1.0)
+                end
+            end
+        end)
+
+        if key == 1 then
+            b:Click()
+        end
     end
 end
 
@@ -460,13 +825,13 @@ function Setup:Filters()
 
     local rows = { -- Our filter rows
         { -- Row 1
-            { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -20, ['displayText'] = 'Selected', ['filterOn'] = 'selected', ['enabled'] = false },
-            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -20, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'In Raid', ['filterOn'] = 'raid', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Pug', ['filterOn'] = 'isPug', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Select All', ['filterOn'] = 'Select_All', ['enabled'] = false },
         },
         { -- Row 2
-            { ['point']='TOPLEFT', ['x'] = 0, ['y'] = 0, ['displayText'] = 'All Classes', ['filterOn'] = 'Class_All',
+            { ['point'] = 'TOPLEFT', ['x'] = 0, ['y'] = 0, ['displayText'] = 'All Classes', ['filterOn'] = 'Class_All',
               ['center'] = true, ['enabled'] = true
             },
         },
@@ -482,7 +847,11 @@ function Setup:Filters()
             ['point'] = 'TOPLEFT', ['x'] = 80, ['y'] = 70, ['displayText'] = class,
             ['filterOn'] = 'Class_' .. class, ['center'] = true, ['enabled'] = true
         }
-        if key >= 4 and key <= 6 then class_row = 4 elseif key >= 7 then class_row = 5 end
+        if key >= 4 and key <= 6 then
+            class_row = 4
+        elseif key >= 7 then
+            class_row = 5
+        end
         table.insert(rows[class_row], classBtn)
     end
 
@@ -505,7 +874,9 @@ function Setup:Filters()
                     filter['filterOn'], filter['center'], filter['enabled'], f)
 
             --- Clear all points, to reassign their points to the previous section's checkbutton.
-            if rowKey >= 2 then cb:ClearAllPoints(); end
+            if rowKey >= 2 then
+                cb:ClearAllPoints();
+            end
 
             if rowKey == 2 then
                 cb:SetPoint("LEFT", Setup.FilterButtons[#Setup.FilterButtons - 4], "LEFT", 0, -30);
@@ -705,15 +1076,23 @@ function Setup:TableSearch()
         toggleClearButton(eb:GetText())
     end
 
-    eb:SetScript("OnEscapePressed", function() resetSearch() end)
-    eb:SetScript("OnEnterPressed", function() resetSearch() end)
+    eb:SetScript("OnEscapePressed", function()
+        resetSearch()
+    end)
+    eb:SetScript("OnEnterPressed", function()
+        resetSearch()
+    end)
     eb:SetScript("OnTextChanged", function()
         local text = eb:GetText()
         toggleClearButton(text)
         PDKP.memberTable:SearchChanged(text)
     end)
-    eb:SetScript("OnEditFocusLost", function() toggleClearButton(eb:GetText()) end)
-    eb:SetScript("OnEditFocusGained", function() toggleClearButton(eb:GetText()) end)
+    eb:SetScript("OnEditFocusLost", function()
+        toggleClearButton(eb:GetText())
+    end)
+    eb:SetScript("OnEditFocusGained", function()
+        toggleClearButton(eb:GetText())
+    end)
 
     clearButton:SetScript("OnClick", function()
         eb:SetText("")
