@@ -82,3 +82,18 @@ function Guild:initBankInfo(index, member)
     Guild.bank = member;
     --Guild:GetSyncStatus()
 end
+
+function Guild:UpdateOnlineStatus()
+    GuildRoster()
+    local onlineTable = {};
+    Guild.numOfMembers, _, _ = GetNumGuildMembers();
+    --if Guild.numOfMembers > 0 then Guild:UpdateNumOfMembers(Guild.numOfMembers) else Guild.numOfMembers = GuildDB.numOfMembers; end
+    for i=1, Guild.numOfMembers do
+        local name, _, _, _, _, _, _, _, online, _, _ = GetGuildRosterInfo(i)
+        if online then
+            name = strsplit('-', name)
+            table.insert(onlineTable, name)
+        end
+    end
+    return onlineTable
+end

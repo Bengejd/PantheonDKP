@@ -2,7 +2,7 @@ local _G = _G;
 local PDKP = _G.PDKP
 
 local Setup, Media, Raid, DKP, Util, Comms, Guild, Defaults, ScrollTable = PDKP:GetInst('Setup', 'Media', 'Raid', 'DKP', 'Util', 'Comms', 'Guild', 'Defaults', 'ScrollTable')
-local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud')
+local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud, Dev = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud', 'Dev')
 
 local pdkp_frame;
 
@@ -17,6 +17,8 @@ local UIParent, UISpecialFrames = UIParent, UISpecialFrames
 local UIDropDownMenu_GetSelectedValue, UIDropDownMenu_SetWidth, UIDropDownMenu_SetText, UIDropDownMenu_Initialize, UIDropDownMenu_CreateInfo,
 UIDropDownMenu_SetSelectedValue, UIDropDownMenu_AddButton = UIDropDownMenu_GetSelectedValue, UIDropDownMenu_SetWidth,
 UIDropDownMenu_SetText, UIDropDownMenu_Initialize, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetSelectedValue, UIDropDownMenu_AddButton
+
+Setup.FilterButtons = {}
 
 --------------------------
 -- Local      Functions --
@@ -102,7 +104,7 @@ function Setup:CreateCloseButton(f, mini)
     return createCloseButton(f, mini)
 end
 
-local function createCheckButton(parent, point, x, y, displayText, uniqueName, center, frame)
+local function createCheckButton(parent, point, x, y, displayText, uniqueName, center, enabled, frame)
     uniqueName = uniqueName or nil;
     center = center or false;
     frame = frame or nil;
@@ -114,6 +116,10 @@ local function createCheckButton(parent, point, x, y, displayText, uniqueName, c
         cb:SetPoint('TOPRIGHT', frame, 'CENTER', x - cbtw * 0.25, y);
     else
         cb:SetPoint(point, x, y);
+    end
+
+    if enabled and enabled == true then
+        cb:SetChecked(true);
     end
 
     cb.filterOn = uniqueName;
@@ -416,25 +422,21 @@ end
 
 function Setup:RandomStuff()
 
-    Setup:ScrollTable()
+    local randomFuncs = {
+        Setup.ScrollTable,
+        Setup.Filters,
 
+        --- Unfinished Functions
+        Setup.ShroudingBox, Setup.Debugging, Setup.EasyStats, Setup.DKPAdjustments,
+        Setup.RaidDropdown, Setup.DKPHistory, Setup.RaidTools, Setup.InterfaceOptions, Setup.PushProgressbar,
+        Setup.HistoryTable, Setup.DKPOfficer, Setup.SyncStatus
+    }
 
-    --Setup:ShroudingBox()
-    --Setup:Debugging()
-    --
-    --Setup:ScrollTable()
-    --Setup:EasyStats()
-    --Setup:Filters()
-    --Setup:DKPAdjustments()
-    --Setup:RaidDropdown()
-    ----Setup:BossKillLoot()
-    --Setup:DKPHistory()
-    --Setup:RaidTools()
-    --Setup:InterfaceOptions()
-    --Setup:PushProgressBar()
-    --Setup:HistoryTable()
-    --Setup:DKPOfficer()
-    --Setup:SyncStatus()
+    for i, func in ipairs(randomFuncs) do
+        if func then
+            func()
+        end
+    end
 
     --- For debugging purposes.
     if Defaults.development then
@@ -442,10 +444,121 @@ function Setup:RandomStuff()
     end
 end
 
+function Setup:Filters()
+    local f = CreateFrame("Frame", "$parentFilterFrame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
+
+    f:SetBackdrop({
+        tile = true, tileSize = 0,
+        edgeFile = Media.SCROLL_BORDER, edgeSize = 8,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetHeight(150)
+    f:SetPoint("TOPLEFT", PDKP.memberTable.frame, "BOTTOMLEFT", 0, 0)
+    f:SetPoint("TOPRIGHT", PDKP.memberTable.frame, "BOTTOMRIGHT", 0, 0)
+
+    f:Show()
+
+    local rows = { -- Our filter rows
+        { -- Row 1
+            { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -20, ['displayText'] = 'Selected', ['filterOn'] = 'selected', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'In Raid', ['filterOn'] = 'raid', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Select All', ['filterOn'] = 'Select_All', ['enabled'] = false },
+        },
+        { -- Row 2
+            { ['point']='TOPLEFT', ['x'] = 0, ['y'] = 0, ['displayText'] = 'All Classes', ['filterOn'] = 'Class_All',
+              ['center'] = true, ['enabled'] = true
+            },
+        },
+        {}, -- First Class Row
+        {}, -- Second Class Row
+        {}, -- Third Class Row
+    }
+
+    local class_row = 3
+
+    for key, class in pairs(Defaults.classes) do
+        local classBtn = {
+            ['point'] = 'TOPLEFT', ['x'] = 80, ['y'] = 70, ['displayText'] = class,
+            ['filterOn'] = 'Class_' .. class, ['center'] = true, ['enabled'] = true
+        }
+        if key >= 4 and key <= 6 then class_row = 4 elseif key >= 7 then class_row = 5 end
+        table.insert(rows[class_row], classBtn)
+    end
+
+    for rowKey, row in pairs(rows) do
+        for fKey, filter in pairs(row) do
+            local parent = f -- Default parent.
+            table.insert(Setup.FilterButtons, {})
+
+            if fKey > 1 or rowKey > 1 then
+                local pcb = Setup.FilterButtons[#Setup.FilterButtons - 1];
+                local pcbt = _G[pcb:GetName() .. 'Text']
+                parent = pcb;
+                if #row > 1 then
+                    -- To better space out the buttons.
+                    filter['x'] = filter['x'] + pcbt:GetWidth();
+                end
+            end
+
+            local cb = createCheckButton(parent, filter['point'], filter['x'], filter['y'], filter['displayText'],
+                    filter['filterOn'], filter['center'], filter['enabled'], f)
+
+            --- Clear all points, to reassign their points to the previous section's checkbutton.
+            if rowKey >= 2 then cb:ClearAllPoints(); end
+
+            if rowKey == 2 then
+                cb:SetPoint("LEFT", Setup.FilterButtons[#Setup.FilterButtons - 4], "LEFT", 0, -30);
+            elseif rowKey == 3 then
+                if fKey == 1 then
+                    cb:SetPoint("LEFT", Setup.FilterButtons[#Setup.FilterButtons - 1], "LEFT", 0, -30);
+                else
+                    cb:SetPoint("TOPRIGHT", Setup.FilterButtons[#Setup.FilterButtons - 1], "TOPRIGHT", filter['x'], 0);
+                end
+            elseif rowKey >= 4 then
+                cb:SetPoint("TOPLEFT", Setup.FilterButtons[#Setup.FilterButtons - 3], "TOPLEFT", 0, -20);
+            end
+
+            cb:SetScript("OnClick", function(b)
+                local function loop_all_class(setStatus)
+                    local all_checked = true;
+                    for i = 1, #Defaults.classes do
+                        local button = _G['pdkp_filter_Class_' .. Defaults.classes[i]];
+                        if setStatus ~= nil then
+                            button:SetChecked(setStatus);
+                        end
+                        if not button:GetChecked() then
+                            all_checked = false
+                        end
+                    end
+                    return all_checked
+                end
+                if rowKey == 2 then
+                    loop_all_class(b:GetChecked());
+                elseif rowKey >= 3 then
+                    local all_checked = loop_all_class();
+                    _G['pdkp_filter_Class_All']:SetChecked(all_checked);
+                end
+
+                local st = PDKP.memberTable;
+                st:ApplyFilter(b.filterOn, b:GetChecked());
+            end)
+            Setup.FilterButtons[#Setup.FilterButtons] = cb;
+        end
+    end
+
+    local st = PDKP.memberTable;
+    for _, b in pairs(Setup.FilterButtons) do
+        st:ApplyFilter(b.filterOn, b:GetChecked());
+    end
+
+    GUI.filter_frame = f;
+end
+
 function Setup:ScrollTable()
     local st = {};
 
-    local function compare(a,b)
+    local function compare(a, b)
         local sortDir = st.sortDir;
         local sortBy = st.sortBy;
         -- Set the data object explicitly here
@@ -457,73 +570,79 @@ function Setup:ScrollTable()
         if sortBy == 'name' then
             a, b = a['name'], b['name']
         elseif sortBy == 'class' then
-            if a['class'] == b['class'] then return a['name'] < b['name'] end
+            if a['class'] == b['class'] then
+                return a['name'] < b['name']
+            end
             a, b = a['class'], b['class']
         elseif sortBy == 'dkp' then
             a, b = a:GetDKP(nil, 'total'), b:GetDKP(nil, 'total')
         end
 
-        if sortDir == 'ASC' then return a > b else return a < b end
+        if sortDir == 'ASC' then
+            return a > b
+        else
+            return a < b
+        end
     end
 
     local table_settings = {
-        ['name']= 'ScrollTable',
-        ['parent']=pdkp_frame,
-        ['height']=500,
-        ['width']=330,
-        ['movable']=true,
-        ['enableMouse']=true,
-        ['retrieveDataFunc']=function()
+        ['name'] = 'ScrollTable',
+        ['parent'] = pdkp_frame,
+        ['height'] = 350,
+        ['width'] = 330,
+        ['movable'] = true,
+        ['enableMouse'] = true,
+        ['retrieveDataFunc'] = function()
             Guild:GetMembers()
             return Guild.memberNames
         end,
-        ['retrieveDisplayDataFunc']=function(_, name)
+        ['retrieveDisplayDataFunc'] = function(_, name)
             return Guild:GetMemberByName(name)
         end,
-        ['anchor']={
-            ['point']='TOPLEFT',
-            ['rel_point_x']=8,
-            ['rel_point_y']=-71,
+        ['anchor'] = {
+            ['point'] = 'TOPLEFT',
+            ['rel_point_x'] = 8,
+            ['rel_point_y'] = -70,
         }
     }
     local col_settings = {
-        ['height']=14,
-        ['width']=90,
-        ['firstSort']=1, -- Denotes the header we want to sort by originally.
+        ['height'] = 14,
+        ['width'] = 90,
+        ['firstSort'] = 1, -- Denotes the header we want to sort by originally.
         ['headers'] = {
             [1] = {
-                ['label']='name',
-                ['sortable']=true,
-                ['point']='LEFT',
+                ['label'] = 'name',
+                ['sortable'] = true,
+                ['point'] = 'LEFT',
                 ['showSortDirection'] = true,
-                ['compareFunc']=compare
+                ['compareFunc'] = compare
             },
             [2] = {
-                ['label']='class',
-                ['sortable']=true,
-                ['point']='CENTER',
+                ['label'] = 'class',
+                ['sortable'] = true,
+                ['point'] = 'CENTER',
                 ['showSortDirection'] = true,
-                ['compareFunc']=compare,
-                ['colored']=true,
+                ['compareFunc'] = compare,
+                ['colored'] = true,
             },
             [3] = {
-                ['label']='dkp',
-                ['sortable']=true,
-                ['point']='RIGHT',
+                ['label'] = 'dkp',
+                ['sortable'] = true,
+                ['point'] = 'RIGHT',
                 ['showSortDirection'] = true,
-                ['compareFunc']=compare,
-                ['getValueFunc']= function (member)
+                ['compareFunc'] = compare,
+                ['getValueFunc'] = function(member)
                     return member:GetDKP(nil, 'total')
                 end,
             },
         }
     }
     local row_settings = {
-        ['height']=20,
-        ['width']=285,
+        ['height'] = 20,
+        ['width'] = 285,
         ['max_values'] = 425,
-        ['showHighlight']=true,
-        ['indexOn']=col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
+        ['showHighlight'] = true,
+        ['indexOn'] = col_settings['headers'][1]['label'], -- Helps us keep track of what is selected, if it is filtered.
     }
 
     st = ScrollTable:newHybrid(table_settings, col_settings, row_settings)
@@ -532,14 +651,80 @@ function Setup:ScrollTable()
     PDKP.memberTable = st;
     GUI.memberTable = st;
 
-    --st.searchFrame = Setup:TableSearch()
+    st.searchFrame = Setup:TableSearch()
     --
     ---- Entries label
     ---- 0 Entries shown | 0 selected
-    --local label = st.searchFrame:CreateFontString(st.searchFrame, 'OVERLAY', 'GameFontNormalLeftYellow')
-    --label:SetSize(200, 14)
-    --label:SetPoint("LEFT", st.searchFrame.clearButton, "LEFT", 60, 0)
-    --label:SetText("0 Players shown | 0 selected")
-    --
-    --st.entryLabel = label
+    local label = st.searchFrame:CreateFontString(st.searchFrame, 'OVERLAY', 'GameFontNormalLeftYellow')
+    label:SetSize(200, 15)
+    label:SetPoint("LEFT", st.searchFrame.clearButton, "LEFT", 60, -1)
+    label:SetText("0 Players shown | 0 selected")
+
+    st.entryLabel = label
+end
+
+function Setup:TableSearch()
+    -- edit frame
+    local ef = CreateFrame("Frame", "$parent_edit_frame", pdkp_frame)
+    ef:SetHeight(25)
+    ef:SetWidth(165)
+    ef:SetPoint('BOTTOMLEFT', pdkp_frame, "BOTTOMLEFT", 10, 10)
+
+    -- search label
+    local sl = ef:CreateFontString(ef, 'OVERLAY', 'GameFontNormalSmall')
+    sl:SetText("Search:")
+    sl:SetPoint("LEFT", ef, "LEFT", -12, 0)
+    sl:SetWidth(80)
+
+    -- edit clear button
+    local clearButton = CreateFrame("Button", "$parent_clear_button", ef, "UIPanelButtonTemplate")
+    clearButton:SetText("Clear")
+    clearButton:SetSize(45, 15)
+    clearButton:SetPoint("RIGHT", ef, "RIGHT", -2, 0)
+
+    -- edit box
+    local eb = CreateFrame("EditBox", "$parent_editBox", pdkp_frame)
+    eb:SetWidth(75)
+    eb:SetHeight(50)
+    eb:SetPoint("LEFT", ef, "LEFT", 48, 0)
+    eb:SetFontObject(GameFontNormalSmall)
+    eb:SetFrameStrata("DIALOG")
+    eb:SetMaxLetters(11)
+    eb:SetAutoFocus(false)
+
+    local function toggleClearButton(text)
+        if text == nil or text == "" then
+            clearButton:Hide()
+        else
+            clearButton:Show()
+        end
+    end
+
+    local function resetSearch()
+        eb:ClearFocus()
+        toggleClearButton(eb:GetText())
+    end
+
+    eb:SetScript("OnEscapePressed", function() resetSearch() end)
+    eb:SetScript("OnEnterPressed", function() resetSearch() end)
+    eb:SetScript("OnTextChanged", function()
+        local text = eb:GetText()
+        toggleClearButton(text)
+        PDKP.memberTable:SearchChanged(text)
+    end)
+    eb:SetScript("OnEditFocusLost", function() toggleClearButton(eb:GetText()) end)
+    eb:SetScript("OnEditFocusGained", function() toggleClearButton(eb:GetText()) end)
+
+    clearButton:SetScript("OnClick", function()
+        eb:SetText("")
+        resetSearch()
+    end)
+
+    clearButton:Hide()
+
+    ef.editBox = eb
+    ef.searchLabel = sl
+    ef.clearButton = clearButton
+
+    return ef
 end

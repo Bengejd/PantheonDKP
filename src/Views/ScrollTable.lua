@@ -1,8 +1,8 @@
 local _G = _G;
 local PDKP = _G.PDKP
 
-local ScrollTable, Util, Defaults, GUI, Media = PDKP:GetInst('ScrollTable', 'Util', 'Defaults', 'GUI', 'Media')
---local Guild, Raid, Media = PDKP:GetInst('ScrollTable', 'Util', 'Defaults', 'Guild', 'Raid', 'GUI', 'Media')
+local ScrollTable, Util, Defaults, GUI, Media, Guild = PDKP:GetInst('ScrollTable', 'Util', 'Defaults', 'GUI', 'Media', 'Guild')
+--local , Raid, Media = PDKP:GetInst('ScrollTable', 'Util', 'Defaults', 'Guild', 'Raid', 'GUI', 'Media')
 
 ScrollTable.__index = ScrollTable; -- Set the __index parameter to reference
 
@@ -41,7 +41,6 @@ function ScrollTable:ClearSelected()
     wipe(self.selected)
     self.lastSelect = nil
     _G['pdkp_filter_Select_All']:SetChecked(false)
-
 end
 
 function ScrollTable:UpdateLastSelect(objIndex, isSelected)
@@ -252,7 +251,7 @@ function ScrollTable:UpdateLabelTotals()
 
     self.entryLabel:SetText(entry_label_text)
 
-    PDKP_ToggleAdjustmentDropdown()
+    --PDKP_ToggleAdjustmentDropdown()
 
     if GUI.history_frame ~= nil then
         if GUI.history_frame:IsVisible() then
@@ -423,8 +422,6 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     listScrollFrame:UpdateScrollChildRect();
 
     self.ListScrollFrame.buttons = self.rows;
-
-    print(#self.data, self.ROW_HEIGHT)
 
     scrollBar:SetMinMaxValues(1, (#self.data * self.ROW_HEIGHT))
 
