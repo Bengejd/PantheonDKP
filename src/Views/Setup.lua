@@ -477,13 +477,13 @@ function Setup:Options()
                     ['value'] = true,
                 },
                 ['raids'] = {
-                    ['name']='Raids',
+                    ['name'] = 'Raids',
                     ['desc'] = 'Enable / Disable sync while in Raid Instances',
                     ['type'] = 'toggle',
                     ['value'] = true,
                 },
                 ['dungeons'] = {
-                    ['name']='Dungeons',
+                    ['name'] = 'Dungeons',
                     ['desc'] = 'Enable / Disable sync while in Dungeon Instances',
                     ['type'] = 'toggle',
                     ['value'] = true,
@@ -495,12 +495,11 @@ function Setup:Options()
             ['title'] = '3. Addon Debugging',
             ['type'] = 'toggle',
             ['desc'] = 'Enables / Disables addon debugging messages. Pretty much only use this if Neekio tells you to.',
+            ['value'] = false,
         }
     }
 
     local f = CreateFrame("Frame", "$parentOptionsFrame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")
-
-    print(f:GetParent():GetWidth())
 
     f:SetHeight(400)
     f:SetWidth(300)
@@ -510,29 +509,89 @@ function Setup:Options()
 
     local opt_frames = {}
 
+    local function generate_option_check(opt, optFrame)
+        local cb_parent = optFrame.content
+        local cb_name = optFrame:GetName() .. 'CheckButton_' .. opt['name']
+        local cb_point = "TOPLEFT"
+        local cb_display_text = 'Enable ' .. opt['name']
+
+        local val = opt['value']
+
+        local cb = createCheckButton(cb_parent, cb_point, 0, 0, cb_display_text, cb_name, false, val)
+
+        local cb_desc = cb:CreateFontString(cb, 'OVERLAY', 'GameFontHighlightSmall')
+        cb_desc:SetPoint("TOPLEFT", cb, "BOTTOMLEFT", 5, 0)
+        cb_desc:SetPoint("TOPRIGHT", cb_parent, "RIGHT", 0, 0)
+        cb_desc:SetJustifyH("LEFT")
+
+        cb_desc:SetText(opt['desc'])
+
+        cb.desc = cb_desc
+
+        table.insert(optFrame.buttons, cb)
+
+        return cb
+    end
+
+    PDKP.canEdit = false
+
+
     for index, opt in pairs(options) do
-        -- name, parent, title
         local opt_name = "$parentOption" .. opt['name']
 
+        -- name, parent, title
         local optFrame = createBackdropFrame(opt_name, f, opt['title'])
-        optFrame.desc:SetText(opt['desc'])
+        optFrame:SetHeight(200)
+        optFrame:SetWidth(200)
 
-        optFrame:SetAlpha(1)
+        optFrame.buttons = {}
 
+        -- Set the first index position, based on the frame, and subsequent ones based on previous indexes.
         if index == 1 then
-            optFrame:SetHeight(200)
-            optFrame:SetWidth(200)
-            optFrame:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
+            optFrame:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -15)
             optFrame:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
-
-            opt_frames[index] = optFrame
         else
-            optFrame:SetHeight(200)
-            optFrame:SetWidth(200)
             optFrame:SetPoint("TOPLEFT", opt_frames[index -1], "BOTTOMLEFT", 0, 0)
             optFrame:SetPoint("TOPRIGHT", opt_frames[index -1], "BOTTOMRIGHT", 0, 0)
         end
 
+        if opt['type'] == 'group' and opt['values'] ~= nil then
+            local opt_val_index = 1
+            for _, opt_val in pairs(opt['values']) do
+                local cb_btn = generate_option_check(opt_val, optFrame)
+
+                if opt_val_index > 1 then
+                    local opt_btn = optFrame.buttons[opt_val_index]
+                    local prev_btn = optFrame.buttons[opt_val_index - 1]
+                    opt_btn:SetPoint("TOPLEFT", prev_btn.desc, "BOTTOMLEFT", -5, -10)
+                end
+
+                local cb_title = _G[optFrame.buttons[#optFrame.buttons]:GetName() .. 'Text']
+                cb_title:SetPoint('LEFT', cb_btn, 'RIGHT', 0, 0)
+
+                opt_val_index = opt_val_index + 1
+            end
+        elseif opt['type'] == 'toggle' then
+            generate_option_check(opt, optFrame)
+        end
+
+        if #optFrame.buttons >= 1 then
+            local top = optFrame:GetTop()
+            local last_btn = optFrame.buttons[#optFrame.buttons]
+            local bot = last_btn.desc:GetBottom()
+            local padding = 15
+
+            local diff = top - bot
+
+            optFrame:SetHeight(diff + padding)
+        end
+
+        if not PDKP.canEdit and index == 3 then
+            _G[optFrame:GetName()] = nil
+            optFrame:Hide()
+        else
+            opt_frames[index] = optFrame
+        end
 
     end
 
