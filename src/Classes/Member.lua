@@ -8,6 +8,8 @@ local setmetatable, strsplit, pairs, next = setmetatable, strsplit, pairs, next
 
 Member.__index = Member; -- Set the __index parameter to reference Character
 
+--local DKPVariables = { 'previousTotal', 'total', 'entries', 'deleted'}
+
 function Member:new(guildIndex)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
@@ -52,4 +54,24 @@ end
 function Member:GetDKP()
     -- TODO: Finish Member.GetDKP
     return 30
+end
+
+function Member:Save()
+    local dkp = self:GetDKP()
+
+
+    --for _, raid in pairs(Defaults.dkp_raids) do
+    --    local dkp = self.dkp[raid]
+    --
+    --    if dkp == nil or (dkp.total == nil) or (dkp.entries) == nil or (dkp.deleted) == nil or (dkp.previousTotal == nil) then
+    --        self:InitRaidDKP(raid)
+    --    end
+    --
+    --    dkp = self.dkp[raid]
+    --
+    --    if dkp.total > 0 or #dkp.entries > 0 or dkp.previousTotal > 0 or #dkp.deleted > 0 then
+    --        memberDB[self.name] = memberDB[self.name] or {}
+    --        memberDB[self.name][raid] = dkp
+    --    end
+    --end
 end
