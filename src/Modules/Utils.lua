@@ -9,15 +9,13 @@ local insert, sort, next = table.insert, table.sort, next;
 local date, type, print = date, type, print
 local getn, pairs, ipairs = table.getn, pairs, ipairs
 
+local daysInWeek = 7
+local daysInYear = 365
+local secondsInHour = 60 * 60
+
 Util.warning = Defaults.warning
 Util.info = Defaults.info
 Util.success = Defaults.success
-
-Util.isResetDay = false
-Util.serverReset = false -- tells us if the server has reset recently.
-Util.dayOfReset = 10
-Util.daysUntilReset = 10
-Util.timeUntilReset = 0 -- Daily Quest Reset timer, there is no blizzard "timeuntilReset" unfortunately...
 
 -----------------------------
 --     Debug Functions     --
@@ -71,44 +69,71 @@ end
 -----------------------------
 
 function Util:Init()
-    local daysInWeek = 7
-    local daysInYear = 365
-    local secondsInHour = 60 * 60
-    local secondsInDay = 60 * 60 * 24
-    -- Sunday (1), Monday (2), Tuesday (3), Wednesday (4), Thursday (5), Friday (6), Saturday (7)
-    local resetDay = 3
-    local day = date("*t", GetServerTime())
+
+    local server_time = GetServerTime()
+    local daily_reset_time = GetQuestResetTime() -- Seconds until daily quests reset.
+    local seconds_until_hour = fmod(daily_reset_time, secondsInHour)
+    local seconds_until_daily_reset = daily_reset_time - seconds_until_hour
+    local hours_until_daily_reset = seconds_until_daily_reset / 60 / 60
+
+    -- Blizzard Format Sunday (1), Monday (2), Tuesday (3), Wednesday (4), Thursday (5), Friday (6), Saturday (7)
+    local day = date("*t", server_time)
     local wday = day.wday
     local yday = day.yday
 
-    if wday < resetDay then
-        Util.daysUntilReset = resetDay - wday
-    elseif wday == resetDay then
-        Util.daysUntilReset = 7
-        Util.isResetDay = true
-    else
-        Util.daysUntilReset = daysInWeek - wday
+    -- custom date schedule.
+    local customWeeklySchedule = {
+        [1] = { -- Old Sunday
+            ['daysFromReset'] = 2
+        },
+        [2] = { -- Old Monday
+            ['daysFromReset'] = 1
+        },
+        [3] = { -- Old Tuesday
+            ['daysFromReset'] = 0 -- Tuesday can either be 0 or 7 depending on time of day.
+        },
+        [4] = { -- Old Wednesday
+            ['daysFromReset'] = 6
+        },
+        [5] = { -- Old Thursday
+            ['daysFromReset'] = 5
+        },
+        [6] = { -- Old Friday
+            ['daysFromReset'] = 4
+        },
+        [7] = { -- Old Saturday
+            ['daysFromReset'] = 3
+        },
+    }
+
+    local customDay = customWeeklySchedule[wday]
+    local daysUntilReset = customDay['daysFromReset']
+    local isResetDay = daysUntilReset == 0
+    local serverReset = false
+
+    -- Today is weekly reset day, Daily reset happens at 9:59:59 AM, server time.
+    if daysUntilReset == 0 and hours_until_daily_reset >= 10 then
+        serverReset = true
+        daysUntilReset = 7
     end
 
-    Util.dayOfReset = yday + Util.daysUntilReset
+    local dayOfReset = yday + daysUntilReset
 
-    if Util.dayOfReset > daysInYear then -- to account for the last week of the year.
-        Util.dayOfReset = Util.dayOfReset - daysInYear
+    if dayOfReset > daysInYear then
+        dayOfReset = dayOfReset - daysInYear
     end
 
-    Util.timeUntilReset = GetQuestResetTime() -- Seconds until daily quests reset.
-    Util.isResetDay = Util.isResetDay or yday == Util.dayOfReset
+    isResetDay = isResetDay or yday == dayOfReset
 
-    --- Because Blizzard hates us, we have to figure out how many hours until reset occurs... stupid...
-    if Util.isResetDay then
-        local seconds_until_hour = fmod(Util.timeUntilReset, secondsInHour)
-        local seconds_until_reset = Util.timeUntilReset - seconds_until_hour
-        local hours_until_reset = seconds_until_reset / 60 / 60
+    --Dev:Print("IsResetDay:", isResetDay, "ServerReset:" , serverReset, "DayOfReset:" , dayOfReset, "DaysUntilReset:" , daysUntilReset)
 
-        if hours_until_reset >= 10 then
-            Util.serverReset = true
-        end
-    end
+    -- Set our globals
+    Util.isResetDay = isResetDay
+    Util.serverReset = serverReset
+    Util.dayOfReset = dayOfReset
+    Util.daysUntilReset = daysUntilReset
+    Util.wday = wday
+    Util.yday = yday
 end
 
 -- Subtracts two timestamps from one another.
@@ -134,6 +159,14 @@ function Util:GetDateTimes()
     local server_time = GetServerTime() -- WoW API of the server time.
     local datetime = time() -- LUA implementation of local machine time.
     return lDate, lTime, server_time, datetime
+end
+
+function Util:GetFormattedServerTime(serverTime, formatType)
+    serverTime = serverTime or GetServerTime()
+
+    if formatType == 'day' then
+        return date("*t", serverTime)
+    end
 end
 
 function Util:FormatDateTime(formatType)
