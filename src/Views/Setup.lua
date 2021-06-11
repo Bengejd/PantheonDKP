@@ -399,7 +399,7 @@ function Setup:MainUI()
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
     addon_version:SetSize(50, 14)
-    addon_version:SetText(Util:FormatFontTextColor(Media.addon_version_hex, "v" .. Defaults.addon_version))
+    addon_version:SetText(Util:FormatTextColor("v" .. Defaults.addon_version, Media.addon_version_hex))
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
     --- Addon Author
