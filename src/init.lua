@@ -69,7 +69,7 @@ end
 local unpack, pairs = unpack, pairs
 
 PDKP.dbDefaults = {
-    global = {
+    ['global'] = {
         ['db'] = {
             ['guildDB'] = {
                 ['members'] = {},
@@ -87,7 +87,13 @@ PDKP.dbDefaults = {
                 ['debug'] = false,
                 ['ignore_from']={},
                 ['minimap']={},
-                ['sync'] = {},
+                ['sync'] = {
+                    ['pvp'] = true,
+                    ['raids'] = true,
+                    ['dungeons'] = true
+                },
+                ['notifications'] = true,
+                ['debug'] = false,
 
             },
             ['testDB']={},
@@ -99,8 +105,9 @@ _G.PDKP = PDKP
 
 function PDKP:InitializeDatabases()
     local Dev = PDKP:GetInst('Dev')
-
     local database = PDKP.AceDB:New("pdkp_DB", PDKP.dbDefaults, true)
+
+    database.global = PDKP.dbDefaults['global']
 
     if database['global'] == nil or next(database.global) == nil then
         Dev:Print('Creating PDKP Database with default values')
