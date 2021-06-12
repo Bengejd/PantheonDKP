@@ -10,6 +10,10 @@ Member.__index = Member; -- Set the __index parameter to reference Character
 
 --local DKPVariables = { 'previousTotal', 'total', 'entries', 'deleted'}
 
+-----------------------------
+--      Init Functions     --
+-----------------------------
+
 function Member:new(guildIndex)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
@@ -40,7 +44,13 @@ function Member:GetMemberData(index)
 
     self.dkp = {};
     self.isDkpOfficer = false
+
+    self.lockouts = {}
 end
+
+-----------------------------
+--      MISC Functions     --
+-----------------------------
 
 function Member:IsRaidReady()
     return self.lvl >= 55 or self.canEdit or self.isOfficer;
@@ -51,15 +61,23 @@ function Member:CanEdit()
     self.isOfficer = self.canEdit;
 end
 
+
+
 function Member:GetDKP()
     -- TODO: Finish Member.GetDKP
     return 30
 end
 
+function Member:GetLockouts()
+
+end
+
+function Member:UpdateLockouts()
+
+end
+
 function Member:Save()
     local dkp = self:GetDKP()
-
-
     --for _, raid in pairs(Defaults.dkp_raids) do
     --    local dkp = self.dkp[raid]
     --

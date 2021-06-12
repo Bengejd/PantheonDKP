@@ -27,6 +27,7 @@ PDKP.Export = {}
 PDKP.Import = {}
 PDKP.Events = {}
 PDKP.Dev = {}
+PDKP.Bid = {}
 
 PDKP.ldb = _G.LibStub:GetLibrary("LibDataBroker-1.1")
 PDKP.cbh = _G.LibStub("CallbackHandler-1.0"):New(PDKP)
@@ -56,7 +57,8 @@ local PDKP_Instances = {
     ['Export']=PDKP.Export,
     ['Import']=PDKP.Import,
     ['Events']=PDKP.Events,
-    ['Dev']=PDKP.Dev
+    ['Dev']=PDKP.Dev,
+    ['Bid']=PDKP.Bid
 }
 
 -- Assign a variable tableName to all of our instances, for easier debugging.

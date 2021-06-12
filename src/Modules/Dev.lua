@@ -3,6 +3,29 @@ local PDKP = _G.PDKP
 
 local Dev, Defaults, Util, Guild, Comms = PDKP:GetInst('Dev', 'Defaults', 'Util', 'Guild', 'Comms')
 
+Dev.bids = {
+    ['Cheesedogs'] = {
+        ['dkp'] = 30,
+        ['bid'] = 10,
+        ['index'] = 1,
+    },
+    ['Veltrix'] = {
+        ['dkp'] = 25,
+        ['bid'] = 5,
+        ['index'] = 3,
+    },
+    ['Nightshelf'] = {
+        ['dkp'] = 20,
+        ['bid'] = 20,
+        ['index'] = 2,
+    },
+    ['Neekio'] = {
+        ['dkp'] = 35,
+        ['bid'] = 25,
+        ['index'] = 4,
+    },
+}
+
 Dev.commands = {
     ['dev']=function() end,
     ['purge_db']=function()

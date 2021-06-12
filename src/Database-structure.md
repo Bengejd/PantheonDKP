@@ -21,10 +21,13 @@ The guild DB contains information regarding the individual members in the guild,
             
             }
             ['lockouts'] = { -- table
-                ['Magtheridon'] = { -- table
-                    ['id']: 651 -- int, boss id
-                    ['lastCredit'] = 157 -- int, day of the year
-                    ['availableOn'] = 
+                [2684] = { -- table, week number since UTC Epoch
+                    ['resetsOn'] = 166, -- int, 
+                    [651] = { -- int, bossID
+                        ['bossName'] = 'Magtheridon', -- string, Boss Name
+                        ['yday'] = 162, -- int, day of year
+                        ['timestamp'] = 1623441373, -- int, UTC timestamp
+                    }
                 }
             }
         },

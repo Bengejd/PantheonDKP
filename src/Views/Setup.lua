@@ -2,7 +2,7 @@ local _G = _G;
 local PDKP = _G.PDKP
 
 local Setup, Media, Raid, DKP, Util, Comms, Guild, Defaults, ScrollTable = PDKP:GetInst('Setup', 'Media', 'Raid', 'DKP', 'Util', 'Comms', 'Guild', 'Defaults', 'ScrollTable')
-local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud, Dev = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud', 'Dev')
+local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud, Dev, Bid = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud', 'Dev', 'Bid')
 
 local pdkp_frame;
 
@@ -222,6 +222,16 @@ local function createDropdown(opts)
     return dropdown
 end
 
+--- Opts:
+---     name (string)
+---     parent (Frame)
+---     title (string)
+---     multi_line (boolean)
+---     max_chars (boolean)
+---     textValidFunc (Function)
+---     numeric (int)
+---     small_title (boolean)
+---
 local function createEditBox(opts)
     local name = opts['name'] or 'edit_box'
     local parent = opts['parent'] or pdkp_frame
@@ -241,24 +251,21 @@ local function createEditBox(opts)
     box:SetAutoFocus(false)
     box:SetFontObject(GameFontHighlightSmall)
     box:SetMultiLine(multi_line)
+    box:SetNumeric(numeric)
     box.uniqueID = name
 
     box.touched = false
 
     box.isValid = function()
-        if box:IsVisible() then
-            local box_text = box:GetText()
-            if name == 'other' then
-                return true
-            end
-            if box_text and box_text ~= "" and box_text ~= 0 then
-                return true
-            else
-                return false
-            end
+        if not box:IsVisible() then return false end
+        if name == 'other' then return true end
+
+        if box:IsNumeric() then
+            return box:GetNumber() > 0
         else
-            return true
+            return box:GetText() and box:GetText() ~= ''
         end
+        return false
     end
 
     box.getValue = function()
@@ -301,7 +308,9 @@ local function createEditBox(opts)
         box_frame:SetHeight(30)
     end
 
-    box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
+    if box:GetFrameLevel() > 4 then
+        box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
+    end
 
     local title_font = 'GameFontNormal'
 
@@ -329,6 +338,45 @@ local function createEditBox(opts)
     box.desc = ed
     box.title = el
     return box
+end
+
+local function createItemLink(parent)
+    local fs = parent:CreateFontString(parent, 'OVERLAY', 'GameFontNormalSmall')
+    fs:SetNonSpaceWrap(false)
+    fs:SetWordWrap(false)
+    fs:SetJustifyH('LEFT')
+
+    local f = CreateFrame('Button', nil, parent)
+    f:SetAllPoints(fs)
+
+    f:SetScript("OnClick", function()
+        if GameTooltip:GetItem() then
+            GameTooltip:SetHyperlink(fs.iLink)
+        else
+            GameTooltip:SetOwner(fs, "ANCHOR_NONE");
+            GameTooltip:ClearAllPoints()
+            GameTooltip:ClearLines()
+            GameTooltip:SetPoint("TOP", fs, "BOTTOM", 0, -20);
+
+            GameTooltip:SetHyperlink(fs.iLink)
+        end
+    end)
+
+    -- ItemID, ItemName or ItemLink
+    fs.SetItemLink = function(itemIdentifier)
+        local itemID, itemType, itemSubType, itemEquipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(itemIdentifier)
+        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
+        itemSellPrice = GetItemInfo(itemIdentifier)
+
+        fs:SetText(itemLink)
+        fs.iLink = itemLink
+
+        if fs.icon then
+            fs.icon:SetTexture(itemTexture)
+        end
+    end
+
+    return fs
 end
 
 --------------------------
@@ -376,12 +424,9 @@ function Setup:MainUI()
         { ['dir'] = 'TOPLEFT', ['file'] = 'BG.tga', }
     }
 
-    for _, t in pairs(textures) do
-        createTextures(t)
-    end
+    for _, t in pairs(textures) do createTextures(t) end
 
     f:SetPoint("TOP", 0, 0)
-    f:Show()
 
     setMovable(f)
 
@@ -391,7 +436,7 @@ function Setup:MainUI()
     b:SetPoint("TOPRIGHT", -2, -10)
 
     local addon_title = f:CreateFontString(f, "Overlay", "BossEmoteNormalHuge")
-    addon_title:SetText("PantheonDKP")
+    addon_title:SetText(Util:FormatTextColor('PantheonDKP', Defaults.addon_hex))
     addon_title:SetSize(200, 25)
     addon_title:SetPoint("CENTER", f, "TOP", 0, -28)
     addon_title:SetScale(0.9)
@@ -428,9 +473,10 @@ function Setup:RandomStuff()
         Setup.Options,
         Setup.DKPAdjustments,
         Setup.PDKPTabs,
+        Setup.BidBox,
 
         --- Unfinished Functions
-        Setup.ShroudingBox, Setup.Debugging, Setup.EasyStats,
+        Setup.Debugging, Setup.EasyStats,
         Setup.RaidDropdown, Setup.DKPHistory, Setup.RaidTools, Setup.InterfaceOptions, Setup.PushProgressbar,
         Setup.HistoryTable, Setup.DKPOfficer, Setup.SyncStatus
     }
@@ -439,11 +485,6 @@ function Setup:RandomStuff()
         if func then
             func()
         end
-    end
-
-    --- For debugging purposes.
-    if Defaults.development then
-        pdkp_frame:Show()
     end
 end
 
@@ -622,6 +663,172 @@ end
 --------------------------
 -- Random     Functions --
 --------------------------
+
+function Setup:BidBox()
+    local title_str = Util:FormatTextColor('PDKP Active Bid', Defaults.addon_hex)
+
+    local f = CreateFrame("Frame", "pdkp_bid_frame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    f:SetWidth(256)
+    f:SetHeight(256)
+    f:SetPoint("CENTER")
+    setMovable(f)
+
+    -- TODO: Hook this up to grab your maximum DKP.
+    local totalDKP = 35
+
+    local sourceWidth, sourceHeight = 256, 512
+    local startX, startY, width, height = 0, 0, 216, 277
+
+    local texCoords = {
+        startX / sourceWidth,
+        (startX + width) / sourceWidth,
+        startY / sourceHeight,
+        (startY+height) / sourceHeight
+    }
+
+    local tex = f:CreateTexture(nil, 'BACKGROUND')
+    tex:SetTexture("Interface\\Addons\\PantheonDKP\\Media\\New_UI\\BidFrame.tga")
+
+    tex:SetTexCoord(unpack(texCoords))
+    tex:SetAllPoints(f)
+
+    local title = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    title:SetText(title_str)
+    title:SetPoint("CENTER", f, "TOP", 25, -22)
+
+    local close_btn = createCloseButton(f, true)
+    close_btn:SetSize(24, 22)
+    close_btn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -10)
+
+    local dkp_title = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    dkp_title:SetPoint("TOP", title, "BOTTOM", -5, -25)
+
+    f.displayDKP = function(dkpTotal)
+        dkp_title:SetText('Total DKP: ' .. dkpTotal)
+    end
+
+    local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    sb:SetSize(80, 22) -- width, height
+    sb:SetText("Submit Bid")
+    sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 10)
+    sb:SetScript("OnClick", function()
+        -- TODO: Setup submit logic
+        Dev:Print("Submit this shit yo")
+    end)
+    sb:SetEnabled(false)
+
+    local cb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    cb:SetSize(80, 22) -- width, height
+    cb:SetText("Cancel Bid")
+    cb:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
+    cb:SetScript("OnClick", function()
+        -- TODO: Setup Cancel logic
+        Dev:Print("Cancel this shit yo")
+    end)
+    cb:SetEnabled(false)
+    cb:Hide()
+
+    local item_icon = f:CreateTexture(nil, 'OVERLAY')
+    item_icon:SetSize(46, 35)
+    item_icon:SetPoint("LEFT", f, "LEFT", 32, 21)
+
+    local item_link = createItemLink(f)
+    item_link:SetPoint("LEFT", item_icon, "RIGHT", 5, 0)
+    item_link:SetWidth(150)
+
+    item_link.icon = item_icon
+
+    -- TODO: Cleanup this dev stuff.
+    local ateish = 22589
+    local kingsfall = 22802
+    local blade = 17780
+    local edge = 14551
+    local test_item_id = edge
+    item_link.SetItemLink(test_item_id)
+
+    local bid_box_opts = {
+        ['name'] = 'bid_input',
+        ['parent'] = f,
+        ['title'] = 'Bid Amount',
+        ['multi_line'] = false,
+        ['max_chars'] = 5,
+        ['textValidFunc'] = function(box)
+            local box_val = box.getValue()
+            if box_val and box_val < totalDKP then
+                return sb:SetEnabled(true)
+            end
+            return sb:SetEnabled(false)
+        end,
+        ['numeric'] = true,
+        ['small_title'] = false,
+    }
+    local bid_box = createEditBox(bid_box_opts)
+    bid_box:SetWidth(80)
+    bid_box:SetPoint("LEFT", f, "LEFT", 45, -35)
+    bid_box.frame:SetFrameLevel(bid_box:GetFrameLevel() - 2)
+
+    local current_bid_opts = {
+        ['name'] = 'display_bid',
+        ['parent'] = f,
+        ['title'] = 'Pending Bid',
+        ['multi_line'] = false,
+        ['max_chars'] = 5,
+        ['textValidFunc'] = nil,
+        ['numeric'] = true,
+        ['small_title'] = false,
+    }
+    local current_bid = createEditBox(current_bid_opts)
+    current_bid:SetWidth(80)
+    current_bid:SetPoint("LEFT", bid_box, "RIGHT", 15, 0)
+    current_bid.frame:SetFrameLevel(current_bid:GetFrameLevel() - 2)
+    current_bid:SetEnabled(false)
+
+    -- TODO Move this to the calling file.
+    f.displayDKP(totalDKP)
+
+    f.current_bid = current_bid
+    f.bix_box = bid_box
+    f.item_link = item_link
+    f.submit_btn = sb
+    f.cancel_btn = cb
+
+    f:Show()
+
+
+    --local item_title = f.content:CreateFontString(f.content, "OVERLAY", 'GameFontNormal')
+    --item_title:SetPoint("TOPLEFT")
+    --
+    --local test_bid_item = '|cff9d9d9d|Hitem:3299::::::::20:257::::::|h[Fractured Canine]|h|r'
+    --
+    --local bid_title = Util:FormatTextColor('Item: ', Defaults.addon_hex)
+    --
+    --print(bid_title)
+    --
+    --item_title:SetText(bid_title .. ' ' .. test_bid_item)
+    --
+    --local scroll = SimpleScrollFrame:new(f.content)
+    --local scrollFrame = scroll.scrollFrame
+    --local scrollContent = scrollFrame.content;
+    --
+    --local cb = createCloseButton(f, true)
+    --cb:SetPoint("TOPRIGHT")
+    --
+    --cb:SetScript("OnClick", function()
+    --    f:Hide()
+    --    -- TODO: Hook this up
+    --    --if Raid:IsDkpOfficer() then Comms:SendCommsMessage('pdkpClearShrouds', {}, 'RAID', nil, nil, nil) end
+    --end)
+    --
+    --f.scrollContent = scrollContent;
+    --f.scroll = scroll;
+    --f.scrollFrame = scrollFrame;
+
+    --local shroud_events = {'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
+    --for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
+    --f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
+
+    Bid.frame = f;
+end
 
 function Setup:DKPAdjustments()
     local f = CreateFrame("Frame", "$parent_adjustment_frame", pdkp_frame, BackdropTemplateMixin and "BackdropTemplate")

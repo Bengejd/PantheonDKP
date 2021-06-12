@@ -35,7 +35,7 @@ src\Modules\Settings.lua
 src\Modules\minimap.lua
 src\Modules\Comms.lua
 src\Modules\Loot.lua
-src\Modules\Shroud.lua
+src\Modules\Bid_Manager.lua
 src\Modules\GUI.lua
 src\Modules\DKP.lua
 src\Modules\Events.lua

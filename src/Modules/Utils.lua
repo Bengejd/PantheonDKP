@@ -11,6 +11,7 @@ local getn, pairs, ipairs = table.getn, pairs, ipairs
 
 local daysInWeek = 7
 local daysInYear = 365
+local hoursInDay = 24
 local secondsInHour = 60 * 60
 
 Util.warning = Defaults.warning
@@ -69,7 +70,6 @@ end
 -----------------------------
 
 function Util:Init()
-
     local server_time = GetServerTime()
     local daily_reset_time = GetQuestResetTime() -- Seconds until daily quests reset.
     local seconds_until_hour = fmod(daily_reset_time, secondsInHour)
@@ -125,6 +125,8 @@ function Util:Init()
 
     isResetDay = isResetDay or yday == dayOfReset
 
+    print(server_time)
+
     --Dev:Print("IsResetDay:", isResetDay, "ServerReset:" , serverReset, "DayOfReset:" , dayOfReset, "DaysUntilReset:" , daysUntilReset)
 
     -- Set our globals
@@ -134,6 +136,16 @@ function Util:Init()
     Util.daysUntilReset = daysUntilReset
     Util.wday = wday
     Util.yday = yday
+    Util.weekNumber = Util:GetWeekNumber(server_time)
+end
+
+-- Return the 1-based unix epoch week number. Seems to be off by 2 weeks?
+function Util:GetWeekNumber(unixtimestamp)
+    return 1 + math.floor(unixtimestamp / 604800)
+end
+
+function Util:WeekStart(week)
+    return (week - 1) * 604800
 end
 
 -- Subtracts two timestamps from one another.

@@ -11,6 +11,8 @@ Defaults.warning = 'E71D36'
 Defaults.success = '22bb33'
 Defaults.info = 'F4A460'
 
+Defaults.addon_hex = '33FF99'
+
 Defaults.addon_version = GetAddonMetadata('PantheonDKP', "Version") -- Retrieves the addon version in the .toc
 Defaults.addon_interface_version = GetAddonMetadata('PantheonDKP', "X-Interface") -- Retrieves the addon's Interface #
 Defaults.addon_name = 'PantheonDKP' -- Addon's name.

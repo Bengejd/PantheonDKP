@@ -99,3 +99,61 @@ function PDKP:CheckTOCVersion()
         Dev:Print('GameTOC', game_toc_version, 'Does not equal Addon Interface', Defaults.addon_interface_version)
     end
 end
+
+-- SuppressTells
+ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", function(self, event, msg, ...)      -- suppresses outgoing whisper responses to limit spam
+
+    --if strfind(msg, "!bid") == 1 then
+    --    return true
+    --else
+    --    return false
+    --end
+
+    --if core.DB == nil then
+    --    return false;
+    --end
+    --
+    --if core.DB.defaults.SuppressTells then
+    --    if core.BidInProgress then
+    --        if strfind(msg, L["YOURBIDOF"]) == 1 then
+    --            return true
+    --        elseif strfind(msg, L["BIDDENIEDFILTER"]) == 1 then
+    --            return true
+    --        elseif strfind(msg, L["BIDACCEPTEDFILTER"]) == 1 then
+    --            return true;
+    --        elseif strfind(msg, L["NOTSUBMITTEDBID"]) == 1 then
+    --            return true;
+    --        elseif strfind(msg, L["ONLYONEROLLWARN"]) == 1 then
+    --            return true;
+    --        elseif strfind(msg, L["ROLLNOTACCEPTED"]) == 1 then
+    --            return true;
+    --        elseif strfind(msg, L["YOURBID"].." "..L["MANUALLYDENIED"]) == 1 then
+    --            return true;
+    --        elseif strfind(msg, L["CANTCANCELROLL"]) == 1 then
+    --            return true;
+    --        end
+    --    end
+    --
+    --    if strfind(msg, "CommunityDKP: ") == 1 then
+    --        return true
+    --    elseif strfind(msg, L["DKPAVAILABLE"]) ~= nil and strfind(msg, '%[') ~= nil and strfind(msg, '%]') ~= nil then
+    --        return true
+    --    elseif strfind(msg, L["NOBIDINPROGRESS"]) == 1 then
+    --        return true
+    --    elseif strfind(msg, L["BIDCANCELLED"]) == 1 then
+    --        return true
+    --    end
+    --end
+end)
+
+--SuppressTells
+ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(self, event, msg, ...)      -- suppresses incoming whisper responses to limit spam
+
+
+
+    if strfind(msg, "!bid") == 1 then
+        return true
+    else
+        return false
+    end
+end)

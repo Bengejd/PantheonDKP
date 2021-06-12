@@ -42,7 +42,7 @@ function GUI:Init()
 
     if Defaults.development then
         Dev:Print('Development Mode Active')
-        GUI.pdkp_frame:Show()
+        --GUI.pdkp_frame:Show()
     end
 end
 
