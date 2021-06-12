@@ -2,7 +2,7 @@ local _G = _G;
 local PDKP = _G.PDKP
 
 local GetGuildInfo = GetGuildInfo
-local Character, Util, Defaults, Dev = PDKP:GetInst('Character', 'Util', 'Defaults', 'Dev')
+local Character, Util, Defaults, Dev, Guild = PDKP:GetInst('Character', 'Util', 'Defaults', 'Dev', 'Guild')
 
 function Character:Init()
     Dev:Print('Character:init()')
@@ -20,4 +20,16 @@ end
 function Character:GetGuildInfo()
     local guildName, guildRankName, guildRankIndex, realmName = GetGuildInfo('PLAYER');
     return guildName, guildRankName, guildRankIndex, realmName;
+end
+
+function Character:GetMe()
+    return Guild:GetMemberByName(Character.name)
+end
+
+function Character:GetMyDKP()
+    local member = Character:GetMe()
+    if member then
+        return member:GetDKP()
+    end
+    return 0
 end

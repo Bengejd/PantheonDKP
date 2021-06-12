@@ -1,7 +1,7 @@
 local _G = _G;
 local PDKP = _G.PDKP
 
-local Setup, Media, Raid, DKP, Util, Comms, Guild, Defaults, ScrollTable = PDKP:GetInst('Setup', 'Media', 'Raid', 'DKP', 'Util', 'Comms', 'Guild', 'Defaults', 'ScrollTable')
+local Setup, Media, Raid, DKP, Util, Comms, Guild, Defaults, ScrollTable, Char = PDKP:GetInst('Setup', 'Media', 'Raid', 'DKP', 'Util', 'Comms', 'Guild', 'Defaults', 'ScrollTable', 'Character')
 local GUI, Settings, Loot, HistoryTable, SimpleScrollFrame, Shroud, Dev, Bid = PDKP:GetInst('GUI', 'Settings', 'Loot', 'HistoryTable', 'SimpleScrollFrame', 'Shroud', 'Dev', 'Bid')
 
 local pdkp_frame;
@@ -369,14 +369,15 @@ local function createItemLink(parent)
         local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
         itemSellPrice = GetItemInfo(itemIdentifier)
 
+        if not itemLink then return end
+
         fs:SetText(itemLink)
         fs.iLink = itemLink
-
-        print(fs.iLink)
-
         if fs.icon then
             fs.icon:SetTexture(itemTexture)
         end
+
+        return fs.iLink, itemTexture
     end
 
     return fs
@@ -673,8 +674,9 @@ function Setup:BidBox()
     f:SetPoint("CENTER")
     setMovable(f)
 
-    -- TODO: Hook this up to grab your maximum DKP.
-    local totalDKP = 35
+    f:SetScript("OnShow", function()
+        f.dkp_title:SetText('Total DKP: ' .. Char:GetMyDKP())
+    end)
 
     local sourceWidth, sourceHeight = 256, 512
     local startX, startY, width, height = 0, 0, 216, 277
@@ -717,10 +719,6 @@ function Setup:BidBox()
     local close_btn = createCloseButton(f, true)
     close_btn:SetSize(24, 22)
     close_btn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -10)
-
-    f.displayDKP = function(dkpTotal)
-        dkp_title:SetText('Total DKP: ' .. dkpTotal)
-    end
 
     local sb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
     sb:SetSize(80, 22) -- width, height
@@ -769,12 +767,11 @@ function Setup:BidBox()
     item_link.icon = item_icon
 
     -- TODO: Cleanup this dev stuff.
-    local ateish = 22589
-    local kingsfall = 22802
-    local blade = 17780
-    local edge = 14551
-    local test_item_id = kingsfall
-    item_link.SetItemLink(test_item_id)
+    --local ateish = 22589
+    --local kingsfall = 22802
+    --local blade = 17780
+    --local edge = 14551
+    --local test_item_id = kingsfall
 
     local bid_box_opts = {
         ['name'] = 'bid_input',
@@ -785,7 +782,7 @@ function Setup:BidBox()
         ['textValidFunc'] = function(box)
             local box_val = box.getValue()
             local curr_bid_val = f.current_bid.getValue()
-            if box_val and box_val < totalDKP and box_val > 0 and box_val ~= curr_bid_val then
+            if box_val and box_val < Char:GetMyDKP() and box_val > 0 and box_val ~= curr_bid_val then
                 return sb:SetEnabled(true)
             end
             return sb:SetEnabled(false)
@@ -832,9 +829,6 @@ function Setup:BidBox()
         end
     end)
 
-    -- TODO Move this to the calling file.
-    f.displayDKP(totalDKP)
-
     tinsert(UISpecialFrames, f:GetName())
 
     f.current_bid = current_bid
@@ -843,10 +837,11 @@ function Setup:BidBox()
     f.submit_btn = sb
     f.cancel_btn = cb
     f.bid_counter = bid_counter
+    f.dkp_title = dkp_title
 
     GUI.bid_frame = f
 
-    f:Show()
+    f:Hide()
 
 
     --local item_title = f.content:CreateFontString(f.content, "OVERLAY", 'GameFontNormal')

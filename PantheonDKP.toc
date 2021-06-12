@@ -4,7 +4,7 @@
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Shrouding based DPK addon for Pantheon
 ## DefaultState: Enabled
-## SavedVariables: pdkp_DB
+## SavedVariables: PDKP_DB, PDKP_Logs
 ## LoadOnDemand: 0
 ## X-Interface: 20501
 ## X-Phase: 1
@@ -13,38 +13,44 @@
 Libraries\Load_Libraries.xml
 #@end-no-lib-strip@
 
-# Init files
-src\init.lua
-Media\Load_Media.xml
-
-# Classes
-src\Classes\Member.lua
-src\Classes\DKP_Entry.lua
-
-# Controllers
-src\Controllers\Guild.lua
-src\Controllers\Raid.lua
-src\Controllers\Import.lua
-src\Controllers\Export.lua
-
-# Module files
-src\Modules\Character.lua
-src\Modules\Defaults.lua
-src\Modules\Utils.lua
-src\Modules\Settings.lua
-src\Modules\minimap.lua
-src\Modules\Comms.lua
-src\Modules\Loot.lua
-src\Modules\Bid_Manager.lua
-src\Modules\GUI.lua
-src\Modules\DKP.lua
-src\Modules\Events.lua
-src\Modules\Dev.lua
-
-# Views
-src\Views\ScrollTable.lua
-src\Views\DKP_History.lua
-src\Views\SimpleScrollFrame.lua
-src\Views\Setup.lua
-
 src\PantheonDKP.xml
+
+
+
+# ----- OLD FILE STRUCTURE
+
+# Init files
+# src\init.lua
+# Media\Load_Media.xml
+#
+# # Classes
+# src\Classes\Member.lua
+# src\Classes\DKP_Entry.lua
+#
+# # Controllers
+# src\Controllers\Guild.lua
+# src\Controllers\Raid.lua
+# src\Controllers\Import.lua
+# src\Controllers\Export.lua
+#
+# # Module files
+# src\Modules\Character.lua
+# src\Modules\Defaults.lua
+# src\Modules\Utils.lua
+# src\Modules\Settings.lua
+# src\Modules\minimap.lua
+# src\Modules\Comms.lua
+# src\Modules\Loot.lua
+# src\Modules\Bid_Manager.lua
+# src\Modules\GUI.lua
+# src\Modules\DKP.lua
+# src\Modules\Events.lua
+# src\Modules\Dev.lua
+#
+# # Views
+# src\Views\ScrollTable.lua
+# src\Views\DKP_History.lua
+# src\Views\SimpleScrollFrame.lua
+# src\Views\Setup.lua
+#
+# src\PantheonDKP.xml
