@@ -687,7 +687,7 @@ function Setup:BidBox()
     }
 
     local tex = f:CreateTexture(nil, 'BACKGROUND')
-    tex:SetTexture("Interface\\Addons\\PantheonDKP\\Media\\New_UI\\BidFrame.tga")
+    tex:SetTexture(Media.BID_FRAME)
 
     tex:SetTexCoord(unpack(texCoords))
     tex:SetAllPoints(f)
@@ -706,7 +706,7 @@ function Setup:BidBox()
 
     --- To visualize the frame's position, uncomment this.
     --bid_counter_frame:SetAlpha(0.5)
-    --bid_tex:SetTexture("Interface\\Addons\\PantheonDKP\\Media\\New_UI\\PDKPFrame-BG.tga")
+    --bid_tex:SetTexture(Media.PDKP_BG)
     --bid_tex:SetAllPoints(bid_counter_frame)
 
     local bid_counter = bid_counter_frame:CreateFontString(bid_counter_frame, 'OVERLAY', 'BossEmoteNormalHuge')

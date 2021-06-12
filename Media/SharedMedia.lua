@@ -14,6 +14,9 @@ Media.HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 Media.ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
 Media.ROW_SEPARATOR = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
+Media.BID_FRAME = "Interface\\Addons\\PantheonDKP\\Media\\New_UI\\BidFrame.tga"
+Media.PDKP_BG = Media.PDKP_TEXTURE_BASE .. "BG.tga"
+
 Media.addon_version_hex = '0059C5'
 
 Media.PaneBackdrop  = {
