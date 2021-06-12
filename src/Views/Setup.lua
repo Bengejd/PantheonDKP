@@ -267,7 +267,6 @@ local function createEditBox(opts)
         end
         return false
     end
-
     box.getValue = function()
         if numeric then
             return box:GetNumber()
@@ -281,6 +280,8 @@ local function createEditBox(opts)
     end)
     box:SetScript("OnTextChanged", function()
         if box.isValid() then
+            textValidFunc(box)
+        else
             textValidFunc(box)
         end
     end)
@@ -370,6 +371,8 @@ local function createItemLink(parent)
 
         fs:SetText(itemLink)
         fs.iLink = itemLink
+
+        print(fs.iLink)
 
         if fs.icon then
             fs.icon:SetTexture(itemTexture)
@@ -574,9 +577,6 @@ function Setup:Options()
         return cb
     end
 
-    PDKP.canEdit = false
-
-
     for index, opt in pairs(options) do
         local opt_name = "$parentOption" .. opt['name']
 
@@ -665,7 +665,7 @@ end
 --------------------------
 
 function Setup:BidBox()
-    local title_str = Util:FormatTextColor('PDKP Active Bid', Defaults.addon_hex)
+    local title_str = Util:FormatTextColor('PDKP Active Bids', Defaults.addon_hex)
 
     local f = CreateFrame("Frame", "pdkp_bid_frame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     f:SetWidth(256)
@@ -696,12 +696,27 @@ function Setup:BidBox()
     title:SetText(title_str)
     title:SetPoint("CENTER", f, "TOP", 25, -22)
 
+    local dkp_title = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
+    dkp_title:SetPoint("TOP", title, "BOTTOM", -5, -25)
+
+    local bid_counter_frame = CreateFrame('Frame', nil, f)
+    local bid_tex = bid_counter_frame:CreateTexture(nil, 'BACKGROUND')
+    bid_counter_frame:SetPoint('TOPLEFT', f, 'TOPLEFT', 5, 0)
+    bid_counter_frame:SetSize(78, 64)
+
+    --- To visualize the frame's position, uncomment this.
+    --bid_counter_frame:SetAlpha(0.5)
+    --bid_tex:SetTexture("Interface\\Addons\\PantheonDKP\\Media\\New_UI\\PDKPFrame-BG.tga")
+    --bid_tex:SetAllPoints(bid_counter_frame)
+
+    local bid_counter = bid_counter_frame:CreateFontString(bid_counter_frame, 'OVERLAY', 'BossEmoteNormalHuge')
+    bid_counter:SetText("0")
+    bid_counter:SetPoint("CENTER", bid_counter_frame, "CENTER")
+    bid_counter:SetPoint("TOP", bid_counter_frame, "CENTER", 0, 10)
+
     local close_btn = createCloseButton(f, true)
     close_btn:SetSize(24, 22)
     close_btn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -10)
-
-    local dkp_title = f:CreateFontString(f, 'OVERLAY', 'GameFontNormal')
-    dkp_title:SetPoint("TOP", title, "BOTTOM", -5, -25)
 
     f.displayDKP = function(dkpTotal)
         dkp_title:SetText('Total DKP: ' .. dkpTotal)
@@ -712,8 +727,10 @@ function Setup:BidBox()
     sb:SetText("Submit Bid")
     sb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 10)
     sb:SetScript("OnClick", function()
-        -- TODO: Setup submit logic
-        Dev:Print("Submit this shit yo")
+        local bid_amt = f.bid_box.getValue()
+        f.current_bid:SetText(bid_amt)
+
+        --TODO: Submit this to the Bid Manager/Comms
     end)
     sb:SetEnabled(false)
 
@@ -721,12 +738,25 @@ function Setup:BidBox()
     cb:SetSize(80, 22) -- width, height
     cb:SetText("Cancel Bid")
     cb:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
+    cb:Hide()
+    cb:SetEnabled(false)
     cb:SetScript("OnClick", function()
         -- TODO: Setup Cancel logic
         Dev:Print("Cancel this shit yo")
+        f.current_bid:SetText("")
+        f.cancel_btn:SetEnabled(false)
+        f.cancel_btn:Hide()
     end)
-    cb:SetEnabled(false)
-    cb:Hide()
+    cb:SetScript("OnShow", function()
+        if f.current_bid.getValue() > 0 then
+            f.submit_btn:SetText("Update Bid")
+        else
+            f.submit_btn:SetText("Submit Bid")
+        end
+    end)
+    cb:SetScript("OnHide", function()
+        f.submit_btn:SetText("Submit Bid")
+    end)
 
     local item_icon = f:CreateTexture(nil, 'OVERLAY')
     item_icon:SetSize(46, 35)
@@ -743,7 +773,7 @@ function Setup:BidBox()
     local kingsfall = 22802
     local blade = 17780
     local edge = 14551
-    local test_item_id = edge
+    local test_item_id = kingsfall
     item_link.SetItemLink(test_item_id)
 
     local bid_box_opts = {
@@ -754,7 +784,8 @@ function Setup:BidBox()
         ['max_chars'] = 5,
         ['textValidFunc'] = function(box)
             local box_val = box.getValue()
-            if box_val and box_val < totalDKP then
+            local curr_bid_val = f.current_bid.getValue()
+            if box_val and box_val < totalDKP and box_val > 0 and box_val ~= curr_bid_val then
                 return sb:SetEnabled(true)
             end
             return sb:SetEnabled(false)
@@ -766,6 +797,11 @@ function Setup:BidBox()
     bid_box:SetWidth(80)
     bid_box:SetPoint("LEFT", f, "LEFT", 45, -35)
     bid_box.frame:SetFrameLevel(bid_box:GetFrameLevel() - 2)
+    bid_box:SetScript("OnTextSet", function()
+        local val = bid_box.getValue()
+        f.submit_btn.isEnabled = val > 0
+        f.submit_btn:SetEnabled(f.submit_btn.isEnabled)
+    end)
 
     local current_bid_opts = {
         ['name'] = 'display_bid',
@@ -782,15 +818,33 @@ function Setup:BidBox()
     current_bid:SetPoint("LEFT", bid_box, "RIGHT", 15, 0)
     current_bid.frame:SetFrameLevel(current_bid:GetFrameLevel() - 2)
     current_bid:SetEnabled(false)
+    current_bid.frame:SetBackdrop(nil)
+    current_bid:SetScript("OnTextSet", function()
+        local val = current_bid.getValue()
+        f.cancel_btn.isEnabled = val > 0
+        f.cancel_btn:SetEnabled(f.cancel_btn.isEnabled)
+        f.bid_box:SetText(0)
+
+        if f.cancel_btn.isEnabled then
+            f.cancel_btn:Show()
+        else
+            f.cancel_btn:Hide()
+        end
+    end)
 
     -- TODO Move this to the calling file.
     f.displayDKP(totalDKP)
 
+    tinsert(UISpecialFrames, f:GetName())
+
     f.current_bid = current_bid
-    f.bix_box = bid_box
+    f.bid_box = bid_box
     f.item_link = item_link
     f.submit_btn = sb
     f.cancel_btn = cb
+    f.bid_counter = bid_counter
+
+    GUI.bid_frame = f
 
     f:Show()
 
@@ -984,30 +1038,38 @@ function Setup:PDKPTabs()
         ['adjust_dkp_button'] = {
             ['parent'] = f,
             ['text'] = 'Adjust DKP',
-            ['hides'] = {GUI.optionsFrame, },
+            ['hides'] = { GUI.optionsFrame },
             ['shows'] = {GUI.adjustment_frame},
         },
         ['view_history_button'] = {
             ['parent'] = f,
             ['text'] = 'History',
-            ['hides'] = {GUI.adjustment_frame, GUI.optionsFrame},
+            ['hides'] = { GUI.adjustment_frame, GUI.optionsFrame },
             ['shows'] = {},
         },
         ['view_loot_button'] = {
             ['parent'] = f,
             ['text'] = 'Loot',
-            ['hides'] = {GUI.adjustment_frame, GUI.optionsFrame},
+            ['hides'] = { GUI.adjustment_frame, GUI.optionsFrame },
             ['shows'] = {},
+        },
+        ['view_lockouts_button'] = {
+            ['parent'] = f,
+            ['text'] = 'Lockouts',
+            ['hides'] = { GUI.adjustment_frame },
+            ['shows'] = { GUI.optionsFrame },
         },
         ['view_options_button'] = {
             ['parent'] = f,
             ['text'] = 'Options',
-            ['hides'] = {GUI.adjustment_frame},
-            ['shows'] = {GUI.optionsFrame},
+            ['hides'] = { GUI.adjustment_frame },
+            ['shows'] = { GUI.optionsFrame },
         },
     }
 
     local tabNames = { 'view_history_button', 'view_loot_button', 'view_options_button' }
+
+    Dev:Print("PDKP.canEdit", PDKP.canEdit)
 
     if PDKP.canEdit then
         tabNames = {'adjust_dkp_button', unpack(tabNames)}

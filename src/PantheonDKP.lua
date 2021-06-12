@@ -1,7 +1,7 @@
 local _G = _G;
 local PDKP = _G.PDKP
 
-local Guild, Defaults, Util, Character, GUI, Dev = PDKP:GetInst('Guild', 'Defaults', 'Util', 'Character', 'GUI', 'Dev')
+local Guild, Defaults, Util, Character, GUI, Dev, Bid = PDKP:GetInst('Guild', 'Defaults', 'Util', 'Character', 'GUI', 'Dev', 'Bid')
 local IsInGuild, GuildRoster = IsInGuild, GuildRoster
 local strlen, next = string.len, next
 
@@ -68,6 +68,14 @@ function PDKP:HandleSlashCommands(msg)
 
     local cmd = PDKP:GetArgs(msg) -- The Chat command, is nil if running /pdkp
 
+    local iLink = nil;
+
+    local _, arg2 = strsplit(" ", msg)
+
+    if Util:IsItemLink(arg2) then
+        iLink = arg2
+    end
+
     --- GUI Commands
     local guiCommands = {
         ['show'] = function()
@@ -75,9 +83,14 @@ function PDKP:HandleSlashCommands(msg)
         end,
         ['hide'] = function()
             GUI:Hide()
-        end
+        end,
+        ['bid'] = function()
+            if GUI.bid_frame and Bid.isActive then
+                GUI.bid_frame:Show()
+            end
+        end,
     }
-    if guiCommands[cmd] then
+    if guiCommands[cmd] and iLink == nil then
         return guiCommands[cmd]()
     end
 
@@ -86,9 +99,22 @@ function PDKP:HandleSlashCommands(msg)
         return Dev:HandleCommands(msg)
     end
 
+    print(iLink, PDKP.canEdit)
+    print(msg)
+
     --- Officer Commands
-    local officerCommands = {}
-    if officerCommands[cmd] then
+    local officerCommands = {
+        ['bid'] = function()
+
+
+            if iLink ~= nil then
+                Bid:New(iLink)
+            else
+                -- TODO: Hook up error printing
+            end
+        end,
+    }
+    if officerCommands[cmd] and PDKP.canEdit then
         return officerCommands[cmd]()
     end
 end

@@ -125,8 +125,6 @@ function Util:Init()
 
     isResetDay = isResetDay or yday == dayOfReset
 
-    print(server_time)
-
     --Dev:Print("IsResetDay:", isResetDay, "ServerReset:" , serverReset, "DayOfReset:" , dayOfReset, "DaysUntilReset:" , daysUntilReset)
 
     -- Set our globals
@@ -279,6 +277,10 @@ function Util:RemoveColorFromname(name)
     fName = string.gsub(fName, "%s+", "")
 
     return fName
+end
+
+function Util:IsItemLink(iLink)
+    return strmatch(iLink, "|Hitem:(%d+):")
 end
 
 -----------------------------

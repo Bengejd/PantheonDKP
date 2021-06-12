@@ -7,33 +7,25 @@ local bids = {}
 
 local test_bid_item = '|cff9d9d9d|Hitem:3299::::::::20:257::::::|h[Fractured Canine]|h|r'
 
+Bid.isActive = false
+
 if Defaults.development then
     bids = Dev.bids
+    Bid.isActive = true
 end
 
 local CurrItemForBid, CurrItemIcon;
 
 function Bid:Init()
-    Bid.frame = SimpleScrollFrame:new(UIParent)
+
 end
 
-function Bid:New(prospect)
-    if prospect ~= nil then
-        table.insert(bids, prospect)
-    end
+function Bid:NewProspect(prospect)
 
-    
+end
 
-    local createShroudStringFrame = function()
-        local f = CreateFrame("Frame", nil, scrollContent, nil)
-        f:SetSize(scrollContent:GetWidth(), 18)
-        f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
-        f.total = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
-        f.name:SetHeight(18)
-        f.total:SetHeight(18)
-        f.name:SetPoint("LEFT")
-        f.total:SetPoint("RIGHT")
-        return f
-    end
+function Bid:New(iLink)
+    Dev:Print("New Bid found", iLink)
 
+    Bid.isActive = true
 end

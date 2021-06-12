@@ -39,7 +39,12 @@ function Member:GetMemberData(index)
     self.formattedName, self.coloredClass = Util:FormatTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == Defaults.bank_name
 
-    if self.name == Character.name then _G.PDKP.canEdit = self.canEdit end
+    if self.name == Character.name then
+        if Dev:IsDev() then
+            self.canEdit = true
+        end
+        PDKP.canEdit = self.canEdit
+    end
     self.visible = true
 
     self.dkp = {};
