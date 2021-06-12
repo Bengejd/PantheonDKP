@@ -105,10 +105,8 @@ function PDKP:HandleSlashCommands(msg)
     --- Officer Commands
     local officerCommands = {
         ['bid'] = function()
-
-
             if iLink ~= nil then
-                Bid:New(iLink)
+                Bid:Start(iLink)
             else
                 -- TODO: Hook up error printing
             end
