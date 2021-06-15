@@ -1,0 +1,22 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+
+    <!-- Core Addon Modules -->
+    <Script file="Logger\Logger.lua" />
+    <Script file="Constants\Constants.lua" />
+    <Script file="Utils\Utils.lua" />
+    <Script file="Utils\GUtils.lua" />
+
+    <!--@do-not-package@-->
+    <Script file="Dev\Dev.lua" />
+    <!--@end-do-not-package@-->
+
+    <!--  Models  -->
+    <Script file="Database\Database.lua" />
+
+    <!-- Controllers -->
+    <Script file="GuildManager\GuildManager.lua" />
+    <Script file="GuildManager\Member\Member.lua" />
+
+    <!--  Views  -->
+    <Include file="Interfaces\Load_interfaces.xml"/>
+</Ui>

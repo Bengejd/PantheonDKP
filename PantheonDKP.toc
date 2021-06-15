@@ -9,11 +9,15 @@
 ## X-Interface: 20501
 ## X-Phase: 1
 
+
+# Libraries
 #@no-lib-strip@
 Libraries\Load_Libraries.xml
 #@end-no-lib-strip@
 
-src\PantheonDKP.xml
+PantheonDKP.xml
+Media\Load_Media.xml
+Modules\Load_Modules.xml
 
 
 

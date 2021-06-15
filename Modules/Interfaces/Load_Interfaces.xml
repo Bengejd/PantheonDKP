@@ -1,0 +1,5 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+    <Script file="Main.lua" />
+    <Script file="ScrollTable_Base\ScrollTable.lua" />
+    <Script file="MemberTable\MemberTable.lua" />
+</Ui>
