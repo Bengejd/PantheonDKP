@@ -281,11 +281,11 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     end
 
     -- TODO: Finish hooking this up.
-    if filterOn == 'online' and checkedStatus then
-        self.online = Guild:UpdateOnlineStatus()
-    elseif filterOn == 'raid' and checkedStatus then
-        self.raid_members = Raid.raid.members or {};
-    end
+    --if filterOn == 'online' and checkedStatus then
+    --    self.online = Guild:UpdateOnlineStatus()
+    --elseif filterOn == 'raid' and checkedStatus then
+    --    self.raid_members = Raid.raid.members or {};
+    --end
 
     self.displayedRows = {};
     for i=1, #self.displayData do
@@ -318,9 +318,6 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     setmetatable(self, ScrollTable); -- Set the metatable so we use ScrollTable's __index
 
     -- Set all of the important settings or default if they were not provided.
-
-    print(table_settings['parent'])
-
     self.parent = self:SetParent(table_settings['parent'])
     self.name = self.parent and self.parent:GetName() .. '_' .. table_settings['name'] or table_settings['name']
     self.height = table_settings['height'] or 300

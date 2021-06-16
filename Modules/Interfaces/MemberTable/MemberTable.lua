@@ -107,7 +107,7 @@ function MemberTable:Initialize()
     st.cols[1]:Click()
 
     PDKP.memberTable = st;
-    GUI.memberTable = st;
+    --GUI.memberTable = st;
 
     st.searchFrame = self:TableSearch()
     --
@@ -120,7 +120,7 @@ function MemberTable:Initialize()
 
     st.entryLabel = label
 
-    self:Filters()
+    PDKP.memberTable.filter_frame = self:Filters()
 end
 
 function MemberTable:TableSearch()
@@ -313,7 +313,9 @@ function MemberTable:Filters()
         st:ApplyFilter(b.filterOn, b:GetChecked());
     end
 
-    self.filter_frame = f;
+    f.filterButtons = self.FilterButtons;
+
+    return f;
 end
 
 
