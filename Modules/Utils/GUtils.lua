@@ -195,7 +195,7 @@ function GUtils:createDropdown(opts)
                 UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value)
                 UIDropDownMenu_SetText(dropdown, b.value)
                 b.checked = true
-                change_func(dropdown, b.value)
+                changeFunc(dropdown, b.value)
             end
             UIDropDownMenu_AddButton(info)
         end
