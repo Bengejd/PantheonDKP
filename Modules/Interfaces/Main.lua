@@ -94,4 +94,4 @@ function Main:Initialize()
     return pdkp_frame
 end
 
-GUI.Main = Main;
+MODULES.Main = Main;

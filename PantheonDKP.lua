@@ -103,6 +103,7 @@ end
 function CORE:_InitializeFeatures()
     LOG:Trace("CORE:_InitializeFeatures()")
     MODULES.GuildManager:Initialize()
+    MODULES.Main:Initialize()
 
     -- We keep the order
     --MODULES.ProfileManager:Initialize()
