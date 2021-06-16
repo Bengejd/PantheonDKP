@@ -12,11 +12,27 @@
 
     <!--  Models  -->
     <Script file="Database\Database.lua" />
+    <Script file="GuildManager\Member\Member.lua" />
+    <Script file="DKPManager\DKPEntry\DKPEntry.lua" />
 
     <!-- Controllers -->
     <Script file="GuildManager\GuildManager.lua" />
-    <Script file="GuildManager\Member\Member.lua" />
+    <Script file="RaidManager\RaidManager.lua" />
+    <Script file="DKPManager\DKPManager.lua" />
+    <Script file="History\History.lua" />
+    <Script file="Lockouts\Lockouts.lua" />
+    <Script file="Options\Options.lua" />
+    <Script file="Loot\Loot.lua" />
+    <Script file="Adjustments\Adjustments.lua" />
 
-    <!--  Views  -->
+    <!-- Standalone Views  -->
     <Include file="Interfaces\Load_interfaces.xml"/>
+
+    <!-- Dependent Views   -->
+    <Include file="RaidManager\GUI.lua" />
+    <Include file="History\GUI.lua" />
+    <Include file="Lockouts\GUI.lua" />
+    <Include file="Options\GUI.lua" />
+    <Include file="Loot\GUI.lua" />
+    <Include file="Adjustments\GUI.lua" />
 </Ui>

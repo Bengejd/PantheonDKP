@@ -34,6 +34,7 @@ Media.ROW_SEP_TEXTURE = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 -- MISC
 Media.CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 Media.TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
+Media.TAB_TEXTURE = "Interface\\CHATFRAME\\ChatFrameTab"
 
 Media.addon_version_hex = '0059C5'
 
