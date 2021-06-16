@@ -11,8 +11,9 @@ local Tab = {}
 function Tab:Initialize()
     Tab.tabs = {};
     Tab.tab_btns = {};
+    Tab.tab_names = {};
 
-    local f = CreateFrame("Frame", "$parentRightFrame", pdkp_frame, MODULES.Media.BackdropTemplate)
+    local f = CreateFrame("Frame", "$parentRightFrame", pdkp_frame)
 
     f:SetHeight(500)
     f:SetWidth(395)
@@ -84,7 +85,7 @@ function Tab:Initialize()
         b.text = b_text
         b.frame = tf
 
-        Tab[name] = b
+        Tab.tab_names[name] = b
         Tab.tabs[i] = b
         Tab.tab_btns[i] = b
     end
