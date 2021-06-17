@@ -6,6 +6,7 @@ local GameFontHighlightSmall = GameFontHighlightSmall
 
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils;
 
 local GUtils = PDKP.GUtils
 
@@ -147,6 +148,7 @@ function GUtils:createDropdown(opts)
     dropdown.uniqueID = opts['name']
     dropdown.showOnValue = opts['showOnValue'] or 'Always'
     dropdown.initialized = false -- Used later on, in initialization
+    dropdown.children = opts['children'] or {}
 
     --- BUG FIX Start: Menu Width
     --- Menu width doesn't dynamically change, at least not easily. To get around this, we find the longest string, pop
@@ -177,7 +179,7 @@ function GUtils:createDropdown(opts)
     dropdown:SetScript("OnHide", hideFunc)
     dropdown.isValid = function()
         local box_text = UIDropDownMenu_GetSelectedValue(dropdown)
-        return dropdown:IsVisible() and box_text and box_text ~= "" and box_text ~= 0;
+        return dropdown:IsVisible() and box_text ~= nil and box_text ~= "" and box_text ~= 0;
     end
 
     if hide then dropdown:Hide() end
@@ -195,7 +197,7 @@ function GUtils:createDropdown(opts)
                 UIDropDownMenu_SetSelectedValue(dropdown, b.value, b.value)
                 UIDropDownMenu_SetText(dropdown, b.value)
                 b.checked = true
-                changeFunc(dropdown, b.value)
+                changeFunc(dropdown, dropdown, b)
             end
             UIDropDownMenu_AddButton(info)
         end
@@ -207,7 +209,8 @@ function GUtils:createDropdown(opts)
     end)
 
     -- Attaches this to a global object, if provided.
-    if opts['dropdownTable'] then opts['dropdownTable'][opts['name']] = dropdown end
+    if opts['dropdownTable'] then dropdown.dropdownTable = opts['dropdownTable'] end
+    Utils:WatchVar(dropdown, dropdown.uniqueID)
 
     return dropdown
 end

@@ -5,7 +5,6 @@ PDKP.Utils = {}
 local Utils = PDKP.Utils;
 local MODULES = PDKP.MODULES;
 
-local ViragDevTool_AddData = ViragDevTool_AddData
 local strmatch, strlower = strmatch, strlower
 
 -- http://lua-users.org/wiki/CopyTable
@@ -105,8 +104,10 @@ end
 
 local watchedVars = {};
 function Utils:WatchVar(tData, strName)
-    if ViragDevTool_AddData and PDKP:IsDev() and not watchedVars[strName] then
+
+    if ViragDevTool_AddData ~= nil and PDKP:IsDev() and watchedVars[strName] ~= true then
         ViragDevTool_AddData(tData, strName)
+        print('Watching Var', strName)
         watchedVars[strName]=true
     end
 end

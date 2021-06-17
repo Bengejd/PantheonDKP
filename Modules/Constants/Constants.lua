@@ -25,8 +25,9 @@ Constants.CLASS_COLORS = {
 
 Constants.RAID_NAMES = {}
 Constants.RAID_INDEXES = {}
-Constants.BOSS_NAMES = {}
-Constants.BOSS_IDS = {}
+Constants.RAID_BOSSES = {}
+--Constants.BOSS_NAMES = {}
+--Constants.BOSS_IDS = {}
 Constants.RAIDS = {
     ["Gruul's Lair"] = {
         ["phase"] = 1,
@@ -99,10 +100,25 @@ do
         if raid_phase <= Constants.PHASE then
             tinsert(Constants.RAID_NAMES, raid)
             Constants.RAID_INDEXES[raid] = raid_table['index']
-            for boss_id, boss in pairs(raid_table) do
-                tinsert(Constants.BOSS_NAMES, boss)
-                tinsert(Constants.BOSS_IDS, boss_id)
+
+            local raidInfo = {
+                ['id_to_name'] = {},
+                ['name_to_id'] = {},
+                ['boss_names'] = {}
+            }
+            for index, value in pairs(raid_table) do
+                if type(index) == "number" then
+                    raidInfo['id_to_name'][index] = value
+                    raidInfo['name_to_id'][value] = index
+                    tinsert(raidInfo['boss_names'], value)
+                end
             end
+
+            tsort(raidInfo['boss_names'], function(a, b)
+                return raidInfo['name_to_id'][a] < raidInfo['name_to_id'][b]
+            end)
+
+            Constants.RAID_BOSSES[raid] = raidInfo
         end
     end
 

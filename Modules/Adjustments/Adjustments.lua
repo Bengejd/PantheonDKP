@@ -7,6 +7,7 @@ local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local Adjust = {}
+Adjust.entry = {}
 
 function Adjust:Initialize()
 
