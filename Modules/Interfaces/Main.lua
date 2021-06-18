@@ -34,7 +34,7 @@ function Main:Initialize()
             t:SetDrawLayer("Background", -8)
             t:SetPoint('TOPLEFT', f, 5, -15)
             t:SetPoint('BOTTOMRIGHT', f, -5, 15)
-            t:SetAlpha(0.8)
+            t:SetAlpha(0.9)
         else
             t:SetPoint(tex['dir'], f, x, y)
         end
