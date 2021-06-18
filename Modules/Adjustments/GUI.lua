@@ -6,17 +6,16 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local tinsert, tContains, pairs = table.insert, tContains, pairs;
+local tinsert, tContains, pairs, next = table.insert, tContains, pairs, next;
 
 local Adjust = {}
 local tabName = 'view_adjust_button';
 
 Adjust.dropdowns = {}
+Adjust.editBoxes = {}
 
 function Adjust:Initialize()
-    if not PDKP.canEdit then
-        return
-    end
+    if not PDKP.canEdit then return end
 
     local tabNames = GUI.TabController.tab_names
 
@@ -29,95 +28,192 @@ function Adjust:Initialize()
 
     local tf = tabNames[tabName].frame;
 
-    local mainDD, amount_box, other_box;
+    --- Entry Preview Section
+    local entry_preview = self:CreateEntryPreview(tf)
 
-    --- Reason Dropdown
+    --- Entry Details section
+    local entry_details = GUtils:createBackdropFrame('entry_details', tf, 'Entry Details');
+    entry_details:SetPoint("TOPLEFT", entry_preview, "BOTTOMLEFT", 0, 0)
+    entry_details:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 0, 0);
+
+    local mainDD, raidDD, amount_box, other_box, item_box;
+
+    --- Reason Section
     local reason_opts = {
-        ['name'] = 'reasons',
-        ['parent'] = tf,
+        ['name'] = 'reason',
+        ['parent'] = entry_details.content,
         ['title'] = 'Adjustment Reason',
-        ['items'] = { 'On Time Bonus', 'Completion Bonus', 'Boss Kill', 'Unexcused Absence', 'Item Win', 'Other' },
+        ['items'] = { 'Completion Bonus', 'Boss Kill', 'Item Win', 'Other' },
         ['defaultVal'] = '',
         ['changeFunc'] = self.DropdownChanged
     }
 
     mainDD = GUtils:createDropdown(reason_opts)
-    mainDD:SetPoint("TOPLEFT", tf, "TOPLEFT", -3, -50)
+    mainDD:SetPoint("TOPLEFT", entry_details, "TOPLEFT", -3, -50)
     tinsert(self.dropdowns, mainDD)
+    tinsert(entry_details.children, mainDD)
+
+    local raid_items = {}
+    for raid_name, raid_table in pairs(MODULES.Constants.RAID_BOSSES) do
+        raid_items[raid_name] = raid_table['boss_names']
+    end
 
     --- Raid Section
     local raid_opts = {
-        ['name'] = 'Raid',
+        ['name'] = 'raid_boss',
         ['parent'] = mainDD,
-        ['title'] = 'Raid',
+        ['title'] = 'Raid Boss',
         ['hide'] = true,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Boss Kill',
         ['changeFunc'] = self.DropdownChanged,
-        ['items'] = MODULES.Constants.RAID_NAMES,
+        ['items'] = raid_items
     }
 
-    local raidDD = GUtils:createDropdown(raid_opts)
+    raidDD = GUtils:createNestedDropdown(raid_opts)
     raidDD:SetPoint("LEFT", mainDD, "RIGHT", -20, 0)
     tinsert(self.dropdowns, raidDD)
+    tinsert(entry_details.children, raidDD)
 
-    --- Boss Section
-    for raidName, raid in pairs(MODULES.Constants.RAID_BOSSES) do
-        local boss_names = raid['boss_names']
-        for i = 1, #boss_names do
-            local boss_opts = {
-                ['name'] = 'boss_' .. raidName,
-                ['parent'] = mainDD,
-                ['title'] = 'Boss',
-                ['hide'] = true,
-                ['showOnValue'] = raidName,
-                ['items'] = boss_names,
-                ['dropdownTable'] = raidDD,
-                ['changeFunc'] = self.DropdownChanged,
-            }
+    --- Amount section
+    local amount_opts = {
+        ['name']='amount',
+        ['parent']=mainDD,
+        ['title']='Amount',
+        ['multi']=false,
+        ['max_chars']=7,
+        ['numeric']=true,
+        ['dropdownTable'] = mainDD,
+        ['showOnValue'] = 'Always',
+        ['textValidFunc']=self.DropdownChanged
+    }
+    amount_box = GUtils:createEditBox(amount_opts)
+    amount_box.frame:SetWidth(75)
+    amount_box:SetWidth(60)
+    amount_box:SetPoint("TOPLEFT", mainDD, "BOTTOMLEFT", 25, -20)
+    tinsert(self.editBoxes, amount_box)
+    tinsert(entry_details.children, amount_box)
 
-            if #boss_names == 1 then
-                boss_opts['defaultVal'] = boss_names[1]
-            end
+    --- Item Name Box Section
+    local item_opts = {
+        ['name']= 'item',
+        ['parent']= mainDD,
+        ['title']='Item Name',
+        ['multi']=true,
+        ['numeric']=false,
+        ['dropdownTable'] = mainDD,
+        ['showOnValue'] = 'Item Win',
+        ['textValidFunc']=self.DropdownChanged
+    }
+    item_box = GUtils:createEditBox(item_opts)
+    item_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
+    item_box:Hide()
+    tinsert(self.editBoxes, item_box)
+    tinsert(entry_details.children, item_box)
 
-            local bossDD = GUtils:createDropdown(boss_opts)
-            bossDD:SetPoint("LEFT", raidDD, "RIGHT", -20, 0)
-            tinsert(self.dropdowns, bossDD)
-            tinsert(raidDD.children, bossDD)
+    --- Other Edit Box Section
+    local other_opts = {
+        ['name']= 'other',
+        ['parent']= mainDD,
+        ['title']='Other',
+        ['multi']=true,
+        ['numeric']=false,
+        ['dropdownTable'] = mainDD,
+        ['showOnValue'] = 'Other',
+        ['textValidFunc']=self.DropdownChanged
+    }
+    other_box = GUtils:createEditBox(other_opts)
+    other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
+    other_box:Hide()
+    tinsert(self.editBoxes, other_box)
+    tinsert(entry_details.children, other_box)
+
+    --- Submit Section
+    local sb = CreateFrame("Button", "$parent_submit", tf, "UIPanelButtonTemplate")
+    sb:SetSize(80, 22) -- width, height
+    sb:SetText("Submit")
+    sb:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 4, -22)
+    sb:SetScript("OnClick", function()
+        -- TODO: Hook up submit logic.
+    end)
+    sb:Disable()
+
+    self.entry_details = entry_details;
+end
+
+function Adjust:CreateEntryPreview(tf)
+    local f = GUtils:createBackdropFrame('entry_preview', tf, 'Entry Preview');
+    f:SetPoint("TOPLEFT", tf, "TOPLEFT", 10, -20)
+    f:SetPoint("TOPRIGHT", tf, "TOPRIGHT", -10, -20)
+    f:SetSize(340, 250);
+
+    local PREVIEW_HEADERS = {'Officer', 'Reason', 'Amount', 'Members'}
+
+    for i=1, #PREVIEW_HEADERS do
+        local head = PREVIEW_HEADERS[i]
+        local label = f.content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
+        local value = f.content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
+
+        label:SetText(head .. ':')
+
+        if i == 1 then
+            label:SetPoint("TOPLEFT", f.content, "TOPLEFT", 5, -5)
+        else
+            label:SetPoint("TOPLEFT", f.children[i -1], "BOTTOMLEFT", 0, -2)
         end
+
+        value:SetPoint("LEFT", label, "RIGHT", 0, 0)
+        value:SetText("None")
+
+        label.value = value;
+
+        table.insert(f.children, label)
     end
+
+    f.desc:SetText(Utils:FormatTextColor("Entry is invalid", 'E71D36'));
+
+    return f;
+end
+
+function Adjust:UpdatePreview(isValid)
+
 end
 
 -- Just helps break up everything, gathering all of the data into one place before shipping it off.
-function Adjust:DropdownChanged(dropdown, menuItem)
+function Adjust:DropdownChanged()
+    --- There will always be either 2 or 3 valid adjustments.
     local valid_adjustments = {}
+    local children = Adjust.entry_details.children
 
-    for _, dd in pairs(Adjust.dropdowns) do
+    local mainDD = children[1]
+    local amount_box = children[3]
+
+    if mainDD.selectedValue == 'Boss Kill' and amount_box:getValue() ~= 10 then
+        amount_box:SetEnabled(false)
+        return amount_box:SetText(10)
+    else
+        amount_box:SetEnabled(true)
+    end
+
+    local tbl_len = 0
+    for _, dd in pairs(children) do
         if dd.dropdownTable ~= nil and dd.showOnValue ~= "Always" then
             local ddParent = dd.dropdownTable;
             if ddParent.selectedValue == dd.showOnValue and ddParent:IsVisible() then
                 dd:Show()
-                print(dd.isValid())
             else
                 dd:Hide()
             end
         end
-
-        if dd.isValid() then valid_adjustments[dd.uniqueID] = dd.selectedValue end
+        if dd.isValid() then
+            valid_adjustments[dd.uniqueID] = dd.selectedValue
+            tbl_len = tbl_len + 1
+        end
     end
 
-    print(#valid_adjustments)
-
-    -- 'On Time Bonus', 'Completion Bonus', 'Boss Kill', 'Unexcused Absence', 'Item Win', 'Other'
-
-end
-
-function Adjust:ReasonChanged()
-
-end
-
-function Adjust:RaidChanged()
-    print('Raid!');
+    if next(valid_adjustments) ~= nil and tbl_len >= 2 then
+        MODULES.Adjustment:Update(valid_adjustments)
+    end
 end
 
 function PDKP_ToggleAdjustmentDropdown()
