@@ -42,9 +42,9 @@ function Adjust:Initialize()
     local reason_opts = {
         ['name'] = 'reason',
         ['parent'] = entry_details.content,
-        ['title'] = 'Adjustment Reason',
-        ['items'] = { 'Completion Bonus', 'Boss Kill', 'Item Win', 'Other' },
-        ['defaultVal'] = '',
+        ['title'] = 'Reason',
+        ['items'] = { 'Boss Kill', 'Item Win', 'Other' },
+        ['defaultVal'] = 'Boss Kill',
         ['changeFunc'] = self.DropdownChanged
     }
 
@@ -99,7 +99,7 @@ function Adjust:Initialize()
         ['name']= 'item',
         ['parent']= mainDD,
         ['title']='Item Name',
-        ['multi']=true,
+        ['multi']=false,
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Item Win',
@@ -142,6 +142,8 @@ function Adjust:Initialize()
 end
 
 function Adjust:CreateEntryPreview(tf)
+    if not PDKP.canEdit then return end
+
     local f = GUtils:createBackdropFrame('entry_preview', tf, 'Entry Preview');
     f:SetPoint("TOPLEFT", tf, "TOPLEFT", 10, -20)
     f:SetPoint("TOPRIGHT", tf, "TOPRIGHT", -10, -20)
@@ -176,11 +178,14 @@ function Adjust:CreateEntryPreview(tf)
 end
 
 function Adjust:UpdatePreview(isValid)
+    if not PDKP.canEdit then return end
 
 end
 
 -- Just helps break up everything, gathering all of the data into one place before shipping it off.
 function Adjust:DropdownChanged()
+    if not PDKP.canEdit then return end
+
     --- There will always be either 2 or 3 valid adjustments.
     local valid_adjustments = {}
     local children = Adjust.entry_details.children

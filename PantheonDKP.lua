@@ -104,6 +104,13 @@ function CORE:_InitializeFeatures()
     LOG:Trace("CORE:_InitializeFeatures()")
     MODULES.GuildManager:Initialize()
     MODULES.Main:Initialize()
+    MODULES.AuctionManager:Initialize()
+    MODULES.DKPManager:Initialize()
+    MODULES.RaidManager:Initialize()
+    MODULES.Lockouts:Initialize()
+    MODULES.Loot:Initialize()
+    MODULES.Options:Initialize()
+    MODULES.History:Initialize()
 
     -- We keep the order
     --MODULES.ProfileManager:Initialize()
@@ -220,7 +227,6 @@ end
 function PDKP:IsDev()
     return MODULES.Dev and type(MODULES.Dev) == "table"
 end
-
 
 --@do-not-package@
 function CORE.Debug()

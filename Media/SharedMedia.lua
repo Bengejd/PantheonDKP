@@ -31,6 +31,9 @@ Media.HIGHLIGHT_TEXTURE = 'Interface\\QuestFrame\\UI-QuestTitleHighlight'
 Media.ARROW_TEXTURE = 'Interface\\MONEYFRAME\\Arrow-Left-Up'
 Media.ROW_SEP_TEXTURE = 'Interface\\Artifacts\\_Artifacts-DependencyBar-BG'
 
+Media.ARROW_RIGHT_TEXTURE = 'Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up'
+Media.ARROW_LEFT_TEXTURE = 'Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up'
+
 -- MISC
 Media.CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 Media.TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"

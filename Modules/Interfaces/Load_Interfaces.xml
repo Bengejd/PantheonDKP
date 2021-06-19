@@ -3,4 +3,5 @@
     <Script file="ScrollTable_Base\ScrollTable.lua" />
     <Script file="MemberTable\MemberTable.lua" />
     <Script file="TabController\TabController.lua" />
+    <Script file="SimpleScrollFrame\SimpleScrollFrame.lua" />
 </Ui>

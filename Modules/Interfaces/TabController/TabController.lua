@@ -70,6 +70,11 @@ function Tab:Initialize()
                 if btn:GetName() ~= b:GetName() then
                     btn.frame:Hide()
                     btn:SetAlpha(0.5)
+                    btn.active = false
+                else
+                    Tab.activeTab = btn:GetName()
+                    -- TODO: Remove this shit
+                    print('TabController:', btn:GetName())
                 end
             end
 
