@@ -21,6 +21,8 @@ function GuildManager:Initialize()
     self.memberNames = {}
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
+    self.GuildDB = MODULES.Database:Guild()
+
     if not IsInGuild() then return end
 
     self:GetMembers()
@@ -32,16 +34,23 @@ function GuildManager:IsNewMemberObject(name)
     return not tContains(self.memberNames, name)
 end
 
+function GuildManager:IsMemberInDatabase(name)
+    return self.GuildDB[name] ~= nil
+end
+
 function GuildManager:GetMembers()
     GuildRoster()
     self.classLeaders, self.officers, self.online = {}, {}, {}
     self.numOfMembers, self.numOnlineMembers, _ = GetNumGuildMembers()
 
+    local server_time = GetServerTime()
+
     local Member = MODULES.Member;
 
     for i=1, self.numOfMembers do
-        local member = Member:new(i)
-        local isNew = self:IsNewMemberObject(member['name'])
+        local member = Member:new(i, server_time)
+        local isNew = self:IsNewMemberObject(member.name)
+        local inDatabase = self:IsMemberInDatabase(member.name);
 
         if member:IsRaidReady() then
             if member.name == nil then member.name = '' end
@@ -53,6 +62,10 @@ function GuildManager:GetMembers()
                 self.members[member.name] = member;
                 self.memberNames[#self.memberNames + 1] = member.name
             end
+
+            --if not inDatabase and PDKP.canEdit then
+            --    member:Initialize(server_time)
+            --end
 
             if member.online then self.online[member.name] = member end
         end

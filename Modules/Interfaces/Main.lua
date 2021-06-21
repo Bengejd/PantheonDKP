@@ -94,4 +94,10 @@ function Main:Initialize()
     return pdkp_frame
 end
 
+function Main:HandleSlashCommands(msg)
+    if pdkp_frame == nil then return end
+
+    if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+end
+
 MODULES.Main = Main;

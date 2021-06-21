@@ -16,10 +16,13 @@
     <Script file="DKPManager\DKPEntry\DKPEntry.lua" />
 
     <!-- Controllers -->
+    <Script file="CommsManager\CommsManager.lua" />
+    <Script file="ChatManager\ChatManager.lua" />
     <Script file="GuildManager\GuildManager.lua" />
     <Script file="RaidManager\RaidManager.lua" />
     <Script file="DKPManager\DKPManager.lua" />
     <Script file="AuctionManager\AuctionManager.lua" />
+    <Script file="BidManager\BidManager.lua" />
     <Script file="History\History.lua" />
     <Script file="Lockouts\Lockouts.lua" />
     <Script file="Options\Options.lua" />
@@ -32,6 +35,7 @@
     <!-- Dependent Views   -->
     <Include file="RaidManager\GUI.lua" />
     <Include file="AuctionManager\GUI.lua" />
+    <Include file="BidManager\GUI.lua" />
     <Include file="History\GUI.lua" />
     <Include file="Lockouts\GUI.lua" />
     <Include file="Options\GUI.lua" />

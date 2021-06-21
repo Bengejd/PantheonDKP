@@ -15,21 +15,28 @@ function DB:Initialize()
     -- Below API requires delay after loading to work after variables loaded event
     UpdateGuild()
 
-    if type(PDKP_DB[self.server_faction_guild]) ~= "table" then
-        PDKP_DB[self.server_faction_guild] = {}
+    local dbRef = self.server_faction_guild;
+
+    local tables = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot' }
+
+    -- Database is compressed
+    if type(PDKP_DB[dbRef]) == "string" then
+        --PDKP_DB[dbRef] = MODULES.CommsManager:DataDecoder(PDKP_DB[dbRef])
     end
-    if type(PDKP_DB[self.server_faction_guild]['personal']) ~= "table" then
-        PDKP_DB[self.server_faction_guild]['personal'] = {}
+
+    if type(PDKP_DB[dbRef]) ~= "table" then PDKP_DB[dbRef] = {} end
+
+    for i=1, #tables do
+        local db = tables[i]
+        if type(PDKP_DB[dbRef][db]) ~= "table" then
+            PDKP_DB[dbRef][db] = {}
+        end
     end
-    if type(PDKP_DB[self.server_faction_guild]['guild']) ~= "table" then
-        PDKP_DB[self.server_faction_guild]['guild'] = {}
-    end
-    if type(PDKP_DB[self.server_faction_guild]['raid']) ~= "table" then
-        PDKP_DB[self.server_faction_guild]['raid'] = {}
-    end
-    if type(PDKP_DB[self.server_faction_guild]['ledger']) ~= "table" then
-        PDKP_DB[self.server_faction_guild]['ledger'] = {}
-    end
+
+    PDKP.CORE:RegisterEvent('PLAYER_LOGOUT', function()
+        print('Player Logout called');
+        PDKP_DB[dbRef] = MODULES.CommsManager:DataEncoder(PDKP_DB[dbRef])
+    end)
 end
 
 function DB:Global()
@@ -52,8 +59,24 @@ function DB:Guild()
     return PDKP_DB[self.server_faction_guild]['guild']
 end
 
-function DB:Raid()
-    return PDKP_DB[self.server_faction_guild]['raid']
+function DB:Pug()
+    return PDKP_DB[self.server_faction_guild]['pug']
+end
+
+function DB:Officers()
+    return PDKP_DB[self.server_faction_guild]['officers']
+end
+
+function DB:Settings()
+    return PDKP_DB[self.server_faction_guild]['settings']
+end
+
+function DB:Loot()
+    return PDKP_DB[self.server_faction_guild]['loot']
+end
+
+function DB:Lockouts()
+    return PDKP_DB[self.server_faction_guild]['lockouts']
 end
 
 function DB:Ledger()

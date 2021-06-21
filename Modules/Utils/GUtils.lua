@@ -305,7 +305,7 @@ function GUtils:createNestedDropdown(opts)
     end
 
     -- We need to define the initialize function via blizzard's method.
-    function PDKP_DropDown_Initialize(self,level)
+    function PDKP_DropDown_Initialize(self, level)
         level = level or 1;
 
         if level == 1 then
@@ -382,10 +382,9 @@ function GUtils:createEditBox(opts)
     end
     local numeric = opts['numeric'] or false
     local small_title = opts['smallTitle'] or false
-    local dropdown_table = opts['dropdownTable'] or nil
-    local showOnValue = opts['showOnValue'] or nil
 
     local box = CreateFrame("EditBox", "$parent_" .. name, parent)
+    box:SetParent(parent)
     box:SetHeight(30)
     box:SetWidth(150)
     box:SetFrameStrata("DIALOG")
@@ -399,8 +398,12 @@ function GUtils:createEditBox(opts)
 
     box.touched = false
 
-    if opts['showOnValue'] then box.showOnValue = opts['showOnValue'] end
-    if opts['dropdownTable'] then box.dropdownTable = opts['dropdownTable'] end
+    if opts['showOnValue'] then
+        box.showOnValue = opts['showOnValue']
+    end
+    if opts['dropdownTable'] then
+        box.dropdownTable = opts['dropdownTable']
+    end
 
     box.isValid = function()
         return box:IsVisible()
@@ -415,7 +418,9 @@ function GUtils:createEditBox(opts)
         return box:GetText()
     end
 
-    box:SetScript("OnEscapePressed", function() box:ClearFocus() end)
+    box:SetScript("OnEscapePressed", function()
+        box:ClearFocus()
+    end)
     box:SetScript("OnTextChanged", function()
         box.selectedValue = box.getValue()
         textValidFunc()

@@ -269,7 +269,7 @@ end
 ----- FILTER FUNCTIONS -----
 
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    Utils:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
+    --Utils:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
 
     if filterOn == 'Class_All' then -- Reset all class filters if this gets checked.
         for _, class in pairs(MODULES.Constants.CLASSES) do

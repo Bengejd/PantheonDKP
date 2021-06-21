@@ -1,17 +1,22 @@
 local _G = _G
 local addonName, PDKP = ...;
 
+local LibStub = LibStub
+
 PDKP.CORE = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0", "AceEvent-3.0")
+
+PDKP.ldb = LibStub:GetLibrary("LibDataBroker-1.1")
+PDKP.cbh = LibStub("CallbackHandler-1.0"):New(PDKP.CORE)
+PDKP.LibDeflate = LibStub:GetLibrary("LibDeflate")
 
 PDKP.MODULES = {}
 PDKP.MODELS = { LEDGER = {} }
 PDKP.CONSTANTS = {}
 PDKP.GUI = {}
 PDKP.OPTIONS = {}
+PDKP.LOG = LibStub("LibLogger"):New()
 
 PDKP.AUTOVERSION = "@project-version@"
-
-PDKP.LOG = LibStub("LibLogger"):New()
 
 local CORE = PDKP.CORE
 local LOG = PDKP.LOG
@@ -84,6 +89,8 @@ function CORE:_InitializeCore()
     LOG:Trace("CORE:_InitializeCore()")
 
     MODULES.Database:Initialize()
+    MODULES.ChatManager:Initialize()
+    MODULES.CommsManager:Initialize()
     --MODULES.ConfigManager:Initialize()
     --MODULES.ACL:Initialize()
 end

@@ -16,16 +16,17 @@ function AuctionGUI:Initialize()
     local title_str = Utils:FormatTextColor('PDKP Active Bids', MODULES.Constants.ADDON_HEX)
 
     local f = CreateFrame("Frame", "pdkp_auction_frame", UIParent, MODULES.Media.BackdropTemplate)
+    f:SetFrameStrata('DIALOG')
     f:SetWidth(256)
     f:SetHeight(256)
     f:SetPoint("BOTTOMRIGHT", pdkp_frame, "BOTTOMLEFT", 0, 0)
     GUtils:setMovable(f)
-    f:SetFrameStrata('FULLSCREEN_DIALOG')
+    f:SetClampedToScreen(true);
 
     -- TODO: Get Rid of this, and hook it up properly.
     local DevDKP = 30
 
-    local stopBid;
+    local stopBid, bid_box;
 
     f:SetScript("OnShow", function()
         -- TODO: Set up this to grab their DKP total.
@@ -138,13 +139,12 @@ function AuctionGUI:Initialize()
     --local edge = 14551
     --local test_item_id = kingsfall
 
-    local bid_box;
-
     local bid_box_opts = {
         ['name'] = 'bid_input',
         ['parent'] = f,
         ['title'] = 'Bid Amount',
         ['multi_line'] = false,
+        ['hide'] = false,
         ['max_chars'] = 5,
         ['textValidFunc'] = function(box)
             if box == nil then box = bid_box end
@@ -162,6 +162,7 @@ function AuctionGUI:Initialize()
     bid_box = GUtils:createEditBox(bid_box_opts)
     bid_box:SetWidth(80)
     bid_box:SetPoint("LEFT", f, "LEFT", 45, -35)
+    bid_box:SetFrameLevel(f:GetFrameLevel() + 5)
     bid_box.frame:SetFrameLevel(bid_box:GetFrameLevel() - 2)
     bid_box:SetScript("OnTextSet", function()
         local val = bid_box.getValue()

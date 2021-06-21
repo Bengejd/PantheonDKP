@@ -12,16 +12,54 @@ local strsplit = strsplit
 
 local Member = {}
 
+local guildDB, pugDB;
+
 Member.__index = Member; -- Set the __index parameter to reference Member
 
-function Member:new(guildIndex)
+function Member:new(guildIndex, server_time)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
 
+    guildDB = MODULES.Database:Guild()
+
     self.guildIndex = guildIndex
+    self.server_time = server_time
+
     self:GetMemberData(guildIndex)
 
+    if self:IsRaidReady() then
+        self:InitializeDKP()
+        self:Save()
+    end
+
     return self
+end
+
+function Member:InitializeDKP()
+    if Utils:tEmpty(guildDB[self.name]) then
+        self.dkp = {
+            ['total'] = 30,
+            ['initOn'] = self.server_time,
+            ['entries'] = {},
+        }
+    else
+        self.dkp = guildDB[self.name]
+    end
+
+    self:Save()
+end
+
+function Member:Save()
+    local dkp = {
+        ['total'] = self.dkp['total'],
+        ['initOn'] = self.dkp['initOn'],
+    }
+
+    if not Utils:tEmpty(self.dkp['entries']) then
+        dkp['entries'] = self.dkp['entries']
+    end
+
+    guildDB[self.name] = dkp
 end
 
 function Member:GetMemberData(index)
@@ -49,22 +87,24 @@ function Member:GetMemberData(index)
     self.visible = true
 
     self.dkp = {};
+    self.init = false
     self.isDkpOfficer = false
 
     self.lockouts = {}
 end
 
 function Member:IsRaidReady()
-    return self.lvl >= 55 or self.canEdit or self.isOfficer;
+    return self.lvl >= 68 or self.canEdit or self.isOfficer;
 end
 
 function Member:CanEdit()
     return self.canEdit or self.rankIndex <= 3 or self.ifOfficer
 end
 
-function Member:GetDKP()
-    -- TODO: Finish Member.GetDKP
-    return 30
+function Member:GetDKP(dkpVariable)
+    if dkpVariable == nil then
+        return self.dkp['total']
+    end
 end
 
 function Member:GetLockouts()

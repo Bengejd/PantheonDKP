@@ -73,8 +73,6 @@ function Tab:Initialize()
                     btn.active = false
                 else
                     Tab.activeTab = btn:GetName()
-                    -- TODO: Remove this shit
-                    print('TabController:', btn:GetName())
                 end
             end
 

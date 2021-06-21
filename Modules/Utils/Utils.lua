@@ -5,7 +5,17 @@ PDKP.Utils = {}
 local Utils = PDKP.Utils;
 local MODULES = PDKP.MODULES;
 
-local strmatch, strlower = strmatch, strlower
+local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
+local replace, format, tostring, gsub, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
+local floor, fmod = math.floor, math.fmod;
+local insert, sort, next = table.insert, table.sort, next;
+local date, type, print = date, type, print
+local getn, pairs, ipairs = table.getn, pairs, ipairs
+
+local daysInWeek = 7
+local daysInYear = 365
+local hoursInDay = 24
+local secondsInHour = 60 * 60
 
 -- http://lua-users.org/wiki/CopyTable
 function Utils.ShallowCopy(orig)
@@ -44,6 +54,11 @@ function Utils.DeepCopy(orig, copies)
     return copy
 end
 
+function Utils:IsItemLink(iLink)
+    return strmatch(iLink, "|Hitem:(%d+):")
+end
+
+-- Formats text color
 function Utils:FormatTextColor(text, color_hex)
     if text == nil then return text end
     if not color_hex then
@@ -52,15 +67,11 @@ function Utils:FormatTextColor(text, color_hex)
     return "|cff" .. color_hex .. text .. "|r"
 end
 
+-- Formats text color based on class
 function Utils:FormatTextByClass(text, class)
     local class_color = MODULES.Constants.CLASS_COLORS[class]
     local colored_text, colored_class = Utils:FormatTextColor(text, class_color), Utils:FormatTextColor(class, class_color)
     return colored_text, colored_class
-end
-
--- Cleaner Ternary function calling.
-function Utils:Ternary(eval, optA, optB)
-    if eval then return optA else return optB end
 end
 
 -- Utility function to help determine if the string is empty or nil.
@@ -110,4 +121,9 @@ function Utils:WatchVar(tData, strName)
         print('Watching Var', strName)
         watchedVars[strName]=true
     end
+end
+
+function Utils:tEmpty(t)
+    if type(t) ~= "table" then return true end
+    return next(t) == nil;
 end

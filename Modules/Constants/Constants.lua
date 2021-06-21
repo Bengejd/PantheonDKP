@@ -9,8 +9,11 @@ local GetAddOnMetadata = GetAddOnMetadata
 local tinsert, tsort, strupper, tostring = tinsert, table.sort, string.upper, tostring;
 
 Constants.ADDON_HEX = '33FF99'
+Constants.SLASH_HEX = 'ffaeae';
 Constants.ADDON_NAME = 'PantheonDKP'
 Constants.COLORED_ADDON_SHORT = '|cff33ff99PDKP|r'
+Constants.SLASH_ADDON = '|cff33ff99/pdkp|r'
+
 Constants.PHASE = GetAddOnMetadata('PantheonDKP', 'X-Phase')
 
 Constants.BANK_NAME = "Testing" -- TODO: Factor this out of Member class, and into a setting.

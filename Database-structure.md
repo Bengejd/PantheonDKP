@@ -42,18 +42,18 @@ The guild DB contains information regarding the individual members in the guild,
     PDKP.dbDefaults = {
         ['global'] = {
             ['db'] = {
-                ['guildDB'] = {
+                ['guild'] = {
                     ['members'] = {},
                     ['numOfMembers'] = 0
                 },
-                ['pugDB'] = {},
-                ['officersDB'] = {},
-                ['dkpDB'] = {
+                ['pug'] = {},
+                ['officers'] = {},
+                ['dkp'] = {
                     ['lastEdit'] = 0,
                     ['history'] = {},
                     ['old_entries']= {},
                 },
-                ['settingsDB'] = {
+                ['settings'] = {
                     ['minimapPos'] = 207,
                     ['debug'] = false,
                     ['ignore_from']={},
@@ -66,7 +66,7 @@ The guild DB contains information regarding the individual members in the guild,
                     ['notifications'] = true,
                     ['debug'] = false,
                 },
-                ['testDB']={},
+                ['test']={},
             }
         }
     }

@@ -13,13 +13,15 @@ local Auction = {}
 Auction.CurrentAuctionInfo = {}
 Auction.CURRENT_BIDDERS = {}
 
-local function HandleModifiedTooltipClick(frame, buttonType)
-    if PDKP.canEdit and GameTooltip and IsAltKeyDown() then
+local function HandleModifiedTooltipClick()
+    if PDKP.canEdit and GameTooltip and IsAltKeyDown() and not Auction:IsAuctionInProgress() then
         local itemName, itemLink = GameTooltip:GetItem()
         if itemLink then
             Auction.auctionInProgress = true
             GUI.AuctionGUI:StartAuction(itemName, itemLink)
         end
+    elseif Auction:IsAuctionInProgress() then
+        PDKP.CORE:Print('Another auction is in progress');
     end
 end
 
@@ -30,6 +32,14 @@ end
 function Auction:Initialize()
     self.auctionInProgress = false
     self:HookBagSlots();
+end
+
+function Auction:HandleSlashCommands(msg)
+    local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
+
+    print(cmd, arg1, arg2)
+
+    --print('Auction:', cmd, args)
 end
 
 function Auction:HookBagSlots()
