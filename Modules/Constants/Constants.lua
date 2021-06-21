@@ -29,8 +29,7 @@ Constants.CLASS_COLORS = {
 Constants.RAID_NAMES = {}
 Constants.RAID_INDEXES = {}
 Constants.RAID_BOSSES = {}
---Constants.BOSS_NAMES = {}
---Constants.BOSS_IDS = {}
+Constants.BOSS_TO_RAID = {}
 Constants.RAIDS = {
     ["Gruul's Lair"] = {
         ["phase"] = 1,
@@ -114,6 +113,7 @@ do
                     raidInfo['id_to_name'][index] = value
                     raidInfo['name_to_id'][value] = index
                     tinsert(raidInfo['boss_names'], value)
+                    Constants.BOSS_TO_RAID[value] = raid
                 end
             end
 

@@ -17,6 +17,65 @@ local daysInYear = 365
 local hoursInDay = 24
 local secondsInHour = 60 * 60
 
+-----------------------------
+--     Debug Functions     --
+-----------------------------
+
+local watchedVars = {};
+function Utils:WatchVar(tData, strName)
+    if ViragDevTool_AddData ~= nil and PDKP:IsDev() and watchedVars[strName] ~= true then
+        ViragDevTool_AddData(tData, strName)
+        print('Watching Var', strName)
+        watchedVars[strName]=true
+    end
+end
+
+-----------------------------
+--     Item Functions      --
+-----------------------------
+
+function Utils:IsItemLink(iLink)
+    return strmatch(iLink, "|Hitem:(%d+):")
+end
+
+-----------------------------
+--     Color Functions     --
+-----------------------------
+
+-- Formats text color
+function Utils:FormatTextColor(text, color_hex)
+    if text == nil then return text end
+    if not color_hex then
+        PDKP:Print("No Default Color given")
+        color_hex = 'ff0000' end
+    return "|cff" .. color_hex .. text .. "|r"
+end
+
+-- Formats text color based on class
+function Utils:FormatTextByClass(text, class)
+    local class_color = MODULES.Constants.CLASS_COLORS[class]
+    local colored_text, colored_class = Utils:FormatTextColor(text, class_color), Utils:FormatTextColor(class, class_color)
+    return colored_text, colored_class
+end
+
+-----------------------------
+--     String Functions    --
+-----------------------------
+
+-- Utility function to help determine if the string is empty or nil.
+function Utils:IsEmpty(string)
+    return string == nil or string == '';
+end
+
+-- Utility function to help tell if the baseString contains the searchString
+function Utils:StringsMatch(baseString, searchString)
+    return not Utils:IsEmpty(strmatch(strlower(baseString), strlower(searchString), nil, true));
+end
+
+-----------------------------
+--     Table Functions     --
+-----------------------------
+
 -- http://lua-users.org/wiki/CopyTable
 function Utils.ShallowCopy(orig)
     local orig_type = type(orig)
@@ -54,36 +113,6 @@ function Utils.DeepCopy(orig, copies)
     return copy
 end
 
-function Utils:IsItemLink(iLink)
-    return strmatch(iLink, "|Hitem:(%d+):")
-end
-
--- Formats text color
-function Utils:FormatTextColor(text, color_hex)
-    if text == nil then return text end
-    if not color_hex then
-        PDKP:Print("No Default Color given")
-        color_hex = 'ff0000' end
-    return "|cff" .. color_hex .. text .. "|r"
-end
-
--- Formats text color based on class
-function Utils:FormatTextByClass(text, class)
-    local class_color = MODULES.Constants.CLASS_COLORS[class]
-    local colored_text, colored_class = Utils:FormatTextColor(text, class_color), Utils:FormatTextColor(class, class_color)
-    return colored_text, colored_class
-end
-
--- Utility function to help determine if the string is empty or nil.
-function Utils:IsEmpty(string)
-    return string == nil or string == '';
-end
-
--- Utility function to help tell if the baseString contains the searchString
-function Utils:StringsMatch(baseString, searchString)
-    return not Utils:IsEmpty(strmatch(strlower(baseString), strlower(searchString), nil, true));
-end
-
 -- For finding the index of an object item.
 function Utils:tfind(t, item, objIndex)
     objIndex = objIndex or nil;
@@ -111,16 +140,6 @@ function Utils:tfindObj(t, item, objIndex)
         index = index + 1
     end
     return nil, nil
-end
-
-local watchedVars = {};
-function Utils:WatchVar(tData, strName)
-
-    if ViragDevTool_AddData ~= nil and PDKP:IsDev() and watchedVars[strName] ~= true then
-        ViragDevTool_AddData(tData, strName)
-        print('Watching Var', strName)
-        watchedVars[strName]=true
-    end
 end
 
 function Utils:tEmpty(t)

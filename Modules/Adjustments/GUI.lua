@@ -20,7 +20,7 @@ function Adjust:Initialize()
     local tabNames = GUI.TabController.tab_names
 
     -- To prevent tab controller not being ready yet.
-    if tabNames == nil then
+    if tabNames == nil and self.entry_preview == nil and self.entry_details == nil then
         return C_Timer.After(0.1, function()
             Adjust:Initialize()
         end)
@@ -29,11 +29,11 @@ function Adjust:Initialize()
     local tf = tabNames[tabName].frame;
 
     --- Entry Preview Section
-    local entry_preview = self:CreateEntryPreview(tf)
+    self.entry_preview = self:_CreateEntryPreview(tf)
 
     --- Entry Details section
     local entry_details = GUtils:createBackdropFrame('entry_details', tf, 'Entry Details');
-    entry_details:SetPoint("TOPLEFT", entry_preview, "BOTTOMLEFT", 0, 0)
+    entry_details:SetPoint("TOPLEFT", self.entry_preview, "BOTTOMLEFT", 0, 0)
     entry_details:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 0, 0);
 
     local mainDD, raidDD, amount_box, other_box, item_box;
@@ -45,7 +45,7 @@ function Adjust:Initialize()
         ['title'] = 'Reason',
         ['items'] = { 'Boss Kill', 'Item Win', 'Other' },
         ['defaultVal'] = 'Boss Kill',
-        ['changeFunc'] = self.DropdownChanged
+        ['changeFunc'] = self._DropdownChanged
     }
 
     mainDD = GUtils:createDropdown(reason_opts)
@@ -66,7 +66,7 @@ function Adjust:Initialize()
         ['hide'] = true,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Boss Kill',
-        ['changeFunc'] = self.DropdownChanged,
+        ['changeFunc'] = self._DropdownChanged,
         ['items'] = raid_items
     }
 
@@ -82,10 +82,10 @@ function Adjust:Initialize()
         ['title']='Amount',
         ['multi']=false,
         ['max_chars']=7,
-        ['numeric']=true,
+        ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Always',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc']=self._DropdownChanged
     }
     amount_box = GUtils:createEditBox(amount_opts)
     amount_box.frame:SetWidth(75)
@@ -103,7 +103,7 @@ function Adjust:Initialize()
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Item Win',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc']=self._DropdownChanged
     }
     item_box = GUtils:createEditBox(item_opts)
     item_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -120,7 +120,7 @@ function Adjust:Initialize()
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Other',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc']=self._DropdownChanged
     }
     other_box = GUtils:createEditBox(other_opts)
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -141,7 +141,7 @@ function Adjust:Initialize()
     self.entry_details = entry_details;
 end
 
-function Adjust:CreateEntryPreview(tf)
+function Adjust:_CreateEntryPreview(tf)
     if not PDKP.canEdit then return end
 
     local f = GUtils:createBackdropFrame('entry_preview', tf, 'Entry Preview');
@@ -180,10 +180,29 @@ end
 function Adjust:UpdatePreview(isValid)
     if not PDKP.canEdit then return end
 
+    local entry = MODULES.Adjustment.entry
+
+    local officerPreview = self.entry_preview.children[1]
+    local reasonPreview = self.entry_preview.children[2]
+    local amountPreview = self.entry_preview.children[3]
+    local memberPreview = self.entry_preview.children[4]
+
+    local previews = {
+        ['officer'] = officerPreview,
+        ['reason'] = reasonPreview,
+        ['dkp_change'] = amountPreview,
+        ['names'] = memberPreview,
+    }
+
+    for key, preview in pairs(previews) do
+        if entry[key] then
+            preview.value:SetText(entry[key])
+        end
+    end
 end
 
 -- Just helps break up everything, gathering all of the data into one place before shipping it off.
-function Adjust:DropdownChanged()
+function Adjust:_DropdownChanged()
     if not PDKP.canEdit then return end
 
     --- There will always be either 2 or 3 valid adjustments.
@@ -195,7 +214,7 @@ function Adjust:DropdownChanged()
 
     if mainDD.selectedValue == 'Boss Kill' and amount_box:getValue() ~= 10 then
         amount_box:SetEnabled(false)
-        return amount_box:SetText(10)
+        amount_box:SetText(10)
     else
         amount_box:SetEnabled(true)
     end

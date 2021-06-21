@@ -38,7 +38,7 @@ end
 ----- HIGHLIGHT FUNCTIONS -----
 
 -- Determines if the row should be highlighted or not.
-function ScrollTable:HighlightRow(row, shouldHighlight)
+function ScrollTable:_HighlightRow(row, shouldHighlight)
     if shouldHighlight then
         row:LockHighlight()
     else
@@ -56,7 +56,7 @@ function ScrollTable:ClearSelected()
 end
 
 -- Populate the last select, for other functions.
-function ScrollTable:UpdateLastSelect(objIndex, isSelected)
+function ScrollTable:_UpdateLastSelect(objIndex, isSelected)
     local selectCount = #self.selected;
     if isSelected then self.lastSelect = objIndex;
     elseif selectCount >= 1 then self.lastSelect = self.selected[selectCount]
@@ -64,13 +64,13 @@ function ScrollTable:UpdateLastSelect(objIndex, isSelected)
     end
 end
 
-function ScrollTable:RowShiftClicked(objIndex, selectIndex)
+function ScrollTable:_RowShiftClicked(objIndex, selectIndex)
     local previousSelect = self.lastSelect
 
     if previousSelect == objIndex then return end -- Do nothing if the same thing is clicked again.
 
     -- Shift clicks always add to the lastSelect.
-    self:UpdateSelectStatus(objIndex, selectIndex, false, false)
+    self:_UpdateSelectStatus(objIndex, selectIndex, false, false)
     if #self.selected <= 1 then return end -- Only one thing selected, do nothing.
 
     local _, prevSelectIndex = Utils:tfind(self.displayedRows, previousSelect, self.ROW_SELECT_ON)
@@ -86,22 +86,22 @@ function ScrollTable:RowShiftClicked(objIndex, selectIndex)
         local rowSelected = Utils:tfind(self.selected, rowObjIndex)
         if not rowSelected then -- Add it to the list, if it is not already selected.
             tinsert(self.selected, rowObjIndex)
-            self:HighlightRow(betweenRows[i], true)
+            self:_HighlightRow(betweenRows[i], true)
         end
     end
 end
 
-function ScrollTable:UpdateSelectStatus(objIndex, selectIndex, isSelected, clear)
+function ScrollTable:_UpdateSelectStatus(objIndex, selectIndex, isSelected, clear)
     clear = clear or false
     if clear then self:ClearSelected() end
 
     if isSelected then tremove(self.selected, selectIndex)
     else tinsert(self.selected, objIndex)
     end
-    self:UpdateLastSelect(objIndex, not isSelected)
+    self:_UpdateLastSelect(objIndex, not isSelected)
 end
 
-function ScrollTable:CheckSelect(row, clickType)
+function ScrollTable:_CheckSelect(row, clickType)
     local selectOn = row.selectOn
     local objIndex = row.dataObj[selectOn]
 
@@ -113,16 +113,16 @@ function ScrollTable:CheckSelect(row, clickType)
         if hasShift and hasCtrl then -- Do nothing here.
             return
         elseif hasShift then -- Shift click
-            self:RowShiftClicked(objIndex, selectIndex)
+            self:_RowShiftClicked(objIndex, selectIndex)
         else -- Control or Regular Click.
-            self:UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
+            self:_UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
         end
 
         return self:RefreshLayout()
     end
 
     local isSelected, _ = Utils:tfind(self.selected, objIndex)
-    self:HighlightRow(row, isSelected)
+    self:_HighlightRow(row, isSelected)
 end
 
 function ScrollTable:ClearAll()
@@ -235,7 +235,7 @@ function ScrollTable:RefreshLayout()
                 row:SetPoint("TOPLEFT", self.displayedRows[i-1], "BOTTOMLEFT")
             end
             local isSelected, _ = Utils:tfind(self.selected, row.dataObj[row.selectOn])
-            self:HighlightRow(row, isSelected)
+            self:_HighlightRow(row, isSelected)
         else
             row:Hide();
         end
@@ -309,6 +309,10 @@ function ScrollTable:SearchChanged(searchText)
     self.searchText = searchText
     local checkedStatus = searchText and searchText ~= '' and searchText ~= nil
     self:ApplyFilter('name', checkedStatus)
+end
+
+function ScrollTable:GetSelected()
+    return self.selected
 end
 
 ----- INITIALIZATION FUNCTIONS -----
@@ -394,8 +398,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.scrollChild = listScrollFrame.scrollChild;
 
     ----------------
-    -- Set the on_ functions
-    self:OnLoad()
+    -- Set the on_Load functions
+    self:_OnLoad()
 
     self.ListScrollFrame.buttonHeight = self.ROW_HEIGHT;
 
@@ -422,7 +426,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     return self
 end
 
-function ScrollTable:OnLoad()
+function ScrollTable:_OnLoad()
     -- Create the item model that we'll be displaying.
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Button", nil, self.scrollChild)
@@ -448,7 +452,7 @@ function ScrollTable:OnLoad()
             row:SetHighlightTexture(MODULES.Media.HIGHLIGHT_TEXTURE)
             row:SetPushedTexture(MODULES.Media.HIGHLIGHT_TEXTURE)
             row:SetScript("OnClick", function(r, clickType)
-                self:CheckSelect(r, clickType)
+                self:_CheckSelect(r, clickType)
             end)
         end
 

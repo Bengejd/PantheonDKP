@@ -181,7 +181,6 @@ function GUtils:createDropdown(opts)
     local dropdown_width = dd_title:GetStringWidth() + title_padding
 
     UIDropDownMenu_SetWidth(dropdown, dropdown_width)
-    UIDropDownMenu_SetText(dropdown, default_val)
     dd_title:SetText(title_text)
 
     --- End BUG FIX: Menu Width
@@ -219,6 +218,7 @@ function GUtils:createDropdown(opts)
         if not dropdown.initialized and default_val and default_val ~= '' then
             dropdown.initialized = true;
             UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
+            UIDropDownMenu_SetText(dropdown, default_val)
         end
     end)
 

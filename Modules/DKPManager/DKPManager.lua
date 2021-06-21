@@ -12,4 +12,8 @@ function DKP:Initialize()
 
 end
 
+function DKP:CreateNewEntry(adjustment_details)
+
+end
+
 MODULES.DKPManager = DKP

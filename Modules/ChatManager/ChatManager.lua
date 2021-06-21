@@ -34,7 +34,9 @@ function Chat:HandleSlashCommands(msg)
         [''] = function()  end,
         [''] = function()  end,
         [''] = function()  end,
-        [''] = function()  end,
+
+        -- Database Handlers
+        ['databaseReset'] = function() MODULES.Database:ResetAllDatabases() end,
     }
 
     if SLASH_COMMANDS[command] then return SLASH_COMMANDS[command]() end

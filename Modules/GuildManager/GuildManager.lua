@@ -6,6 +6,8 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
+local Member;
+
 local tContains = tContains
 
 local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
@@ -21,6 +23,7 @@ function GuildManager:Initialize()
     self.memberNames = {}
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
+    Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
 
     if not IsInGuild() then return end
@@ -44,8 +47,6 @@ function GuildManager:GetMembers()
     self.numOfMembers, self.numOnlineMembers, _ = GetNumGuildMembers()
 
     local server_time = GetServerTime()
-
-    local Member = MODULES.Member;
 
     for i=1, self.numOfMembers do
         local member = Member:new(i, server_time)
@@ -76,6 +77,10 @@ end
 function GuildManager:GetMemberByName(name)
     if tContains(self.memberNames, name) then return self.members[name] end
     return nil
+end
+
+function GuildManager:GetMe()
+    return GuildManager:GetMemberByName()
 end
 
 MODULES.GuildManager = GuildManager
