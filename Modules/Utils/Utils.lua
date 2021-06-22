@@ -17,6 +17,11 @@ local daysInYear = 365
 local hoursInDay = 24
 local secondsInHour = 60 * 60
 
+function Utils:ternaryAssign(cond, a, b)
+    if cond then return a end
+    return b
+end
+
 -----------------------------
 --     Debug Functions     --
 -----------------------------

@@ -118,6 +118,8 @@ function ScrollTable:_CheckSelect(row, clickType)
             self:_UpdateSelectStatus(objIndex, selectIndex, isSelected, not hasCtrl)
         end
 
+        if self.onSelectChanged then self:onSelectChanged() end
+
         return self:RefreshLayout()
     end
 
@@ -340,6 +342,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.ROW_SELECT_ON = row_settings['indexOn'] or nil
     self.retrieveDataFunc = table_settings['retrieveDataFunc']
     self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
+    self.onSelectChanged = table_settings['onSelectChanged']
 
     self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
     self.showHighlight = row_settings['showHighlight'] or false

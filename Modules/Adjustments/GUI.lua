@@ -45,7 +45,7 @@ function Adjust:Initialize()
         ['title'] = 'Reason',
         ['items'] = { 'Boss Kill', 'Item Win', 'Other' },
         ['defaultVal'] = 'Boss Kill',
-        ['changeFunc'] = self._DropdownChanged
+        ['changeFunc'] = self.DropdownChanged
     }
 
     mainDD = GUtils:createDropdown(reason_opts)
@@ -66,7 +66,7 @@ function Adjust:Initialize()
         ['hide'] = true,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Boss Kill',
-        ['changeFunc'] = self._DropdownChanged,
+        ['changeFunc'] = self.DropdownChanged,
         ['items'] = raid_items
     }
 
@@ -85,7 +85,7 @@ function Adjust:Initialize()
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Always',
-        ['textValidFunc']=self._DropdownChanged
+        ['textValidFunc']=self.DropdownChanged
     }
     amount_box = GUtils:createEditBox(amount_opts)
     amount_box.frame:SetWidth(75)
@@ -103,7 +103,7 @@ function Adjust:Initialize()
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Item Win',
-        ['textValidFunc']=self._DropdownChanged
+        ['textValidFunc']=self.DropdownChanged
     }
     item_box = GUtils:createEditBox(item_opts)
     item_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -120,7 +120,7 @@ function Adjust:Initialize()
         ['numeric']=false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Other',
-        ['textValidFunc']=self._DropdownChanged
+        ['textValidFunc']=self.DropdownChanged
     }
     other_box = GUtils:createEditBox(other_opts)
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -138,6 +138,8 @@ function Adjust:Initialize()
     end)
     sb:Disable()
 
+    entry_details.submit_btn = sb
+
     self.entry_details = entry_details;
 end
 
@@ -151,12 +153,22 @@ function Adjust:_CreateEntryPreview(tf)
 
     local PREVIEW_HEADERS = {'Officer', 'Reason', 'Amount', 'Members'}
 
+    local padding = 20
+
     for i=1, #PREVIEW_HEADERS do
         local head = PREVIEW_HEADERS[i]
         local label = f.content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
-        local value = f.content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
 
-        label:SetText(head .. ':')
+        label.setVal = function(_, value)
+            if value == nil or value == '' then return label:resetVal() end
+            label:SetText(head .. ': ' .. value)
+        end
+        label.resetVal = function()
+            label:SetText(head .. ': ' .. 'None')
+        end
+        label.setDefault = function()
+            label:SetText(head .. ': ')
+        end
 
         if i == 1 then
             label:SetPoint("TOPLEFT", f.content, "TOPLEFT", 5, -5)
@@ -164,46 +176,55 @@ function Adjust:_CreateEntryPreview(tf)
             label:SetPoint("TOPLEFT", f.children[i -1], "BOTTOMLEFT", 0, -2)
         end
 
-        value:SetPoint("LEFT", label, "RIGHT", 0, 0)
-        value:SetText("None")
+        label:setDefault()
 
-        label.value = value;
+        local label_width = label:GetStringWidth()
+        local total_width = 340
+        local remaining_width = total_width - (label_width + padding)
+
+        label:SetWidth(remaining_width)
+
+        label:resetVal()
 
         table.insert(f.children, label)
     end
 
-    f.desc:SetText(Utils:FormatTextColor("Entry is invalid", 'E71D36'));
+    f.invalidText = Utils:FormatTextColor("Entry is invalid", MODULES.Constants.WARNING);
+    f.validText = Utils:FormatTextColor('Entry is ready for submission', MODULES.Constants.SUCCESS)
+    f.desc:SetText(f.invalidText);
 
     return f;
 end
 
-function Adjust:UpdatePreview(isValid)
+function Adjust:UpdatePreview()
     if not PDKP.canEdit then return end
 
     local entry = MODULES.Adjustment.entry
+    local isValid = entry:IsValid()
 
     local officerPreview = self.entry_preview.children[1]
     local reasonPreview = self.entry_preview.children[2]
     local amountPreview = self.entry_preview.children[3]
     local memberPreview = self.entry_preview.children[4]
 
-    local previews = {
-        ['officer'] = officerPreview,
-        ['reason'] = reasonPreview,
-        ['dkp_change'] = amountPreview,
-        ['names'] = memberPreview,
-    }
+    officerPreview:setVal(entry.formattedOfficer)
+    amountPreview:setVal(entry.change_text)
+    memberPreview:setVal(entry.formattedNames)
+    reasonPreview:setVal(entry.historyText)
 
-    for key, preview in pairs(previews) do
-        if entry[key] then
-            preview.value:SetText(entry[key])
-        end
+    if isValid then
+        self.entry_preview.desc:SetText(self.entry_preview.validText)
+    else
+        self.entry_preview.desc:SetText(self.entry_preview.invalidText)
     end
+
+    self.entry_details.submit_btn:SetEnabled(isValid)
 end
 
 -- Just helps break up everything, gathering all of the data into one place before shipping it off.
-function Adjust:_DropdownChanged()
+function Adjust:DropdownChanged()
     if not PDKP.canEdit then return end
+    --if self.entry_preview == nil then return end
 
     --- There will always be either 2 or 3 valid adjustments.
     local valid_adjustments = {}

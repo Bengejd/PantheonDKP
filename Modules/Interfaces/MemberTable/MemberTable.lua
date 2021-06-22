@@ -61,7 +61,10 @@ function MemberTable:Initialize()
             ['point'] = 'TOPLEFT',
             ['rel_point_x'] = 8,
             ['rel_point_y'] = -70,
-        }
+        },
+        ['onSelectChanged'] = function()
+            return GUI.Adjustment:DropdownChanged()
+        end
     }
     local col_settings = {
         ['height'] = 14,

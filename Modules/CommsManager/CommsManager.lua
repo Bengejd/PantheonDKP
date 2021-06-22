@@ -13,11 +13,11 @@ function Comms:Initialize()
 end
 
 function Comms:Serialize(data)
-    return PDKP:Serialize(data);
+    return PDKP.CORE:Serialize(data);
 end
 
 function Comms:Deserialize(string)
-    local success, data = PDKP:Deserialize(string)
+    local success, data = PDKP.CORE:Deserialize(string)
     if success == false or success == nil then
         --Util:ThrowError('An error occured Deserializing the data...');
         return nil;
@@ -26,7 +26,7 @@ function Comms:Deserialize(string)
 end
 
 function Comms:DataEncoder(data)
-    local serialized = PDKP:Serialize(data)
+    local serialized = self:Serialize(data)
     local compressed = PDKP.LibDeflate:CompressDeflate(serialized)
     local encoded = PDKP.LibDeflate:EncodeForWoWAddonChannel(compressed)
     return encoded

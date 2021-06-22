@@ -35,10 +35,10 @@ function DB:Initialize()
         end
     end
 
-    PDKP.CORE:RegisterEvent('PLAYER_LOGOUT', function()
-        print('Player Logout called');
-        PDKP_DB[dbRef] = MODULES.CommsManager:DataEncoder(PDKP_DB[dbRef])
-    end)
+    --PDKP.CORE:RegisterEvent('PLAYER_LOGOUT', function()
+    --    print('Player Logout called');
+    --    PDKP_DB[dbRef] = MODULES.CommsManager:DataEncoder(PDKP_DB[dbRef])
+    --end)
 end
 
 function DB:Global()
