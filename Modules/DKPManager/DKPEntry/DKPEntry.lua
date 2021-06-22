@@ -83,9 +83,9 @@ function entry:IsValid()
     for i = 1, #core_details do
         local detail = self[core_details[i]]
         if type(detail) == "string" then
-            hasCore = hasCore and not (Utils:IsEmpty(detail))
+            isValid = isValid and not (Utils:IsEmpty(detail))
         elseif type(detail) == "table" then
-            hasCore = hasCore and not (Utils:tEmpty(detail))
+            isValid = isValid and not (Utils:tEmpty(detail))
         end
     end
 

@@ -125,6 +125,7 @@ function ScrollTable:_CheckSelect(row, clickType)
 
     local isSelected, _ = Utils:tfind(self.selected, objIndex)
     self:_HighlightRow(row, isSelected)
+    if self.onSelectChanged then self:onSelectChanged() end
 end
 
 function ScrollTable:ClearAll()
