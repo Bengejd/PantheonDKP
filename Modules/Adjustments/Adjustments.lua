@@ -33,16 +33,7 @@ function Adjust:Update(adjustments)
     end
 
     self.entry = MODULES.DKPEntry:new(temp_entry)
-
     return GUI.Adjustment:UpdatePreview()
-end
-
-function Adjust:_HasCore(entry)
-
-end
-
-function Adjust:_IsEntryValid()
-
 end
 
 MODULES.Adjustment = Adjust
