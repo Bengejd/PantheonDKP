@@ -1,4 +1,5 @@
 local _, PDKP = ...
+local _G = _G;
 
 local MODULES = PDKP.MODULES
 
@@ -147,6 +148,7 @@ function ScrollTable:SelectAll(remove)
             end
         end
     end
+    self.onSelectChanged()
     self:RefreshLayout()
 end
 
@@ -299,9 +301,11 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
     end
 
     if filterOn == 'Select_All' then
-        self:SelectAll()
-    else
-        self:ClearAll()
+        if self.appliedFilters['Select_All'] then
+            self:SelectAll()
+        else
+            self:ClearAll()
+        end
     end
 
     self:RefreshTableSize();
@@ -343,7 +347,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.ROW_SELECT_ON = row_settings['indexOn'] or nil
     self.retrieveDataFunc = table_settings['retrieveDataFunc']
     self.retrieveDisplayDataFunc = table_settings['retrieveDisplayDataFunc']
-    self.onSelectChanged = table_settings['onSelectChanged']
+    self.onSelectChanged = table_settings['onSelectChanged'] or function() end
 
     self.MAX_ROWS = (self.height / self.ROW_HEIGHT);
     self.showHighlight = row_settings['showHighlight'] or false
