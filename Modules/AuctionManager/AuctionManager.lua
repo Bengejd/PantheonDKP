@@ -19,6 +19,7 @@ local function HandleModifiedTooltipClick()
         if itemLink then
             Auction.auctionInProgress = true
             GUI.AuctionGUI:StartAuction(itemName, itemLink)
+            GUI.Adjustment:InsertItemLink(itemLink)
         end
     elseif Auction:IsAuctionInProgress() then
         PDKP.CORE:Print('Another auction is in progress');
