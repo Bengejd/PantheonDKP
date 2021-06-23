@@ -88,6 +88,7 @@ end
 function CORE:_InitializeCore()
     LOG:Trace("CORE:_InitializeCore()")
 
+    PDKP.Utils:Initialize()
     MODULES.Database:Initialize()
     MODULES.ChatManager:Initialize()
     MODULES.CommsManager:Initialize()

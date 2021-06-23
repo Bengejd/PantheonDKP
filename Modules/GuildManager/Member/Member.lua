@@ -68,6 +68,11 @@ function Member:GetDKP(dkpVariable)
     end
 end
 
+function Member:_UpdateDKP(amount)
+    self.dkp['total'] = self.dkp['total'] + amount
+
+end
+
 function Member:_InitializeDKP()
     if Utils:tEmpty(guildDB[self.name]) then
         self:_DefaultDKP()

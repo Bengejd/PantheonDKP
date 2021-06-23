@@ -11,11 +11,119 @@ local floor, fmod = math.floor, math.fmod;
 local insert, sort, next = table.insert, table.sort, next;
 local date, type, print = date, type, print
 local getn, pairs, ipairs = table.getn, pairs, ipairs
+local GetServerTime, GetQuestResetTime = GetServerTime, GetQuestResetTime
 
 local daysInWeek = 7
 local daysInYear = 365
 local hoursInDay = 24
 local secondsInHour = 60 * 60
+
+function Utils:Initialize()
+    self:GetResetInfo()
+end
+
+-----------------------------
+--     Reset Functions     --
+-----------------------------
+
+function Utils:GetResetInfo()
+    local server_time = GetServerTime()
+    local daily_reset_time = GetQuestResetTime() -- Seconds until daily quests reset.
+    local seconds_until_hour = fmod(daily_reset_time, secondsInHour)
+    local seconds_until_daily_reset = daily_reset_time - seconds_until_hour
+    local hours_until_daily_reset = seconds_until_daily_reset / 60 / 60
+
+    -- Blizzard Format Sunday (1), Monday (2), Tuesday (3), Wednesday (4), Thursday (5), Friday (6), Saturday (7)
+    local day = date("*t", server_time)
+    local wday = day.wday
+    local yday = day.yday
+
+    -- custom date schedule.
+    local customWeeklySchedule = {
+        [1] = { -- Old Sunday
+            ['daysFromReset'] = 2
+        },
+        [2] = { -- Old Monday
+            ['daysFromReset'] = 1
+        },
+        [3] = { -- Old Tuesday
+            ['daysFromReset'] = 0 -- Tuesday can either be 0 or 7 depending on time of day.
+        },
+        [4] = { -- Old Wednesday
+            ['daysFromReset'] = 6
+        },
+        [5] = { -- Old Thursday
+            ['daysFromReset'] = 5
+        },
+        [6] = { -- Old Friday
+            ['daysFromReset'] = 4
+        },
+        [7] = { -- Old Saturday
+            ['daysFromReset'] = 3
+        },
+    }
+
+    local customDay = customWeeklySchedule[wday]
+    local daysUntilReset = customDay['daysFromReset']
+    local isResetDay = daysUntilReset == 0
+    local serverReset = false
+
+    -- Today is weekly reset day, Daily reset happens at 9:59:59 AM, server time.
+    if daysUntilReset == 0 and hours_until_daily_reset >= 10 then
+        serverReset = true
+        daysUntilReset = 7
+    end
+
+    local dayOfReset = yday + daysUntilReset
+
+    if dayOfReset > daysInYear then
+        dayOfReset = dayOfReset - daysInYear
+    end
+
+    isResetDay = isResetDay or yday == dayOfReset
+
+    -- Set our globals
+    Utils.isResetDay = isResetDay
+    Utils.serverHasReset = serverReset
+    Utils.dayOfReset = dayOfReset
+    Utils.daysUntilReset = daysUntilReset
+    Utils.wday = wday
+    Utils.yday = yday
+    Utils.weekNumber = Utils:GetWeekNumber(server_time)
+end
+
+function Utils:GetWeekInfo()
+    return Utils.weekNumber, Utils.wday, Utils.yday
+end
+
+function Utils:GetYDay(unixtimestamp)
+    return date("*t", unixtimestamp).yday
+end
+
+function Utils:GetWDay(unixtimestamp)
+    return date("*t", unixtimestamp).wday
+end
+
+-- Return the 1-based unix epoch week number. Seems to be off by 2 weeks?
+function Utils:GetWeekNumber(unixtimestamp)
+    return 1 + floor(unixtimestamp / 604800)
+end
+
+function Utils:WeekStart(week)
+    return (week - 1) * 604800
+end
+
+-----------------------------
+--      Time Functions     --
+-----------------------------
+
+function Utils:Format12HrDateTime(dateTime)
+    return date("%a, %b %d | %I:%M %p", dateTime)
+end
+
+-----------------------------
+--      MISC Functions     --
+-----------------------------
 
 function Utils:ternaryAssign(cond, a, b)
     if cond then return a end
@@ -75,6 +183,17 @@ end
 -- Utility function to help tell if the baseString contains the searchString
 function Utils:StringsMatch(baseString, searchString)
     return not Utils:IsEmpty(strmatch(strlower(baseString), strlower(searchString), nil, true));
+end
+
+-- Utility function to remove non-numerics (except minus) from a number.
+function Utils:RemoveNonNumerics(str)
+    if str == nil then return str end
+    return str:gsub("%D+", "")
+end
+
+function Utils:RemoveAllNonNumerics(str)
+    if str == nil then return str end
+    return str:gsub("[^0-9]", "")
 end
 
 -----------------------------

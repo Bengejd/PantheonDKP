@@ -204,9 +204,14 @@ function ScrollTable:GetDisplayRows()
     end
 end
 
-function ScrollTable:RaidChanged()
+function ScrollTable:DataChanged()
     for i=1, #self.displayData do
         self.rows[i]:UpdateRowValues();
+    end
+
+    if self.sortCol then -- resort the column
+        self.sortCol:Click()
+        self.sortCol:Click()
     end
 end
 
@@ -319,7 +324,11 @@ function ScrollTable:SearchChanged(searchText)
 end
 
 function ScrollTable:GetSelected()
-    return self.selected
+    local selected = {}
+    for i=1, #self.selected do
+        tinsert(selected, self.selected[i])
+    end
+    return selected;
 end
 
 ----- INITIALIZATION FUNCTIONS -----
@@ -359,6 +368,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.displayData, self.displayedRows, self.appliedFilters, self.selected, self.online = {}, {}, {}, {}, {}
     self.raid_members, self.cols, self.data = {}, {}, {};
     self.searchText, self.entryLabel, self.lastSelect, self.sortBy, self.sortDir = nil;
+    self.sortCol = nil;
 
     self.firstSort = col_settings['firstSort'] or nil;
 
@@ -626,6 +636,7 @@ function ScrollTable:_OnLoad()
                         else
                             column:ToggleArrow(true)
                             self.sortBy = column.label
+                            self.sortCol = column
                         end
                     end
 

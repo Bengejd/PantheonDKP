@@ -134,7 +134,9 @@ function Adjust:Initialize()
     sb:SetText("Submit")
     sb:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 4, -22)
     sb:SetScript("OnClick", function()
-        -- TODO: Hook up submit logic.
+        if not Utils:tEmpty(MODULES.Adjustment.entry) then
+            MODULES.Adjustment.entry:Save()
+        end
     end)
     sb:Disable()
 
@@ -178,11 +180,9 @@ function Adjust:_CreateEntryPreview(tf)
 
         label:setDefault()
 
-        local label_width = label:GetStringWidth()
-        local total_width = 340
-        local remaining_width = total_width - (label_width + padding)
+        if head == 'Members' then label:SetMaxLines(12) end
 
-        label:SetWidth(remaining_width)
+        label:SetWidth(f.content:GetWidth() - padding)
 
         label:resetVal()
 
@@ -226,6 +226,8 @@ function Adjust:DropdownChanged()
     if not PDKP.canEdit then return end
     --if self.entry_preview == nil then return end
 
+    if Adjust.entry_details == nil then return end
+
     --- There will always be either 2 or 3 valid adjustments.
     local valid_adjustments = {}
     local children = Adjust.entry_details.children
@@ -233,11 +235,23 @@ function Adjust:DropdownChanged()
     local mainDD = children[1]
     local amount_box = children[3]
 
-    if mainDD.selectedValue == 'Boss Kill' and amount_box:getValue() ~= 10 then
+    local amt = tonumber(amount_box:getValue())
+
+    if mainDD.selectedValue == 'Boss Kill' and amt ~= 10 then
         amount_box:SetEnabled(false)
         amount_box:SetText(10)
     else
         amount_box:SetEnabled(true)
+    end
+
+    -- In case someone accidentally puts other characters in the edit box that makes it invalid.
+    if amt == nil then
+        local num = Utils:RemoveAllNonNumerics(amount_box:getValue())
+        amount_box:SetText(num)
+    end
+
+    if mainDD.selectedValue == 'Item Win' and amt ~= nil and amt >= 0 then
+        amount_box:SetText(amt * -1)
     end
 
     local tbl_len = 0
@@ -261,106 +275,16 @@ function Adjust:DropdownChanged()
     end
 end
 
-function PDKP_ToggleAdjustmentDropdown()
-    if tEmpty(GUI.adjustmentDropdowns) then
-        return
-    end
-
-    local gui_dds = GUI.adjustmentDropdowns;
-
-    wipe(GUI.adjustment_entry) -- Wipe the old entry details.
-
-    local entry_details = GUI.adjustment_entry
-
-    --- Submit Button
-    local sb = GUI.adjustment_submit_button
-
-    local reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD = gui_dds['reasons'], gui_dds['raid'], gui_dds['boss_Blackwing Lair'],
-    gui_dds['boss_Molten Core'], gui_dds['boss_Ahn\'Qiraj'], gui_dds['boss_Naxxramas']
-
-    local other_box = GUI.editBoxes['other']
-    local amount_box = GUI.editBoxes['amount']
-
-    local reason_val = UIDropDownMenu_GetSelectedValue(reasonDD)
-    local raid_val = UIDropDownMenu_GetSelectedValue(raidDD)
-
-    entry_details['raid'] = raid_val
-    entry_details['reason'] = reason_val
-
-    local function toggleFrameVisiblity(frame, show)
-        if show then
-            frame:Show()
-        else
-            frame:Hide()
+function Adjust:InsertItemLink(itemLink)
+    for i=1, #self.editBoxes do
+        local eb = self.editBoxes[i]
+        if eb.uniqueID == 'item' then
+            eb:SetText("");
+            eb:SetText(itemLink);
+            return
         end
     end
-
-    for _, b_dd in pairs({ bwlDD, mcDD, aqDD, naxxDD }) do
-        toggleFrameVisiblity(b_dd, reason_val == 'Boss Kill' and b_dd.uniqueID == 'boss_' .. raid_val)
-    end
-    toggleFrameVisiblity(other_box, reason_val == 'Other')
-
-    local adjust_amount_setting = Defaults.adjustment_amounts[raid_val][reason_val]
-    if adjust_amount_setting ~= nil then
-        amount_box:SetText(adjust_amount_setting)
-    end
-
-    GUI.adjustment_entry['dkp_change'] = amount_box:getValue()
-    GUI.adjustment_entry['other_text'] = other_box:GetText()
-
-    local selected = #PDKP.memberTable.selected
-
-    if reason_val == 'Unexcused Absence' and selected == 1 then
-        local unexcused_amount = DKP:CalculateButton('Unexcused Absence')
-        amount_box:SetText("-" .. unexcused_amount)
-        GUI.adjustment_entry['dkp_change'] = amount_box:getValue()
-    end
-
-    for _, b_dd in pairs({ bwlDD, mcDD, aqDD, naxxDD }) do
-        if b_dd:IsVisible() then
-            GUI.adjustment_entry['boss'] = UIDropDownMenu_GetSelectedValue(b_dd)
-        end
-    end
-
-    local can_submit = true
-
-    local entry_frames = { reasonDD, raidDD, bwlDD, mcDD, aqDD, naxxDD, other_box, amount_box }
-
-    --- Validate every frame.
-    for _, frame in pairs(entry_frames) do
-        can_submit = can_submit and frame.isValid()
-    end
-
-    if reason_val == 'Unexcused Absence' and selected ~= 1 then
-        can_submit = false
-    end
-
-    --- Selection check
-    can_submit = can_submit and selected > 0
-
-    if reason_val == 'Item Win' then
-        GUI.adjustment_entry['shouldHaveItem'] = true
-        can_submit = can_submit and selected == 1
-        Loot.frame:Show()
-    else
-        Loot.frame:Hide()
-    end
-
-    GUI.adjustment_entry['names'] = PDKP.memberTable.selected
-    GUI.adjustment_entry['item'] = nil;
-
-    for _, button in pairs(GUI.adjust_buttons) do
-        if (reason_val == 'Other' or reason_val == 'Item Win') and selected == 1 then
-            button:Enable()
-        else
-            button:Disable()
-        end
-    end
-
-    sb.canSubmit = can_submit
-    sb.canSubmit = can_submit
-
-    sb.toggle()
 end
+
 
 GUI.Adjustment = Adjust

@@ -61,6 +61,10 @@ function DB:Guild()
     return PDKP_DB[self.server_faction_guild]['guild']
 end
 
+function DB:DKP()
+    return PDKP_DB[self.server_faction_guild]['dkp']
+end
+
 function DB:Pug()
     return PDKP_DB[self.server_faction_guild]['pug']
 end
