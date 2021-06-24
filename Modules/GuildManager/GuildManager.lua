@@ -10,7 +10,11 @@ local Member;
 
 local tContains = tContains
 
-local IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo = IsInGuild, GetNumGuildMembers, GuildRoster, GuildRosterSetOfficerNote, GetGuildInfo -- Global Guild Functions
+local GetServerTime = GetServerTime
+
+local IsInGuild, GetNumGuildMembers, GuildRoster = IsInGuild, GetNumGuildMembers, GuildRoster
+local GuildRosterSetOfficerNote, GetGuildInfo = GuildRosterSetOfficerNote, GetGuildInfo
+
 
 local GuildManager = {}
 
@@ -44,6 +48,7 @@ end
 function GuildManager:GetMembers()
     GuildRoster()
     self.classLeaders, self.officers, self.online = {}, {}, {}
+
     self.numOfMembers, self.numOnlineMembers, _ = GetNumGuildMembers()
 
     local server_time = GetServerTime()
@@ -77,10 +82,6 @@ end
 function GuildManager:GetMemberByName(name)
     if tContains(self.memberNames, name) then return self.members[name] end
     return nil
-end
-
-function GuildManager:GetMe()
-    return GuildManager:GetMemberByName()
 end
 
 MODULES.GuildManager = GuildManager

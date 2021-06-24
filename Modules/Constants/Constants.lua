@@ -6,7 +6,8 @@ local MODULES = PDKP.MODULES
 local Constants = {}
 
 local GetAddOnMetadata = GetAddOnMetadata
-local tinsert, tsort, strupper, tostring = tinsert, table.sort, string.upper, tostring;
+local tinsert, tsort, pairs = tinsert, table.sort, pairs;
+local tonumber, type = tonumber, type
 
 Constants.ADDON_HEX = '33FF99'
 Constants.SLASH_HEX = 'ffaeae';
@@ -14,7 +15,7 @@ Constants.ADDON_NAME = 'PantheonDKP'
 Constants.COLORED_ADDON_SHORT = '|cff33ff99PDKP|r'
 Constants.SLASH_ADDON = '|cff33ff99/pdkp|r'
 
-Constants.PHASE = GetAddOnMetadata('PantheonDKP', 'X-Phase')
+Constants.PHASE = tonumber(GetAddOnMetadata('PantheonDKP', 'X-Phase'))
 
 Constants.SUCCESS = '22bb33'
 Constants.WARNING = 'E71D36'
@@ -101,7 +102,7 @@ Constants.RAIDS = {
 -- Setup RAID_NAMES, RAID_INDEXES, BOSS_NAMES, BOSS_IDS
 do
     for raid, raid_table in pairs(Constants.RAIDS) do
-        local raid_phase = tostring(raid_table['phase'])
+        local raid_phase = tonumber(raid_table['phase'])
         if raid_phase <= Constants.PHASE then
             tinsert(Constants.RAID_NAMES, raid)
             Constants.RAID_INDEXES[raid] = raid_table['index']

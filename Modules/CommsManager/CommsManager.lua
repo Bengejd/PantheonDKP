@@ -42,5 +42,32 @@ function Comms:DataDecoder(data)
     return deserialized -- Deserialize the compressed message
 end
 
+function Comms:DatabaseEncoder(data)
+    --local serialized = self:Serialize(data)
+    --local encoded = PDKP.LibDeflate:EncodeForWoWAddonChannel(serialized)
+    --return encoded
+
+    local serialized = self:Serialize(data)
+    local compressed = PDKP.LibDeflate:CompressDeflate(serialized)
+    return compressed
+    --local encoded = PDKP.LibDeflate:EncodeForWoWAddonChannel(compressed)
+    --return encoded
+end
+
+function Comms:DatabaseDecoder(data)
+    --local detransmit = PDKP.LibDeflate:DecodeForWoWAddonChannel(data)
+    --local deserialized = Comms:Deserialize(detransmit)
+    --return deserialized
+
+    --local detransmit = PDKP.LibDeflate:DecodeForWoWAddonChannel(data)
+    local decompressed = PDKP.LibDeflate:DecompressDeflate(data)
+    if decompressed == nil then -- It wasn't a message that can be decompressed.
+        return Comms:Deserialize(data) -- Return the regular deserialized messge
+    end
+    local deserialized = Comms:Deserialize(decompressed)
+    return deserialized -- Deserialize the compressed message
+end
+
+
 
 MODULES.CommsManager = Comms

@@ -22,6 +22,8 @@ local CORE = PDKP.CORE
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 
+local C_Timer = C_Timer
+
 local function Initialize_SavedVariables()
 
     if type(PDKP_DB) ~= "table" then
@@ -184,6 +186,10 @@ end
 
 function CORE:_ExecuteInitialize()
     if self._initialize_fired then return end
+
+    -- To make printing easier...
+    PDKP.Print = PDKP.CORE.Print
+
     self._initialize_fired = true
     C_Timer.After(1, function() CORE:_SequentialInitialize(0) end)
 end

@@ -69,8 +69,8 @@ function Member:GetDKP(dkpVariable)
 end
 
 function Member:_UpdateDKP(amount)
+    if amount == nil then return end
     self.dkp['total'] = self.dkp['total'] + amount
-
 end
 
 function Member:_InitializeDKP()

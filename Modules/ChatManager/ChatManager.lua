@@ -33,13 +33,19 @@ function Chat:HandleSlashCommands(msg)
         [''] = function()  end,
         [''] = function()  end,
         [''] = function()  end,
-        [''] = function()  end,
+        ['LoadMoreEntries'] = function() MODULES.DKPManager:LoadPrevFourWeeks() end,
 
         -- Database Handlers
         ['databaseReset'] = function() MODULES.Database:ResetAllDatabases() end,
     }
 
+    -- Dev Handlers
+    local DEV_SLASH_COMMANDS = {
+        ['databasePopulate'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
+    }
+
     if SLASH_COMMANDS[command] then return SLASH_COMMANDS[command]() end
+    if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then return DEV_SLASH_COMMANDS[command]() end
 end
 
 function Chat:DisplayHelp()

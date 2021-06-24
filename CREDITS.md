@@ -1,7 +1,7 @@
 # Credits
 PantheonDKP has been released since March 14, 2020. 
 I had no idea what I was doing when it came to developing an addon originally, so I turned to other code bases for 
-inspiration or help with solving a complicated problem.
+inspiration or help with solving a complicated problem. They are all listed below.
 
 ## World of Warcraft Classic Credits:
 

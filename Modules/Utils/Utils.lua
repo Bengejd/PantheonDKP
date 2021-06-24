@@ -104,6 +104,19 @@ function Utils:GetWDay(unixtimestamp)
     return date("*t", unixtimestamp).wday
 end
 
+function Utils:GetYear(unixtimestamp)
+    unixtimestamp = unixtimestamp or GetServerTime()
+    return date("%y", unixtimestamp)
+end
+
+function Utils:GenerateHashTimestamp(unixtimestamp)
+    local wday = self:GetWDay(unixtimestamp)
+    local weekNumber = self:GetWeekNumber(unixtimestamp)
+    local year = self:GetYear(unixtimestamp)
+
+    return tostring(year) .. "_" .. tostring(weekNumber) .. '_' .. tostring(wday)
+end
+
 -- Return the 1-based unix epoch week number. Seems to be off by 2 weeks?
 function Utils:GetWeekNumber(unixtimestamp)
     return 1 + floor(unixtimestamp / 604800)
@@ -126,7 +139,9 @@ end
 -----------------------------
 
 function Utils:ternaryAssign(cond, a, b)
-    if cond then return a end
+    if cond then
+        return a
+    end
     return b
 end
 
@@ -139,7 +154,7 @@ function Utils:WatchVar(tData, strName)
     if ViragDevTool_AddData ~= nil and PDKP:IsDev() and watchedVars[strName] ~= true then
         ViragDevTool_AddData(tData, strName)
         print('Watching Var', strName)
-        watchedVars[strName]=true
+        watchedVars[strName] = true
     end
 end
 
@@ -157,10 +172,13 @@ end
 
 -- Formats text color
 function Utils:FormatTextColor(text, color_hex)
-    if text == nil then return text end
+    if text == nil then
+        return text
+    end
     if not color_hex then
         PDKP:Print("No Default Color given")
-        color_hex = 'ff0000' end
+        color_hex = 'ff0000'
+    end
     return "|cff" .. color_hex .. text .. "|r"
 end
 
@@ -187,12 +205,16 @@ end
 
 -- Utility function to remove non-numerics (except minus) from a number.
 function Utils:RemoveNonNumerics(str)
-    if str == nil then return str end
+    if str == nil then
+        return str
+    end
     return str:gsub("%D+", "")
 end
 
 function Utils:RemoveAllNonNumerics(str)
-    if str == nil then return str end
+    if str == nil then
+        return str
+    end
     return str:gsub("[^0-9]", "")
 end
 
@@ -209,7 +231,8 @@ function Utils.ShallowCopy(orig)
         for orig_key, orig_value in pairs(orig) do
             copy[orig_key] = orig_value
         end
-    else -- number, string, boolean, etc
+    else
+        -- number, string, boolean, etc
         copy = orig
     end
     return copy
@@ -231,7 +254,8 @@ function Utils.DeepCopy(orig, copies)
             end
             setmetatable(copy, Utils.DeepCopy(getmetatable(orig), copies))
         end
-    else -- number, string, boolean, etc
+    else
+        -- number, string, boolean, etc
         copy = orig
     end
     return copy
@@ -267,6 +291,39 @@ function Utils:tfindObj(t, item, objIndex)
 end
 
 function Utils:tEmpty(t)
-    if type(t) ~= "table" then return true end
+    if type(t) ~= "table" then
+        return true
+    end
     return next(t) == nil;
+end
+
+local waitTable = {};
+local waitFrame = nil;
+
+function PDKP__wait(delay, func, ...)
+    if (type(delay) ~= "number" or type(func) ~= "function") then
+        return false;
+    end
+    if (waitFrame == nil) then
+        waitFrame = CreateFrame("Frame", "WaitFrame", UIParent);
+        waitFrame:SetScript("onUpdate", function(self, elapse)
+            local count = #waitTable;
+            local i = 1;
+            while (i <= count) do
+                local waitRecord = tremove(waitTable, i);
+                local d = tremove(waitRecord, 1);
+                local f = tremove(waitRecord, 1);
+                local p = tremove(waitRecord, 1);
+                if (d > elapse) then
+                    tinsert(waitTable, i, { d - elapse, f, p });
+                    i = i + 1;
+                else
+                    count = count - 1;
+                    f(unpack(p));
+                end
+            end
+        end);
+    end
+    tinsert(waitTable, { delay, func, { ... } });
+    return true;
 end

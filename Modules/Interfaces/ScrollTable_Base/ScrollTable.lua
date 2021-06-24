@@ -213,6 +213,8 @@ function ScrollTable:DataChanged()
         self.sortCol:Click()
         self.sortCol:Click()
     end
+
+    self:ApplyFilter('Select_All', false)
 end
 
 function ScrollTable:RefreshTableSize()

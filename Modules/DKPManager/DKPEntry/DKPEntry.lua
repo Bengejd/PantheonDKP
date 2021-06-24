@@ -22,6 +22,9 @@ local _OTHER = 'Other'
 entry.__index = entry
 
 function entry:new(entry_details)
+    local self = {}
+    setmetatable(self, entry); -- Set the metatable so we used entry's __index
+
     Guild = MODULES.GuildManager;
 
     --- Core Entry Details
@@ -73,7 +76,7 @@ function entry:new(entry_details)
     return self;
 end
 
-function entry:Save()
+function entry:Save(updateTable)
     wipe(self.sd)
 
     self.sd['id'] = self.id or GetServerTime()
@@ -90,7 +93,7 @@ function entry:Save()
         self.sd['other_text'] = self.other_text
     end
 
-    MODULES.DKPManager:AddNewEntryToDB(self)
+    MODULES.DKPManager:AddNewEntryToDB(self, updateTable)
 end
 
 function entry:GetMembers()
@@ -110,7 +113,6 @@ end
 
 function entry:IsValid()
     local isValid = true
-    local reason = '';
 
     for i = 1, #core_details do
         local detail = self[core_details[i]]
