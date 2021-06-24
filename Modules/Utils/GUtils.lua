@@ -49,6 +49,10 @@ function GUtils:createCheckButton(opts)
     local cbText = _G[cb:GetName() .. 'Text']
     cbText:SetText(displayText)
 
+    -- To center the text and the check box.
+    cbText:SetPoint("TOPLEFT", cb, "TOPRIGHT", 0, 0)
+    cbText:SetPoint("BOTTOMLEFT", cb, "BOTTOMRIGHT", 0, 0)
+
     if center and frame then
         local cbtw = cbText:GetWidth()
         cb:SetPoint("TOPRIGHT", frame, "CENTER", pointX - cbtw * 0.25, pointY)
