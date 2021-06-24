@@ -16,8 +16,8 @@ local tinsert, tremove = tinsert, tremove
 
 
 local tabName = 'view_history_button';
-local EXPAND_ALL = "Interface\\Addons\\PantheonDKP\\Icons\\expand_all.tga"
-local COLLAPSE_ALL = "Interface\\Addons\\PantheonDKP\\Icons\\collapse_all.tga"
+
+local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
     { ['variable']='formattedOfficer', ['display']='Officer', },
@@ -44,10 +44,12 @@ function HistoryTable:Initialize()
     Media = MODULES.Media
     DKPManager = MODULES.DKPManager
 
+    EXPAND_ALL = Media.EXPAND_ALL
+    COLLAPSE_ALL = Media.COLLAPSE_ALL
+
     self.parentFrame = GUI.TabController.tab_names[tabName].frame;
 
     self.frame = GUtils:createBackdropFrame('history_frame', self.parentFrame, '')
-    self.frame:SetAllPoints(self.parentFrame)
 
     local scroll = SimpleScrollFrame:new(self.frame.content)
     local scrollFrame = scroll.scrollFrame
@@ -85,7 +87,7 @@ function HistoryTable:Initialize()
     end)
 
     collapse_all.UpdateTexture = function()
-        collapse_all:SetNormalTexture(Utils.ternaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
+        collapse_all:SetNormalTexture(Utils:ternaryAssign(self.collapsed, COLLAPSE_ALL, EXPAND_ALL))
     end
 
     self.collapse_all = collapse_all;
@@ -374,7 +376,14 @@ function HistoryTable:_OnLoad()
             local c_raid = row.dataObj['raid'] or ''
             local c_officer = row.dataObj['formattedOfficer'] or ''
             local c_hist = row.dataObj['collapsedHistoryText'] or ''
-            local c_text = c_raid .. ' | ' .. c_officer .. ' | ' .. c_hist
+            local c_sep = ' | '
+            local c_text = c_officer .. c_sep
+            if c_raid ~= '' then
+                c_text = c_text .. c_raid .. c_sep
+            end
+
+            c_text = c_text .. c_hist
+
             collapse_text:SetText(c_text)
             if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
         end
