@@ -68,8 +68,7 @@ function entry:new(entry_details)
     self.change_text = self:_GetChangeText()
     self.historyText = self:_GetHistoryText()
     self.formattedID = Utils:Format12HrDateTime(self.id)
-
-    --self.collapsedHistoryText = self:GetCollapsedHistoryText()
+    self.collapsedHistoryText = self:_GetCollapsedHistoryText()
 
     self.edited_fields = entry_details['edited_fields'] or {}
 
@@ -186,6 +185,21 @@ function entry:_GetHistoryText()
     elseif self.reason == 'Other' then
         text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
     end
+
+    local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
+    return Utils:FormatTextColor(text, color)
+end
+
+function entry:_GetCollapsedHistoryText()
+    local texts = {
+        ['On Time Bonus']= self.reason,
+        ['Completion Bonus']= self.reason,
+        ['Unexcused Absence']= self.reason,
+        ['Boss Kill']= self.boss,
+        ['Item Win']= 'Item Win - ' .. self.item,
+        ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
+    }
+    local text = texts[self.reason]
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
     return Utils:FormatTextColor(text, color)

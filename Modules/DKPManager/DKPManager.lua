@@ -7,6 +7,7 @@ local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
+local tinsert, tsort, pairs = table.insert, table.sort, pairs
 
 local DKP = {}
 
@@ -27,15 +28,26 @@ function DKP:Initialize()
 
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
-
-    print('DKP initialized with', tostring(self.numOfEncoded) .. ' Encoded Entries')
 end
 
-function DKP:_LoadEncodedDatabase()
-    for index, entry in pairs(DKP_DB) do
-        self.encoded_entries[index] = entry
-        self.numOfEncoded = self.numOfEncoded + 1
+function DKP:GetEntries()
+    return self.entries;
+end
+
+function DKP:GetEntryKeys(sorted)
+    sorted = sorted or false
+    local keys = {}
+    for key, _ in pairs(self.entries) do
+        tinsert(keys, key)
     end
+
+    if sorted then tsort(keys, function(a, b) return a > b end) end
+
+    return keys;
+end
+
+function DKP:GetEntryByID(id)
+    return self.entries[id]
 end
 
 function DKP:LoadPrevFourWeeks()
@@ -90,6 +102,13 @@ function DKP:AddNewEntryToDB(entry, updateTable)
 
     if updateTable then
         PDKP.memberTable:DataChanged()
+    end
+end
+
+function DKP:_LoadEncodedDatabase()
+    for index, entry in pairs(DKP_DB) do
+        self.encoded_entries[index] = entry
+        self.numOfEncoded = self.numOfEncoded + 1
     end
 end
 

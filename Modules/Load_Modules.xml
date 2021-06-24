@@ -17,6 +17,7 @@
 
     <!-- Controllers -->
     <Script file="CommsManager\CommsManager.lua" />
+    <Script file="LedgerManager\LedgerManager.lua" />
     <Script file="ChatManager\ChatManager.lua" />
     <Script file="GuildManager\GuildManager.lua" />
     <Script file="RaidManager\RaidManager.lua" />
