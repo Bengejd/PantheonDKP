@@ -56,6 +56,7 @@ Media.PaneBackdrop  = {
 }
 Media.PaneColor = { 0.1, 0.1, 0.1, 0.5 }
 Media.PaneBorderColor = { 0.4, 0.4, 0.4 }
+Media.PaneBorderColorTransparent = { 0, 0, 0, 0 }
 
 Media.SolidBackDrop  = {
     bgFile = Media.PDKP_TEXTURE_BASE .. "BG.tga",

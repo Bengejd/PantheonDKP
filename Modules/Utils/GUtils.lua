@@ -72,12 +72,13 @@ function GUtils:createCheckButton(opts)
     return cb;
 end
 
-function GUtils:createBackdropFrame(name, parent, title)
+function GUtils:createBackdropFrame(name, parent, title, ignoreBorder)
     if parent == nil then
         return
     end
     title = title or ''
     name = name or nil
+    ignoreBorder = ignoreBorder or false
 
     local f = CreateFrame("Frame", name, parent)
 
@@ -92,9 +93,11 @@ function GUtils:createBackdropFrame(name, parent, title)
     border:SetPoint("TOPLEFT", 0, -17)
     border:SetPoint("BOTTOMRIGHT", -1, 3)
 
-    border:SetBackdrop(MODULES.Media.PaneBackdrop)
-    border:SetBackdropColor(unpack(MODULES.Media.PaneColor))
-    border:SetBackdropBorderColor(unpack(MODULES.Media.PaneBorderColor))
+    if not ignoreBorder then
+        border:SetBackdrop(MODULES.Media.PaneBackdrop)
+        border:SetBackdropColor(unpack(MODULES.Media.PaneColor))
+        border:SetBackdropBorderColor(unpack(MODULES.Media.PaneBorderColor))
+    end
 
     local content = CreateFrame("Frame", nil, border)
     content:SetPoint("TOPLEFT", 10, -10)

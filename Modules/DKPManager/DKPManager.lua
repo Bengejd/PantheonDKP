@@ -34,11 +34,23 @@ function DKP:GetEntries()
     return self.entries;
 end
 
-function DKP:GetEntryKeys(sorted)
+function DKP:GetEntryKeys(sorted, filterReasons)
     sorted = sorted or false
     local keys = {}
-    for key, _ in pairs(self.entries) do
-        tinsert(keys, key)
+
+    local excludedTypes = {}
+    if type(filterReasons) == "table" then
+        for i=1, #filterReasons do
+            excludedTypes[filterReasons[i]] = true
+        end
+    elseif type(filterReasons) == "string" then
+        excludedTypes[filterReasons] = true
+    end
+
+    for key, entry in pairs(self.entries) do
+        if excludedTypes[entry.reason] == nil then
+            tinsert(keys, key)
+        end
     end
 
     if sorted then tsort(keys, function(a, b) return a > b end) end
@@ -50,12 +62,19 @@ function DKP:GetEntryByID(id)
     return self.entries[id]
 end
 
+function DKP:GetNumEncoded()
+    return self.numOfEncoded
+end
+
 function DKP:LoadPrevFourWeeks()
     self.currentLoadedWeek = self.currentLoadedWeek - 4
 
-    for index, entry in pairs(self.encoded_entries) do
-        local weekNumber = Utils:GetWeekNumber(index)
+    self.numOfEncoded = 0
 
+    for index, entry in pairs(self.encoded_entries) do
+        self.numOfEncoded = self.numOfEncoded + 1
+
+        local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= self.currentLoadedWeek then
             local decoded_entry = CommsManager:DatabaseDecoder(entry)
             if decoded_entry == nil then decoded_entry = entry; end
@@ -67,10 +86,13 @@ function DKP:LoadPrevFourWeeks()
     for index, _ in pairs(self.entries) do
         if self.encoded_entries[index] ~= nil then
             self.encoded_entries[index] = nil
+            self.numOfEncoded = self.numOfEncoded - 1
         end
     end
 
     PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
+
+    return self.numOfEncoded
 end
 
 function DKP:GetOldestAndNewestEntry()

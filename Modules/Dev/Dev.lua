@@ -2,6 +2,7 @@ local _, PDKP = ...
 
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils
 --@do-not-package@
 
 local Dev = {}
@@ -97,6 +98,17 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames)
         local boss_name = raid_info['boss_names'][random_boss_index]
 
         dummy_entry['boss'] = boss_name;
+    elseif reason == 'Item Win' then
+        wipe(random_names)
+        tinsert(random_names, memberNames[member_index_end])
+
+        -- Ateish, Kingsfall, Blade, Edgemasters
+        local items = { 22589, 22802, 17780, 14551 }
+        local randomItemIndex = random(5)
+
+        if randomItemIndex ~= 5 then
+            dummy_entry['item'] = Utils:GetItemLink(items[randomItemIndex])
+        end
     end
 
     local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
@@ -104,11 +116,6 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames)
     if entry:IsValid() then
         return entry;
     else
-
-        if reason == 'Boss Kill' then
-            print(entry.reason, entry.boss, entry.raid)
-        end
-
         wipe(entry)
         return self:CreateDummyEntry(numOfMembers, memberNames)
     end

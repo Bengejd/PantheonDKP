@@ -49,11 +49,46 @@ function HistoryTable:Initialize()
 
     self.parentFrame = GUI.TabController.tab_names[tabName].frame;
 
-    self.frame = GUtils:createBackdropFrame('history_frame', self.parentFrame, '')
+    self.frame = GUtils:createBackdropFrame('history_frame', self.parentFrame, '', false)
+
+    self.frame:SetPoint("TOPLEFT", self.parentFrame, "TOPLEFT", 0, 0)
+    self.frame:SetPoint("BOTTOMRIGHT", self.parentFrame, "BOTTOMRIGHT", 0, 0)
+
+    self.frame.border:SetAllPoints(self.frame)
+
+    self.frame.content:SetPoint("TOPLEFT", 10, -40)
+    self.frame.content:SetPoint("BOTTOMRIGHT", -10, 10)
+
+    self.frame.title:SetPoint("TOPLEFT", 14, -15)
+    self.frame.title:SetPoint("TOPRIGHT", -14, -15)
+
+    local sb = CreateFrame("Button", "$parent_load_more_btn", self.frame, "UIPanelButtonTemplate")
+    sb:SetSize(80, 22) -- width, height
+    sb:SetText("Load More")
+    sb:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 4, -22)
+
+    local function toggleSB()
+        local numLeft = DKPManager:GetNumEncoded()
+        if numLeft <= 0 then
+            sb:Disable()
+        else
+            sb:Enable()
+        end
+    end
+
+    sb:SetScript("OnClick", function()
+        MODULES.DKPManager:LoadPrevFourWeeks()
+        toggleSB()
+    end)
+
+    self.frame.content:SetScript("OnShow", function() toggleSB() end)
 
     local scroll = SimpleScrollFrame:new(self.frame.content)
     local scrollFrame = scroll.scrollFrame
     local scrollContent = scrollFrame.content;
+    local scrollBar = scrollFrame.scrollBar
+
+    scrollBar.bg:SetColorTexture(unpack({0, 0, 0, 1}))
 
     self.scrollContent = scrollContent;
 
@@ -78,7 +113,7 @@ function HistoryTable:Initialize()
     end
 
     local collapse_all = CreateFrame("Button", nil, self.frame)
-    collapse_all:SetPoint("TOPRIGHT")
+    collapse_all:SetPoint("TOPRIGHT", -12, -20)
     collapse_all:SetSize(16, 16)
     collapse_all:SetNormalTexture(EXPAND_ALL)
     collapse_all:SetScript("OnClick", function()
@@ -113,14 +148,15 @@ function HistoryTable:Initialize()
         end
     end)
 
-    -- TODO: Change border color on the frame to be dark and the rows to be light.
-
     self:_OnLoad()
 
     self:RefreshData()
 
+
     return self
 end
+
+
 
 function HistoryTable:CollapseAllRows(collapse)
     for i=1, #self.rows do
@@ -146,12 +182,15 @@ function HistoryTable:RefreshData(justData)
     wipe(self.entry_keys)
     wipe(self.entries)
 
-    self.entry_keys = DKPManager:GetEntryKeys(true);
-
+    self.entry_keys = DKPManager:GetEntryKeys(true, {'Item Win'});
     for i=1, #self.entry_keys do self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]) end
 
     if justData == nil then
         self:RefreshTable()
+    end
+
+    if #self.entry_keys == 0 then
+        self:_NoEntriesFound()
     end
 end
 
@@ -397,6 +436,13 @@ function HistoryTable:_OnLoad()
     self.rows = rows
 end
 
+function HistoryTable:_NoEntriesFound()
+    self.frame.title:SetText("No Entries Found")
+    self.frame.desc:SetText("This will be populated once your database has a valid entry")
+
+    self.collapse_all:Hide()
+end
+
 function PDKP_History_OnClick(frame, buttonType)
     --if not PDKP.canEdit or not IsShiftKeyDown() then return end
     --
@@ -422,7 +468,7 @@ function PDKP_History_EntryDeleted(id)
     --GUI.history_table:HistoryUpdated()
 end
 
-pdkp_HistoryTableMixin = PDKP.History_Table;
+pdkp_HistoryTableMixin = HistoryTable;
 
 
 GUI.HistoryGUI = HistoryTable;

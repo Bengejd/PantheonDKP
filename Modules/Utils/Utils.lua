@@ -166,6 +166,18 @@ function Utils:IsItemLink(iLink)
     return strmatch(iLink, "|Hitem:(%d+):")
 end
 
+function Utils:GetItemLink(itemIdentifier)
+    -- Call instant first, since it assures that we'll get the item info.
+    GetItemInfoInstant(itemIdentifier)
+    -- Then call the actual item info, so we can get the texture, and link.
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
+    itemSellPrice = GetItemInfo(itemIdentifier)
+
+    return itemLink
+end
+
+
+
 -----------------------------
 --     Color Functions     --
 -----------------------------
