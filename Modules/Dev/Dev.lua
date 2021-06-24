@@ -24,7 +24,7 @@ function Dev:HandleSlashCommands(msg)
 end
 
 function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
-    numOfEntriesToCreate = numOfEntriesToCreate or 500;
+    numOfEntriesToCreate = tonumber(numOfEntriesToCreate) or 500;
 
     local memberNames = MODULES.GuildManager.memberNames;
     local numOfMembers = #memberNames
@@ -104,6 +104,11 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames)
     if entry:IsValid() then
         return entry;
     else
+
+        if reason == 'Boss Kill' then
+            print(entry.reason, entry.boss, entry.raid)
+        end
+
         wipe(entry)
         return self:CreateDummyEntry(numOfMembers, memberNames)
     end
