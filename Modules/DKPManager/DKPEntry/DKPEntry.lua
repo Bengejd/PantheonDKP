@@ -136,6 +136,7 @@ function entry:_GetRaid()
         return nil
     end
     self.raid = MODULES.Constants.BOSS_TO_RAID[self.boss]
+    return self.raid
 end
 
 function entry:_GetFormattedNames()
