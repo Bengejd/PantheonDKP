@@ -56,8 +56,14 @@ function GUtils:createCheckButton(opts)
         cb:SetPoint(point, pointX, pointY)
     end
 
+    --- BUG FIX: HitInset should be set to avoid overlapping other content with check box's click frame.
+    --- Defaults to (l,r,t,b) = 0, -145, 0, 0
+    cb:SetHitRectInsets(0, cbText:GetWidth() * -1, 0, 0)
+
     cb:SetChecked(enabled)
 
+    cb.text = cbText
+    cb.displayText = displayText
     cb.filterOn = uniqueName
     return cb;
 end
