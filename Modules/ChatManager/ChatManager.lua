@@ -54,7 +54,8 @@ function Chat:DisplayHelp()
 
     local helpCommands = {
         { ['cmd'] = 'show / hide', ['desc'] = 'PantheonDKP window', },
-        { ['cmd'] = 'bid <number>', ['desc'] = '', },
+        { ['cmd'] = 'bid <number>', ['desc'] = 'To place a bid', },
+        { ['cmd'] = 'bid <itemLink>', ['desc'] = 'To start a bid', },
         --{ ['cmd'] = '', ['desc'] = '', },
         --{ ['cmd'] = '', ['desc'] = '', },
         --{ ['cmd'] = '', ['desc'] = '', },
