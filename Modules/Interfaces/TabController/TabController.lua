@@ -6,7 +6,7 @@ local GUI = PDKP.GUI
 
 local CreateFrame = CreateFrame
 
-local Tab = {}
+local Tab = { _initialized=false }
 
 function Tab:Initialize()
     Tab.tabs = {};
@@ -14,6 +14,7 @@ function Tab:Initialize()
     Tab.tab_names = {};
 
     local f = CreateFrame("Frame", "$parentRightFrame", pdkp_frame)
+    f:SetFrameStrata("DIALOG")
 
     f:SetHeight(500)
     f:SetWidth(395)
@@ -94,6 +95,8 @@ function Tab:Initialize()
     end
 
     Tab.tab_btns[1]:Click()
+
+    self._initialized = true
 end
 
 GUI.TabController = Tab
