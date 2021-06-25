@@ -71,7 +71,7 @@ function RaidTools:Initialize()
             ['description'] = "This will set the loot threshold to 'Common'. \n\n" .. Utils:FormatTextColor('Note:', 'E71D36') .. ' This action becomes undone if Loot Master is changed.',
         },
         {
-            ['name'] = 'inv_control_group', ['title'] = 'Invite Control', ['height'] = 350,
+            ['name'] = 'inv_control_group', ['title'] = 'Invite Control', ['height'] = 425,
         },
     }
     local GROUPS = {}
@@ -118,7 +118,7 @@ function RaidTools:Initialize()
 
     -- Automatically resizes the Inv_control_group based on the editBoxes size.
     GROUPS['inv_control_group'].resize = function(diff)
-        if diff < -10 then GROUPS['inv_control_group']:SetHeight(350 - diff) else GROUPS['inv_control_group']:SetHeight(350) end
+        if diff < -10 then GROUPS['inv_control_group']:SetHeight(425 - diff) else GROUPS['inv_control_group']:SetHeight(425) end
         scrollContent.Resize()
     end
 
