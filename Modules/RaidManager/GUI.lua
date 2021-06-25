@@ -111,23 +111,26 @@ function RaidTools:Initialize()
         btn:SetScript("OnClick", opt['clickFunc'])
         btn:SetPoint("TOPLEFT")
         btn:SetSize(btn:GetTextWidth() + 20, 30)
-
     end
 
     local spam_button_desc; -- Define this early so we can detect how far it is from the bottom in the resize.
 
     -- Automatically resizes the Inv_control_group based on the editBoxes size.
     GROUPS['inv_control_group'].resize = function(diff)
-        if diff < -10 then GROUPS['inv_control_group']:SetHeight(425 - diff) else GROUPS['inv_control_group']:SetHeight(425) end
+        if diff < -10 then
+            GROUPS['inv_control_group']:SetHeight(425 - diff)
+        else
+            GROUPS['inv_control_group']:SetHeight(425)
+        end
         scrollContent.Resize()
     end
 
     local invite_command_opts = {
-        ['name']='invite_commands',
-        ['parent']=GROUPS['inv_control_group'].content,
-        ['title']='Auto Invite Commands',
-        ['smallTitle']=true,
-        ['textValidFunc']=RaidTools._TextValidFunc
+        ['name'] = 'invite_commands',
+        ['parent'] = GROUPS['inv_control_group'].content,
+        ['title'] = 'Auto Invite Commands',
+        ['smallTitle'] = true,
+        ['textValidFunc'] = RaidTools._TextValidFunc
     }
 
     local inv_edit_box = GUtils:createEditBox(invite_command_opts)
@@ -137,13 +140,13 @@ function RaidTools:Initialize()
     inv_edit_box:SetText("inv, invite")
 
     local disallow_opts = {
-        ['name']='disallow_invite',
-        ['parent']=GROUPS['inv_control_group'].content,
-        ['title']='Ignore Invite Requests from',
-        ['multi']=true,
-        ['smallTitle']=true,
-        ['max_lines']=4,
-        ['textValidFunc']=RaidTools._TextValidFunc
+        ['name'] = 'disallow_invite',
+        ['parent'] = GROUPS['inv_control_group'].content,
+        ['title'] = 'Ignore Invite Requests from',
+        ['multi'] = true,
+        ['smallTitle'] = true,
+        ['max_lines'] = 4,
+        ['textValidFunc'] = RaidTools._TextValidFunc
     }
     local disallow_edit = GUtils:createEditBox(disallow_opts)
     disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
@@ -152,11 +155,15 @@ function RaidTools:Initialize()
     --local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
     local ignore_from = {}
     if #ignore_from >= 1 then
-        local names = {unpack(ignore_from)}
+        local names = { unpack(ignore_from) }
         local ignore_text = ''
         for k, n in pairs(names) do
             n = strlower(n)
-            if k == #names then ignore_text = ignore_text .. n else ignore_text = ignore_text .. n .. ', ' end
+            if k == #names then
+                ignore_text = ignore_text .. n
+            else
+                ignore_text = ignore_text .. n .. ', '
+            end
         end
         disallow_edit:SetText(ignore_text)
     end
@@ -187,15 +194,14 @@ function RaidTools:Initialize()
         print('TODO: Guild Only', b:GetChecked())
     end)
 
-
     local invite_spam_opts = {
-        ['name']='invite_spam',
-        ['parent']=GROUPS['inv_control_group'].content,
-        ['title']='Guild Invite Spam text',
-        ['multi']=true,
-        ['smallTitle']=true,
-        ['max_lines']=5,
-        ['textValidFunc']=RaidTools._TextValidFunc
+        ['name'] = 'invite_spam',
+        ['parent'] = GROUPS['inv_control_group'].content,
+        ['title'] = 'Guild Invite Spam text',
+        ['multi'] = true,
+        ['smallTitle'] = true,
+        ['max_lines'] = 5,
+        ['textValidFunc'] = RaidTools._TextValidFunc
     }
     local invite_spam_box = GUtils:createEditBox(invite_spam_opts)
     invite_spam_box:SetPoint("TOPLEFT", guild_only.desc, "BOTTOMLEFT", 8, -32)
@@ -212,7 +218,11 @@ function RaidTools:Initialize()
 
         local b_text = ''
 
-        if RaidTools.SpamRunning then b_text = 'Stop Raid Inv Spam' else b_text = 'Start Raid Inv Spam' end
+        if RaidTools.SpamRunning then
+            b_text = 'Stop Raid Inv Spam'
+        else
+            b_text = 'Start Raid Inv Spam'
+        end
         spam_button:SetText(b_text)
 
         -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
@@ -230,7 +240,9 @@ function RaidTools:Initialize()
 
     -- Resizes the Inv_control_group frame, based on the size of the edit boxes.
     local function editBoxResized(edit_frame, _, _)
-        if not edit_frame.touched then return end
+        if not edit_frame.touched then
+            return
+        end
         local _, button_bottom, _, _ = spam_button_desc:GetRect()
         local bottom = floor(button_bottom)
         local diff = floor(bottom) - floor(360)
