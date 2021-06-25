@@ -74,7 +74,7 @@ function RaidTools:Initialize()
             ['name'] = 'inv_control_group', ['title'] = 'Invite Control', ['height'] = 350,
         },
     }
-    local GROUPS, BUTTONS, EDIT_BOXES = {}, {}, {}
+    local GROUPS = {}
 
     for i = 1, #GROUP_OPTS do
         local opts = GROUP_OPTS[i]
@@ -111,6 +111,7 @@ function RaidTools:Initialize()
         btn:SetScript("OnClick", opt['clickFunc'])
         btn:SetPoint("TOPLEFT")
         btn:SetSize(btn:GetTextWidth() + 20, 30)
+
     end
 
     local spam_button_desc; -- Define this early so we can detect how far it is from the bottom in the resize.
@@ -164,9 +165,28 @@ function RaidTools:Initialize()
         disallow_edit:SetText(strlower(disallow_edit:GetText()))
     end)
 
-    disallow_edit.desc:SetText("This will prevent the above members from abusing the automatic raid invite feature.")
-
+    disallow_edit.desc:SetText("This will prevent the above comma seperated names from abusing the automatic raid invite feature.")
     disallow_edit.start_height = disallow_edit:GetHeight() -- Set our starting height for resize purposes.
+
+    local guild_only_opts = {
+        ['parent'] = disallow_edit,
+        ['uniqueName'] = 'guild_only_invites',
+        ['text'] = 'Ignore PUGS',
+        ['enabled'] = false,
+        ['frame'] = f,
+    }
+
+    local guild_only = GUtils:createCheckButton(guild_only_opts)
+    guild_only.desc:SetText('This will block Invite requests from\nnon-guildies.')
+    guild_only:ClearAllPoints()
+    guild_only:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 0, -5)
+
+    guild_only.desc:SetPoint("RIGHT", GROUPS['inv_control_group'].content, "RIGHT", 0, -5)
+    guild_only:SetScript("OnClick", function(b)
+        -- TODO: Hook this up.
+        print('TODO: Guild Only', b:GetChecked())
+    end)
+
 
     local invite_spam_opts = {
         ['name']='invite_spam',
@@ -178,8 +198,8 @@ function RaidTools:Initialize()
         ['textValidFunc']=RaidTools._TextValidFunc
     }
     local invite_spam_box = GUtils:createEditBox(invite_spam_opts)
-    invite_spam_box:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 8, -32)
-    invite_spam_box:SetPoint("TOPRIGHT", disallow_edit.desc, "BOTTOMRIGHT", -10, 32)
+    invite_spam_box:SetPoint("TOPLEFT", guild_only.desc, "BOTTOMLEFT", 8, -32)
+    invite_spam_box:SetPoint("TOPRIGHT", guild_only.desc, "BOTTOMRIGHT", -10, 32)
     invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for Invite")
     invite_spam_box.desc:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
 
@@ -221,7 +241,7 @@ function RaidTools:Initialize()
 
     disallow_edit:SetScript("OnSizeChanged", editBoxResized)
     invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
-    
+
     f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button
     PDKP.raid_frame = f
@@ -231,9 +251,9 @@ function RaidTools:Initialize()
     --@end-debug@
 end
 
-function RaidTools:_TextValidFunc()
-
-    print('TODO: TextValidFunc')
+-- TODO: Hook this up.
+function RaidTools:_TextValidFunc(box)
+    --print('TODO: TextValidFunc')
 
     --if not box.touched and box.init then
     --    return
@@ -271,12 +291,8 @@ function RaidTools:_CreateGroupIcons(class_group)
 
     local CLASS_ICON_TCOORDS = CLASS_ICON_TCOORDS
 
-    -- TODO: Attach Dead Counter to CompactRaidFrameContainerBorderFrame using Interface\ICONS\INV_Misc_Bone_HumanSkull_01 or Interface\Durability\DeathRecap with TexCoords?
-    -- TODO: Create MasterLooter using Interface\ICONS\INV_Crate_05 as ICONS or Interface\ICONS\INV_Box_03
-    -- TODO: Create DKP Officer using Interface\ICONS\INV_MISC_Coin_01 as ICONS
-
-    local ICONS = { 'Total', 'Tank', unpack(Constants.CLASSES) }
-    local ICON_PATHS = { ['Total'] = Media.TANK_ICON, ['Tank'] = Media.TOTAL_ICON }
+    local ICONS = { 'DKP', 'Total', 'Tank', unpack(Constants.CLASSES) }
+    local ICON_PATHS = { ['Total'] = Media.TOTAL_ICON, ['Tank'] = Media.TANK_ICON, ['DKP'] = Media.DKP_OFFICER_ICON }
     for i = 1, #Constants.CLASSES do
         ICON_PATHS[Constants.CLASSES[i]] = classTexture
     end
@@ -288,24 +304,25 @@ function RaidTools:_CreateGroupIcons(class_group)
         i_frame.icon:SetTexture(ICON_PATHS[class])
 
         -- Set up the text coords for the class icons
-        if key > 2 then
+        if key > 3 then
             i_frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[strupper(class)]))
         end
 
         -- Set up the previous frames.
         local previous_frame;
         if key > 1 then
-            local prev_key = Utils:ternaryAssign(key <= 7, 1, 6)
+            local prev_key = Utils:ternaryAssign(key <= 8, 1, 6)
             previous_frame = class_group.class_icons[ICONS[key - prev_key]]
         end
 
         local BASE_POINTS = {
-            [key == 1] = { { "TOP", -20, 0 }, { "CENTER", -20, 0 } }, -- Total
-            [key == 2] = { "LEFT", previous_frame, "RIGHT", 10, 0 }, -- Tanks
-            [key == 3] = { "TOPRIGHT", class_group.class_icons[ICONS[key - 2]], "BOTTOMLEFT", -10, -15 },
-            [key > 3 and key <= 6] = { "LEFT", previous_frame, "RIGHT", 10, 0 },
-            [key == 7] = { "TOPLEFT", class_group.class_icons[ICONS[key - 4]], "BOTTOMLEFT", -20, -15 },
-            [key > 7] = { "LEFT", class_group.class_icons[ICONS[key - 1]], "RIGHT", 10, 0 }
+            [key == 1] = { { "TOP", 0, 0 }, { "CENTER", 0, 0 } }, -- DKP
+            [key == 2] = { "RIGHT", class_group.class_icons[ICONS[1]], "LEFT", -10, 0 }, -- Total
+            [key == 3] = { "LEFT", class_group.class_icons[ICONS[1]], "RIGHT", 10, 0 }, -- Tanks
+            [key == 4] = { "TOPRIGHT", class_group.class_icons[ICONS[2]], "BOTTOMLEFT", 9, -15 },
+            [key > 4 and key <= 7] = { "LEFT", previous_frame, "RIGHT", 10, 0 },
+            [key == 8] = { "TOPLEFT", class_group.class_icons[ICONS[key - 4]], "BOTTOMLEFT", -20, -15 },
+            [key > 8] = { "LEFT", class_group.class_icons[ICONS[key - 1]], "RIGHT", 10, 0 }
         }
 
         local points = BASE_POINTS[true]
@@ -318,6 +335,10 @@ function RaidTools:_CreateGroupIcons(class_group)
                     i_frame:SetPoint(unpack(points))
                 end
             end
+        end
+
+        if key == 3 then
+            --i_frame:Hide()
         end
 
         if class ~= 'Total' then

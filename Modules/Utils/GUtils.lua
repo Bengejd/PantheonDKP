@@ -44,6 +44,7 @@ function GUtils:createCheckButton(opts)
     local displayText = opts['text'] or ''
     local enabled = opts['enabled'] or false
     local parent = opts['parent']
+    local desc = opts['desc'] or ''
 
     local cb = CreateFrame("CheckButton", 'pdkp_filter_' .. uniqueName, parent, "ChatConfigCheckButtonTemplate")
     local cbText = _G[cb:GetName() .. 'Text']
@@ -66,9 +67,16 @@ function GUtils:createCheckButton(opts)
 
     cb:SetChecked(enabled)
 
+    local cbd = cb:CreateFontString(cb, "OVERLAY", "GameFontHighlightSmall")
+    cbd:SetText(desc)
+    cbd:SetPoint("TOPLEFT", cb, "BOTTOMLEFT", 2, 0)
+    cbd:SetWidth(100)
+    cbd:SetJustifyH("LEFT")
+
     cb.text = cbText
     cb.displayText = displayText
     cb.filterOn = uniqueName
+    cb.desc = cbd
     return cb;
 end
 
