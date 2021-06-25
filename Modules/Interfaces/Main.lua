@@ -89,6 +89,8 @@ function Main:Initialize()
 
     pdkp_frame = f
 
+    f:Hide()
+
     tinsert(UISpecialFrames, f:GetName())
 
     return pdkp_frame

@@ -395,6 +395,7 @@ function GUtils:createEditBox(opts)
     end
     local numeric = opts['numeric'] or false
     local small_title = opts['smallTitle'] or false
+    local desc = opts['description'] or ''
 
     local box = CreateFrame("EditBox", "$parent_" .. name, parent)
     box:SetParent(parent)
@@ -478,7 +479,7 @@ function GUtils:createEditBox(opts)
 
     -- Description below the edit box.
     local ed = box:CreateFontString(box_frame, "OVERLAY", "GameFontHighlightSmall")
-    ed:SetText("")
+    ed:SetText(desc)
     ed:SetPoint("TOPLEFT", box_frame, "BOTTOMLEFT", 2, 0)
     ed:SetPoint("TOPRIGHT", box_frame, "BOTTOMRIGHT", 0, 0)
     ed:SetJustifyH("LEFT")

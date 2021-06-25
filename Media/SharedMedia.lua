@@ -42,6 +42,9 @@ Media.CLOSE_BUTTON_TEXT = "|TInterface\\Buttons\\UI-StopButton:0|t"
 Media.TRANSPARENT_BACKGROUND = "Interface\\TutorialFrame\\TutorialFrameBackground"
 Media.TAB_TEXTURE = "Interface\\CHATFRAME\\ChatFrameTab"
 
+Media.TANK_ICON = 'Interface\\ICONS\\Ability_Defend'
+Media.TOTAL_ICON = 'Interface\\ICONS\\Achievement_GuildPerk_EverybodysFriend'
+
 Media.addon_version_hex = '0059C5'
 
 local BackdropTemplateMixin = BackdropTemplateMixin
