@@ -179,7 +179,7 @@ function RaidTools:Initialize()
         ['parent'] = disallow_edit,
         ['uniqueName'] = 'guild_only_invites',
         ['text'] = 'Ignore PUGS',
-        ['enabled'] = false,
+        ['enabled'] = true,
         ['frame'] = f,
     }
 
