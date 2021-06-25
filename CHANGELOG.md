@@ -93,7 +93,7 @@ This quickly becomes a problem because the larger your SavedVariables (database)
 
 To overcome this issue, all entries in the database will automatically be encoded and compressed when they are created. 
 
-To compare the difference this makes in the size of the database file, previously, a file with 890 entries would be 1,021 KB in size, where as the encoded database has a size of just 238 KB
+To compare the difference this makes in the size of the database file, previously, a non-encoded file with 890 entries would be `1,021 KB` in size, where as the encoded entries have a size of just 238 KB.
 
 #### Entry Decoding
 Decoding entries is a very memory-intensive task. To combat this, only the entries that have occurred in the last 4 weeks are decoded from the start for history viewing purposes. This does not affect the sync hashing algorithm.
