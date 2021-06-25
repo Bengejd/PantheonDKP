@@ -12,13 +12,16 @@ local RaidManager, Media, Constants;
 
 local RaidFrame = RaidFrame
 local CreateFrame, unpack, GameTooltip = CreateFrame, unpack, GameTooltip
-local strupper = string.upper
+local floor, fmod = math.floor, math.fmod
+local strupper, strlower = string.upper, string.lower
 local tinsert = table.insert
 
 function RaidTools:Initialize()
     RaidManager = MODULES.RaidManager
     Media = MODULES.Media
     Constants = MODULES.Constants
+
+    RaidTools.SpamRunning = false
 
     local f = CreateFrame("Frame", 'pdkp_raid_frame', RaidFrame, 'BasicFrameTemplateWithInset')
     f:SetSize(300, 425)
@@ -55,117 +58,104 @@ function RaidTools:Initialize()
     local scrollContent = scrollFrame.content;
 
     -- Create all of the Backdrop groups.
-    --local GROUPS = {
-    --    { ['name'] = 'class_group', ['title'] = 'Raid Breakdown', ['height'] = 170, ['sub_func'] = self._CreateGroupIcons, ['sub_args'] = 'self' },
-    --    {
-    --        ['name'] = 'promote_group', ['title'] = 'Raid Breakdown',
-    --        ['args'] = { nil, scrollContent, 'Raid Control' },
-    --        ['height'] = 170,
-    --        ['desc'] = "This will give all Officers & Class Leaders in the raid the 'Assist' role."
-    --    },
-    --    {
-    --        ['init'] = GUtils.createBackdropFrame,
-    --        ['args'] = { nil, scrollContent, "Raid Breakdown" },
-    --        ['height'] = 170,
-    --    },
-    --}
-    --local loot_threshold_group = GUtils:createBackdropFrame(nil, scrollContent, 'Loot Threshold')
-    --loot_threshold_group:SetHeight(125)
-    --scrollContent:AddChild(loot_threshold_group)
-    --local loot_warning = Utils:FormatTextColor('Note:', 'E71D36')
-    --loot_threshold_group.desc:SetText("This will set the loot threshold to 'Common'. \n\n" .. loot_warning .. ' This action becomes undone if Loot Master is changed.')
+    local GROUP_OPTS = {
+        {
+            ['name'] = 'class_group', ['title'] = 'Raid Breakdown', ['height'] = 170,
+        },
+        {
+            ['name'] = 'promote_group', ['title'] = 'Raid Control', ['height'] = 100,
+            ['description'] = "This will give all Officers & Class Leaders in the raid the 'Assist' role.",
+        },
+        {
+            ['name'] = 'loot_threshold_group', ['title'] = 'Loot Threshold', ['height'] = 125,
+            ['description'] = "This will set the loot threshold to 'Common'. \n\n" .. Utils:FormatTextColor('Note:', 'E71D36') .. ' This action becomes undone if Loot Master is changed.',
+        },
+        {
+            ['name'] = 'inv_control_group', ['title'] = 'Invite Control', ['height'] = 350,
+        },
+    }
+    local GROUPS, BUTTONS, EDIT_BOXES = {}, {}, {}
 
-    --- Class Group Section
-    local class_group = GUtils:createBackdropFrame(nil, scrollContent, 'Raid Breakdown')
-    class_group:SetHeight(170)
-    scrollContent:AddChild(class_group)
+    for i = 1, #GROUP_OPTS do
+        local opts = GROUP_OPTS[i]
+        local frame = GUtils:createBackdropFrame(nil, scrollContent, opts['title'])
+        frame:SetHeight(opts['height'])
+        if opts['description'] then
+            frame.desc:SetText(opts['description'])
+        end
+        scrollContent:AddChild(frame)
+        GROUPS[opts['name']] = frame
+    end
 
-    self:_CreateGroupIcons(class_group)
+    self:_CreateGroupIcons(GROUPS['class_group'])
 
-    local promote_group = GUtils:createBackdropFrame(nil, scrollContent, 'Raid Control')
-    promote_group:SetHeight(100)
-    scrollContent:AddChild(promote_group)
-    promote_group.desc:SetText("This will give all Officers & Class Leaders in the raid the 'Assist' role.")
+    local BUTTON_OPTS = {
+        {
+            ['parent'] = GROUPS['promote_group'],
+            ['clickFunc'] = RaidManager.PromoteLeadership,
+            ['text'] = 'Promote Leadership',
+            ['name'] = 'promote_button'
+        },
+        {
+            ['parent'] = GROUPS['loot_threshold_group'],
+            ['clickFunc'] = RaidManager.SetLootCommon,
+            ['text'] = 'Set Loot Common',
+            ['name'] = 'threshold_button'
+        },
+    }
 
-    --- Promote Leadership section.
-    local promote_button = CreateFrame("Button", nil, promote_group.content, "UIPanelButtonTemplate")
-    promote_button:SetText("Promote Leadership")
-    promote_button:SetScript("OnClick", RaidManager.PromoteLeadership)
-    promote_button:SetPoint("TOPLEFT")
-    promote_button:SetSize(promote_button:GetTextWidth() + 20, 30)
-
-    --- Loot Threshold Group
-    --local loot_threshold_group = GUtils:createBackdropFrame(nil, scrollContent, 'Loot Threshold')
-    --loot_threshold_group:SetHeight(125)
-    --scrollContent:AddChild(loot_threshold_group)
-    --local loot_warning = Utils:FormatTextColor('Note:', 'E71D36')
-    --loot_threshold_group.desc:SetText("This will set the loot threshold to 'Common'. \n\n" .. loot_warning .. ' This action becomes undone if Loot Master is changed.')
-
-    local threshold_button = CreateFrame("Button", nil, loot_threshold_group.content, 'UIPanelButtonTemplate')
-    threshold_button:SetText("Set Loot Common")
-    threshold_button:SetScript("OnClick", RaidManager.SetLootCommon)
-    threshold_button:SetPoint("TOPLEFT")
-    threshold_button:SetSize(threshold_button:GetTextWidth() + 20, 30)
-
-    --- Invite Control Group
-    local inv_control_group = GUtils:createBackdropFrame(nil, scrollContent, 'Invite Control')
-    inv_control_group:SetHeight(360)
-    scrollContent:AddChild(inv_control_group)
+    for i = 1, #BUTTON_OPTS do
+        local opt = BUTTON_OPTS[i]
+        local btn = CreateFrame("Button", nil, opt['parent'].content, 'UIPanelButtonTemplate')
+        btn:SetText(opt['text'])
+        btn:SetScript("OnClick", opt['clickFunc'])
+        btn:SetPoint("TOPLEFT")
+        btn:SetSize(btn:GetTextWidth() + 20, 30)
+    end
 
     local spam_button_desc; -- Define this early so we can detect how far it is from the bottom in the resize.
 
     -- Automatically resizes the Inv_control_group based on the editBoxes size.
-    inv_control_group.resize = function(diff)
-        if diff < -10 then
-            inv_control_group:SetHeight(350 - diff)
-        else
-            inv_control_group:SetHeight(350)
-        end
+    GROUPS['inv_control_group'].resize = function(diff)
+        if diff < -10 then GROUPS['inv_control_group']:SetHeight(350 - diff) else GROUPS['inv_control_group']:SetHeight(350) end
         scrollContent.Resize()
     end
 
     local invite_command_opts = {
-        ['name'] = 'invite_commands',
-        ['parent'] = inv_control_group.content,
-        ['title'] = 'Auto Invite Commands',
-        ['max_chars'] = 225,
-        ['smallTitle'] = true,
-        ['textValidFunc'] = self._TextValidFunc,
-        ['description'] = 'You will auto-invite when whispered one of the words or phrases listed above.'
+        ['name']='invite_commands',
+        ['parent']=GROUPS['inv_control_group'].content,
+        ['title']='Auto Invite Commands',
+        ['smallTitle']=true,
+        ['textValidFunc']=RaidTools._TextValidFunc
     }
 
     local inv_edit_box = GUtils:createEditBox(invite_command_opts)
-    inv_edit_box:SetPoint("TOPLEFT", inv_control_group.content, "TOPLEFT", 12, -8)
-    inv_edit_box:SetPoint("TOPRIGHT", inv_control_group.content, "TOPRIGHT", 12, 8)
+    inv_edit_box:SetPoint("TOPLEFT", GROUPS['inv_control_group'].content, "TOPLEFT", 12, -8)
+    inv_edit_box:SetPoint("TOPRIGHT", GROUPS['inv_control_group'].content, "TOPRIGHT", 12, 8)
+    inv_edit_box.desc:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
     inv_edit_box:SetText("inv, invite")
 
     local disallow_opts = {
-        ['name'] = 'disallow_invite',
-        ['parent'] = inv_control_group.content,
-        ['title'] = 'Ignore Invite Requests from',
-        ['multi'] = true,
-        ['max_chars'] = 225,
-        ['smallTitle'] = true,
-        ['max_lines'] = 4,
-        ['numeric'] = false,
-        ['textValidFunc'] = self._TextValidFunc,
-        ['description'] = "This will prevent the above members from abusing the automatic raid invite feature."
+        ['name']='disallow_invite',
+        ['parent']=GROUPS['inv_control_group'].content,
+        ['title']='Ignore Invite Requests from',
+        ['multi']=true,
+        ['smallTitle']=true,
+        ['max_lines']=4,
+        ['textValidFunc']=RaidTools._TextValidFunc
     }
     local disallow_edit = GUtils:createEditBox(disallow_opts)
     disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
     disallow_edit:SetPoint("TOPRIGHT", inv_edit_box.desc, "BOTTOMRIGHT", -10, 32)
 
-    local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
+    --local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
+    local ignore_from = {}
     if #ignore_from >= 1 then
-        local names = { unpack(ignore_from) }
+        local names = {unpack(ignore_from)}
         local ignore_text = ''
         for k, n in pairs(names) do
             n = strlower(n)
-            if k == #names then
-                ignore_text = ignore_text .. n
-            else
-                ignore_text = ignore_text .. n .. ', '
-            end
+            if k == #names then ignore_text = ignore_text .. n else ignore_text = ignore_text .. n .. ', ' end
         end
         disallow_edit:SetText(ignore_text)
     end
@@ -174,7 +164,67 @@ function RaidTools:Initialize()
         disallow_edit:SetText(strlower(disallow_edit:GetText()))
     end)
 
+    disallow_edit.desc:SetText("This will prevent the above members from abusing the automatic raid invite feature.")
+
     disallow_edit.start_height = disallow_edit:GetHeight() -- Set our starting height for resize purposes.
+
+    local invite_spam_opts = {
+        ['name']='invite_spam',
+        ['parent']=GROUPS['inv_control_group'].content,
+        ['title']='Guild Invite Spam text',
+        ['multi']=true,
+        ['smallTitle']=true,
+        ['max_lines']=5,
+        ['textValidFunc']=RaidTools._TextValidFunc
+    }
+    local invite_spam_box = GUtils:createEditBox(invite_spam_opts)
+    invite_spam_box:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 8, -32)
+    invite_spam_box:SetPoint("TOPRIGHT", disallow_edit.desc, "BOTTOMRIGHT", -10, 32)
+    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for Invite")
+    invite_spam_box.desc:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
+
+    local spam_button = CreateFrame("Button", nil, GROUPS['inv_control_group'].content, "UIPanelButtonTemplate")
+    spam_button:SetText("Start Raid Inv Spam")
+
+    -- TODO: Implement this stuff.
+    spam_button:SetScript("OnClick", function()
+        RaidTools.SpamRunning = not RaidTools.SpamRunning
+
+        local b_text = ''
+
+        if RaidTools.SpamRunning then b_text = 'Stop Raid Inv Spam' else b_text = 'Start Raid Inv Spam' end
+        spam_button:SetText(b_text)
+
+        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
+    end)
+    spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
+    spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
+
+    spam_button_desc = spam_button:CreateFontString(spam_button, "OVERLAY", "GameFontHighlightSmall")
+    spam_button_desc:SetPoint("TOPLEFT", spam_button, "BOTTOMLEFT", 0, -8)
+    spam_button_desc:SetPoint("TOPRIGHT", spam_button, "BOTTOMRIGHT", 0, 8)
+    spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes or until the raid is full. Click again to stop the message spam.")
+    spam_button_desc:SetJustifyH("LEFT")
+
+    invite_spam_box.start_height = invite_spam_box:GetHeight() -- Set our starting height for resize purposes.
+
+    -- Resizes the Inv_control_group frame, based on the size of the edit boxes.
+    local function editBoxResized(edit_frame, _, _)
+        if not edit_frame.touched then return end
+        local _, button_bottom, _, _ = spam_button_desc:GetRect()
+        local bottom = floor(button_bottom)
+        local diff = floor(bottom) - floor(360)
+        local singles = math.fmod(diff, 10) -- We only care about intervals of 10.
+        diff = diff - singles
+        GROUPS['inv_control_group'].resize(diff)
+    end
+
+    disallow_edit:SetScript("OnSizeChanged", editBoxResized)
+    invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
+    
+    f.class_groups = GROUPS['class_group']
+    f.spam_button = spam_button
+    PDKP.raid_frame = f
 
     --@debug@
     ToggleFriendsFrame(4)
@@ -182,6 +232,8 @@ function RaidTools:Initialize()
 end
 
 function RaidTools:_TextValidFunc()
+
+    print('TODO: TextValidFunc')
 
     --if not box.touched and box.init then
     --    return
@@ -210,82 +262,6 @@ function RaidTools:_TextValidFunc()
     --if box_funcs[box_id] then
     --    box_funcs[box_id]()
     --end
-end
-
-function RaidTools:CreateOldRaidTools()
-
-
-    local invite_spam_opts = {
-        ['name'] = 'invite_spam',
-        ['parent'] = inv_control_group.content,
-        ['title'] = 'Guild Invite Spam text',
-        ['multi'] = true,
-        ['max_chars'] = 225,
-        ['smallTitle'] = true,
-        ['max_lines'] = 5,
-        ['numeric'] = false,
-        ['textValidFunc'] = textValidFunc
-    }
-    local invite_spam_box = createEditBox(invite_spam_opts)
-    invite_spam_box:SetPoint("TOPLEFT", disallow_edit.desc, "BOTTOMLEFT", 8, -32)
-    invite_spam_box:SetPoint("TOPRIGHT", disallow_edit.desc, "BOTTOMRIGHT", -10, 32)
-    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for Invite")
-    invite_spam_box.desc:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
-
-    local spam_button = CreateFrame("Button", nil, inv_control_group.content, "UIPanelButtonTemplate")
-    spam_button:SetText("Start Raid Inv Spam")
-    spam_button:SetScript("OnClick", function()
-        GUI.invite_control['running'] = not GUI.invite_control['running']
-        local running = GUI.invite_control['running']
-
-        local b_text = ''
-
-        if running then
-            b_text = 'Stop Raid Inv Spam'
-        else
-            b_text = 'Start Raid Inv Spam'
-        end
-        spam_button:SetText(b_text)
-
-        GUI:ToggleRaidInviteSpam()
-
-        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
-    end)
-    spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
-    spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
-
-    spam_button_desc = spam_button:CreateFontString(spam_button, "OVERLAY", "GameFontHighlightSmall")
-    spam_button_desc:SetPoint("TOPLEFT", spam_button, "BOTTOMLEFT", 0, -8)
-    spam_button_desc:SetPoint("TOPRIGHT", spam_button, "BOTTOMRIGHT", 0, 8)
-    spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes or until the raid is full. Click again to stop the message spam.")
-    spam_button_desc:SetJustifyH("LEFT")
-
-    invite_spam_box.start_height = invite_spam_box:GetHeight() -- Set our starting height for resize purposes.
-
-    -- Resizes the Inv_control_group frame, based on the size of the edit boxes.
-    local function editBoxResized(edit_frame, _, _)
-        if not edit_frame.touched then
-            return
-        end
-        local _, button_bottom, _, _ = spam_button_desc:GetRect()
-        local bottom = floor(button_bottom)
-        local diff = floor(bottom) - floor(360)
-        local singles = math.fmod(diff, 10) -- We only care about intervals of 10.
-        diff = diff - singles
-        inv_control_group.resize(diff)
-    end
-
-    disallow_edit:SetScript("OnSizeChanged", editBoxResized)
-    invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
-
-    f.class_groups = class_group
-
-    GUI.raid_frame = f
-    GUI.invite_control['spamButton'] = spam_button
-
-    --- This is to ensure that the commands get registered initially.
-    f:Show()
-    f:Hide()
 end
 
 function RaidTools:_CreateGroupIcons(class_group)
