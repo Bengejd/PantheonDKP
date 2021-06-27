@@ -71,7 +71,6 @@ You can also manually end the bidding early, by clicking the button on the botto
 
 #### DKP Decay
 
-
 ### Nerd Stuff
 This section is mostly just for people who want to learn more about the inner workings of PDKP. If you don't care, you can just stop reading now.
 

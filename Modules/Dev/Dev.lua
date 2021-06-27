@@ -18,10 +18,11 @@ function Dev:HandleSlashCommands(msg)
 
     local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
 
-    local SLASH_COMMANDS = {
-        ['databasePopulate'] = self:PopulateDummyDatabase(arg1)
-    }
-    if SLASH_COMMANDS[cmd] then return SLASH_COMMANDS[cmd]() end
+    if cmd == 'databasePopulate' then
+        return self:PopulateDummyDatabase(arg1)
+    elseif cmd == 'whoTest' then
+        self:WhoTest(msg)
+    end
 end
 
 function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
@@ -119,6 +120,11 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames)
         wipe(entry)
         return self:CreateDummyEntry(numOfMembers, memberNames)
     end
+end
+
+function Dev:WhoTest(msg)
+    PDKP:Print('Dev: Testing Who');
+    SendWho('Lariese');
 end
 
 -- Publish API

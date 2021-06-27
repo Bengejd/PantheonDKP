@@ -14,6 +14,7 @@
     <Script file="Database\Database.lua" />
     <Script file="GuildManager\Member\Member.lua" />
     <Script file="DKPManager\DKPEntry\DKPEntry.lua" />
+    <Script file="RaidManager\Group.lua" />
 
     <!-- Controllers -->
     <Script file="CommsManager\CommsManager.lua" />

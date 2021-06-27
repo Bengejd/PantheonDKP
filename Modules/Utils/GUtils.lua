@@ -445,7 +445,7 @@ function GUtils:createEditBox(opts)
     end)
     box:SetScript("OnTextChanged", function()
         box.selectedValue = box.getValue()
-        textValidFunc()
+        textValidFunc(box)
     end)
     box:SetScript("OnEditFocusGained", function()
         box.touched = true
@@ -553,4 +553,12 @@ function GUtils:createItemLink(parent)
     end
 
     return fs
+end
+
+function GUtils:createStrikethroughText(parent)
+    parent = parent or pdkp_frame
+
+    local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+
+    local f = parent:CreateFrame("Frame", nil, parent)
 end

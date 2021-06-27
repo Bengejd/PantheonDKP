@@ -25,7 +25,11 @@ function GuildManager:Initialize()
     self.online = {}
     self.members = {}
     self.memberNames = {}
+    self.guildies = {}
     self.numOfMembers, self.numOnlineMembers = 0, 0
+
+    PDKP.player = {}
+    self.playerName = GetUnitName("PLAYER", false)
 
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
@@ -45,6 +49,10 @@ function GuildManager:IsMemberInDatabase(name)
     return self.GuildDB[name] ~= nil
 end
 
+function GuildManager:IsGuildMember(name)
+    return tContains(self.guildies, name)
+end
+
 function GuildManager:GetMembers()
     GuildRoster()
     self.classLeaders, self.officers, self.online = {}, {}, {}
@@ -57,6 +65,14 @@ function GuildManager:GetMembers()
         local member = Member:new(i, server_time)
         local isNew = self:IsNewMemberObject(member.name)
         local inDatabase = self:IsMemberInDatabase(member.name);
+
+        if member.name == self.playerName then
+            PDKP.player = member;
+        end
+
+        if member.name ~= nil then
+            self.guildies[#self.guildies + 1] = member.name;
+        end
 
         if member:IsRaidReady() then
             if member.name == nil then member.name = '' end

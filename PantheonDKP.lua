@@ -117,6 +117,7 @@ function CORE:_InitializeFeatures()
     MODULES.AuctionManager:Initialize()
     MODULES.DKPManager:Initialize()
     MODULES.RaidManager:Initialize()
+    MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
     MODULES.Loot:Initialize()
     MODULES.Options:Initialize()
@@ -187,8 +188,9 @@ end
 function CORE:_ExecuteInitialize()
     if self._initialize_fired then return end
 
-    -- To make printing easier...
-    PDKP.Print = PDKP.CORE.Print
+    PDKP.Print = function(...)
+        print('|cff33ff99PantheonDKP|r:', strjoin(" ", tostringall(...)))
+    end
 
     self._initialize_fired = true
     C_Timer.After(1, function() CORE:_SequentialInitialize(0) end)
@@ -217,7 +219,11 @@ function CORE:OnInitialize()
     GuildRoster()
     -- We schedule this in case GUILD_ROSTER_UPDATE won't come early enough
     C_Timer.After(20, function()
-        CORE:_ExecuteInitialize()
+        if IsInGuild() then
+            CORE:_ExecuteInitialize()
+        else
+           PDKP.CORE:Print("PantheonDKP is meant for use in Guilds, please join a guild for the addon to work properly.")
+        end
     end)
 end
 

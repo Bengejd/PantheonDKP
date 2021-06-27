@@ -9,7 +9,17 @@ local Utils = PDKP.Utils;
 local Raid = {}
 
 function Raid:Initialize()
+    self.settings_DB = MODULES.Database:Settings()
+    local db = self.settings_DB
 
+    self.ignore_from = db['ignore_from']
+    self.invite_commands = db['invite_commands']
+    self.invite_spam_text = "[TIME] [RAID] invites going out. Pst for Invite"
+    self.ignore_pugs = db['ignore_pugs'] or false
+
+    if Utils:tEmpty(self.invite_commands) then
+        self.settings_DB['invite_commands'] = {'inv', 'invite'}
+    end
 end
 
 function Raid:GetClassMemberNames(class)

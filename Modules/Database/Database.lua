@@ -34,11 +34,6 @@ function DB:Initialize()
             PDKP_DB[dbRef][db] = {}
         end
     end
-
-    --PDKP.CORE:RegisterEvent('PLAYER_LOGOUT', function()
-    --    print('Player Logout called');
-    --    PDKP_DB[dbRef] = MODULES.CommsManager:DataEncoder(PDKP_DB[dbRef])
-    --end)
 end
 
 function DB:Global()
@@ -97,76 +92,14 @@ function DB:ResetAllDatabases()
     PDKP.CORE:Print('Databases have been reset');
 end
 
-function DB:PopulateDummyDatabase()
-
-    local memberNames = MODULES.GuildManager.memberNames;
-    local numOfMembers = #memberNames
-
-    local DKP_DB = self:DKP()
-
-    local valid_counter = 1
-    local valid_entries = {}
-    while valid_counter <= 500 do
-        local random_member_start = math.random(numOfMembers)
-        local random_member_end = math.random(random_member_start, numOfMembers)
-
-        -- Random epoch datetime between January 1st, 2021 and now.
-        local server_time = math.random(1609480800, GetServerTime())
-        local year = PDKP.Utils:GetYear(server_time)
-
-        local random_names = {}
-
-        for k=1, #memberNames do
-            if k >= random_member_start and k < random_member_end then
-                table.insert(random_names, memberNames[k])
-            end
-        end
-
-        local reasons = {'Boss Kill', 'Item Win', 'Other'}
-        local randomReason = math.random(3)
-        local reason = reasons[randomReason]
-
-        local dkp_change;
-        if reason == 'Boss Kill' then
-            dkp_change = 10
-        elseif reason == 'Item Win' then
-            dkp_change = -1
-            reason = 'Other'
-        else
-            dkp_change = 5
-        end
-
-        local dummy_entry = {
-            ['id'] = server_time,
-            ['officer'] = 'Lariese',
-            ['reason'] = reason,
-            ['names'] = random_names,
-            ['dkp_change'] = dkp_change
-        }
-
-        if reason == 'Boss Kill' then
-            dummy_entry['boss'] = 'Magtheridon';
-        end
-
-        local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
-
-        if entry:IsValid() then
-            table.insert(valid_entries, entry)
-            valid_counter = valid_counter + 1
-        else
-            wipe(entry)
-        end
+function DB:UpdateSetting(settingName, value)
+    if settingName == 'disallow_invite' then
+        PDKP_DB[self.server_faction_guild]['settings']['ignore_from'] = value
+    elseif settingName == 'invite_commands' then
+        PDKP_DB[self.server_faction_guild]['settings']['invite_commands'] = value
+    elseif settingName == 'ignore_PUGS' then
+        PDKP_DB[self.server_faction_guild]['settings']['ignore_PUGS'] = value
     end
-
-    for key, entry in pairs(valid_entries) do
-        if key == #valid_entries then
-            entry:Save(true)
-        else
-            entry:Save(false)
-        end
-    end
-
-    PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
 end
 
 MODULES.Database = DB

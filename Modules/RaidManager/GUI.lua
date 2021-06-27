@@ -6,7 +6,7 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local RaidTools = {}
+local RaidTools = { _initialized = false}
 
 local RaidManager, Media, Constants;
 
@@ -22,6 +22,8 @@ function RaidTools:Initialize()
     Constants = MODULES.Constants
 
     RaidTools.SpamRunning = false
+
+    self.options = {}
 
     local f = CreateFrame("Frame", 'pdkp_raid_frame', RaidFrame, 'BasicFrameTemplateWithInset')
     f:SetSize(300, 425)
@@ -130,14 +132,18 @@ function RaidTools:Initialize()
         ['parent'] = GROUPS['inv_control_group'].content,
         ['title'] = 'Auto Invite Commands',
         ['smallTitle'] = true,
-        ['textValidFunc'] = RaidTools._TextValidFunc
+        ['textValidFunc'] = PDKP_RaidTools_TextValidFunc
     }
 
     local inv_edit_box = GUtils:createEditBox(invite_command_opts)
     inv_edit_box:SetPoint("TOPLEFT", GROUPS['inv_control_group'].content, "TOPLEFT", 12, -8)
     inv_edit_box:SetPoint("TOPRIGHT", GROUPS['inv_control_group'].content, "TOPRIGHT", 12, 8)
     inv_edit_box.desc:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
-    inv_edit_box:SetText("inv, invite")
+
+    local inv_text = strlower(strjoin(", ", tostringall(unpack(RaidManager.invite_commands))))
+    inv_edit_box:SetText(inv_text)
+
+    self.options['commands'] = inv_edit_box
 
     local disallow_opts = {
         ['name'] = 'disallow_invite',
@@ -146,27 +152,16 @@ function RaidTools:Initialize()
         ['multi'] = true,
         ['smallTitle'] = true,
         ['max_lines'] = 4,
-        ['textValidFunc'] = RaidTools._TextValidFunc
+        ['textValidFunc'] = PDKP_RaidTools_TextValidFunc
     }
     local disallow_edit = GUtils:createEditBox(disallow_opts)
     disallow_edit:SetPoint("TOPLEFT", inv_edit_box.desc, "BOTTOMLEFT", 8, -32)
     disallow_edit:SetPoint("TOPRIGHT", inv_edit_box.desc, "BOTTOMRIGHT", -10, 32)
+    self.options['ignored'] = disallow_edit
 
     --local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
-    local ignore_from = {}
-    if #ignore_from >= 1 then
-        local names = { unpack(ignore_from) }
-        local ignore_text = ''
-        for k, n in pairs(names) do
-            n = strlower(n)
-            if k == #names then
-                ignore_text = ignore_text .. n
-            else
-                ignore_text = ignore_text .. n .. ', '
-            end
-        end
-        disallow_edit:SetText(ignore_text)
-    end
+    local ignore_text = strlower(strjoin(", ", tostringall(unpack(RaidManager.ignore_from))))
+    disallow_edit:SetText(ignore_text)
 
     disallow_edit:HookScript("OnEditFocusLost", function()
         disallow_edit:SetText(strlower(disallow_edit:GetText()))
@@ -179,7 +174,7 @@ function RaidTools:Initialize()
         ['parent'] = disallow_edit,
         ['uniqueName'] = 'guild_only_invites',
         ['text'] = 'Ignore PUGS',
-        ['enabled'] = true,
+        ['enabled'] = RaidManager.ignore_pugs,
         ['frame'] = f,
     }
 
@@ -193,6 +188,7 @@ function RaidTools:Initialize()
         -- TODO: Hook this up.
         print('TODO: Guild Only', b:GetChecked())
     end)
+    self.options['ignore_PUGS'] = guild_only
 
     local invite_spam_opts = {
         ['name'] = 'invite_spam',
@@ -201,13 +197,14 @@ function RaidTools:Initialize()
         ['multi'] = true,
         ['smallTitle'] = true,
         ['max_lines'] = 5,
-        ['textValidFunc'] = RaidTools._TextValidFunc
+        ['textValidFunc'] = PDKP_RaidTools_TextValidFunc
     }
     local invite_spam_box = GUtils:createEditBox(invite_spam_opts)
     invite_spam_box:SetPoint("TOPLEFT", guild_only.desc, "BOTTOMLEFT", 8, -32)
     invite_spam_box:SetPoint("TOPRIGHT", guild_only.desc, "BOTTOMRIGHT", -10, 32)
-    invite_spam_box:SetText("[TIME] [RAID] invites going out. Pst for Invite")
+    invite_spam_box:SetText(RaidManager.invite_spam_text)
     invite_spam_box.desc:SetText("This is the message that will be sent when 'Start Raid Inv Spam' is clicked.")
+    self.options['spam'] = invite_spam_box
 
     local spam_button = CreateFrame("Button", nil, GROUPS['inv_control_group'].content, "UIPanelButtonTemplate")
     spam_button:SetText("Start Raid Inv Spam")
@@ -256,26 +253,41 @@ function RaidTools:Initialize()
 
     f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button
+    f.GROUPS = GROUPS;
+
     PDKP.raid_frame = f
 
     --@debug@
     ToggleFriendsFrame(4)
     --@end-debug@
+
+    self._initialized = true
 end
 
--- TODO: Hook this up.
-function RaidTools:_TextValidFunc(box)
-    --print('TODO: TextValidFunc')
+function PDKP_RaidTools_TextValidFunc(box)
+    if (not box.touched) or not RaidTools._initialized then return end
+    if not box.touched and not box.init then box.init = true; return end
 
-    --if not box.touched and box.init then
-    --    return
-    --end
-    --box.init = true
-    --
-    --local box_id = box.uniqueID
-    --
-    --local bt = box:GetText()
-    --
+    local boxID, text = box.uniqueID, box:GetText()
+    local text_arr = Utils:SplitString(text, ',')
+    local box_funcs = {
+        ['invite_spam'] = function()
+            MODULES.RaidManager.invite_spam_text = text
+        end,
+        ['disallow_invite'] = function()
+            MODULES.RaidManager.ignore_from = text_arr
+            MODULES.Database:UpdateSetting('disallow_invite', text_arr)
+        end,
+        ['invite_commands'] = function()
+            MODULES.RaidManager.invite_commands = text_arr
+            MODULES.Database:UpdateSetting('invite_commands', text_arr)
+        end,
+    }
+
+    print(boxID, text)
+
+    if box_funcs[boxID] then return box_funcs[boxID]() end
+
     --local box_funcs = {
     --    ['invite_spam'] = function()
     --        --RaidTools.invite_control['text'] = bt
@@ -290,10 +302,6 @@ function RaidTools:_TextValidFunc(box)
     --        --RaidTools.invite_control['commands'] = text_arr
     --    end,
     --}
-    --
-    --if box_funcs[box_id] then
-    --    box_funcs[box_id]()
-    --end
 end
 
 function RaidTools:_CreateGroupIcons(class_group)

@@ -8,18 +8,78 @@ local Utils = PDKP.Utils;
 
 local Chat = {}
 
+local trim, lower, contains = strtrim, strlower, tContains
+
 function Chat:Initialize()
-    PDKP.CORE:RegisterChatCommand("pdkp", function(msg) Chat:HandleSlashCommands(msg) end)
+    PDKP.CORE:RegisterChatCommand("pdkp", function(msg) Chat:_HandleSlashCommands(msg) end)
+
+    self.eventsFrame = CreateFrame("Frame", "EventsFrame")
+    self.eventsFrame:SetScript("OnEvent", Chat.HandleChatEvent)
+
+    local eventNames = {
+        'CHAT_MSG_WHISPER',
+        --'CHAT_MSG_WHISPER_INFORM',
+        'CHAT_MSG_GUILD',
+        'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER', 'CHAT_MSG_RAID_WARNING',
+    }
+
+    for _, eventName in pairs(eventNames) do
+        self:RegisterEvent(eventName)
+    end
 end
 
-function Chat:HandleSlashCommands(msg)
+function Chat:HandleChatEvent(eventName, msg, author, ...)
+    author = Utils:RemoveServerName(author)
+    PDKP.CORE:Print("Event", eventName, "Msg", msg, "Author", author)
+
+    msg = lower(trim(msg))
+    local invite_commands = MODULES.RaidManager.invite_commands
+
+    if eventName == 'CHAT_MSG_WHISPER' and contains(invite_commands, msg) then
+        return Chat:_HandleInviteMsg(author)
+    end
+end
+
+-----------------------------
+--     Invite Functions    --
+-----------------------------
+
+function Chat:_HandleInviteMsg(name)
+    local RaidManager = MODULES.RaidManager
+
+    local ignore_from = RaidManager.ignore_from
+
+    if contains(ignore_from, lower(name)) then
+        local player_name = '|cffffaeae' .. name .. '|r'
+        return PDKP.CORE:Print(player_name, "'s invite request was ignored")
+    end
+
+
+    --GuildManager:IsGuildMember
+
+    MODULES.GroupManager:InvitePlayer(name)
+end
+
+--- Events
+
+function Chat:RegisterEvent(eventName)
+    self.eventsFrame:RegisterEvent(eventName)
+end
+
+function Chat:UnregisterEvent(eventName)
+    self.eventsFrame:UnregisterEvent(eventName)
+end
+
+
+--- Slash commands stuff
+function Chat:_HandleSlashCommands(msg)
     if msg == "" then msg = 'pdkp' end --- Default command doesn't display in the msg.
 
     local command = PDKP.CORE:GetArgs(msg)
 
     local SLASH_COMMANDS = {
         -- Help Handlers
-        ['help'] = function() Chat:DisplayHelp() end,
+        ['help'] = function() Chat:_DisplayHelp() end,
 
         -- Main Handlers
         ['pdkp'] = function() MODULES.Main:HandleSlashCommands(msg) end,
@@ -33,22 +93,24 @@ function Chat:HandleSlashCommands(msg)
         [''] = function()  end,
         [''] = function()  end,
         [''] = function()  end,
+
+        -- DKP Handlers
         ['LoadMoreEntries'] = function() MODULES.DKPManager:LoadPrevFourWeeks() end,
 
         -- Database Handlers
         ['databaseReset'] = function() MODULES.Database:ResetAllDatabases() end,
     }
+    if SLASH_COMMANDS[command] then return SLASH_COMMANDS[command]() end
 
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
+        ['whoTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
         ['databasePopulate'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
     }
-
-    if SLASH_COMMANDS[command] then return SLASH_COMMANDS[command]() end
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then return DEV_SLASH_COMMANDS[command]() end
 end
 
-function Chat:DisplayHelp()
+function Chat:_DisplayHelp()
     local slash_addon = MODULES.Constants.SLASH_ADDON
     local CMD_COLOR = '|cffffaeae'
 
