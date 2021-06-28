@@ -14,8 +14,8 @@ function Raid:Initialize()
 
     self.ignore_from = db['ignore_from']
     self.invite_commands = db['invite_commands']
-    self.invite_spam_text = "[TIME] [RAID] invites going out. Pst for Invite"
     self.ignore_pugs = db['ignore_pugs'] or false
+    self.invite_spam_text = "[TIME] [RAID] invites going out. Pst for Invite"
 
     if Utils:tEmpty(self.invite_commands) then
         self.settings_DB['invite_commands'] = {'inv', 'invite'}
@@ -24,11 +24,6 @@ end
 
 function Raid:GetClassMemberNames(class)
     local names = {}
-
-    if class == 'Paladin' and PDKP:IsDev() then
-        table.insert(names, 'Lariese')
-    end
-
     return names
 end
 

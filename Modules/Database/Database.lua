@@ -97,8 +97,8 @@ function DB:UpdateSetting(settingName, value)
         PDKP_DB[self.server_faction_guild]['settings']['ignore_from'] = value
     elseif settingName == 'invite_commands' then
         PDKP_DB[self.server_faction_guild]['settings']['invite_commands'] = value
-    elseif settingName == 'ignore_PUGS' then
-        PDKP_DB[self.server_faction_guild]['settings']['ignore_PUGS'] = value
+    elseif settingName == 'ignore_pugs' then
+        PDKP_DB[self.server_faction_guild]['settings']['ignore_pugs'] = value
     end
 end
 

@@ -57,16 +57,11 @@ function Group:Refresh()
         end
 
         if name == PDKP.player.name then
-            self.player = {
-                name = name,
-                class = class,
-                isML = isML ~= nil,
-                isLeader = rank == 2,
-                isAssist = rank == 1,
-                isDKP = name == self.leadership.dkpOfficer
-            }
+            self.isML = isML ~= nil
+            self.isLeader = rank == 2
+            self.isAssist = rank >= 1
+            self.isDKP = name == self.leadership.dkpOfficer
         end
-
     end
 
     --if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
@@ -87,20 +82,6 @@ function Group:Refresh()
     --    --        end
     --    --    end
     --    --}
-
-
-    --function Raid:InviteName(name)
-    --    name = strlower(name)
-    --    local ignore_from = GUI.invite_control['ignore_from']
-    --    if contains(ignore_from, name) then
-    --        return print("Invite request from", name, "has been ignored")
-    --    end
-    --
-    --    if Raid:InRaid() then
-    --        if not (Raid.raid.leader == Char:GetMyName() or tContains(Raid.raid.assistants, Char:GetMyName())) then
-    --            SendChatMessage("Whisper " .. Raid.raid.leader .. " for invite, I don\'t have assist", "WHISPER", nil, name)
-    --            return
-    --        end
     --    else
     --        ConvertToRaid()
     --    end
@@ -110,29 +91,32 @@ function Group:Refresh()
 end
 
 function Group:InvitePlayer(name)
-    if self:CanInvite() then
+    if self:CanInvite(name) then
         return InviteUnit(name)
+    elseif GetNumGroupMembers() == 5 and self.isLeader then
+        ConvertToRaid()
+        return self:InvitePlayer(name)
     end
 end
 
-function Group:CanInvite()
-    local inRaid = IsInRaid()
-    local numGroupMembers = GetNumGroupMembers()
+function Group:CanInvite(name)
     local isGroupLeader = UnitIsGroupLeader("PLAYER")
+    local ignore_pugs = MODULES.RaidManager.ignore_pugs
+    local isAlone = (not IsInRaid() and GetNumGroupMembers() == 0)
 
-    if (not inRaid and numGroupMembers == 0) or isGroupLeader then
-        return true
-    elseif not isGroupLeader and inRaid then
-        self:Refresh()
-        if self.isAssist then
-            return true
-        end
+    if ignore_pugs and not MODULES.GuildManager:IsGuildMember(name) then
+        return false
     end
-    return false
+
+    self:Refresh()
+
+    return isAlone or isGroupLeader or self.isAssist
 end
 
 function Group:RegisterEvents()
     local events = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL', 'ZONE_CHANGE_NEW_AREA'};
+
+    local f = CreateFrame("Frame", "PDKP_Group_EventsFrame");
 
 
     --local raid_group_events = {

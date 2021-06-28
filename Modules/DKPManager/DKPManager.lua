@@ -110,6 +110,25 @@ function DKP:GetOldestAndNewestEntry()
     return oldestEntry, newestEntry;
 end
 
+function DKP:ExportEntry(entry)
+    MODULES.CommsManager:SendCommsMessage('SyncSmall', entry.sd, 'GUILD', nil, 'BULK', nil)
+--    Comms:SendCommsMessage
+
+    --function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
+    --    local transmitData = Comms:DataEncoder(data)
+    --    PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
+    --end
+end
+
+function DKP:ImportEntry(entry, sender)
+    local importEntry = MODULES.DKPEntry:new(entry)
+    importEntry:Save(true)
+end
+
+function DKP:ImportBulkEntries(entries, sender)
+    print('Importing bulk entries')
+end
+
 function DKP:AddNewEntryToDB(entry, updateTable)
     if updateTable == nil then updateTable = true end
 
@@ -124,6 +143,7 @@ function DKP:AddNewEntryToDB(entry, updateTable)
 
     if updateTable then
         PDKP.memberTable:DataChanged()
+        GUI.HistoryGUI:RefreshData()
     end
 end
 

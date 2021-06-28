@@ -38,7 +38,11 @@ function Tab:Initialize()
             ['text'] = 'Options',
         },
     }
-    local tab_names = {'view_adjust_button', 'view_history_button', 'view_loot_button', 'view_lockouts_button', 'view_options_button'}
+
+    local tab_names = {'view_history_button', 'view_loot_button', 'view_lockouts_button', 'view_options_button'}
+    if PDKP.canEdit then
+        tab_names = {'view_adjust_button', unpack(tab_names)}
+    end
 
     local btn_pad = 35
 

@@ -13,13 +13,13 @@ local trim, lower, contains = strtrim, strlower, tContains
 function Chat:Initialize()
     PDKP.CORE:RegisterChatCommand("pdkp", function(msg) Chat:_HandleSlashCommands(msg) end)
 
-    self.eventsFrame = CreateFrame("Frame", "EventsFrame")
+    self.eventsFrame = CreateFrame("Frame", "PDKP_Chat_EventsFrame")
     self.eventsFrame:SetScript("OnEvent", Chat.HandleChatEvent)
 
     local eventNames = {
         'CHAT_MSG_WHISPER',
         --'CHAT_MSG_WHISPER_INFORM',
-        'CHAT_MSG_GUILD',
+        --'CHAT_MSG_GUILD',
         'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER', 'CHAT_MSG_RAID_WARNING',
     }
 

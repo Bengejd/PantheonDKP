@@ -152,7 +152,6 @@ function HistoryTable:Initialize()
 
     self:RefreshData()
 
-
     return self
 end
 
@@ -191,6 +190,8 @@ function HistoryTable:RefreshData(justData)
 
     if #self.entry_keys == 0 then
         self:_NoEntriesFound()
+    else
+        self:_EntriesFound()
     end
 end
 
@@ -201,14 +202,17 @@ function HistoryTable:RefreshTable()
         row:Hide()
         row:ClearAllPoints()
 
+        row:UpdateRowValues(self.entries[i])
+
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row)
             row:Show()
             row.display_index = #self.displayedRows
         end
     end
-
     self.scrollContent:AddBulkChildren(self.displayedRows)
+
+    self:CollapseAllRows(self.collapsed)
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -441,6 +445,13 @@ function HistoryTable:_NoEntriesFound()
     self.frame.desc:SetText("This will be populated once your database has a valid entry")
 
     self.collapse_all:Hide()
+end
+
+function HistoryTable:_EntriesFound()
+    self.frame.title:SetText("")
+    self.frame.desc:SetText("")
+
+    self.collapse_all:Show()
 end
 
 function PDKP_History_OnClick(frame, buttonType)

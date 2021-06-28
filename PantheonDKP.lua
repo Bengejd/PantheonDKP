@@ -114,6 +114,7 @@ function CORE:_InitializeFeatures()
     LOG:Trace("CORE:_InitializeFeatures()")
     MODULES.GuildManager:Initialize()
     MODULES.Main:Initialize()
+    MODULES.CommsManager:RegisterComms()
     MODULES.AuctionManager:Initialize()
     MODULES.DKPManager:Initialize()
     MODULES.RaidManager:Initialize()
@@ -191,6 +192,8 @@ function CORE:_ExecuteInitialize()
     PDKP.Print = function(...)
         print('|cff33ff99PantheonDKP|r:', strjoin(" ", tostringall(...)))
     end
+
+    PDKP.canEdit = false
 
     self._initialize_fired = true
     C_Timer.After(1, function() CORE:_SequentialInitialize(0) end)

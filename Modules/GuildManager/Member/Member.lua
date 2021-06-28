@@ -34,7 +34,7 @@ function Member:new(guildIndex, server_time)
         self:Save()
     end
 
-    if self.name == playerName then
+    if strlower(self.name) == strlower(playerName) then
         PDKP.char = self;
     end
 
@@ -59,7 +59,7 @@ function Member:IsRaidReady()
 end
 
 function Member:CanEdit()
-    return self.canEdit or self.rankIndex <= 3 or self.ifOfficer
+    return self.canEdit or self.rankIndex <= 3 or self.isOfficer
 end
 
 function Member:GetDKP(dkpVariable)
@@ -117,10 +117,8 @@ function Member:_GetMemberData(index)
     self.formattedName, self.coloredClass = Utils:FormatTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == MODULES.Constants.BANK_NAME
 
-    -- TODO: Hook this up, potentially?
     if self.name == 'Lariese' and PDKP:IsDev() then
         self.canEdit = true
-        PDKP.canEdit = true
     end
 
     self.visible = true

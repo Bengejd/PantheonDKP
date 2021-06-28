@@ -15,10 +15,11 @@ local GetServerTime = GetServerTime
 local IsInGuild, GetNumGuildMembers, GuildRoster = IsInGuild, GetNumGuildMembers, GuildRoster
 local GuildRosterSetOfficerNote, GetGuildInfo = GuildRosterSetOfficerNote, GetGuildInfo
 
-
 local GuildManager = {}
 
 function GuildManager:Initialize()
+    self.initiated = false
+
     self.bankIndex = nil
     self.officers = {}
     self.classLeaders = {}
@@ -31,10 +32,10 @@ function GuildManager:Initialize()
     PDKP.player = {}
     self.playerName = GetUnitName("PLAYER", false)
 
+    if not IsInGuild() then return end
+
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
-
-    if not IsInGuild() then return end
 
     self:GetMembers()
 
@@ -66,17 +67,16 @@ function GuildManager:GetMembers()
         local isNew = self:IsNewMemberObject(member.name)
         local inDatabase = self:IsMemberInDatabase(member.name);
 
-        if member.name == self.playerName then
-            PDKP.player = member;
-        end
-
         if member.name ~= nil then
             self.guildies[#self.guildies + 1] = member.name;
         end
 
+        if member.name == self.playerName then
+            PDKP.canEdit = member.canEdit
+        end
+
         if member:IsRaidReady() then
             if member.name == nil then member.name = '' end
-            --if member.isBank then Guild:initBankInfo(i, member) end
             if member.isOfficer then self.officers[member.name] = member end
             if member.isClassLeader then self.classLeaders[member.name] = member end
 
@@ -84,10 +84,6 @@ function GuildManager:GetMembers()
                 self.members[member.name] = member;
                 self.memberNames[#self.memberNames + 1] = member.name
             end
-
-            --if not inDatabase and PDKP.canEdit then
-            --    member:Initialize(server_time)
-            --end
 
             if member.online then self.online[member.name] = member end
         end

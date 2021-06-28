@@ -135,8 +135,10 @@ function Adjust:Initialize()
     sb:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 4, -22)
     sb:SetScript("OnClick", function()
         if not Utils:tEmpty(MODULES.Adjustment.entry) then
-            MODULES.Adjustment.entry:Save()
+            MODULES.Adjustment.entry:Save(nil, true)
         end
+
+        wipe(MODULES.Adjustment.entry)
     end)
     sb:Disable()
 

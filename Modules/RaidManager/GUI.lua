@@ -140,7 +140,8 @@ function RaidTools:Initialize()
     inv_edit_box:SetPoint("TOPRIGHT", GROUPS['inv_control_group'].content, "TOPRIGHT", 12, 8)
     inv_edit_box.desc:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
 
-    local inv_text = strlower(strjoin(", ", tostringall(unpack(RaidManager.invite_commands))))
+    local invite_commands = RaidManager.invite_commands or {'invite', 'inv'}
+    local inv_text = strlower(strjoin(", ", tostringall(unpack(invite_commands))))
     inv_edit_box:SetText(inv_text)
 
     self.options['commands'] = inv_edit_box
@@ -185,8 +186,9 @@ function RaidTools:Initialize()
 
     guild_only.desc:SetPoint("RIGHT", GROUPS['inv_control_group'].content, "RIGHT", 0, -5)
     guild_only:SetScript("OnClick", function(b)
-        -- TODO: Hook this up.
-        print('TODO: Guild Only', b:GetChecked())
+        local val = b:GetChecked()
+        RaidManager.ignore_pugs = val
+        MODULES.Database:UpdateSetting('ignore_pugs', val)
     end)
     self.options['ignore_PUGS'] = guild_only
 
@@ -258,7 +260,7 @@ function RaidTools:Initialize()
     PDKP.raid_frame = f
 
     --@debug@
-    ToggleFriendsFrame(4)
+    --ToggleFriendsFrame(4)
     --@end-debug@
 
     self._initialized = true
