@@ -144,6 +144,7 @@ function DKP:AddNewEntryToDB(entry, updateTable)
     if updateTable then
         PDKP.memberTable:DataChanged()
         GUI.HistoryGUI:RefreshData()
+        GUI.LootGUI:RefreshData()
     end
 end
 

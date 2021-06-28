@@ -188,6 +188,8 @@ function LootTable:RefreshData(justData)
 
     if #self.entry_keys == 0 then
         self:_NoEntriesFound()
+    else
+        self:_EntriesFound()
     end
 end
 
@@ -198,6 +200,8 @@ function LootTable:RefreshTable()
         row:Hide()
         row:ClearAllPoints()
 
+        row:UpdateRowValues(self.entries[i])
+
         if not row:ApplyFilters() then
             tinsert(self.displayedRows, row)
             row:Show()
@@ -206,6 +210,8 @@ function LootTable:RefreshTable()
     end
 
     self.scrollContent:AddBulkChildren(self.displayedRows)
+
+    self:CollapseAllRows(self.collapsed)
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -250,6 +256,13 @@ function LootTable:_NoEntriesFound()
     self.frame.desc:SetText("This will be populated once your database has a valid entry")
 
     self.collapse_all:Hide()
+end
+
+function LootTable:_EntriesFound()
+    self.frame.title:SetText("")
+    self.frame.desc:SetText("")
+
+    self.collapse_all:Show()
 end
 
 function LootTable:_OnLoad()
