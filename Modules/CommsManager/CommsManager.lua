@@ -60,6 +60,15 @@ function Comms:RegisterComms()
         --},
         ['SyncSmall'] = { ['self'] = true, ['combat'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, },
         ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
+
+        ['startBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
+        ['stopBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
+
+        ['bidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
+        ['bidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
+
+        ['AddBid'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
+        ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
     }
     for prefix, opts in pairs(commChannels) do
         local commOpts = {['prefix'] = prefix, ['combat'] = opts['combat'], ['self'] = opts['self'], ['requireCheck'] = opts['requireCheck'] }

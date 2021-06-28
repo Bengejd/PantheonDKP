@@ -110,6 +110,17 @@ function DKP:GetOldestAndNewestEntry()
     return oldestEntry, newestEntry;
 end
 
+function DKP:GetMyDKP()
+    local dkpTotal = 0
+    if PDKP.char ~= nil then
+        dkpTotal = PDKP.char:GetDKP('total')
+    end
+    if dkpTotal == nil then
+        return 0
+    end
+    return dkpTotal
+end
+
 function DKP:ExportEntry(entry)
     MODULES.CommsManager:SendCommsMessage('SyncSmall', entry.sd, 'GUILD', nil, 'BULK', nil)
 --    Comms:SendCommsMessage

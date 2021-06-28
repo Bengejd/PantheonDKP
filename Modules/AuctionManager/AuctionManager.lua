@@ -13,13 +13,19 @@ local Auction = {}
 Auction.CurrentAuctionInfo = {}
 Auction.CURRENT_BIDDERS = {}
 
+local function GetItemCommInfo(itemIdentifier)
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
+    itemSellPrice = GetItemInfo(itemIdentifier)
+    return itemLink, itemName, itemTexture
+end
+
 local function HandleModifiedTooltipClick()
     if PDKP.canEdit and GameTooltip and IsAltKeyDown() and not Auction:IsAuctionInProgress() then
         local itemName, itemLink = GameTooltip:GetItem()
         if itemLink then
-            Auction.auctionInProgress = true
-            GUI.AuctionGUI:StartAuction(itemName, itemLink)
-            GUI.Adjustment:InsertItemLink(itemLink)
+            local iLink, iName, iTexture = GetItemCommInfo(itemLink)
+            local commsData = { iLink, iName, iTexture }
+            MODULES.CommsManager:SendCommsMessage('startBids', commsData, 'RAID', nil, 'BULK', nil)
         end
     elseif Auction:IsAuctionInProgress() then
         PDKP.CORE:Print('Another auction is in progress');

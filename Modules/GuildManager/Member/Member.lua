@@ -66,6 +66,7 @@ function Member:GetDKP(dkpVariable)
     if dkpVariable == nil then
         return self.dkp['total']
     end
+    return self.dkp[dkpVariable]
 end
 
 function Member:_UpdateDKP(amount)

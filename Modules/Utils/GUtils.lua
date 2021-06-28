@@ -529,7 +529,7 @@ function GUtils:createItemLink(parent)
     end)
 
     -- ItemID, ItemName or ItemLink
-    fs.SetItemLink = function(itemIdentifier)
+    fs.SetItemLink = function(itemIdentifier, iName, iTexture)
         -- TODO: Find out if we need all of this, or if it can be nullified.
 
         -- Call instant first, since it assures that we'll get the item info.
@@ -538,6 +538,12 @@ function GUtils:createItemLink(parent)
         -- Then call the actual item info, so we can get the texture, and link.
         local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
         itemSellPrice = GetItemInfo(itemIdentifier)
+
+        if iName and iTexture then
+            itemLink = itemIdentifier
+            itemName = iName
+            itemTexture = iTexture
+        end
 
         if not itemLink then
             return

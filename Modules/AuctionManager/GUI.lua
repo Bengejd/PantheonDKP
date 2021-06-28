@@ -12,6 +12,8 @@ local tinsert = table.insert
 local AuctionGUI = {}
 AuctionGUI.itemLink = nil;
 
+local DKPManager;
+
 function AuctionGUI:Initialize()
     local title_str = Utils:FormatTextColor('PDKP Active Bids', MODULES.Constants.ADDON_HEX)
 
@@ -23,14 +25,11 @@ function AuctionGUI:Initialize()
     GUtils:setMovable(f)
     f:SetClampedToScreen(true);
 
-    -- TODO: Get Rid of this, and hook it up properly.
-    local DevDKP = 30
-
     local stopBid, bid_box;
 
     f:SetScript("OnShow", function()
         -- TODO: Set up this to grab their DKP total.
-        f.dkp_title:SetText('Total DKP: ' .. 30)
+        f.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
 
         -- TODO: Possible that I don't need the IsAuctionInProgress part...
         if PDKP.canEdit and MODULES.AuctionManager:IsAuctionInProgress() then
@@ -84,8 +83,7 @@ function AuctionGUI:Initialize()
     sb:SetScript("OnClick", function()
         local bid_amt = f.bid_box.getValue()
         f.current_bid:SetText(bid_amt)
-
-        --TODO: Submit this to the Bid Manager/Comms
+        MODULES.CommsManager:SendCommsMessage('bidSubmit', bid_amt, 'RAID', nil, 'BULK', nil)
     end)
     sb:SetEnabled(false)
 
@@ -132,13 +130,6 @@ function AuctionGUI:Initialize()
     item_link:SetWidth(150)
     item_link.icon = item_icon
 
-    -- TODO: Cleanup this dev stuff.
-    --local ateish = 22589
-    --local kingsfall = 22802
-    --local blade = 17780
-    --local edge = 14551
-    --local test_item_id = kingsfall
-
     local bid_box_opts = {
         ['name'] = 'bid_input',
         ['parent'] = f,
@@ -151,7 +142,9 @@ function AuctionGUI:Initialize()
 
             local box_val = box.getValue()
             local curr_bid_val = f.current_bid.getValue()
-            if box_val and box_val <= DevDKP and box_val > 0 and box_val ~= curr_bid_val then
+            local myDKP = MODULES.DKPManager:GetMyDKP()
+
+            if box_val and box_val <= myDKP and box_val > 0 and box_val ~= curr_bid_val then
                 return sb:SetEnabled(true)
             end
             return sb:SetEnabled(false)
@@ -203,7 +196,6 @@ function AuctionGUI:Initialize()
     bids_open_btn:SetSize(45, 25);
     bids_open_btn:SetNormalTexture(MODULES.Media.ARROW_RIGHT_TEXTURE)
     bids_open_btn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -45)
-
 
     bids_open_btn:SetScript("OnClick", function()
         if AuctionGUI.current_bidders_frame:IsVisible() then
@@ -265,12 +257,22 @@ function AuctionGUI:CreateNewBidder(bid_info)
     local bidders_frame = self.current_bidders_frame;
     local scrollContent = bidders_frame.scrollContent;
 
+    local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
+    local bidFound = false
+
+    for i=1, #bidders do
+        local bidder = bidders[i]
+        if bidder.name == bid_info['name'] then
+            MODULES.AuctionManager.CURRENT_BIDDERS[i].bid = bid_info['bid']
+            bidFound = true
+        end
+    end
+
     scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
-    table.insert(MODULES.AuctionManager.CURRENT_BIDDERS, bid_info)
-
-    local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
-    local padding = 95
+    if not bidFound then
+        table.insert(MODULES.AuctionManager.CURRENT_BIDDERS, bid_info)
+    end
 
     local createProspectFrame = function()
         local f = CreateFrame("Frame", nil, scrollContent, nil)
@@ -302,22 +304,23 @@ function AuctionGUI:CreateNewBidder(bid_info)
     end
 end
 
-function AuctionGUI:StartAuction(itemName, itemLink)
-    self.frame.item_link.SetItemLink(itemName)
+function AuctionGUI:StartAuction(itemLink, itemName, itemTexture)
+    self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
+    self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
     self.frame:Show()
 
-    local bidders = {
-        { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },
-        { ['name'] = 'Neekio', ['bid'] = 17, ['dkpTotal'] = 30, },
-        { ['name'] = 'Veltrix', ['bid'] = 12, ['dkpTotal'] = 30, },
-        { ['name'] = 'Nightshelf', ['bid'] = 05, ['dkpTotal'] = 30, },
-        { ['name'] = 'Advanty', ['bid'] = 01, ['dkpTotal'] = 30, },
-        { ['name'] = 'Athico', ['bid'] = 14, ['dkpTotal'] = 30, },
-    }
+    --local bidders = {
+    --    { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },
+    --    { ['name'] = 'Neekio', ['bid'] = 17, ['dkpTotal'] = 30, },
+    --    { ['name'] = 'Veltrix', ['bid'] = 12, ['dkpTotal'] = 30, },
+    --    { ['name'] = 'Nightshelf', ['bid'] = 05, ['dkpTotal'] = 30, },
+    --    { ['name'] = 'Advanty', ['bid'] = 01, ['dkpTotal'] = 30, },
+    --    { ['name'] = 'Athico', ['bid'] = 14, ['dkpTotal'] = 30, },
+    --}
 
-    for i=1, #bidders do
-        self:CreateNewBidder(bidders[i])
-    end
+    --for i=1, #bidders do
+    --    self:CreateNewBidder(bidders[i])
+    --end
 
 end
 
