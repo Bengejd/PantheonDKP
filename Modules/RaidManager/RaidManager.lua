@@ -8,6 +8,8 @@ local Utils = PDKP.Utils;
 
 local Raid = {}
 
+local tinsert = tinsert
+
 function Raid:Initialize()
     self.settings_DB = MODULES.Database:Settings()
     local db = self.settings_DB
@@ -24,6 +26,11 @@ end
 
 function Raid:GetClassMemberNames(class)
     local names = {}
+    local classNames = MODULES.GroupManager.classes[class]
+
+    for i=1, #classNames do
+        tinsert(names, classNames[i])
+    end
     return names
 end
 
