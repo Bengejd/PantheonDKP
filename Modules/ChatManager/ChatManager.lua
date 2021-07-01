@@ -54,9 +54,6 @@ function Chat:_HandleInviteMsg(name)
         return PDKP.CORE:Print(player_name, "'s invite request was ignored")
     end
 
-
-    --GuildManager:IsGuildMember
-
     MODULES.GroupManager:InvitePlayer(name)
 end
 
@@ -106,6 +103,8 @@ function Chat:_HandleSlashCommands(msg)
     local DEV_SLASH_COMMANDS = {
         ['whoTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
         ['databasePopulate'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
+        ['largeDataSync'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
+        ['decayTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then return DEV_SLASH_COMMANDS[command]() end
 end

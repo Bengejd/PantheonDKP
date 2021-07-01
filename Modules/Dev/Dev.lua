@@ -13,6 +13,8 @@ local random = math.random
 local pairs = pairs
 local wipe = wipe
 
+local decayCount = 0
+
 function Dev:HandleSlashCommands(msg)
     if not PDKP:IsDev() then return end
 
@@ -22,7 +24,58 @@ function Dev:HandleSlashCommands(msg)
         return self:PopulateDummyDatabase(arg1)
     elseif cmd == 'whoTest' then
         self:WhoTest(msg)
+    elseif cmd == 'largeDataSync' then
+        self:LargeDataSync(msg)
+    elseif cmd == 'decayTest' then
+        self:DecayTest(msg)
     end
+end
+
+function Dev:DecayTest()
+    local member1 = MODULES.GuildManager:GetMemberByName('Mariku')
+    local member2 = MODULES.GuildManager:GetMemberByName('Oxford')
+
+    local m1DKP = member1:GetDKP()
+    local m2DKP = member2:GetDKP()
+
+    if m1DKP == 30 or m2DKP == 30 then
+        member1.dkp['total'] = 20000
+        member2.dkp['total'] = 19999
+    else
+        decayCount = decayCount + 1
+        local diffOffset = 0
+        local decayAmount = 0.9
+
+        if m1DKP - m2DKP == 1 then
+            diffOffset = 1
+        end
+
+        if decayCount % 10 == 0 then
+            decayAmount = 0.5
+            PDKP.CORE:Print('50% Decay')
+        end
+
+        member1.dkp['total'] = math.floor((m1DKP + diffOffset) * 0.9 )
+        member2.dkp['total'] = math.floor((m2DKP) * 0.9)
+    end
+
+    m1DKP = member1:GetDKP()
+    m2DKP = member2:GetDKP()
+
+    if m1DKP <= m2DKP then
+        print(Utils:FormatTextColor('OXFORD CAUGHT UP TO MARIKU on week: ' .. tostring(decayCount), MODULES.Constants.WARNING))
+    end
+
+    print(decayCount)
+
+    MODULES.DKPManager:_UpdateTables()
+end
+
+function Dev:LargeDataSync()
+    local entries, total = MODULES.DKPManager:GetEntriesForSync()
+    local transmission_data = { ['total'] = total, ['entries'] = entries }
+    PDKP.CORE:Print('Dev() Preparing largeDataSync for', total, 'entries')
+    MODULES.CommsManager:SendCommsMessage('SyncLarge', transmission_data)
 end
 
 function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
