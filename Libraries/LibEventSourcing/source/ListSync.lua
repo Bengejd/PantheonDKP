@@ -17,7 +17,6 @@ local StateMessage = LibStub("EventSourcing/Message/State")
 local BulkDataMessage = LibStub("EventSourcing/Message/BulkData")
 local Message = LibStub("EventSourcing/Message")
 
-
 local ADVERTISEMENT_TIMEOUT = 30
 local CHANNEL_GUILD = "GUILD"
 local CHANNEL_RAID = "RAID"

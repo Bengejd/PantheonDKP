@@ -29,8 +29,6 @@ local privateCounter = '_b'
 local privateTimestamp = '_c'
 local privateClass = '_d'
 
-
-
 LogEntry.__index = LogEntry
 LogEntry[privateStaticClass] = 'LE'
 
