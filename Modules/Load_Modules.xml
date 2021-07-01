@@ -44,4 +44,5 @@
     <Include file="Options\GUI.lua" />
     <Include file="Loot\GUI.lua" />
     <Include file="Adjustments\GUI.lua" />
+    <Script file="Minimap\GUI.lua" />
 </Ui>
