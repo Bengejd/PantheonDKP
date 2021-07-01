@@ -14,6 +14,8 @@ Media.PDKP_FRAMES_PATH = Media.PDKP_MEDIA_PATH .. "Frames\\"
 -- The base path for our icons
 Media.PDKP_ICONS_PATH = Media.PDKP_MEDIA_PATH .. "Icons\\"
 
+Media.PDKP_ADDON_ICON = Media.PDKP_ICONS_PATH .. "icon.tga"
+
 -- Main Interface textures are denoted with "PDKPFrame-"
 Media.PDKP_TEXTURE_BASE = Media.PDKP_FRAMES_PATH .. "PDKPFrame-"
 
