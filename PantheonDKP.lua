@@ -84,6 +84,8 @@ local function Initialize_Versioning()
         CORE.versionString = "v" .. GetAddOnMetadata('PantheonDKP', "Version")
     end
 
+    MODULES.Constants.COLORED_ADDON_VERSION = '|cff33FF99' .. PDKP.CORE.versionString .. '|r'
+
     return old, new
 end
 
