@@ -161,7 +161,7 @@ function RaidTools:Initialize()
     self.options['ignored'] = disallow_edit
 
     --local ignore_from = Settings:UpdateIgnoreFrom({}, true) or {};
-    local ignore_text = strlower(strjoin(", ", tostringall(unpack(RaidManager.ignore_from))))
+    local ignore_text = strlower(strjoin(", ", tostringall(unpack(RaidManager.ignore_from or {}))))
     disallow_edit:SetText(ignore_text)
 
     disallow_edit:HookScript("OnEditFocusLost", function()
