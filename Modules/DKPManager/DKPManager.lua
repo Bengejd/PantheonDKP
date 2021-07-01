@@ -34,6 +34,32 @@ function DKP:GetEntries()
     return self.entries;
 end
 
+function DKP:GetEncodedEntries()
+    return self.encoded_entries;
+end
+
+function DKP:GetEntriesForSync(loadAfterWeek)
+    loadAfterWeek = loadAfterWeek or 0
+
+    local encoded_entries = self:GetEncodedEntries()
+    local decoded_entries = self:GetEntries()
+
+    local transmission_entries = {}
+    local total_entries = 0
+
+    for id, decoded_entry in pairs(decoded_entries) do
+        local save_details = decoded_entry:GetSaveDetails()
+        transmission_entries[id] = MODULES.CommsManager:DatabaseEncoder(save_details)
+        total_entries = total_entries + 1
+    end
+    for id, entry in pairs(encoded_entries) do
+        transmission_entries[id] = entry;
+        total_entries = total_entries + 1
+    end
+
+    return transmission_entries, total_entries;
+end
+
 function DKP:GetEntryKeys(sorted, filterReasons)
     sorted = sorted or false
     local keys = {}
@@ -122,13 +148,7 @@ function DKP:GetMyDKP()
 end
 
 function DKP:ExportEntry(entry)
-    MODULES.CommsManager:SendCommsMessage('SyncSmall', entry.sd, 'GUILD', nil, 'BULK', nil)
---    Comms:SendCommsMessage
-
-    --function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    --    local transmitData = Comms:DataEncoder(data)
-    --    PDKP:SendCommMessage(prefix, transmitData, distro, sendTo, bulk, func)
-    --end
+    MODULES.CommsManager:SendCommsMessage('SyncSmall', entry.sd)
 end
 
 function DKP:ImportEntry(entry, sender)
@@ -136,33 +156,86 @@ function DKP:ImportEntry(entry, sender)
     importEntry:Save(true)
 end
 
-function DKP:ImportBulkEntries(entries, sender)
-    print('Importing bulk entries')
+function DKP:ImportBulkEntries(message, sender)
+    PDKP.CORE:Print('Importing bulk entries from', sender)
+    local data = MODULES.CommsManager:DataDecoder(message)
+
+    local total, entries = data['total'], data['entries']
+
+    local batches, total_batches = self:_CreateBatches(entries, total)
+    local currentBatch = 0
+    self.importTicker = C_Timer.NewTicker(0.5, function()
+        currentBatch = currentBatch + 1
+        DKP:_ProcessEntryBatch(batches[currentBatch])
+
+        if PDKP:IsDev() then
+            PDKP.CORE:Print('Processing import batch', tostring(currentBatch) .. '/' .. tostring(total_batches))
+        end
+
+        if currentBatch == total_batches then
+            DKP:_UpdateTables()
+            DKP.importTicker:Cancel()
+        end
+    end, total_batches)
+end
+
+function DKP:_CreateBatches(entries, total)
+    local batches = {}
+    local index = 1
+
+    local total_batches = math.ceil(total / 50)
+    for i=1, total_batches do
+        batches[i] = {}
+    end
+    for key, entry in pairs(entries) do
+        if #batches[index] >= 50 then
+            index = index + 1
+        end
+        batches[index][key] = entry
+    end
+    return batches, total_batches
+end
+
+function DKP:_ProcessEntryBatch(batch)
+    for key, encoded_entry in pairs(batch) do
+        local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
+        local importEntry = MODULES.DKPEntry:new(entry)
+        importEntry:Save(false)
+    end
 end
 
 function DKP:AddNewEntryToDB(entry, updateTable)
     if updateTable == nil then updateTable = true end
 
-    for _, member in pairs(entry.members) do
-        member:_UpdateDKP(entry.sd.dkp_change)
-        member:Save()
-    end
-    DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
+    if entry ~= nil then
+        for _, member in pairs(entry.members) do
+            member:_UpdateDKP(entry.sd.dkp_change)
+            member:Save()
+        end
+        DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
 
-    self.entries[entry.id] = entry
-    self.numOfEntries = self.numOfEntries + 1
+        self.entries[entry.id] = entry
+        self.numOfEntries = self.numOfEntries + 1
+    end
 
     if updateTable then
-        PDKP.memberTable:DataChanged()
-        GUI.HistoryGUI:RefreshData()
-        GUI.LootGUI:RefreshData()
+        DKP:_UpdateTables()
     end
+end
+
+function DKP:_UpdateTables()
+    PDKP.memberTable:DataChanged()
+    GUI.HistoryGUI:RefreshData()
+    GUI.LootGUI:RefreshData()
 end
 
 function DKP:_LoadEncodedDatabase()
     for index, entry in pairs(DKP_DB) do
         self.encoded_entries[index] = entry
         self.numOfEncoded = self.numOfEncoded + 1
+    end
+    if PDKP:IsDev() then
+        PDKP.CORE:Print('Loaded', self.numOfEncoded, 'Encoded entries');
     end
 end
 
