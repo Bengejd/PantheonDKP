@@ -52,10 +52,17 @@ function Comms:RegisterComms()
         --    --['V2SyncReq'] = {},
         --},
 
+        --- GUILD COMMS
+
         -- TODO: Remove combat after done dev
         ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = false, },
         -- TODO: Remove self after done dev
         ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = true, },
+
+        --- RAID COMMS
+
+        ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID', ['requireCheck'] = true, ['combat'] = true, },
+        ['WhoIsDKP'] = { ['self'] = false, ['channel'] = 'RAID', ['requireCheck'] = false, ['combat'] = true, },
 
         ['startBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
         ['stopBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },

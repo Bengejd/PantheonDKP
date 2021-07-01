@@ -1,4 +1,5 @@
 local _, PDKP = ...
+local _G = _G
 
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
@@ -9,24 +10,29 @@ local Utils = PDKP.Utils;
 local Group = {}
 
 local IsInRaid = IsInRaid
-
 local tinsert = table.insert
 local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterInfo
 local UnitIsGroupLeader = UnitIsGroupLeader
 local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
+local strtrim = strtrim
+
+local GuildManager;
 
 function Group:Initialize()
     setmetatable(self, Group); -- Set the metatable so we used Group's __index
 
+    GuildManager = MODULES.GuildManager;
+
     self.classes = {};
     self.available = true
+    self.requestedDKPOfficer = false
 
     self:_RefreshClasses()
 
+    self:InitializePortrait()
+
     self.memberNames = {};
-
     self.player = {}
-
     self.leadership = {
         assist = {},
         masterLoot = nil,
@@ -37,10 +43,6 @@ function Group:Initialize()
     self:RegisterEvents();
 
     self:Refresh()
-
-    if PDKP:IsDev() then
-
-    end
 end
 
 function Group:Refresh()
@@ -49,13 +51,19 @@ function Group:Refresh()
 
     local numGroupMembers = GetNumGroupMembers()
 
-    self:_RefreshLeadership()
     self:_RefreshClasses()
+    self:_RefreshLeadership()
     self:_RefreshMembers()
 
     for i=1, numGroupMembers do
-        local name, rank, _, _, class, _, _, _, _, _, isML, _ = GetRaidRosterInfo(i);
-        tinsert(self.classes[class], name)
+        local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
+
+        if role == 'MAINTANK' then
+            tinsert(self.classes['Tank'], name)
+        else
+            tinsert(self.classes[class], name)
+        end
+
         tinsert(self.memberNames, name)
 
         -- leadership
@@ -80,6 +88,10 @@ function Group:Refresh()
 
     if PDKP.raid_frame ~= nil then
         PDKP.raid_frame:updateClassGroups()
+    end
+
+    if self:IsInRaid() and not self:HasDKPOfficer() then
+        self:RequestDKPOfficer()
     end
 
     --if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
@@ -162,12 +174,58 @@ function Group:IsMasterLoot()
     return self.isML
 end
 
+function Group:IsMemberDKPOfficer(name)
+    return self.leadership.dkpOfficer == name
+end
+
 function Group:HasDKPOfficer()
     return self.leadership.dkpOfficer ~= nil
 end
 
+function Group:SetDKPOfficer(data)
+    local charName, previous, fromRequest = unpack(data)
+
+    fromRequest = fromRequest or false
+
+    local isDKPOfficer = charName == previous
+
+    if isDKPOfficer and fromRequest and self:IsMemberDKPOfficer(charName) then return end
+
+    if fromRequest then
+        isDKPOfficer = false
+    end
+
+    self.leadership.dkpOfficer = Utils:ternaryAssign(isDKPOfficer, nil, charName);
+    local officerText = Utils:ternaryAssign(isDKPOfficer, 'is no longer the DKP Officer', 'is now the DKP Officer')
+    PDKP.CORE:Print(charName .. ' ' .. officerText)
+    self.classes['DKP'] = {charName}
+
+    PDKP.raid_frame:updateClassGroups()
+
+    if self:HasDKPOfficer() then
+        self.requestedDKPOfficer = true
+    end
+end
+
+function Group:RequestDKPOfficer()
+    if self.requestedDKPOfficer or self:HasDKPOfficer() then return end
+    self.requestedDKPOfficer = true
+    MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
+
+    C_Timer.After(5, function()
+        if not self:HasDKPOfficer() then
+            self.requestedDKPOfficer = false
+            if PDKP:IsDev() then
+                PDKP.CORE:Print("Was unable to find DKP officer");
+            end
+        end
+    end)
+end
+
 function Group:GetNumClass(class)
-    if self.classes[class] then
+    if class == 'Total' then
+        return #self.memberNames
+    elseif self.classes[class] then
         return #self.classes[class]
     end
     return 0
@@ -181,6 +239,9 @@ function Group:_RefreshClasses()
         end
         self.classes[CLASSES[i]] = {}
     end
+    self.classes['Tank'] = {}
+    self.classes['Total'] = {}
+    self.classes['DKP'] = {}
 end
 
 function Group:_RefreshLeadership()
@@ -188,7 +249,11 @@ function Group:_RefreshLeadership()
         if type(val) == "table" then
             wipe(self.leadership[key])
         else
-            self.leadership[key] = nil
+            if key ~= 'dkpOfficer' then
+                self.leadership[key] = nil
+            elseif key == 'dkpOfficer' and val == nil then
+                self.leadership[key] = nil
+            end
         end
     end
 end
@@ -202,12 +267,9 @@ end
 
 function Group:_HandleEvent(event, arg1, ...)
     self:Refresh()
-
     if not self.available then
-        print('Restarting handle event');
         return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...))
     end
-
     if event == 'GROUP_ROSTER_UPDATE' then
         if not self:IsInRaid() then return end
         -- TODO: Update GUI Filter?
@@ -218,14 +280,71 @@ function Group:_HandleEvent(event, arg1, ...)
             MODULES.DKPManager:BossKillDetected(arg1, ...)
         end
     end
+end
 
-    --local raid_group_events = {
-    --    ['ZONE_CHANGED_NEW_AREA']=function()
-    --        if not UnitIsDeadOrGhost("player") then
-    --            Raid:CheckCombatLogging()
-    --        end
+function Group:_IsMemberInRaid(name)
+    return tContains(self.memberNames, name) or false
+    --for i=1, #self.memberNames do
+    --    if self.memberNames[i] == name then
+    --        return true
     --    end
-    --}
+    --end
+    --return false
+end
+
+function Group:InitializePortrait()
+    if (not PDKP.canEdit) and (not self:IsLeader()) then return end
+
+    local lineSep = _G['UIDropDownMenu_AddSeparator']
+    local addBtn = _G['UIDropDownMenu_AddButton']
+
+    local commonSettings = {
+        hasArrow = false;
+        notCheckable = true;
+        iconOnly = false;
+        tCoordLeft = 0;
+        tCoordRight = 1;
+        tCoordTop = 0;
+        tCoordBottom = 1;
+        tSizeX = 0;
+        tSizeY = 8;
+        tFitDropDownSizeX = true;
+    }
+    local titleSettings = {
+        text = 'PDKP',
+        isTitle = true;
+        isUninteractable = true;
+    }
+    local dkpOfficerSettings = {
+        text = '',
+        isTitle = false;
+        isUninteractable = false;
+        keepShownOnClick=false;
+        func = nil;
+    }
+
+    for key, val in pairs(commonSettings) do
+        titleSettings[key] = val
+        dkpOfficerSettings[key] = val
+    end
+
+    local dropdownList = _G['DropDownList1']
+    dropdownList:HookScript('OnShow', function()
+        local charName = strtrim(_G['DropDownList1Button1']:GetText())
+        local member = GuildManager:GetMemberByName(charName)
+
+        if not (member and self:_IsMemberInRaid(charName) and member.canEdit) then return end
+
+        dkpOfficerSettings.text = Utils:ternaryAssign(self:IsMemberDKPOfficer(charName), 'Demote from DKP Officer', 'Promote to DKP Officer')
+        dkpOfficerSettings.func = function(...)
+            MODULES.CommsManager:SendCommsMessage('DkpOfficer', {charName, self.leadership.dkpOfficer, false})
+        end
+
+        lineSep(1)
+        addBtn(titleSettings, 1) -- Title
+        addBtn(dkpOfficerSettings, 1)
+        lineSep(1)
+    end)
 end
 
 MODULES.GroupManager = Group

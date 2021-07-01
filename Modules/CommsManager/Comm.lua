@@ -91,28 +91,6 @@ end
 --    Private Functions     --
 -----------------------------
 
-function Comm:_GetOnCommReceived()
-
-
-    --['GUILD'] = {
-    --    --['V2PushReceive'] = { ['self']=true, ['combat']=false, }, -- Officer check -- When a new push is received.
-    --    --['V2EntryDelete'] = { ['self']=true, ['combat']=true, }, -- Officer check -- When an entry is deleted.
-    --    --['V2SyncRes']= { }, -- When an officer's sync request goes through.
-    --
-    --    --['V2Version']= { }, -- When someone requests the latest version of the addon.
-    --    --['V2SyncProgress']= { ['self']=false, ['combat']=false, },
-    --},
-    --['RAID'] = {
-    --    --['ClearBids']= { ['combat']=true, }, -- Officer check -- When the DKP Officer clears the Shrouding Window.
-    --    --['UpdateBid']= { ['combat']=true, }, -- Officer check -- When someone new shrouds, comes from DKP Officer.
-    --    --['V2SetDkpOfficer']= { ['combat']=true, }, -- Officer check -- Sets the DKP officer for everyone.
-    --    --['V2WhoIsDKP']= { ['self']=false, ['combat']=true, }, -- Requests who the DKP officer is.
-    --},
-    --['OFFICER'] = {
-    --    --['V2SyncReq'] = {},
-    --},
-end
-
 function Comm:_Setup()
     local p = self.ogPrefix
     -- Comm Channel, SendTo, Prio, CallbackFunc, OnCommReceivedFunc
@@ -132,6 +110,26 @@ function Comm:_Setup()
         -- Player Bid section
         ['bidSubmit'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['bidCancel'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+
+        ['DkpOfficer'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_SetDKPOfficer },
+        ['WhoIsDKP'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_GetDKPOfficer },
+
+        --['GUILD'] = {
+        --    --['V2PushReceive'] = { ['self']=true, ['combat']=false, }, -- Officer check -- When a new push is received.
+        --    --['V2EntryDelete'] = { ['self']=true, ['combat']=true, }, -- Officer check -- When an entry is deleted.
+        --    --['V2SyncRes']= { }, -- When an officer's sync request goes through.
+        --
+        --    --['V2Version']= { }, -- When someone requests the latest version of the addon.
+        --    --['V2SyncProgress']= { ['self']=false, ['combat']=false, },
+        --},
+        --['RAID'] = {
+        --    --['ClearBids']= { ['combat']=true, }, -- Officer check -- When the DKP Officer clears the Shrouding Window.
+        --    --['UpdateBid']= { ['combat']=true, }, -- Officer check -- When someone new shrouds, comes from DKP Officer.
+        --    --['V2WhoIsDKP']= { ['self']=false, ['combat']=true, }, -- Requests who the DKP officer is.
+        --},
+        --['OFFICER'] = {
+        --    --['V2SyncReq'] = {},
+        --},
     }
 
     if commParams[p] then
@@ -177,6 +175,19 @@ function PDKP_Comms_OnEvent(eventsFrame, event, arg1, ...)
             comm:_ProcessCache(comm.cache)
             PDKP.CORE:Print('End Cached message', #comm.cache)
         end
+    end
+end
+
+function PDKP_OnComm_SetDKPOfficer(_, message, _)
+    local data = MODULES.CommsManager:DataDecoder(message)
+    MODULES.GroupManager:SetDKPOfficer(data)
+end
+
+function PDKP_OnComm_GetDKPOfficer(comm, message, sender)
+    print(sender, 'requested DKP Officer');
+    local data = MODULES.CommsManager:DataDecoder(message)
+    if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
+        MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true } )
     end
 end
 

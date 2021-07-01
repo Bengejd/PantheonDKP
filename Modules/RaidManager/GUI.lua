@@ -257,15 +257,17 @@ function RaidTools:Initialize()
     f.spam_button = spam_button
     f.GROUPS = GROUPS;
 
-    --class_group.class_icons[class]
-
     f.updateClassGroups = function()
-        local classes = MODULES.Constants.CLASSES
         local classGroups = f.class_groups.class_icons
-        for _, className in pairs(classes) do
+
+        for className, classGroup in pairs(classGroups) do
             local numClass = MODULES.GroupManager:GetNumClass(className)
-            classGroups[className].label:SetText(tostring(numClass))
+            classGroup.label:SetText(tostring(numClass))
         end
+
+        --for _, className in pairs(classes) do
+        --
+        --end
     end
 
     f:SetScript("OnShow", f.updateClassGroups)

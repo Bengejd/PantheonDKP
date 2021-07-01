@@ -28,9 +28,12 @@ function Raid:GetClassMemberNames(class)
     local names = {}
     local classNames = MODULES.GroupManager.classes[class]
 
-    for i=1, #classNames do
-        tinsert(names, classNames[i])
+    if classNames then
+        for i=1, #classNames do
+            tinsert(names, classNames[i])
+        end
     end
+
     return names
 end
 
