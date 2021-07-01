@@ -75,7 +75,7 @@ function Main:Initialize()
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
     addon_version:SetSize(50, 14)
-    addon_version:SetText(Utils:FormatTextColor(PDKP.CORE.versionString, MODULES.Constants.ADDON_HEX))
+    addon_version:SetText(MODULES.Constants.COLORED_ADDON_VERSION)
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
     --- Addon Author
