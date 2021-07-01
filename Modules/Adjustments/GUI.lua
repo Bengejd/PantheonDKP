@@ -43,7 +43,7 @@ function Adjust:Initialize()
         ['name'] = 'reason',
         ['parent'] = entry_details.content,
         ['title'] = 'Reason',
-        ['items'] = { 'Boss Kill', 'Item Win', 'Other' },
+        ['items'] = { 'Boss Kill', 'Item Win', 'Other', 'Decay' },
         ['defaultVal'] = 'Boss Kill',
         ['changeFunc'] = self.DropdownChanged
     }
