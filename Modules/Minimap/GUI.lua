@@ -10,6 +10,7 @@ local LibStub = LibStub
 local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 local StaticPopup_Show = StaticPopup_Show
 local InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
+local unpack, tinsert = unpack, table.insert
 
 local map = {}
 
@@ -25,54 +26,19 @@ local shiftRightClickText = Utils:FormatTextColor('Right-Shift-Click', info) .. 
 local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local disableSyncInRaidText = Utils:FormatTextColor('Push requests disabled', warning)
 
+local Dialogs;
+
 function map:Initialize()
     local miniDB = MODULES.Database:Settings()
+    Dialogs = GUI.Dialogs;
 
     map.LDB = LibStub("LibDataBroker-1.1"):NewDataObject("PantheonDKP", {
         type="launcher",
         text='PantheonDKP',
         icon = MODULES.Media.PDKP_ADDON_ICON,
         OnTooltipShow = function(tooltip)
-            tooltip:SetText("PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION) -- First line
-            --tooltip:AddLine('Sync Status: '.. ' Out of date', 1, 1, 1, 1) -- text, r,g,b flag to wrap text.
-            tooltip:AddLine(" ", 1,1,1,1)
-            tooltip:AddLine(clickText, 1,1,1)
-            tooltip:AddLine(rightClickText, 1, 1, 1)
-
-            --
-            --Raid:GetLockedInfo()
-            --
-            --local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
-            --
-            --if Defaults:AllowSync() == false then
-            --    tooltip:AddLine(disableSyncInRaidText, 1, 1, 1)
-            --elseif canRequestSync then
-            --    tooltip:AddLine(shiftClickText, 1, 1, 1)
-            --else
-            --    local nextSyncText = 'Next ' .. Util:FormatFontTextColor(info, 'Sync') ..
-            --            ' available in: ' .. tostring(nextSyncAvailable) .. ' min(s).'
-            --    tooltip:AddLine(nextSyncText, 1, 1, 1)
-            --end
-            ----            tooltip:AddLine(altShiftText, 1, 1, 1, 1)
-            --
-            --if core.canEdit then
-            --    tooltip:AddLine(shiftRightClickText, 1, 1, 1)
-            --end
-            --
-            --if #Raid.lockedInstances > 0 then
-            --    tooltip:AddLine(' ', 1, 1, 1, 1)
-            --    for _, raid in pairs(Raid.lockedInstances) do
-            --        tooltip:AddLine(raid.desc, 1, 1, 1)
-            --    end
-            --end
-            --
-            --if #Raid.lockedRaids > 0 then
-            --    tooltip:AddLine(' ', 1, 1, 1, 1)
-            --    for _, raid in pairs(Raid.lockedRaids) do
-            --        tooltip:AddLine(raid.desc, 1, 1, 1)
-            --    end
-            --end
-
+            local texts = map:_GetToolTipTexts()
+            for i=1, #texts do tooltip:AddLine(unpack(texts[i])) end
             tooltip:Show()
         end,
         OnClick = function(_, button)
@@ -83,25 +49,107 @@ function map:Initialize()
     icon:Register('PantheonDKP', map.LDB, miniDB)
 end
 
-function map:HandleIconClicks(buttonType)
+function map:_GetToolTipTexts()
+    local title = {"PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION}
+    local lineBreak = { " ", 1, 1, 1, 1 }
+    local leftClick = { clickText, 1, 1, 1 }
+    local rightClick = { rightClickText, 1, 1, 1 }
+    local shiftRightClick = { shiftRightClickText, 1, 1, 1 }
 
-    local hasCtrl, hasShift, hasAlt = IsControlKeyDown(), IsShiftKeyDown(), IsAltKeyDown()
-    if buttonType == 'LeftButton' then
-        if hasShift and hasAlt then -- Table wipe. -- TODO: Hook this up.
-            -- TODO: Hookup Wipe Request.
-        elseif hasShift then -- Sync request.
-            -- TODO: Hookup Sync Request.
-        else
-            GUI:TogglePDKP()
-        end
-    elseif buttonType == 'RightButton' then
-        if hasShift and PDKP.canEdit then -- Can Edit.
-            StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM') -- Officer Confirm Push.
-        else
-            --Open Interface Options.
-            InterfaceOptionsFrame_OpenToCategory("PantheonDKP");
-        end
+    local texts = { title, lineBreak, leftClick, rightClick }
+
+    if PDKP.canEdit then
+        tinsert(texts, lineBreak)
+        tinsert(texts, shiftRightClick)
     end
+
+    --tooltip:AddLine('Sync Status: '.. ' Out of date', 1, 1, 1, 1) -- text, r,g,b flag to wrap text.
+    --tooltip:AddLine(" ", 1,1,1,1)
+    --tooltip:AddLine(clickText, 1,1,1)
+    --tooltip:AddLine(rightClickText, 1, 1, 1)
+
+    --Raid:GetLockedInfo()
+    --
+    --local canRequestSync, _, nextSyncAvailable  = DKP:CanRequestSync()
+    --
+    --if Defaults:AllowSync() == false then
+    --    tooltip:AddLine(disableSyncInRaidText, 1, 1, 1)
+    --elseif canRequestSync then
+    --    tooltip:AddLine(shiftClickText, 1, 1, 1)
+    --else
+    --    local nextSyncText = 'Next ' .. Util:FormatFontTextColor(info, 'Sync') ..
+    --            ' available in: ' .. tostring(nextSyncAvailable) .. ' min(s).'
+    --    tooltip:AddLine(nextSyncText, 1, 1, 1)
+    --end
+    ----            tooltip:AddLine(altShiftText, 1, 1, 1, 1)
+    --
+    --if core.canEdit then
+    --    tooltip:AddLine(shiftRightClickText, 1, 1, 1)
+    --end
+    --
+    --if #Raid.lockedInstances > 0 then
+    --    tooltip:AddLine(' ', 1, 1, 1, 1)
+    --    for _, raid in pairs(Raid.lockedInstances) do
+    --        tooltip:AddLine(raid.desc, 1, 1, 1)
+    --    end
+    --end
+    --
+    --if #Raid.lockedRaids > 0 then
+    --    tooltip:AddLine(' ', 1, 1, 1, 1)
+    --    for _, raid in pairs(Raid.lockedRaids) do
+    --        tooltip:AddLine(raid.desc, 1, 1, 1)
+    --    end
+    --end
+
+    return texts
+end
+
+function map:HandleIconClicks(buttonType)
+    local hasCtrl, hasShift, hasAlt = IsControlKeyDown(), IsShiftKeyDown(), IsAltKeyDown()
+    local clickTypes = {
+        ['LeftButton'] = {
+            [hasShift and hasAlt and hasCtrl] = function()
+                print('Left, hasShift, hasAlt, hasCtrl')
+            end,
+            [hasShift and hasAlt and not hasCtrl] = function()
+                print('Left, hasShift, hasAlt');
+            end,
+            [hasShift and not hasAlt and not hasCtrl] = function()
+                print('Left, hasShift');
+            end,
+            ['default'] = function()
+                print('Left, Default');
+            end,
+        },
+        ['RightButton'] = {
+            [hasShift and PDKP.canEdit and not hasAlt and not hasCtrl] = function()
+                Dialogs:Show('PDKP_OFFICER_PUSH_CONFIRM', nil, nil)
+            end,
+            ['default'] = function()
+                print('Right, Default');
+            end,
+        }
+    }
+
+    local clickFunc = clickTypes[buttonType][true] or clickTypes[buttonType]['default']
+    clickFunc()
+
+    --if buttonType == 'LeftButton' then
+    --    if hasShift and hasAlt then -- Table wipe. -- TODO: Hook this up.
+    --        -- TODO: Hookup Wipe Request.
+    --    elseif hasShift then -- Sync request.
+    --        -- TODO: Hookup Sync Request.
+    --    else
+    --        GUI:TogglePDKP()
+    --    end
+    --elseif buttonType == 'RightButton' then
+    --    if hasShift and PDKP.canEdit then -- Can Edit.
+    --        StaticPopup_Show('PDKP_OFFICER_PUSH_CONFIRM') -- Officer Confirm Push.
+    --    else
+    --        --Open Interface Options.
+    --        InterfaceOptionsFrame_OpenToCategory("PantheonDKP");
+    --    end
+    --end
 
 
 
