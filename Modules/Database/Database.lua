@@ -5,7 +5,7 @@ local LOG = PDKP.LOG
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot', 'ledger' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
