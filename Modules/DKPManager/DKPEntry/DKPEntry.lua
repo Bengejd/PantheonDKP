@@ -80,6 +80,16 @@ function entry:Save(updateTable, exportEntry)
 
     exportEntry = exportEntry or false
 
+    self:GetSaveDetails()
+
+    if exportEntry == false then
+        MODULES.DKPManager:AddNewEntryToDB(self, updateTable)
+    elseif PDKP.canEdit and exportEntry then
+        MODULES.DKPManager:ExportEntry(self)
+    end
+end
+
+function entry:GetSaveDetails()
     self.sd['id'] = self.id or GetServerTime()
     self.sd['reason'] = self.reason or 'No Valid Reason'
     self.sd['dkp_change'] = self.dkp_change or 0
@@ -94,11 +104,7 @@ function entry:Save(updateTable, exportEntry)
         self.sd['other_text'] = self.other_text
     end
 
-    if exportEntry == false then
-        MODULES.DKPManager:AddNewEntryToDB(self, updateTable)
-    elseif PDKP.canEdit and exportEntry then
-        MODULES.DKPManager:ExportEntry(self)
-    end
+    return self.sd
 end
 
 function entry:GetMembers()
