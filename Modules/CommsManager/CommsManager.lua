@@ -26,15 +26,8 @@ end
 function PDKP_OnCommsReceived(prefix, message, distribution, sender)
     local channel = Comms.channels[prefix]
     if channel then
-        return channel:OnCommReceived(prefix, message, distribution, sender)
+        return channel:VerifyCommSender(message, sender)
     end
-
-    --local data = Comms:DataDecoder(message)
-    --
-    --if prefix == 'pdkpV2SyncLarge' then
-    --elseif prefix == 'pdkpV2SyncSmall' then
-    --    MODULES.DKPManager:ImportEntry(data, sender)
-    --end
 end
 
 function Comms:RegisterComms()
@@ -58,8 +51,11 @@ function Comms:RegisterComms()
         --['OFFICER'] = {
         --    --['V2SyncReq'] = {},
         --},
-        ['SyncSmall'] = { ['self'] = true, ['combat'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, },
-        ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
+
+        -- TODO: Remove combat after done dev
+        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = false, },
+        -- TODO: Remove self after done dev
+        ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = true, },
 
         ['startBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
         ['stopBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
@@ -81,7 +77,16 @@ end
 
 function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
     local transmitData = self:DataEncoder(data)
-    PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, distro, sendTo, bulk, func)
+    local comm = self.channels[_prefix(prefix)]
+
+    if comm ~= nil and comm:IsValid() then
+        local params = comm:GetSendParams()
+        return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack( params ))
+    end
+
+    if PDKP:IsDev() then
+        PDKP.CORE:Print('Could not complete comm request ', prefix, 'channel', comm.channel, 'Params', comm:GetSendParams())
+    end
 end
 
 -----------------------------
