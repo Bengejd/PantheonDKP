@@ -83,7 +83,7 @@ function AuctionGUI:Initialize()
     sb:SetScript("OnClick", function()
         local bid_amt = f.bid_box.getValue()
         f.current_bid:SetText(bid_amt)
-        MODULES.CommsManager:SendCommsMessage('bidSubmit', bid_amt, 'RAID', nil, 'BULK', nil)
+        MODULES.CommsManager:SendCommsMessage('bidSubmit', bid_amt)
     end)
     sb:SetEnabled(false)
 

@@ -25,7 +25,7 @@ local function HandleModifiedTooltipClick()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
             local commsData = { iLink, iName, iTexture }
-            MODULES.CommsManager:SendCommsMessage('startBids', commsData, 'RAID', nil, 'BULK', nil)
+            MODULES.CommsManager:SendCommsMessage('startBids', commsData)
         end
     elseif Auction:IsAuctionInProgress() then
         PDKP.CORE:Print('Another auction is in progress');
