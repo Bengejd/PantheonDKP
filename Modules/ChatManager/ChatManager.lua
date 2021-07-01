@@ -105,6 +105,7 @@ function Chat:_HandleSlashCommands(msg)
         ['databasePopulate'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
         ['largeDataSync'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
         ['decayTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
+        ['bossKillTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then return DEV_SLASH_COMMANDS[command]() end
 end

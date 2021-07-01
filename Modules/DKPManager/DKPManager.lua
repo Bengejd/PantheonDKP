@@ -179,6 +179,20 @@ function DKP:ImportBulkEntries(message, sender)
     end, total_batches)
 end
 
+function DKP:BossKillDetected(bossID, bossName)
+    if not PDKP.canEdit then return end
+    local dkpAwardAmount = 10
+
+    if MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil then
+        GUI.Dialogs:Show( 'PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
+    end
+end
+
+function DKP:AwardBossKill(boss_name)
+    PDKP.CORE:Print('Awarding DKP for ' .. boss_name .. ' Kill')
+    MODULES.GroupManager:Refresh()
+end
+
 function DKP:_CreateBatches(entries, total)
     local batches = {}
     local index = 1

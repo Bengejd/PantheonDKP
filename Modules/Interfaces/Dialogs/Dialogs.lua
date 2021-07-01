@@ -17,7 +17,7 @@ function Dialogs:Initialize()
             button1 = "Award DKP",
             button2 = "Cancel",
             OnAccept = function(self, data, data2)
-
+                MODULES.DKPManager:AwardBossKill(data)
             end,
             OnCancel = function()
                 -- TODO: Cancel Raid Boss Kill Award

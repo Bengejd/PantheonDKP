@@ -28,6 +28,8 @@ function Dev:HandleSlashCommands(msg)
         self:LargeDataSync(msg)
     elseif cmd == 'decayTest' then
         self:DecayTest(msg)
+    elseif cmd == 'bossKillTest' then
+        self:BossKillTest(msg)
     end
 end
 
@@ -178,6 +180,19 @@ end
 function Dev:WhoTest(msg)
     PDKP:Print('Dev: Testing Who');
     SendWho('Lariese');
+end
+
+function Dev:BossKillTest()
+    local RAID_NAMES = MODULES.Constants.RAID_NAMES
+    local RAID_BOSSES = MODULES.Constants.RAID_BOSSES
+
+    local random_raid_index = random(#RAID_NAMES)
+    local raid_name = RAID_NAMES[random_raid_index]
+    local raid_info = RAID_BOSSES[raid_name]
+    local random_boss_index = random(#raid_info['boss_names'])
+    local boss_name = raid_info['boss_names'][random_boss_index]
+
+    MODULES.DKPManager:BossKillDetected(nil, boss_name)
 end
 
 -- Publish API
