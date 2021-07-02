@@ -580,9 +580,26 @@ end
 function GUtils:createStrikethroughText(parent)
     parent = parent or pdkp_frame
 
+    local fc = CreateFrame("Frame", nil, parent, MODULES.Media.BackdropTemplate)
     local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    fs:SetAllPoints(parent)
 
-    local f = parent:CreateFrame("Frame", nil, parent)
+    fc:SetPoint("LEFT", fs, "LEFT")
+    fc:SetPoint("RIGHT", fs, "RIGHT")
+    fc:SetFrameLevel(10)
+
+    fc:SetHeight(fs:GetStringHeight() / 2)
+
+    fc:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+                   edgeFile = "Interface/BUTTONS/UI-SliderBar-Border.png",
+                   edgeSize = 4,
+                   insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    });
+    fc:SetBackdropColor(1,0,0, 1);
+    fc:SetBackdropBorderColor(1, 0,0, 0);
+
+    fs.line = fc
+    return fs
 end
 
 function GUtils:createStatusBar(opts)
