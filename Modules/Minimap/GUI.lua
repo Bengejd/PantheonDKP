@@ -118,7 +118,7 @@ function map:HandleIconClicks(buttonType)
                 print('Left, hasShift');
             end,
             ['default'] = function()
-                print('Left, Default');
+                if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
             end,
         },
         ['RightButton'] = {
@@ -126,7 +126,7 @@ function map:HandleIconClicks(buttonType)
                 Dialogs:Show('PDKP_OFFICER_PUSH_CONFIRM', nil, nil)
             end,
             ['default'] = function()
-                print('Right, Default');
+                if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
             end,
         }
     }

@@ -244,7 +244,6 @@ end
 
 function DKP:_ProcessEntryBatch(batch)
     for key, encoded_entry in pairs(batch) do
-        PDKP.CORE:Print(GetFramerate())
         local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
         local importEntry = MODULES.DKPEntry:new(entry)
         importEntry:Save(false)
