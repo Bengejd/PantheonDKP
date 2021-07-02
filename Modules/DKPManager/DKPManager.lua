@@ -24,7 +24,27 @@ function DKP:Initialize()
     self.numOfDecoded = 0
     self.numOfEncoded = 0
 
+    self.currentWeekNumber = Utils.weekNumber - 4
     self.currentLoadedWeek = Utils.weekNumber
+    self.currentLoadedWeekEntries = {}
+    self.currentLoadedSet = false
+    self.numCurrentLoadedWeek = 0
+
+    self.compressedCurrentWeekEntries = ''
+    self.lastAutoSync = GetServerTime()
+    self.autoSyncInProgress = false
+
+    self.eventsFrame = CreateFrame("Frame", "PDKP_DKP_EventsFrame")
+    self.eventsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+    self.eventsFrame:SetScript("OnEvent", function(_, eventName)
+        if eventName == 'GUILD_ROSTER_UPDATE' then
+            local currentTime = GetServerTime()
+            if Utils:SubtractTime(self.lastAutoSync, currentTime) >= 2 and not self.autoSyncInProgress  then
+                self.lastAutoSync = currentTime
+                MODULES.CommsManager:SendCommsMessage('SyncAd', self.compressedCurrentWeekEntries, true)
+            end
+        end
+    end)
 
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
@@ -94,20 +114,27 @@ end
 
 function DKP:LoadPrevFourWeeks()
     self.currentLoadedWeek = self.currentLoadedWeek - 4
-
     self.numOfEncoded = 0
 
-    for index, entry in pairs(self.encoded_entries) do
+    for index, encoded_entry in pairs(self.encoded_entries) do
         self.numOfEncoded = self.numOfEncoded + 1
 
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= self.currentLoadedWeek then
-            local decoded_entry = CommsManager:DatabaseDecoder(entry)
-            if decoded_entry == nil then decoded_entry = entry; end
-            self.entries[index] = MODULES.DKPEntry:new(decoded_entry)
+            local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
+            if decoded_entry == nil then decoded_entry = encoded_entry; end
+            local entry = MODULES.DKPEntry:new(decoded_entry)
+            self.entries[index] = entry
             self.numOfEntries = self.numOfEntries + 1
+
+            if not self.currentLoadedSet then
+                self.currentLoadedWeekEntries[index] = encoded_entry
+                self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+            end
         end
     end
+
+    self.currentLoadedSet = true
 
     for index, _ in pairs(self.entries) do
         if self.encoded_entries[index] ~= nil then
@@ -154,27 +181,23 @@ end
 function DKP:ImportEntry(entry, sender)
     local importEntry = MODULES.DKPEntry:new(entry)
     importEntry:Save(true)
+    self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
+    self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+    self:_RecompressCurrentLoaded()
 end
 
 function DKP:ImportBulkEntries(message, sender)
-    PDKP.CORE:Print('Importing bulk entries from', sender)
     local data = MODULES.CommsManager:DataDecoder(message)
-
     local total, entries = data['total'], data['entries']
-
     local batches, total_batches = self:_CreateBatches(entries, total)
     local currentBatch = 0
     self.importTicker = C_Timer.NewTicker(0.5, function()
         currentBatch = currentBatch + 1
         DKP:_ProcessEntryBatch(batches[currentBatch])
-
-        if PDKP:IsDev() then
-            PDKP.CORE:Print('Processing import batch', tostring(currentBatch) .. '/' .. tostring(total_batches))
-        end
-
-        if currentBatch == total_batches then
+        if currentBatch >= total_batches then
             DKP:_UpdateTables()
             DKP.importTicker:Cancel()
+            self:_RecompressCurrentLoaded()
         end
     end, total_batches)
 end
@@ -244,9 +267,29 @@ end
 
 function DKP:_ProcessEntryBatch(batch)
     for key, encoded_entry in pairs(batch) do
-        local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
-        local importEntry = MODULES.DKPEntry:new(entry)
-        importEntry:Save(false)
+
+        local shouldContinue = true
+
+        if DKP_DB[key] ~= nil then
+            local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
+            local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
+            shouldContinue = dbAdler ~= eAdler
+            if PDKP:IsDev() then
+                PDKP.CORE:Print('Skipping Entry')
+            end
+        end
+
+        -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.
+        if shouldContinue then
+            local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
+            local importEntry = MODULES.DKPEntry:new(entry)
+            importEntry:Save(false)
+            local weekNumber = Utils:GetWeekNumber(key)
+            if weekNumber >= self.currentWeekNumber then
+                self.currentLoadedWeekEntries[key] = encoded_entry
+                self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+            end
+        end
     end
 end
 
@@ -283,6 +326,10 @@ function DKP:_LoadEncodedDatabase()
     if PDKP:IsDev() then
         PDKP.CORE:Print('Loaded', self.numOfEncoded, 'Encoded entries');
     end
+end
+
+function DKP:_RecompressCurrentLoaded()
+    self.compressedCurrentWeekEntries = MODULES.CommsManager:DataEncoded({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries })
 end
 
 MODULES.DKPManager = DKP

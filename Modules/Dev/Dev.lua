@@ -76,9 +76,9 @@ function Dev:DecayTest()
 end
 
 function Dev:LargeDataSync()
-    local entries, total = MODULES.DKPManager:GetEntriesForSync()
+    local DKP = MODULES.DKPManager
+    local entries, total = DKP.currentLoadedWeekEntries, DKP.numCurrentLoadedWeek
     local transmission_data = { ['total'] = total, ['entries'] = entries }
-    PDKP.CORE:Print('Dev() Preparing largeDataSync for', total, 'entries')
     MODULES.CommsManager:SendCommsMessage('SyncLarge', transmission_data)
 end
 

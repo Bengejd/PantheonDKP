@@ -131,6 +131,13 @@ function Utils:WeekStart(week)
     return (week - 1) * 604800
 end
 
+-- Subtracts two timestamps from one another.
+function Utils:SubtractTime(baseTime, subTime)
+    local secondsSinceSync = (subTime - baseTime) -- the seconds since our last sync
+    local minsSinceFirstReset = floor(secondsSinceSync / 60) -- Minutes since last sync.
+    return minsSinceFirstReset
+end
+
 -----------------------------
 --      Time Functions     --
 -----------------------------

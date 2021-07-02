@@ -98,6 +98,7 @@ function Comm:_Setup()
         -- Sync Section
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds/Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
+        ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 
         -- Auction Section
         ['startBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -201,6 +202,8 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return MODULES.DKPManager:ImportEntry(data, sender)
     elseif self.ogPrefix == 'SyncLarge' then
         return MODULES.DKPManager:ImportBulkEntries(message, sender)
+    elseif self.ogPrefix == 'SyncAd' then
+        return MODULES.DKPManager:ImportBulkEntries(message, sender)
     end
 end
 
@@ -266,6 +269,16 @@ function PDKP_SyncProgressBar(arg, sent, total)
     end
 end
 
+function PDKP_SyncLockout(arg, sent, total)
+    local DKP = MODULES.DKPManager
+    local percentage = floor((sent / total) * 100)
+    if percentage < 100 then
+        DKP.autoSyncInProgress = true
+    else
+        DKP.autoSyncInProgress = false
+    end
+end
+
 function PDKP_UpdatePushBar(percent, elapsed)
     local remaining = 100 - percent
     local pps = percent / elapsed -- Percent per second
@@ -275,8 +288,6 @@ function PDKP_UpdatePushBar(percent, elapsed)
     local hours = string.format("%02.f", math.floor(eta/3600));
     local mins = string.format("%02.f", math.floor(eta/60 - (hours*60)));
     local secs = string.format("%02.f", math.floor(eta - hours*3600 - mins *60));
-
-
 
     local etatext = mins .. ':' .. secs
     local statusText = 'PDKP Push: ' .. percent .. '%' .. ' ETA: ' .. etatext

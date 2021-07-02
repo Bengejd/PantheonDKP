@@ -54,10 +54,9 @@ function Comms:RegisterComms()
 
         --- GUILD COMMS
 
-        -- TODO: Remove combat after done dev
-        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = false, },
-        -- TODO: Remove self after done dev
-        ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = true, },
+        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, },
+        ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
+        ['SyncAd'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
 
         --- RAID COMMS
 
@@ -82,8 +81,14 @@ function Comms:RegisterComms()
     end
 end
 
-function Comms:SendCommsMessage(prefix, data, distro, sendTo, bulk, func)
-    local transmitData = self:DataEncoder(data)
+function Comms:SendCommsMessage(prefix, data, skipEncoding)
+    skipEncoding = skipEncoding or false
+    local transmitData = data
+
+    if not skipEncoding then
+        transmitData = self:DataEncoder(data)
+    end
+
     local comm = self.channels[_prefix(prefix)]
 
     if comm ~= nil and comm:IsValid() then
@@ -105,7 +110,7 @@ function Comms:_Serialize(data)
 end
 
 function Comms:_Compress(serialized)
-    return PDKP.LibDeflate:CompressDeflate(serialized)
+    return PDKP.LibDeflate:CompressDeflate(serialized, {level = 9})
 end
 
 function Comms:_Encode(compressed)
