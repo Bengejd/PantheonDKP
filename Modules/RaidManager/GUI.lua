@@ -211,7 +211,6 @@ function RaidTools:Initialize()
     local spam_button = CreateFrame("Button", nil, GROUPS['inv_control_group'].content, "UIPanelButtonTemplate")
     spam_button:SetText("Start Raid Inv Spam")
 
-    -- TODO: Implement this stuff.
     spam_button:SetScript("OnClick", function()
         RaidTools.SpamRunning = not RaidTools.SpamRunning
 
@@ -223,6 +222,22 @@ function RaidTools:Initialize()
             b_text = 'Start Raid Inv Spam'
         end
         spam_button:SetText(b_text)
+
+        if RaidTools.spamTimer == nil and RaidTools.SpamRunning then
+            SendChatMessage(invite_spam_box:GetText(), "GUILD", nil, nil)
+            RaidTools.spamTimer = C_Timer.NewTicker(90, function()
+                if RaidTools.spamTimer.count == 10 then
+                    PDKP.CORE:Print("Guild Invite Spam has completed")
+                    RaidTools.spamTimer:Cancel()
+                end
+                SendChatMessage(invite_spam_box:GetText(), "GUILD", nil, nil)
+                RaidTools.spamTimer.count = RaidTools.spamTimer.count + 1
+            end, 9)
+            RaidTools.spamTimer.count = 1
+        elseif not RaidTools.SpamRunning then
+            RaidTools.spamTimer:Cancel()
+            RaidTools.spamTimer = nil
+        end
     end)
     spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
     spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
