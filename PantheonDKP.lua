@@ -24,6 +24,15 @@ local MODULES = PDKP.MODULES
 
 local C_Timer = C_Timer
 
+PDKP.CONSTANTS.ACL = {}
+
+PDKP.CONSTANTS.ACL.LEVEL = {
+    PLEBS = 0,
+    ASSISTANT = 1,
+    MANAGER = 2,
+    GUILD_MASTER = 3
+}
+
 local function Initialize_SavedVariables()
 
     if type(PDKP_DB) ~= "table" then
@@ -96,6 +105,7 @@ function CORE:_InitializeCore()
     MODULES.Database:Initialize()
     MODULES.ChatManager:Initialize()
     MODULES.CommsManager:Initialize()
+    MODULES.CLMComms:Initialize()
     --MODULES.ConfigManager:Initialize()
     --MODULES.ACL:Initialize()
 end
@@ -103,10 +113,9 @@ end
 function CORE:_InitializeBackend()
     LOG:Trace("CORE:_InitializeBackend()")
     MODULES.Logger:Initialize()
-    --MODULES.Comms:Initialize()
     --MODULES.EventManager:Initialize()
     --MODULES.GuildInfoListener:Initialize()
-    --MODULES.LedgerManager:Initialize()
+    MODULES.LedgerManager:Initialize()
     if type(self.Debug) == "function" then
         self.Debug()
     end

@@ -4,6 +4,8 @@ local _, PDKP = ...
 
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
+local Comms = MODULES.CLMComms
+local CONSTANTS = PDKP.CONSTANTS
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
@@ -16,7 +18,7 @@ local LedgerLib = LibStub("EventSourcing/LedgerFactory")
 local LedgerManager = { _initialized = false}
 
 local function authorize(entry, sender)
-    return ACL:CheckLevel(CONSTANTS.ACL.LEVEL.ASSISTANT, sender)
+    return true -- TODO: Hook this up with GuildManager
 end
 
 function LedgerManager:Initialize()
@@ -42,8 +44,6 @@ function LedgerManager:Initialize()
     end)
     self.entryExtensions = {}
     self._initialized = true
-
-    MODULES.ConfigManager:RegisterUniversalExecutor("ledger", "LedgerManager", self)
 end
 
 function LedgerManager:IsInitialized()
@@ -121,6 +121,7 @@ end
 function LedgerManager:Hash()
     return self.ledger.getStateManager():stateHash()
 end
+
 function LedgerManager:Length()
     return self.ledger.getSortedList():length()
 end

@@ -3,6 +3,8 @@
     <!-- Core Addon Modules -->
     <Script file="Logger\Logger.lua" />
     <Script file="Constants\Constants.lua" />
+    <Script file="LedgerManager\LedgerManager.lua" />
+
     <Script file="Utils\Utils.lua" />
     <Script file="Utils\GUtils.lua" />
 
@@ -15,6 +17,7 @@
     <Script file="GuildManager\Member\Member.lua" />
     <Script file="DKPManager\DKPEntry\DKPEntry.lua" />
     <Script file="RaidManager\Group.lua" />
+    <Script file="CommsManager\CLMComms.lua" /> <!-- Take this out later -->
     <Script file="CommsManager\Comm.lua" />
 
     <!-- Controllers -->
