@@ -184,7 +184,6 @@ function PDKP_OnComm_SetDKPOfficer(_, message, _)
 end
 
 function PDKP_OnComm_GetDKPOfficer(comm, message, sender)
-    print(sender, 'requested DKP Officer');
     local data = MODULES.CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
         MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true } )

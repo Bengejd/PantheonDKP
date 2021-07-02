@@ -30,8 +30,6 @@ end
 
 function Chat:HandleChatEvent(eventName, msg, author, ...)
     author = Utils:RemoveServerName(author)
-    PDKP.CORE:Print("Event", eventName, "Msg", msg, "Author", author)
-
     msg = lower(trim(msg))
     local invite_commands = MODULES.RaidManager.invite_commands
 
