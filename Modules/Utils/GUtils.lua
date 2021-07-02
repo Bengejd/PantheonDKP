@@ -3,6 +3,7 @@ local _G = _G
 PDKP.GUtils = {}
 local unpack, CreateFrame = unpack, CreateFrame
 local GameFontHighlightSmall = GameFontHighlightSmall
+local UIParent = UIParent
 
 local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
@@ -567,4 +568,63 @@ function GUtils:createStrikethroughText(parent)
     local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 
     local f = parent:CreateFrame("Frame", nil, parent)
+end
+
+function GUtils:createStatusBar(opts)
+    local name = opts['name'] or 'PushBar'
+    local type = opts['type'] or 'percent' -- Percent or Timer
+    local default = opts['default'] or 0
+    local min = opts['min'] or 0
+    local max = opts['max'] or 100
+
+    local pb = CreateFrame("StatusBar", 'PDKP_' .. name, UIParent)
+    pb:SetFrameStrata("HIGH")
+    pb:SetPoint("TOP")
+    pb:SetWidth(300)
+    pb:SetHeight(20)
+    pb:SetStatusBarTexture("")
+    pb:SetStatusBarTexture(MODULES.Media.STATUS_BAR_TEXTURE)
+    pb:GetStatusBarTexture():SetHorizTile(true)
+    pb:GetStatusBarTexture():SetVertTile(false)
+    pb:SetStatusBarColor(0, 0.65, 0)
+    pb.bg = pb:CreateTexture(nil, "BACKGROUND")
+    pb.bg:SetTexture(MODULES.Media.STATUS_BAR_FILL)
+    pb.bg:SetAllPoints(true)
+    pb.bg:SetVertexColor(0, 0.35, 0)
+    pb.value = pb:CreateFontString(nil, "OVERLAY")
+    pb.value:SetPoint("CENTER")
+    pb.value:SetFont(MODULES.Media.STATUS_BAR_FONT, 16, "OUTLINE")
+    pb.value:SetJustifyH("LEFT")
+    pb.value:SetShadowOffset(1, -1)
+    pb.value:SetTextColor(0, 1, 0)
+    pb:SetMinMaxValues(min, max)
+
+    pb.reset = function()
+        if type == 'percent' then
+            pb.value:SetText(tostring(default) .. "%")
+        else
+            pb.value:SetText(tostring(default))
+        end
+        pb.value:SetValue(default)
+        pb.isLocked = false;
+
+        pb:Hide()
+    end
+
+    pb.setAmount = function(amount)
+        local extra = ''
+        if type == 'percent' then
+            extra = '%'
+        end
+        pb.value:SetText(tostring(amount) .. extra)
+        pb.value:SetValue(amount)
+
+        local currVal = pb.value:GetValue()
+
+        if currVal < min or currVal >= max then
+            pb:reset()
+        end
+    end
+
+    return pb
 end

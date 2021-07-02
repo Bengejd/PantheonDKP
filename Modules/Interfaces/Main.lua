@@ -93,6 +93,8 @@ function Main:Initialize()
 
     tinsert(UISpecialFrames, f:GetName())
 
+    self:SetupPushProgress()
+
     return pdkp_frame
 end
 
@@ -100,6 +102,10 @@ function Main:HandleSlashCommands(msg)
     if pdkp_frame == nil then return end
 
     if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+end
+
+function Main:SetupPushProgress()
+    --PDKP.PushBar = GUtils:createStatusBar()
 end
 
 MODULES.Main = Main;
