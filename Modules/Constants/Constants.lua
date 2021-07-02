@@ -20,8 +20,6 @@ Constants.PHASE = tonumber(GetAddOnMetadata('PantheonDKP', 'X-Phase'))
 Constants.SUCCESS = '22bb33'
 Constants.WARNING = 'E71D36'
 
-Constants.BANK_NAME = "Testing" -- TODO: Factor this out of Member class, and into a setting.
-
 -- The TBC classic classes
 Constants.CLASSES = { 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior' }
 -- The TBC Classic Class colors

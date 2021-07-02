@@ -265,17 +265,6 @@ function ScrollTable:UpdateLabelTotals()
     notify_history = not (entry_label_text == self.entryLabel:GetText())
 
     self.entryLabel:SetText(entry_label_text)
-
-    --PDKP_ToggleAdjustmentDropdown()
-
-    -- TODO: Find out if we can make this more generic.
-    --if GUI.history_frame ~= nil then
-    --    if GUI.history_frame:IsVisible() then
-    --        GUI.history_table:HistoryUpdated(true)
-    --    else
-    --        GUI.history_table.updateNextOpen = true
-    --    end
-    --end
 end
 
 ----- FILTER FUNCTIONS -----

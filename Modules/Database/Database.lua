@@ -9,11 +9,9 @@ local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'setting
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
-    LOG:Debug("Using database: %s", DB.server_faction_guild)
 end
 
 function DB:Initialize()
-    LOG:Trace("DB:Initialize()")
     -- Below API requires delay after loading to work after variables loaded event
     UpdateGuild()
 

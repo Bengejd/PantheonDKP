@@ -14,27 +14,15 @@ PDKP.MODELS = { LEDGER = {} }
 PDKP.CONSTANTS = {}
 PDKP.GUI = {}
 PDKP.OPTIONS = {}
-PDKP.LOG = LibStub("LibLogger"):New()
 
 PDKP.AUTOVERSION = "@project-version@"
 
 local CORE = PDKP.CORE
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 
 local C_Timer = C_Timer
 
-PDKP.CONSTANTS.ACL = {}
-
-PDKP.CONSTANTS.ACL.LEVEL = {
-    PLEBS = 0,
-    ASSISTANT = 1,
-    MANAGER = 2,
-    GUILD_MASTER = 3
-}
-
 local function Initialize_SavedVariables()
-
     if type(PDKP_DB) ~= "table" then
         PDKP_DB = {
             global = {
@@ -44,22 +32,9 @@ local function Initialize_SavedVariables()
                     patch = 0,
                     changeset = ""
                 },
-                logger = {
-                    severity = PDKP.LOG.SEVERITY.ERROR,
-                    verbosity = false
-                }
             }
         }
     end
-
-    if type(PDKP_Logs) ~= "table" then PDKP_Logs = {} end
-end
-
-local function Initialize_Logger()
-    LOG:SetSeverity(PDKP_DB.global.logger.severity)
-    LOG:SetVerbosity(PDKP_DB.global.logger.verbosity)
-    LOG:SetPrefix("PDKP")
-    LOG:SetDatabase(PDKP_Logs)
 end
 
 local function Initialize_Versioning()
@@ -99,30 +74,13 @@ local function Initialize_Versioning()
 end
 
 function CORE:_InitializeCore()
-    LOG:Trace("CORE:_InitializeCore()")
-
     PDKP.Utils:Initialize()
     MODULES.Database:Initialize()
     MODULES.ChatManager:Initialize()
     MODULES.CommsManager:Initialize()
-    MODULES.CLMComms:Initialize()
-    --MODULES.ConfigManager:Initialize()
-    --MODULES.ACL:Initialize()
-end
-
-function CORE:_InitializeBackend()
-    LOG:Trace("CORE:_InitializeBackend()")
-    MODULES.Logger:Initialize()
-    --MODULES.EventManager:Initialize()
-    --MODULES.GuildInfoListener:Initialize()
-    MODULES.LedgerManager:Initialize()
-    if type(self.Debug) == "function" then
-        self.Debug()
-    end
 end
 
 function CORE:_InitializeFeatures()
-    LOG:Trace("CORE:_InitializeFeatures()")
     MODULES.GuildManager:Initialize()
     MODULES.Main:Initialize()
     MODULES.CommsManager:RegisterComms()
@@ -133,22 +91,9 @@ function CORE:_InitializeFeatures()
     MODULES.Lockouts:Initialize()
     MODULES.Loot:Initialize()
     MODULES.Options:Initialize()
-    MODULES.History:Initialize()
-
-    -- We keep the order
-    --MODULES.ProfileManager:Initialize()
-    --MODULES.RosterManager:Initialize()
-    --MODULES.PointManager:Initialize()
-    --MODULES.LootManager:Initialize()
-    --MODULES.RaidManager:Initialize()
-    --MODULES.AuctionManager:Initialize()
-    --MODULES.BiddingManager:Initialize()
-    -- Initialize Migration
-    --PDKP.Migration:Initialize()
 end
 
 function CORE:_InitializeFrontend()
-    LOG:Trace("CORE:_InitializeFrontend()")
     -- No GUI / OPTIONS should be dependent on each other ever, only on the managers
     for _, module in pairs(PDKP.OPTIONS) do
         module:Initialize()
@@ -156,42 +101,15 @@ function CORE:_InitializeFrontend()
     for _, module in pairs(PDKP.GUI) do
         module:Initialize()
     end
-
-
-    -- TODO Initialize Minmap
-    --MODULES.Minimap:Initialize()
-    -- Hook Minimap Icon
-
-    --hooksecurefunc(MODULES.LedgerManager, "UpdateSyncState", function()
-    --    if MODULES.LedgerManager:IsInSync() then
-    --        PDKP.MinimapDBI.icon = "Interface\\AddOns\\ClassicLootManager\\Media\\Icons\\PDKP-ok-32.tga"
-    --    elseif MODULES.LedgerManager:IsSyncOngoing() then
-    --        PDKP.MinimapDBI.icon = "Interface\\AddOns\\ClassicLootManager\\Media\\Icons\\PDKP-nok-32.tga"
-    --    else -- Unknown state
-    --        PDKP.MinimapDBI.icon = "Interface\\AddOns\\ClassicLootManager\\Media\\Icons\\PDKP-sync-32.tga"
-    --    end
-    --end)
-end
-
-function CORE:_Enable()
-    LOG:Trace("CORE:_Enable()")
-    --MODULES.Comms:Enable()
-    --MODULES.LedgerManager:Enable()
 end
 
 function CORE:_SequentialInitialize(stage)
-    LOG:Trace("CORE:_SequentialInitialize()")
     if stage == 0 then
         self:_InitializeCore()
     elseif stage == 1 then
-        self:_InitializeBackend()
-    elseif stage == 2 then
         self:_InitializeFeatures()
-    elseif stage == 3 then
+    elseif stage >= 2 then
         self:_InitializeFrontend()
-    elseif stage >= 4 then
-        self:_Enable()
-        LOG:Info("Initialization complete")
         return
     end
     C_Timer.After(0.1, function() CORE:_SequentialInitialize(stage + 1) end)
@@ -200,10 +118,6 @@ end
 function CORE:_ExecuteInitialize()
     if self._initialize_fired then return end
 
-    PDKP.Print = function(...)
-        print('|cff33ff99PantheonDKP|r:', strjoin(" ", tostringall(...)))
-    end
-
     PDKP.canEdit = false
 
     self._initialize_fired = true
@@ -211,7 +125,6 @@ function CORE:_ExecuteInitialize()
 end
 
 function CORE:_Initialize()
-    LOG:Trace("CORE:_Initialize()")
     if not self._initialize_fired then
         CORE:_ExecuteInitialize()
         self:UnregisterEvent("GUILD_ROSTER_UPDATE")
@@ -221,12 +134,9 @@ end
 function CORE:OnInitialize()
     -- Initialize SavedVariables
     Initialize_SavedVariables()
-    -- Early Initialize Logger
-    Initialize_Logger()
     -- Initialize Versioning
     Initialize_Versioning()
     -- Initialize Addon
-    LOG:Trace("OnInitialize")
     self._initialize_fired = false
     CORE:RegisterEvent("GUILD_ROSTER_UPDATE")
     SetGuildRosterShowOffline(true)
@@ -250,7 +160,6 @@ function CORE:OnDisable()
 end
 
 function CORE:GUILD_ROSTER_UPDATE(...)
-    LOG:Trace("GUILD_ROSTER_UPDATE")
     local inGuild = IsInGuild()
     local numTotal = GetNumGuildMembers();
     if inGuild and numTotal ~= 0 then
@@ -261,10 +170,3 @@ end
 function PDKP:IsDev()
     return MODULES.Dev and type(MODULES.Dev) == "table"
 end
-
---@do-not-package@
-function CORE.Debug()
-    --PDKP.Debug:Initialize()
-    --PDKP.Debug:RegisterSlash()
-end
---@end-do-not-package@

@@ -120,37 +120,6 @@ function Dialogs:Initialize()
                 hideOnEscape = false,
                 preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
             },
-
-            ['PDKP_Placeholder']={
-                text = "This method is under construction",
-                button1 = "OK",
-                OnAccept = function()
-                end,
-                OnCancel = function()
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = true,
-                preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-            }, -- TODO: NOT USED
-            ['PDKP_CONFIRM_DKP_ENTRY_POPUP']={
-
-            }, -- TODO: NOT USED
-            ['PDKP_CONFIRM_DKP_CHANGE'] = {
-                text = "",
-                button1 = "Confirm",
-                button2 = "Cancel",
-                OnAccept = function()
-                    DKP:UpdateEntries()
-                end,
-                OnCancel = function()
-                    StaticPopupDialogs['PDKP_CONFIRM_DKP_CHANGE'].text = ''
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = false,
-                preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-            }, -- TODO: NOT USED
         }
     end
 
