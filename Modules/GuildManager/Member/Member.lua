@@ -118,7 +118,7 @@ function Member:_GetMemberData(index)
     self.formattedName, self.coloredClass = Utils:FormatTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == MODULES.Constants.BANK_NAME
 
-    if self.name == 'Lariese' and PDKP:IsDev() then
+    if (self.name == 'Lariese' or self.name == 'Karenbaskins') and PDKP:IsDev() then
         self.canEdit = true
     end
 
