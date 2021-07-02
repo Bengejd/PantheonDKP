@@ -137,7 +137,7 @@ function Adjust:Initialize()
         if not Utils:tEmpty(MODULES.Adjustment.entry) then
             MODULES.Adjustment.entry:Save(nil, true)
         end
-
+        raidDD.resetVals()
         wipe(MODULES.Adjustment.entry)
     end)
     sb:Disable()

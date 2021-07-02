@@ -28,10 +28,7 @@ function AuctionGUI:Initialize()
     local stopBid, bid_box;
 
     f:SetScript("OnShow", function()
-        -- TODO: Set up this to grab their DKP total.
         f.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
-
-        -- TODO: Possible that I don't need the IsAuctionInProgress part...
         if PDKP.canEdit and MODULES.AuctionManager:IsAuctionInProgress() then
             stopBid:SetEnabled(true)
             stopBid:Show()
@@ -94,10 +91,10 @@ function AuctionGUI:Initialize()
     cb:Hide()
     cb:SetEnabled(false)
     cb:SetScript("OnClick", function()
-        -- TODO: Setup Cancel logic
         f.current_bid:SetText("")
         f.cancel_btn:SetEnabled(false)
         f.cancel_btn:Hide()
+        MODULES.CommsManager:SendCommsMessage('CancelBid', {['cancelBid'] = true})
     end)
     cb:SetScript("OnShow", function()
         if f.current_bid.getValue() > 0 then
@@ -116,7 +113,7 @@ function AuctionGUI:Initialize()
     stopBid:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 15, -22)
     stopBid:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -10, 0)
     stopBid:SetScript("OnClick", function()
-        -- TODO: Submit this to the AuctionManager Comms
+        MODULES.AuctionManager:HandleTimerFinished()
     end)
     stopBid:SetEnabled(false)
     stopBid:Hide()
@@ -139,12 +136,12 @@ function AuctionGUI:Initialize()
         ['max_chars'] = 5,
         ['textValidFunc'] = function(box)
             if box == nil then box = bid_box end
-
             local box_val = box.getValue()
             local curr_bid_val = f.current_bid.getValue()
             local myDKP = MODULES.DKPManager:GetMyDKP()
+            local bidInProgress = MODULES.AuctionManager:IsAuctionInProgress()
 
-            if box_val and box_val <= myDKP and box_val > 0 and box_val ~= curr_bid_val then
+            if box_val and box_val <= myDKP and box_val > 0 and box_val ~= curr_bid_val and bidInProgress then
                 return sb:SetEnabled(true)
             end
             return sb:SetEnabled(false)
@@ -207,6 +204,20 @@ function AuctionGUI:Initialize()
         end
     end)
 
+    local reopenFrame = CreateFrame("Button", "$parent_reopen_btn", UIParent, "UIPanelButtonTemplate")
+    reopenFrame:SetSize(150, 22) -- width, height
+    reopenFrame:SetText("PDKP Bid Interface")
+    reopenFrame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
+    reopenFrame:SetScript("OnClick", function()
+        reopenFrame:Hide()
+        if MODULES.AuctionManager:IsAuctionInProgress() then
+            f:Show()
+            PDKP.AuctionTimer.isBarLocked = false
+            PDKP.AuctionTimer:Show()
+        end
+    end)
+    reopenFrame:Hide()
+
     tinsert(UISpecialFrames, f:GetName())
 
     f.current_bid = current_bid
@@ -216,8 +227,39 @@ function AuctionGUI:Initialize()
     f.cancel_btn = cb
     f.bid_counter = bid_counter
     f.dkp_title = dkp_title
+    f.stopBid = stopBid
+    f.bids_open_btn = bids_open_btn
+    f.reopenFrame = reopenFrame
 
     AuctionGUI.frame = f
+
+    local pushBarOpts = {
+        ['name'] = 'AuctionTimer',
+        ['type'] = 'timer',
+        ['default'] = 15,
+        ['min'] = 0,
+        ['max'] = 15,
+        ['func'] = function()
+            MODULES.AuctionManager:HandleTimerFinished()
+        end,
+    }
+    PDKP.AuctionTimer = GUtils:createStatusBar(pushBarOpts)
+
+    PDKP.AuctionTimer:SetPoint("BOTTOMLEFT", f, "TOPLEFT")
+    PDKP.AuctionTimer:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT")
+
+    PDKP.AuctionTimer.bg:SetPoint("TOPLEFT", PDKP.AuctionTimer, "TOPLEFT")
+    PDKP.AuctionTimer.bg:SetPoint("BOTTOMLEFT", PDKP.AuctionTimer, "BOTTOMLEFT")
+    PDKP.AuctionTimer.bg:SetWidth(PDKP.AuctionTimer:GetWidth())
+
+    f:SetScript("OnHide", function()
+        if MODULES.AuctionManager:IsAuctionInProgress() then
+            reopenFrame:Show()
+            PDKP.AuctionTimer.isBarLocked = true
+        else
+            PDKP.AuctionTimer.reset()
+        end
+    end)
 
     self:CreateBiddersWindow()
 
@@ -250,6 +292,25 @@ function AuctionGUI:CreateBiddersWindow()
     self.current_bidders_frame = f;
 end
 
+function AuctionGUI:ResetAuctionInterface()
+    self.frame.stopBid:Hide()
+    self.frame.bid_box:SetText(0)
+    self.frame.current_bid:SetText(0)
+    self.frame.stopBid:Hide()
+
+    self.frame:Show()
+
+    local numBidders = #MODULES.AuctionManager.CURRENT_BIDDERS
+
+    if not self.current_bidders_frame:IsVisible() and numBidders >= 1 then
+        self.frame.bids_open_btn:Click()
+    end
+
+    self:_ShowBidAmounts()
+
+    self.frame.reopenFrame:Hide()
+end
+
 --- Bid info:
 ---
 ---Name, Bid Amount, Total DKP
@@ -258,31 +319,42 @@ function AuctionGUI:CreateNewBidder(bid_info)
     local scrollContent = bidders_frame.scrollContent;
 
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
-    local bidFound = false
+    local bidFound, bidIndex = false, nil
 
     for i=1, #bidders do
         local bidder = bidders[i]
         if bidder.name == bid_info['name'] then
             MODULES.AuctionManager.CURRENT_BIDDERS[i].bid = bid_info['bid']
             bidFound = true
+            bidIndex = i
         end
     end
 
-    scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
-
     if not bidFound then
         table.insert(MODULES.AuctionManager.CURRENT_BIDDERS, bid_info)
+    elseif bidFound and bidIndex ~= nil then
+        MODULES.AuctionManager.CURRENT_BIDDERS[bidIndex] = bid_info
     end
+
+    self:RefreshBidders()
+end
+
+function AuctionGUI:RefreshBidders()
+    local bidders_frame = self.current_bidders_frame;
+    local scrollContent = bidders_frame.scrollContent;
+    local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
+
+    scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
     local createProspectFrame = function()
         local f = CreateFrame("Frame", nil, scrollContent, nil)
         f:SetSize(scrollContent:GetWidth(), 18)
         f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
-        f.total = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
+        f.bid = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
         f.name:SetHeight(18)
-        f.total:SetHeight(18)
+        f.bid:SetHeight(18)
         f.name:SetPoint("LEFT")
-        f.total:SetPoint("RIGHT")
+        f.bid:SetPoint("RIGHT")
         return f
     end
 
@@ -290,24 +362,42 @@ function AuctionGUI:CreateNewBidder(bid_info)
         local prospect_frame = createProspectFrame()
         local prospect_info = bidders[i]
 
-        prospect_frame.name:SetText(prospect_info['name'])
-        prospect_frame.total:SetText(prospect_info['dkpTotal'])
+        if prospect_info ~= nil then
+            prospect_frame.name:SetText(prospect_info['name'])
 
-        local name_width = prospect_frame.name:GetStringWidth()
-        local total_width = prospect_frame.total:GetStringWidth()
+            prospect_frame.bid:Hide()
+            prospect_frame.bid:SetText(prospect_info['bid'])
 
-        --if bidders_frame.scrollContent:GetWidth() < (name_width + total_width + padding) then
-        --    bidders_frame:SetWidth(name_width + total_width + padding)
-        --end
-
-        scrollContent:AddChild(prospect_frame)
+            scrollContent:AddChild(prospect_frame)
+        end
     end
+end
+
+function AuctionGUI:_ShowBidAmounts()
+    local bidders_frame = self.current_bidders_frame;
+    local scrollContent = bidders_frame.scrollContent;
+    for _, val in pairs(scrollContent.children) do
+        val.bid:Show()
+    end
+end
+
+function AuctionGUI:CancelBidder(bidder)
+    local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
+    for i=1, #bidders do
+        local b = bidders[i]
+        if b.name == bidder then
+            MODULES.AuctionManager.CURRENT_BIDDERS[i] = nil
+            break;
+        end
+    end
+    self:RefreshBidders()
 end
 
 function AuctionGUI:StartAuction(itemLink, itemName, itemTexture)
     self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
     self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
     self.frame:Show()
+    MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture}
 
     --local bidders = {
     --    { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },

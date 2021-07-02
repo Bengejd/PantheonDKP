@@ -150,7 +150,10 @@ function Comm:_InitializeCache()
 end
 
 function Comm:_ProcessCache(frameCache)
-    PDKP.CORE:Print('Processing', #self.cache, 'cached messages')
+    if PDKP:IsDev() then
+        PDKP.CORE:Print('Processing', #self.cache, 'cached messages')
+    end
+
     for i = #self.cache, 1, -1 do
         local transmission = self.cache[i]
         self:VerifyCommSender(transmission['message'], transmission['sender'])
@@ -207,25 +210,39 @@ function PDKP_OnComm_BidSync(comm, message, sender)
 
     local Auction = MODULES.AuctionManager
     local AuctionGUI = GUI.AuctionGUI
+    local GroupManager = MODULES.GroupManager
 
     if self.ogPrefix == 'startBids' then
         local itemLink, itemName, iTexture = unpack(data)
         Auction.auctionInProgress = true
         AuctionGUI:StartAuction(itemLink, itemName, iTexture)
+        PDKP.AuctionTimer.startTimer()
         if PDKP.canEdit then
             GUI.Adjustment:InsertItemLink(itemLink)
         end
-    elseif self.ogPrefix == 'bidSubmit' then
-        -- TODO: Should be DKP Officer
 
+        if GroupManager:IsDKPOfficer() then
+            local channel = "RAID"
+            if GroupManager:IsAssist() or GroupManager:IsLeader() then
+                channel = "RAID_WARNING"
+            end
+            local text = string.format("Starting bids for %s", itemLink)
+            SendChatMessage(text, channel, nil, nil)
+        end
+
+    elseif self.ogPrefix == 'bidSubmit' then
+        if not MODULES.AuctionManager:CanChangeAuction() then return end
         local member = MODULES.GuildManager:GetMemberByName(sender)
         local bidder_info = { ['name'] = member.name, ['bid'] = data, ['dkpTotal'] = member:GetDKP('total') }
+        CommsManager:SendCommsMessage('AddBid', bidder_info)
     elseif self.ogPrefix == 'stopBids' then
-
+        if Auction:IsAuctionInProgress() then
+            Auction:EndAuction()
+        end
     elseif self.ogPrefix == 'AddBid' then
-        GUI.AuctionGUI:CreateNewBidder(bidder_info)
+        GUI.AuctionGUI:CreateNewBidder(data)
     elseif self.ogPrefix == 'CancelBid' then
-
+        GUI.AuctionGUI:CancelBidder(sender)
     end
 end
 
@@ -259,11 +276,11 @@ function PDKP_UpdatePushBar(percent, elapsed)
     local mins = string.format("%02.f", math.floor(eta/60 - (hours*60)));
     local secs = string.format("%02.f", math.floor(eta - hours*3600 - mins *60));
 
-    --print('percent: ', percent, 'elapsed:', elapsed, 'hours', hours, 'mins', mins, 'secs', secs)
+
 
     local etatext = mins .. ':' .. secs
     local statusText = 'PDKP Push: ' .. percent .. '%' .. ' ETA: ' .. etatext
-    PDKP.CORE:Print(statusText)
+    PDKP.PushBar.setAmount(percent, statusText)
 end
 
 MODULES.Comm = Comm

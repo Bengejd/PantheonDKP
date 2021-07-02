@@ -13,7 +13,6 @@ local tinsert = tinsert
 local UIParent, UISpecialFrames = UIParent, UISpecialFrames
 
 function Main:Initialize()
-    -- TODO: Find why Main:Initialize() is being called twice...
     if pdkp_frame ~= nil then return end
 
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
@@ -105,7 +104,14 @@ function Main:HandleSlashCommands(msg)
 end
 
 function Main:SetupPushProgress()
-    --PDKP.PushBar = GUtils:createStatusBar()
+    local pushBarOpts = {
+        ['name'] = 'PushBar',
+        ['type'] = 'percent',
+        ['default'] = 0,
+        ['min'] = 0,
+        ['max'] = 100
+    }
+    PDKP.PushBar = GUtils:createStatusBar(pushBarOpts)
 end
 
 MODULES.Main = Main;

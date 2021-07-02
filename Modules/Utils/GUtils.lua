@@ -182,6 +182,16 @@ function GUtils:createDropdown(opts)
     dropdown.initialized = false -- Used later on, in initialization
     dropdown.children = opts['children'] or {}
 
+    dropdown.resetVals = function()
+        UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
+        UIDropDownMenu_SetText(dropdown, default_val)
+    end
+
+    dropdown.setAutoValue = function(val)
+        UIDropDownMenu_SetSelectedValue(dropdown, val, val)
+        UIDropDownMenu_SetText(dropdown, val)
+    end
+
     --- BUG FIX Start: Menu Width
     --- Menu width doesn't dynamically change, at least not easily. To get around this, we find the longest string, pop
     --- it into the dd_title font string, calculate the width with some padding, and set that as our dropdown width.
@@ -324,6 +334,15 @@ function GUtils:createNestedDropdown(opts)
     dropdown.isValid = function()
         local box_text = UIDropDownMenu_GetSelectedValue(dropdown)
         return dropdown:IsVisible() and box_text ~= nil and box_text ~= "" and box_text ~= 0;
+    end
+    dropdown.resetVals = function()
+        UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
+        UIDropDownMenu_SetText(dropdown, default_val)
+    end
+
+    dropdown.setAutoValue = function(val)
+        UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
+        UIDropDownMenu_SetText(dropdown, default_val)
     end
 
     -- We need to define the initialize function via blizzard's method.
@@ -576,10 +595,11 @@ function GUtils:createStatusBar(opts)
     local default = opts['default'] or 0
     local min = opts['min'] or 0
     local max = opts['max'] or 100
+    local onTimerFinished = opts['func'] or function()  end
+    local parent = UIParent
 
-    local pb = CreateFrame("StatusBar", 'PDKP_' .. name, UIParent)
+    local pb = CreateFrame("StatusBar", 'PDKP_' .. name, parent)
     pb:SetFrameStrata("HIGH")
-    pb:SetPoint("TOP")
     pb:SetWidth(300)
     pb:SetHeight(20)
     pb:SetStatusBarTexture("")
@@ -589,7 +609,6 @@ function GUtils:createStatusBar(opts)
     pb:SetStatusBarColor(0, 0.65, 0)
     pb.bg = pb:CreateTexture(nil, "BACKGROUND")
     pb.bg:SetTexture(MODULES.Media.STATUS_BAR_FILL)
-    pb.bg:SetAllPoints(true)
     pb.bg:SetVertexColor(0, 0.35, 0)
     pb.value = pb:CreateFontString(nil, "OVERLAY")
     pb.value:SetPoint("CENTER")
@@ -599,32 +618,79 @@ function GUtils:createStatusBar(opts)
     pb.value:SetTextColor(0, 1, 0)
     pb:SetMinMaxValues(min, max)
 
+    pb.isBarLocked = false
+
+    if type == 'percent' then
+        pb:SetPoint("TOP")
+        pb.bg:SetAllPoints(true)
+    end
+
     pb.reset = function()
         if type == 'percent' then
             pb.value:SetText(tostring(default) .. "%")
         else
             pb.value:SetText(tostring(default))
         end
-        pb.value:SetValue(default)
-        pb.isLocked = false;
+        pb:SetValue(default)
+        pb.isBarLocked = false;
 
         pb:Hide()
+
+        if pb.timer ~= nil then
+            pb.timer:Cancel()
+            pb.bg:SetWidth(pb:GetWidth())
+        end
     end
 
-    pb.setAmount = function(amount)
+    pb.setAmount = function(amount, formattedText)
+        if not pb:IsVisible() and not pb.isBarLocked then
+            pb:Show()
+        elseif pb:IsVisible() and pb.isBarLocked then
+            pb:Hide()
+        end
+
         local extra = ''
         if type == 'percent' then
             extra = '%'
         end
-        pb.value:SetText(tostring(amount) .. extra)
-        pb.value:SetValue(amount)
 
-        local currVal = pb.value:GetValue()
+        if formattedText then
+            pb.value:SetText(formattedText)
+        else
+            pb.value:SetText(tostring(math.ceil(amount)) .. extra)
+        end
 
-        if currVal < min or currVal >= max then
+
+        pb:SetValue(amount)
+
+        local currVal = pb:GetValue()
+        if currVal < min or currVal >= max and type == 'percent' then
             pb:reset()
+            pb.onTimerFinished()
+        elseif currVal <= min and type == 'timer' then
+            pb:reset()
+            pb.onTimerFinished()
         end
     end
+
+    pb.startTimer = function()
+        if pb.isBarLocked then
+            pb.reset()
+        end
+        pb.isBarLocked = false
+
+        local pbWidth = pb:GetWidth()
+        local reductionAmt = pbWidth / max
+
+        pb.timer = C_Timer.NewTicker(0.1, function()
+            local currVal = pb:GetValue()
+            pb.setAmount(currVal - 0.1)
+            pb:SetWidth(pb:GetWidth() - (reductionAmt * 0.1))
+        end, (max*10) + 0.1)
+    end,
+
+    pb:reset()
+    pb.onTimerFinished = onTimerFinished
 
     return pb
 end

@@ -55,6 +55,8 @@ function Group:Refresh()
     self:_RefreshLeadership()
     self:_RefreshMembers()
 
+    local myName = Utils:GetMyName()
+
     for i=1, numGroupMembers do
         local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
 
@@ -78,7 +80,7 @@ function Group:Refresh()
             self.leadership.masterLoot = name
         end
 
-        if name == PDKP.player.name then
+        if name == myName then
             self.isML = isML ~= nil
             self.isLeader = rank == 2
             self.isAssist = rank >= 1
@@ -199,6 +201,8 @@ function Group:SetDKPOfficer(data)
     local officerText = Utils:ternaryAssign(isDKPOfficer, 'is no longer the DKP Officer', 'is now the DKP Officer')
     PDKP.CORE:Print(charName .. ' ' .. officerText)
     self.classes['DKP'] = {charName}
+
+    self.isDKP = Utils:GetMyName() == self.leadership.dkpOfficer
 
     PDKP.raid_frame:updateClassGroups()
 

@@ -20,7 +20,7 @@ local function GetItemCommInfo(itemIdentifier)
 end
 
 local function HandleModifiedTooltipClick()
-    if PDKP.canEdit and GameTooltip and IsAltKeyDown() and not Auction:IsAuctionInProgress() then
+    if PDKP.canEdit and GameTooltip and IsAltKeyDown() and not Auction:IsAuctionInProgress() and MODULES.AuctionManager:CanChangeAuction() then
         local itemName, itemLink = GameTooltip:GetItem()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
@@ -34,6 +34,11 @@ end
 
 function Auction:IsAuctionInProgress()
     return self.auctionInProgress
+end
+
+function Auction:CanChangeAuction()
+    local gm = MODULES.GroupManager;
+    return (gm:IsDKPOfficer() or gm:IsMasterLoot()) and gm:IsInRaid()
 end
 
 function Auction:Initialize()
@@ -51,6 +56,145 @@ end
 
 function Auction:HookBagSlots()
     hooksecurefunc("ContainerFrameItemButton_OnModifiedClick", HandleModifiedTooltipClick)
+
+    local eventsFrame = CreateFrame("Frame", "PDKP_AuctionEvents")
+    eventsFrame:RegisterEvent('LOOT_OPENED')
+    eventsFrame:RegisterEvent('LOOT_SLOT_CLEARED')
+    eventsFrame:SetScript("OnEvent", function(self, eventName, ...)
+        if eventName == 'LOOT_OPENED' then
+            Auction:HookIntoLootBag()
+        elseif eventName == 'LOOT_SLOT_CLEARED' then
+            GUI.AuctionGUI.frame:Hide()
+        end
+    end);
+end
+
+function Auction:HookIntoLootBag()
+    local numLootItems = GetNumLootItems();
+    for i=1, numLootItems do
+        local btnName = 'LootButton'
+        btnName = btnName .. tostring(i)
+        local btn = _G[btnName]
+        if btn then
+            btn:SetScript("OnMouseDown", function(b, buttonType)
+                if buttonType == 'LeftButton' and IsAltKeyDown() then
+                    HandleModifiedTooltipClick()
+                end
+            end)
+        end
+    end
+end
+
+function Auction:EndAuction()
+    PDKP.AuctionTimer.reset()
+    self.auctionInProgress = false
+    GUI.AuctionGUI:ResetAuctionInterface()
+
+    local GroupManager = MODULES.GroupManager
+
+    if GroupManager:IsDKPOfficer() then
+        local channel = "RAID"
+        if GroupManager:IsAssist() or GroupManager:IsLeader() then
+            channel = "RAID_WARNING"
+        end
+        local bidInfo = self.CurrentAuctionInfo
+        local text = string.format("Bids for %s have closed", bidInfo['itemLink'])
+        SendChatMessage(text, channel, nil, nil)
+
+        local winners, winningText, amount = self:_GetWinnerInfo(bidInfo['itemLink'])
+
+        SendChatMessage(winningText, channel, nil, nil)
+
+        wipe(self.CURRENT_BIDDERS)
+        wipe(self.CurrentAuctionInfo)
+
+        local AdjustChildren = GUI.Adjustment.entry_details.children
+        local mainDD = AdjustChildren[1]
+        local amtBox = AdjustChildren[3]
+
+        mainDD.setAutoValue('Item Win')
+        amtBox:SetText(amount)
+    end
+end
+
+function Auction:HandleTimerFinished()
+    if not PDKP.canEdit or not MODULES.AuctionManager:CanChangeAuction() then return end
+    MODULES.CommsManager:SendCommsMessage('stopBids', {['startBid'] = true})
+end
+
+function Auction:_GetWinnerInfo(itemLink)
+    table.sort(self.CURRENT_BIDDERS, function(a, b)
+        return a['bid'] > b['bid']
+    end)
+
+    local winners = {}
+
+    local numBidders = #self.CURRENT_BIDDERS
+
+    if numBidders == 0 then
+        return winners, string.format('%s Open for free-rolls', itemLink)
+    elseif numBidders == 1 then
+        local winner = self.CURRENT_BIDDERS[1]
+        winners[1] = winner
+        return winners, string.format('%s Won by %s, for %d DKP', itemLink, winners[1].name, 1), 1
+    elseif numBidders > 1 then
+        local winningText = ''
+        local winningAmt;
+
+        for i=1, #self.CURRENT_BIDDERS do
+            local bidder = self.CURRENT_BIDDERS[i]
+            if i == 1 then
+                tinsert(winners, bidder)
+            elseif bidder.bid == winners[1].bid then
+                tinsert(winners, bidder)
+            else
+                break
+            end
+        end
+
+        if #winners == 1 and numBidders > 1 then -- Multiple Bidders
+            winningAmt = (tonumber(self.CURRENT_BIDDERS[2]['bid']) + 1)
+            winningText = string.format("%s won by %s, for %d DKP", itemLink, winners[1].name, winningAmt)
+        elseif #winners == 1 and numBidders == 1 then
+            winningAmt = 1
+            winningText = string.format("%s won by %s, for %d DKP", itemLink, winners[1].name, winningAmt)
+        elseif #winners > 1 and numBidders > 1 then
+            local names = ''
+            for i=1, #winners do
+                local member = winners[i]
+                names = names .. member.name
+                if i ~= #winners then
+                    names = names .. ', '
+                end
+            end
+            winningAmt = winners[1].bid
+            winningText = string.format('%s TIED, Please /roll 100', names)
+        end
+
+        return winners, winningText, winningAmt * -1
+    end
+end
+
+function Auction:_GetWinners()
+    local winners = {}
+
+    table.sort(self.CURRENT_BIDDERS, function(a, b)
+        return a['bid'] > b['bid']
+    end)
+
+    if #self.CURRENT_BIDDERS == 1 then
+        tinsert(winners, self.CURRENT_BIDDERS[1])
+    elseif #self.CURRENT_BIDDERS > 1 then
+        for i=2, #self.CURRENT_BIDDERS do
+            local bidder = self.CURRENT_BIDDERS[i]
+            if bidder['bid'] == self.CURRENT_BIDDERS[1] then
+                tinsert(winners, self.CURRENT_BIDDERS[i])
+            else
+                break
+            end
+        end
+    end
+    return winners
 end
 
 
