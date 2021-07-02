@@ -19,9 +19,7 @@ function Dialogs:Initialize()
             OnAccept = function(self, data, data2)
                 MODULES.DKPManager:AwardBossKill(data)
             end,
-            OnCancel = function()
-                -- TODO: Cancel Raid Boss Kill Award
-            end,
+            OnCancel = function() end,
             timeout = 0,
             whileDead = true,
             hideOnEscape = false,
