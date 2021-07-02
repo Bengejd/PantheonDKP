@@ -514,9 +514,6 @@ function GUtils:createEditBox(opts)
 
     box.init = false;
 
-    -- TODO: Might need to reimplement this later on...
-    --GUI.editBoxes[name] = box
-
     box.frame = box_frame
     box.desc = ed
     box.title = el
@@ -550,10 +547,9 @@ function GUtils:createItemLink(parent)
 
     -- ItemID, ItemName or ItemLink
     fs.SetItemLink = function(itemIdentifier, iName, iTexture)
-        -- TODO: Find out if we need all of this, or if it can be nullified.
 
         -- Call instant first, since it assures that we'll get the item info.
-        local itemID, itemType, itemSubType, itemEquipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(itemIdentifier)
+        GetItemInfoInstant(itemIdentifier)
 
         -- Then call the actual item info, so we can get the texture, and link.
         local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,

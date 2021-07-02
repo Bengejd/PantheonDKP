@@ -223,8 +223,6 @@ function RaidTools:Initialize()
             b_text = 'Start Raid Inv Spam'
         end
         spam_button:SetText(b_text)
-
-        -- TODO: See if there is an easy way to change this color to something more like ElvUI's Black buttons.
     end)
     spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
     spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
@@ -259,15 +257,10 @@ function RaidTools:Initialize()
 
     f.updateClassGroups = function()
         local classGroups = f.class_groups.class_icons
-
         for className, classGroup in pairs(classGroups) do
             local numClass = MODULES.GroupManager:GetNumClass(className)
             classGroup.label:SetText(tostring(numClass))
         end
-
-        --for _, className in pairs(classes) do
-        --
-        --end
     end
 
     f:SetScript("OnShow", f.updateClassGroups)

@@ -109,13 +109,13 @@ function map:HandleIconClicks(buttonType)
     local clickTypes = {
         ['LeftButton'] = {
             [hasShift and hasAlt and hasCtrl] = function()
-                print('Left, hasShift, hasAlt, hasCtrl')
+                --print('Left, hasShift, hasAlt, hasCtrl')
             end,
             [hasShift and hasAlt and not hasCtrl] = function()
-                print('Left, hasShift, hasAlt');
+                --print('Left, hasShift, hasAlt');
             end,
             [hasShift and not hasAlt and not hasCtrl] = function()
-                print('Left, hasShift');
+                --print('Left, hasShift');
             end,
             ['default'] = function()
                 if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
@@ -134,11 +134,10 @@ function map:HandleIconClicks(buttonType)
     local clickFunc = clickTypes[buttonType][true] or clickTypes[buttonType]['default']
     clickFunc()
 
+    -- TODO: Hook this up eventually.
     --if buttonType == 'LeftButton' then
-    --    if hasShift and hasAlt then -- Table wipe. -- TODO: Hook this up.
-    --        -- TODO: Hookup Wipe Request.
+    --    if hasShift and hasAlt then -- Table wipe.
     --    elseif hasShift then -- Sync request.
-    --        -- TODO: Hookup Sync Request.
     --    else
     --        GUI:TogglePDKP()
     --    end
