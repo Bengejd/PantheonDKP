@@ -18,7 +18,7 @@ local playerName = UnitName("PLAYER")
 
 Member.__index = Member; -- Set the __index parameter to reference Member
 
-function Member:new(guildIndex, server_time)
+function Member:new(guildIndex, server_time, leadershipRanks)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
 
@@ -26,6 +26,8 @@ function Member:new(guildIndex, server_time)
 
     self.guildIndex = guildIndex
     self.server_time = server_time
+
+    self.officerRank, self.classLeadRank = unpack(leadershipRanks)
 
     self:_GetMemberData(guildIndex)
 
@@ -109,23 +111,28 @@ function Member:_GetMemberData(index)
 
     self.name, self.server = strsplit('-', self.name) -- Remove the server name from their name.
 
-    self.isOfficer = self.rankIndex <= 3
+    self.isOfficer = self.rankIndex <= self.officerRank
     self.canEdit = self.isOfficer
     self.isOfficer = self.canEdit
 
-    self.isClassLeader = self.rankIndex == 4
+    self.isClassLeader = self.rankIndex == self.classLeadRank
+
+    self.isInLeadership = self.isOfficer or self.isClassLeader
 
     self.formattedName, self.coloredClass = Utils:FormatTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == MODULES.Constants.BANK_NAME
 
+    --@do-not-package@
     if (self.name == 'Lariese' or self.name == 'Karenbaskins') and PDKP:IsDev() then
         self.canEdit = true
+        self.isOfficer = true
+        self.isInLeadership = true
     end
+    --@end-do-not-package@
 
     self.visible = true
 
     self.dkp = {};
-    self.isDkpOfficer = false
     self.lockouts = {}
 end
 

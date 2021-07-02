@@ -34,6 +34,8 @@ function GuildManager:Initialize()
 
     if not IsInGuild() then return end
 
+    self:_GetLeadershipRanks()
+
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
 
@@ -63,7 +65,7 @@ function GuildManager:GetMembers()
     local server_time = GetServerTime()
 
     for i=1, self.numOfMembers do
-        local member = Member:new(i, server_time)
+        local member = Member:new(i, server_time, { self.officerRank, self.classLeadRank })
         local isNew = self:IsNewMemberObject(member.name)
         local inDatabase = self:IsMemberInDatabase(member.name);
 
@@ -109,6 +111,19 @@ function GuildManager:GetOnlineNames()
         end
     end
     return onlineNames
+end
+
+function GuildManager:_GetLeadershipRanks()
+    local numRanks = GuildControlGetNumRanks()
+    for i=2, numRanks do
+        local perm = C_GuildInfo.GuildControlGetRankFlags(i)
+        local listen, speak, promote, demote, invite, kick, o_note = perm[3], perm[4], perm[5], perm[6], perm[7], perm[8], perm[12]
+        if listen and speak and promote and demote and invite and kick and o_note and i ~= 1 then
+            self.officerRank = i
+        elseif invite and kick and promote and demote then
+            self.classLeadRank = i
+        end
+    end
 end
 
 MODULES.GuildManager = GuildManager
