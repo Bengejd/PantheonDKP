@@ -189,8 +189,40 @@ function DKP:BossKillDetected(bossID, bossName)
 end
 
 function DKP:AwardBossKill(boss_name)
+    if not PDKP.canEdit then return end
+
     PDKP.CORE:Print('Awarding DKP for ' .. boss_name .. ' Kill')
     MODULES.GroupManager:Refresh()
+
+    local GuildManager = MODULES.GuildManager
+
+    local memberNames = MODULES.GroupManager.memberNames;
+
+    local myName, _ = Utils:GetMyName()
+
+    local dummy_entry = {
+        ['officer'] = myName,
+        ['reason'] = 'Boss Kill',
+        ['names'] = {},
+        ['dkp_change'] = 10,
+        ['boss'] = boss_name
+    }
+
+    for i=1, #memberNames do
+        local memberName = memberNames[i]
+        local member = GuildManager:GetMemberByName(memberName)
+        if member then
+            tinsert(dummy_entry['names'], member.name)
+        elseif true then
+            --print('FUCK', memberName)
+        end
+    end
+
+    local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
+
+    if entry:IsValid() then
+        entry:Save(false, true)
+    end
 end
 
 function DKP:_CreateBatches(entries, total)
@@ -212,6 +244,7 @@ end
 
 function DKP:_ProcessEntryBatch(batch)
     for key, encoded_entry in pairs(batch) do
+        PDKP.CORE:Print(GetFramerate())
         local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
         local importEntry = MODULES.DKPEntry:new(entry)
         importEntry:Save(false)

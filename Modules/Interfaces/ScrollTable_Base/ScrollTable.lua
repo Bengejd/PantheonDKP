@@ -292,12 +292,11 @@ function ScrollTable:ApplyFilter(filterOn, checkedStatus)
         self.appliedFilters[filterOn] = checkedStatus;
     end
 
-    -- TODO: Finish hooking this up.
-    --if filterOn == 'online' and checkedStatus then
-    --    self.online = Guild:UpdateOnlineStatus()
-    --elseif filterOn == 'raid' and checkedStatus then
-    --    self.raid_members = Raid.raid.members or {};
-    --end
+    if filterOn == 'online' and checkedStatus then
+        self.online = MODULES.GuildManager:GetOnlineNames() or {}
+    elseif filterOn == 'raid' and checkedStatus then
+        self.raid_members = MODULES.GroupManager:GetRaidMemberObjects() or {}
+    end
 
     self.displayedRows = {};
     for i=1, #self.displayData do

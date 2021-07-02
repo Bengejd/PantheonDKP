@@ -123,10 +123,10 @@ end
 
 function Group:InvitePlayer(name)
     if self:CanInvite(name) then
+        if self:IsLeader() and GetNumGroupMembers() == 5 then
+            ConvertToRaid()
+        end
         return InviteUnit(name)
-    elseif GetNumGroupMembers() == 5 and self.isLeader then
-        ConvertToRaid()
-        return self:InvitePlayer(name)
     end
 end
 
@@ -215,9 +215,6 @@ function Group:RequestDKPOfficer()
     C_Timer.After(5, function()
         if not self:HasDKPOfficer() then
             self.requestedDKPOfficer = false
-            if PDKP:IsDev() then
-                PDKP.CORE:Print("Was unable to find DKP officer");
-            end
         end
     end)
 end
@@ -229,6 +226,17 @@ function Group:GetNumClass(class)
         return #self.classes[class]
     end
     return 0
+end
+
+function Group:GetRaidMemberObjects()
+    local members = {}
+    for i=1, #self.memberNames do
+        local member = GuildManager:GetMemberByName(self.memberNames[i])
+        if member then
+            tinsert(members, member.name)
+        end
+    end
+    return members
 end
 
 function Group:_RefreshClasses()

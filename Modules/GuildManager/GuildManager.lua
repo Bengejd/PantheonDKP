@@ -85,7 +85,11 @@ function GuildManager:GetMembers()
                 self.memberNames[#self.memberNames + 1] = member.name
             end
 
-            if member.online then self.online[member.name] = member end
+            if member.online then
+                self.online[member.name] = member
+            elseif self.online[member.name] ~= nil then
+                self.online[member.name] = nil
+            end
         end
     end
     return self.online, self.members -- Always return, even if it's empty for edge cases.
@@ -94,6 +98,17 @@ end
 function GuildManager:GetMemberByName(name)
     if tContains(self.memberNames, name) then return self.members[name] end
     return nil
+end
+
+function GuildManager:GetOnlineNames()
+    local onlineMembers, _ = self:GetMembers()
+    local onlineNames = {}
+    for name, val in pairs(onlineMembers) do
+        if val ~= nil then
+            tinsert(onlineNames, name)
+        end
+    end
+    return onlineNames
 end
 
 MODULES.GuildManager = GuildManager

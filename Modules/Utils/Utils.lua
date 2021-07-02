@@ -243,6 +243,10 @@ function Utils:RemoveAllNonNumerics(str)
     return str:gsub("[^0-9]", "")
 end
 
+function Utils:GetMyName()
+    return UnitName("PLAYER")
+end
+
 function Utils:RemoveServerName(name)
     if Utils:IsEmpty(name) then return nil end;
     return strsplit('-', name)
