@@ -30,6 +30,8 @@ function Dev:HandleSlashCommands(msg)
         self:DecayTest(msg)
     elseif cmd == 'bossKillTest' then
         self:BossKillTest(msg)
+    elseif cmd == 'testAuctionTimer' then
+        PDKP.AuctionTimer.startTimer()
     end
 end
 
