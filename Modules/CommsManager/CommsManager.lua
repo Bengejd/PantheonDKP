@@ -112,6 +112,10 @@ function Comms:_Encode(compressed)
     return PDKP.LibDeflate:EncodeForWoWAddonChannel(compressed)
 end
 
+function Comms:_Adler(string)
+    return PDKP.LibDeflate:Adler32(string)
+end
+
 function Comms:_Deserialize(string)
     local success, data = PDKP.CORE:Deserialize(string)
     if not success then return nil end

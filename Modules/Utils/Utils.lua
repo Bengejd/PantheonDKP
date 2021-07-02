@@ -22,6 +22,11 @@ function Utils:Initialize()
     self:GetResetInfo()
 end
 
+function Utils:BuildEntryStartHash(officer)
+    local weekNumber = self:GetWeekNumber(GetServerTime())
+    return string.format("%d__%s__", weekNumber, officer)
+end
+
 -----------------------------
 --     Reset Functions     --
 -----------------------------
