@@ -76,7 +76,18 @@ end
 function Member:_UpdateDKP(entry)
     local amount = entry.sd.dkp_change
     if amount == nil then return end
-    self.dkp['total'] = self.dkp['total'] + amount
+
+    if entry.reason == 'Decay' then
+        if self.dkp['entries'] == nil or #self.dkp['entries'] == 0 or not self:IsRaidReady() then
+            entry:RemoveMember(self.name)
+            return
+        end -- Do not decay non-active members
+
+        self.dkp['total'] = math.floor(self.dkp['total'] * 0.9)
+    else
+        self.dkp['total'] = self.dkp['total'] + amount
+    end
+
     table.insert(self.dkp['entries'], entry.id)
 end
 

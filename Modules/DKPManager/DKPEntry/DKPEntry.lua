@@ -130,6 +130,7 @@ function entry:RemoveMember(name)
             memberIndex = i
         end
     end
+
     table.remove(self.names, memberIndex)
 
     self:GetMembers()
@@ -200,7 +201,12 @@ end
 
 function entry:_GetChangeText()
     local color = Utils:ternaryAssign(self.dkp_change >= 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
-    return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
+
+    if self.reason == 'Decay' then
+        return Utils:FormatTextColor('10% DKP', MODULES.Constants.WARNING)
+    else
+        return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
+    end
 end
 
 function entry:_GetHistoryText()
@@ -215,6 +221,9 @@ function entry:_GetHistoryText()
         text = 'Item Win - ' .. self.item
     elseif self.reason == 'Other' then
         text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
+    elseif self.reason == 'Decay' then
+        text = 'Weekly Decay'
+        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
     end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
@@ -229,8 +238,13 @@ function entry:_GetCollapsedHistoryText()
         ['Boss Kill']= self.boss,
         ['Item Win']= 'Item Win - ' .. self.item,
         ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
+        ['Decay'] = 'Weekly Decay'
     }
     local text = texts[self.reason]
+
+    if self.reason == 'Decay' then
+        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
+    end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
     return Utils:FormatTextColor(text, color)

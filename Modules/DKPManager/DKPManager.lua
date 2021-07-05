@@ -250,18 +250,29 @@ end
 function DKP:AddNewEntryToDB(entry, updateTable)
     if updateTable == nil then updateTable = true end
 
-    Utils:WatchVar(entry, 'Entry-test')
-
     if entry.reason == 'Boss Kill' then
         MODULES.Lockouts:AddMemberLockouts(entry)
         entry:GetMembers()
     end
 
     if entry ~= nil then
-        for _, member in pairs(entry.members) do
+        for i=#entry.members, 1, -1 do
+            local member = entry.members[i]
             member:_UpdateDKP(entry)
             member:Save()
         end
+
+        local entryMembers = entry:GetMembers()
+        entry.formattedNames = entry:_GetFormattedNames()
+        entry:GetSaveDetails()
+
+        if #entryMembers == 0 then
+            PDKP.CORE:Print('No members found for:', entry.reason)
+            DKP:_UpdateTables()
+            return
+        end
+
+
         DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
 
         self.entries[entry.id] = entry
