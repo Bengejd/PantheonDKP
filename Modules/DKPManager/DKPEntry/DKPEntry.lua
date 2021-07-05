@@ -227,6 +227,11 @@ end
 
 function entry:_GetFormattedOfficer()
     local officer = MODULES.GuildManager:GetMemberByName(self.officer)
+
+    if officer == nil then
+        return '|CFF' .. 'E71D36' .. self.officer .. '|r'
+    end
+
     return officer.formattedName
 end
 
