@@ -361,6 +361,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.sortCol = nil;
 
     self.firstSort = col_settings['firstSort'] or nil;
+    self.firstSortDir = col_settings['firstSortDir'] or 'ASC';
 
     self.firstSortRan, self.isDragging = false, false;
 
@@ -430,6 +431,18 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
     self.scrollChild:SetPoint("TOPLEFT", self.ListScrollFrame, "TOPLEFT", -0, 0);
 
     self:RefreshLayout();
+
+    self.frame:SetScript("OnShow", function()
+        if not self.firstSortRan then
+            if self.firstSortDir == 'DESC' then
+                self.cols[self.firstSort]:Click()
+                self.cols[self.firstSort]:Click()
+            else
+                self.cols[self.firstSort]:Click()
+            end
+            self.firstSortRan = true
+        end
+    end)
 
     return self
 end

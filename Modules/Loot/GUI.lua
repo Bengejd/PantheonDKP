@@ -223,7 +223,7 @@ function LootTable:HistoryUpdated(selectedUpdate)
 
     --self.appliedFilters['raid']=Settings.current_raid
 
-    local selected = GUI.memberTable.selected;
+    local selected = PDKP.memberTable.selected;
     if #selected > 0 then self.appliedFilters['selected']=selected;
     elseif #selected == 0 then self.appliedFilters['selected'] = nil;
     end
@@ -243,12 +243,9 @@ function LootTable:HistoryUpdated(selectedUpdate)
 end
 
 function LootTable:UpdateTitleText(selected)
-    --local raid = Settings.current_raid;
-    --local text = raid .. ' History'
-
-    --if #selected == 1 then text = selected[1] .. ' History'; end
-    --
-    --self.frame.title:SetText(text)
+    local text;
+    if #selected == 1 then text = selected[1] .. ' Loot History'; end
+    self.frame.title:SetText(text)
 end
 
 function LootTable:_NoEntriesFound()

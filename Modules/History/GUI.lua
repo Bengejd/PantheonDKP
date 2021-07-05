@@ -62,6 +62,8 @@ function HistoryTable:Initialize()
     self.frame.title:SetPoint("TOPLEFT", 14, -15)
     self.frame.title:SetPoint("TOPRIGHT", -14, -15)
 
+    HistoryTable.frame = self.frame
+
     local sb = CreateFrame("Button", "$parent_load_more_btn", self.frame, "UIPanelButtonTemplate")
     sb:SetSize(80, 22) -- width, height
     sb:SetText("Load More")
@@ -220,19 +222,14 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     -- Don't do unnecessary updates.
 
     if self.table_init and not selectedUpdate then return end
-    --if self.previous_raid == Settings.current_raid and self.table_init and not selectedUpdate then return end
 
-    --self.appliedFilters['raid']=Settings.current_raid
-
-    local selected = GUI.memberTable.selected;
+    local selected = PDKP.memberTable.selected;
     if #selected > 0 then self.appliedFilters['selected']=selected;
     elseif #selected == 0 then self.appliedFilters['selected'] = nil;
     end
     self:UpdateTitleText(selected)
 
     local collapse_rows = false
-    --if self.collapsed ~= self.collapsed_raids[Settings.current_raid] then collapse_rows = true end
-    --self.collapsed = self.collapsed_raids[Settings.current_raid];
     if collapse_rows then self:CollapseAllRows(self.collapsed) end
 
     self:RefreshTable()
@@ -240,12 +237,10 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     self:ToggleRows()
 
     if not self.table_init then self.table_init = true end
-    --self.previous_raid = Settings.current_raid
 end
 
 function HistoryTable:UpdateTitleText(selected)
-    --local raid = Settings.current_raid;
-    local text = raid .. ' History'
+    local text;
 
     if #selected == 1 then text = selected[1] .. ' History'; end
 
@@ -331,8 +326,6 @@ function HistoryTable:_OnLoad()
             if dataObj['deleted'] == true then row.isFiltered = true end
 
             local selected = self.appliedFilters['selected']
-
-
 
             for filter, val in pairs(self.appliedFilters or {}) do
                 if row.isFiltered then break end -- No need to continue the loop.

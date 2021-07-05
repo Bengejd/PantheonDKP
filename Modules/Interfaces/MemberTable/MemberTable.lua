@@ -63,13 +63,22 @@ function MemberTable:Initialize()
             ['rel_point_y'] = -70,
         },
         ['onSelectChanged'] = function()
-            return GUI.Adjustment:DropdownChanged()
+            GUI.Adjustment:DropdownChanged()
+
+            if GUI.HistoryGUI.frame and GUI.HistoryGUI.frame:IsVisible() then
+                GUI.HistoryGUI:HistoryUpdated(true)
+            end
+
+            if GUI.LootGUI.frame and GUI.LootGUI.frame:IsVisible() then
+                GUI.LootGUI:HistoryUpdated(true)
+            end
         end
     }
     local col_settings = {
         ['height'] = 14,
         ['width'] = 90,
-        ['firstSort'] = 1, -- Denotes the header we want to sort by originally.
+        ['firstSort'] = 3, -- Denotes the header we want to sort by originally.
+        ['firstSortDir'] = 'DESC',
         ['headers'] = {
             [1] = {
                 ['label'] = 'name',
@@ -107,7 +116,6 @@ function MemberTable:Initialize()
     }
 
     st = PDKP.ScrollTable:newHybrid(table_settings, col_settings, row_settings)
-    st.cols[1]:Click()
 
     PDKP.memberTable = st;
     --GUI.memberTable = st;
