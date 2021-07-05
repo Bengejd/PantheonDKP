@@ -26,20 +26,22 @@ function Dialogs:Initialize()
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
         ['PDKP_OFFICER_PUSH_CONFIRM'] = {
-            text = "WARNING THIS IS GUILD WIDE \n Overwrite is permanent and cannot be reversed. Merge is a safer option.",
-            button1 = "Overwrite",
-            button3 = 'Cancel',
-            button2 = "Merge",
+            text = "MANUAL DKP PUSH \n This will broadcast all of your entries to the guild. May cause brief lag spikes.",
+            button1 = "Merge",
+            button2 = 'Cancel',
+            --button2 = "Merge",
             OnAccept = function(...) -- First (Overwrite)
-                PDKP.CORE:Print('TODO: Push-overwrite');
-                --Export:New('push-overwrite')
+                local DKP = MODULES.DKPManager
+                local entries, total = DKP.currentLoadedWeekEntries, DKP.numCurrentLoadedWeek
+                local transmission_data = { ['total'] = total, ['entries'] = entries }
+                MODULES.CommsManager:SendCommsMessage('SyncLarge', transmission_data)
             end,
             OnCancel = function(...) -- Second (Merge)
-                local _, _, clickType = ...
-                if clickType == 'clicked' then
-                    PDKP.CORE:Print('TODO: push-merge');
-                    --Export:New('push-merge')
-                end
+                --local _, _, clickType = ...
+                --if clickType == 'clicked' then
+                --    PDKP.CORE:Print('TODO: push-merge');
+                --    --Export:New('push-merge')
+                --end
             end,
             OnAlt = function(...) -- Third (Cancel)
             end,
