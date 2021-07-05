@@ -20,11 +20,12 @@ local info = 'F4A460'
 local system = '1E90FF'
 
 local clickText = Utils:FormatTextColor('Click', info) .. ' to open PDKP. '
-local shiftClickText = Utils:FormatTextColor('Shift-Click', info) ..  ' to request a push.'
-local altShiftText = Utils:FormatTextColor('Alt-Shift-Click', info) .. ' to wipe your tables.'
 local shiftRightClickText = Utils:FormatTextColor('Right-Shift-Click', info) .. ' to open Officer push'
 local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
-local disableSyncInRaidText = Utils:FormatTextColor('Push requests disabled', warning)
+local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
+
+local shiftClickText = Utils:FormatTextColor('Shift-Click', info) ..  ' to request a push.'
+local altShiftText = Utils:FormatTextColor('Alt-Shift-Click', info) .. ' to wipe your tables.'
 
 local Dialogs;
 
@@ -55,13 +56,19 @@ function map:_GetToolTipTexts()
     local leftClick = { clickText, 1, 1, 1 }
     local rightClick = { rightClickText, 1, 1, 1 }
     local shiftRightClick = { shiftRightClickText, 1, 1, 1 }
+    local databaseResetClick = { resetDatabaseText, 1, 1, 1 }
 
-    local texts = { title, lineBreak, leftClick, rightClick }
+    local texts = { title, lineBreak, leftClick,
+                    --rightClick
+    }
 
     if PDKP.canEdit then
         tinsert(texts, lineBreak)
         tinsert(texts, shiftRightClick)
     end
+
+    tinsert(texts, lineBreak)
+    tinsert(texts, databaseResetClick)
 
     --tooltip:AddLine('Sync Status: '.. ' Out of date', 1, 1, 1, 1) -- text, r,g,b flag to wrap text.
     --tooltip:AddLine(" ", 1,1,1,1)
@@ -124,6 +131,9 @@ function map:HandleIconClicks(buttonType)
         ['RightButton'] = {
             [hasShift and PDKP.canEdit and not hasAlt and not hasCtrl] = function()
                 Dialogs:Show('PDKP_OFFICER_PUSH_CONFIRM', nil, nil)
+            end,
+            [hasShift and hasAlt and hasCtrl] = function()
+                MODULES.Database:ResetAllDatabases()
             end,
             ['default'] = function()
                 if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
