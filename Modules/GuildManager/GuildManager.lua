@@ -104,6 +104,9 @@ end
 
 function GuildManager:IsMemberOfficer(name)
     local member = self:GetMemberByName(name)
+
+    if member == nil then return false end
+
     return member.isOfficer
 end
 
