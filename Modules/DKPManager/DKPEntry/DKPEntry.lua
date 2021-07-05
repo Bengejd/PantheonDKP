@@ -125,6 +125,20 @@ function entry:GetMembers()
     return self.members, self.nonMemberNames
 end
 
+function entry:RemoveMember(name)
+    local memberIndex;
+
+    for i=1, #self.names do
+        if self.names[i] == name then
+            memberIndex = i
+        end
+    end
+
+    print(memberIndex)
+
+    table.remove(self.names, memberIndex)
+end
+
 function entry:IsMemberInEntry(name)
     return tContains(self.names, name)
 end
