@@ -32,6 +32,8 @@ function DB:Initialize()
             PDKP_DB[dbRef][db] = {}
         end
     end
+
+    self:Personal()[UnitName("PLAYER")] = true
 end
 
 function DB:Global()
