@@ -51,6 +51,8 @@ function Member:Save()
 
     if not Utils:tEmpty(self.dkp['entries']) then
         dkp['entries'] = self.dkp['entries']
+    else
+        return -- Don't save guildies who have no data associated with them.
     end
 
     guildDB[self.name] = dkp
@@ -71,9 +73,11 @@ function Member:GetDKP(dkpVariable)
     return self.dkp[dkpVariable]
 end
 
-function Member:_UpdateDKP(amount)
+function Member:_UpdateDKP(entry)
+    local amount = entry.sd.dkp_change
     if amount == nil then return end
     self.dkp['total'] = self.dkp['total'] + amount
+    table.insert(self.dkp['entries'], entry.id)
 end
 
 function Member:_InitializeDKP()
