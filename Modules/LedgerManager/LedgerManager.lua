@@ -57,30 +57,55 @@ function Ledger:CheckRequestKeys(message, sender)
     end
     local requestData = CommsManager:DataDecoder(message)
 
-    local keys_to_send = {}
+    local missing_keys = {}
+    local requestHasKeys = false
     for weekNumber, weekTable in pairs(requestData) do
         for officerName, officerTable in pairs(weekTable) do
             local myOfficerTable = self:_GetOfficerTable(weekNumber, officerName)
             local myLastEntry = #myOfficerTable
             local theirLastEntry = #officerTable
 
+            requestHasKeys = true
+
             if myLastEntry > theirLastEntry then
                 local entry_keys = self:_GetEntriesBetweenRange(weekNumber, officerName, theirLastEntry, myLastEntry)
                 for i=1, #entry_keys do
-                    table.insert(keys_to_send, entry_keys[i])
+                    table.insert(missing_keys, entry_keys[i])
                 end
             end
         end
     end
+
+    if Utils:tEmpty(missing_keys) and not requestHasKeys then -- Request User has 0 keys from the last 4 weeks
+        missing_keys = self:GetLastFourWeekEntryIds()
+    end
+
     local entries = {}
-    for _, entry_id in pairs(keys_to_send) do
+    for _, entry_id in pairs(missing_keys) do
         local entry = MODULES.DKPManager:GetEntryByID(entry_id)
         local save_details = entry:GetSaveDetails()
         entries[entry_id] = save_details
     end
 
-    if Utils:tEmpty(entries) then return end
+    if Utils:tEmpty(entries) then
+        if PDKP:IsDev() then
+            PDKP.CORE:Print('DEV: Entries were empty, returning')
+        end
+        return
+    end
     CommsManager:SendCommsMessage('SyncAd', entries)
+end
+
+function Ledger:GetLastFourWeekEntryIds()
+    local keys = {}
+    for _, weekTable in pairs(self.weekHashes) do
+        for _, officerTable in pairs(weekTable) do
+            for _, entryId in pairs(officerTable) do
+                table.insert(keys, entryId)
+            end
+        end
+    end
+    return keys
 end
 
 function Ledger:GetLastFourWeeks()
@@ -103,26 +128,44 @@ function Ledger:GenerateEntryHash(entry)
     if LEDGER[weekNumber][officer] == nil then
         LEDGER[weekNumber][officer] = {}
     end
-    table.insert(LEDGER[weekNumber][officer], entry.id)
 
-    local entry_index = #LEDGER[weekNumber][officer]
+    local entry_index = #LEDGER[weekNumber][officer] + 1
     entry.hash = string.format("%d__%s__%d", weekNumber, officer, entry_index)
     return entry:GetSaveDetails()
 end
 
 function Ledger:ImportEntry(entry)
-    local weekNumber, officer, index = strsplit(entry.hash, "__")
+    local hashMakeup = { strsplit("__", entry.hash) }
+    local tbl = {}
+
+    for i=1, #hashMakeup do
+        if hashMakeup[i] ~= "" then
+            table.insert(tbl, hashMakeup[i])
+        end
+    end
+
+    local weekNumber = tonumber(tbl[1])
+    local officer = tbl[2]
+    local index = tbl[3]
+
+    weekNumber = tonumber(weekNumber)
 
     self:_GetWeekTable(weekNumber)
     self:_GetOfficerTable(weekNumber, officer)
 
-    if tContains(LEDGER[weekNumber][officer], entry.id) then return end
+    if tContains(LEDGER[weekNumber][officer], entry.id) then
+        if PDKP:IsDev() then
+            PDKP.CORE:Print('Entry already exists')
+        end
+        return false
+    end
 
     --self.weekHashes[weekNumber][officer][index] = entry.id
     table.insert(LEDGER[weekNumber][officer], entry.id)
     table.sort(LEDGER[weekNumber][officer], function(a,b)
         return a < b
     end)
+    return true
 end
 
 function Ledger:GetLedgerEntryIndex(entryID, LedgerPath)

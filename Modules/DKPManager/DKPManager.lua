@@ -121,12 +121,15 @@ end
 
 function DKP:ImportEntry(entry, sender)
     local importEntry = MODULES.DKPEntry:new(entry)
-    MODULES.LedgerManager:ImportEntry(entry)
-    importEntry:Save(true)
+    local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(entry)
 
-    self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
-    self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
-    self:_RecompressCurrentLoaded()
+    if saved_ledger_entry then
+        importEntry:Save(true)
+
+        self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
+        self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+        self:_RecompressCurrentLoaded()
+    end
 end
 
 function DKP:ImportBulkEntries(message, sender)
@@ -247,9 +250,16 @@ end
 function DKP:AddNewEntryToDB(entry, updateTable)
     if updateTable == nil then updateTable = true end
 
+    Utils:WatchVar(entry, 'Entry-test')
+
+    if entry.reason == 'Boss Kill' then
+        MODULES.Lockouts:AddMemberLockouts(entry)
+        entry:GetMembers()
+    end
+
     if entry ~= nil then
         for _, member in pairs(entry.members) do
-            member:_UpdateDKP(entry.sd.dkp_change)
+            member:_UpdateDKP(entry)
             member:Save()
         end
         DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
