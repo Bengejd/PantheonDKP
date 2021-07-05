@@ -48,6 +48,8 @@ function entry:new(entry_details)
     self.other_text = entry_details['other_text'] or ''
     self.edited_time = entry_details['edited_time'] or nil
 
+    self.hash = entry_details['hash'] or nil
+
     self.nonMemberNames = {}
     self.members = {}
     self.sd = {} -- Save Details
@@ -95,6 +97,7 @@ function entry:GetSaveDetails()
     self.sd['dkp_change'] = self.dkp_change or 0
     self.sd['officer'] = self.officer
     self.sd['names'] = self.names
+    self.sd['hash'] = self.hash or nil
 
     if self.reason == _BOSS_KILL then
         self.sd['boss'] = self.boss
@@ -120,6 +123,10 @@ function entry:GetMembers()
         end
     end
     return self.members, self.nonMemberNames
+end
+
+function entry:IsMemberInEntry(name)
+    return tContains(self.names, name)
 end
 
 function entry:IsValid()

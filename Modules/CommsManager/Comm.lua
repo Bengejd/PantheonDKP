@@ -99,6 +99,7 @@ function Comm:_Setup()
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds/Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
+        ['SyncReq'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 
         -- Auction Section
         ['startBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -196,14 +197,21 @@ end
 
 function PDKP_OnComm_EntrySync(comm, message, sender)
     local self = comm
-
     if self.ogPrefix == 'SyncSmall' then
         local data = MODULES.CommsManager:DataDecoder(message)
         return MODULES.DKPManager:ImportEntry(data, sender)
     elseif self.ogPrefix == 'SyncLarge' then
         return MODULES.DKPManager:ImportBulkEntries(message, sender)
     elseif self.ogPrefix == 'SyncAd' then
-        return MODULES.DKPManager:ImportBulkEntries(message, sender)
+        local data = MODULES.CommsManager:DataDecoder(message)
+
+        
+
+        for _, entry in pairs(data) do
+            MODULES.DKPManager:ImportEntry(entry)
+        end
+    elseif self.ogPrefix == 'SyncReq' and PDKP.canEdit then
+        MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end
 
@@ -249,6 +257,16 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     end
 end
 
+function PDKP_SyncLockout(arg, sent, total)
+    local DKP = MODULES.DKPManager
+    local percentage = floor((sent / total) * 100)
+    if percentage < 100 then
+        DKP.autoSyncInProgress = true
+    else
+        DKP.autoSyncInProgress = false
+    end
+end
+
 function PDKP_SyncProgressBar(arg, sent, total)
     local percentage = floor((sent / total) * 100)
 
@@ -266,16 +284,6 @@ function PDKP_SyncProgressBar(arg, sent, total)
         end
         Comm.progress = 0
         Comm.start_time = nil
-    end
-end
-
-function PDKP_SyncLockout(arg, sent, total)
-    local DKP = MODULES.DKPManager
-    local percentage = floor((sent / total) * 100)
-    if percentage < 100 then
-        DKP.autoSyncInProgress = true
-    else
-        DKP.autoSyncInProgress = false
     end
 end
 

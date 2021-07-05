@@ -56,7 +56,9 @@ function Comms:RegisterComms()
 
         ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, },
         ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
-        ['SyncAd'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
+
+        ['SyncAd'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = false },
+        ['SyncReq'] = { ['channel'] = 'GUILD', ['requireCheck'] = false, ['self'] = false, },
 
         --- RAID COMMS
 

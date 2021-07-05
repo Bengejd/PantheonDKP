@@ -87,12 +87,18 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
 
     local memberNames = MODULES.GuildManager.memberNames;
     local numOfMembers = #memberNames
+    local officers = MODULES.GuildManager.officers
+    local officerNames = {}
+
+    for officerName, _ in pairs(officers) do
+        table.insert(officerNames, officerName)
+    end
 
     local valid_counter = 1
     local valid_entries = {}
 
     while valid_counter <= numOfEntriesToCreate do
-        local entry = self:CreateDummyEntry(numOfMembers, memberNames)
+        local entry = self:CreateDummyEntry(numOfMembers, memberNames, officerNames)
 
         if entry:IsValid() then
             tinsert(valid_entries, entry)
@@ -103,6 +109,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
     end
 
     for key, entry in pairs(valid_entries) do
+        MODULES.LedgerManager:GenerateEntryHash(entry)
         if key == #valid_entries then
             entry:Save(true)
         else
@@ -113,7 +120,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
     PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
 end
 
-function Dev:CreateDummyEntry(numOfMembers, memberNames)
+function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
 
     -- Generate the start and end indexes for our entry's members.
     local member_index_start = random(numOfMembers)
@@ -137,9 +144,12 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames)
         tinsert(random_names, memberNames[i])
     end
 
+    local random_officer_index = random(#officerNames)
+    local officer = officerNames[random_officer_index]
+
     local dummy_entry = {
         ['id'] = entry_id,
-        ['officer'] = 'Lariese',
+        ['officer'] = officer,
         ['reason'] = reason,
         ['names'] = random_names,
         ['dkp_change'] = dkp_change

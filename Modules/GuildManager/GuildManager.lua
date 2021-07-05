@@ -102,6 +102,11 @@ function GuildManager:GetMemberByName(name)
     return nil
 end
 
+function GuildManager:IsMemberOfficer(name)
+    local member = self:GetMemberByName(name)
+    return member.isOfficer
+end
+
 function GuildManager:GetOnlineNames()
     local onlineMembers, _ = self:GetMembers()
     local onlineNames = {}
