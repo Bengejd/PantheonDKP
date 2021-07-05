@@ -62,9 +62,6 @@ function entry:new(entry_details)
     self.yday = Utils:GetYDay(self.id)
     self.weekNumber = Utils:GetWeekNumber(self.id)
 
-    --- Hashing info: Year_Week_Day
-    --self.previousTotals = entry_details['previousTotals'] or self:GetPreviousTotals()
-
     self.formattedNames = self:_GetFormattedNames()
     self.formattedOfficer = self:_GetFormattedOfficer()
     self.change_text = self:_GetChangeText()
@@ -133,10 +130,10 @@ function entry:RemoveMember(name)
             memberIndex = i
         end
     end
-
-    print(memberIndex)
-
     table.remove(self.names, memberIndex)
+
+    self:GetMembers()
+    self.formattedNames = self:_GetFormattedNames()
 end
 
 function entry:IsMemberInEntry(name)
