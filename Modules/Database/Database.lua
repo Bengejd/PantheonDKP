@@ -92,6 +92,11 @@ function DB:ResetAllDatabases()
     PDKP.CORE:Print('Databases have been reset');
 end
 
+function DB:ResetLockouts()
+    PDKP_DB[self.server_faction_guild]['lockouts'] = {}
+    return PDKP_DB[self.server_faction_guild]['lockouts']
+end
+
 function DB:UpdateSetting(settingName, value)
     if settingName == 'disallow_invite' then
         PDKP_DB[self.server_faction_guild]['settings']['ignore_from'] = value
