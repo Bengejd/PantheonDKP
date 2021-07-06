@@ -81,7 +81,7 @@ function Group:Refresh()
         end
 
         if name == myName then
-            self.isML = isML ~= nil
+            self.isML = isML
             self.isLeader = rank == 2
             self.isAssist = rank >= 1
             self.isDKP = name == self.leadership.dkpOfficer
