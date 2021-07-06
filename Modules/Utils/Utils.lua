@@ -255,6 +255,13 @@ function Utils:RemoveAllNonNumerics(str)
     return str:gsub("[^0-9]", "")
 end
 
+function Utils:RemoveNonAlphaNumerics(str)
+    if str == nil then
+        return str
+    end
+    return str:gsub("[^a-zA-Z]", "")
+end
+
 function Utils:GetMyName()
     return UnitName("PLAYER")
 end
