@@ -283,10 +283,6 @@ function AuctionGUI:CreateBiddersWindow()
     f.scroll = scroll;
     f.scrollFrame = scrollFrame;
 
-    --local shroud_events = {'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
-    --for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
-    --f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
-
     f:Hide()
 
     self.current_bidders_frame = f;
