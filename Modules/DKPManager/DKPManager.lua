@@ -258,6 +258,18 @@ function DKP:AddNewEntryToDB(entry, updateTable)
     if entry ~= nil then
         for i=#entry.members, 1, -1 do
             local member = entry.members[i]
+
+            if entry.reason == "Decay" then
+                if entry['previousTotals'][member.name] == nil then
+                    entry['previousTotals'][member.name] = member.dkp['total']
+                else
+                    if member.dkp['total'] ~= entry['previousTotals'][member.name] then
+                        PDKP.CORE:Print("Missing entries, skipping decay calculations")
+                        return -- Skipping the Decay, because the numbers don't match up.
+                    end
+                end
+            end
+
             member:_UpdateDKP(entry)
             member:Save()
         end

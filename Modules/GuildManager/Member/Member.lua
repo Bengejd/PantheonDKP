@@ -82,13 +82,13 @@ function Member:_UpdateDKP(entry)
             entry:RemoveMember(self.name)
             return
         end -- Do not decay non-active members
-
         self.dkp['total'] = math.floor(self.dkp['total'] * 0.9)
     else
         self.dkp['total'] = self.dkp['total'] + amount
     end
 
     table.insert(self.dkp['entries'], entry.id)
+
 end
 
 function Member:_InitializeDKP()

@@ -49,6 +49,7 @@ function entry:new(entry_details)
     self.edited_time = entry_details['edited_time'] or nil
 
     self.hash = entry_details['hash'] or nil
+    self.previousTotals = entry_details['previousTotals'] or {}
 
     self.nonMemberNames = {}
     self.members = {}
@@ -104,6 +105,10 @@ function entry:GetSaveDetails()
         self.sd['other_text'] = self.other_text
     end
 
+    if self.previousTotals and next(self.previousTotals) ~= nil then
+        self.sd['previousTotals'] = self.previousTotals
+    end
+
     return self.sd
 end
 
@@ -135,6 +140,10 @@ function entry:RemoveMember(name)
 
     self:GetMembers()
     self.formattedNames = self:_GetFormattedNames()
+
+    if self.previousTotals[name] ~= nil then
+        self.previousTotals[name] = nil
+    end
 end
 
 function entry:IsMemberInEntry(name)
