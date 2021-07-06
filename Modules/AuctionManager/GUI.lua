@@ -236,9 +236,9 @@ function AuctionGUI:Initialize()
     local pushBarOpts = {
         ['name'] = 'AuctionTimer',
         ['type'] = 'timer',
-        ['default'] = 15,
+        ['default'] = 20,
         ['min'] = 0,
-        ['max'] = 15,
+        ['max'] = 20,
         ['func'] = function()
             MODULES.AuctionManager:HandleTimerFinished()
         end,
