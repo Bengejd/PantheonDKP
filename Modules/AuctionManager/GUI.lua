@@ -394,6 +394,8 @@ function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
     self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
     self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
 
+    self:RefreshBidders()
+
     if self.frame:IsVisible() then
         self.frame:Hide()
     end
