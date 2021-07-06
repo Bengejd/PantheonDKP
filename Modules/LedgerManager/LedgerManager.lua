@@ -8,6 +8,7 @@ local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
 local tinsert, tsort, pairs = table.insert, table.sort, pairs
+local strfind = string.find
 
 local DKP_DB, Guild, CommsManager, LEDGER;
 
@@ -31,6 +32,27 @@ function Ledger:Initialize()
     self.syncLocked = false
 
     self:GetLastFourWeeks()
+
+    local f = CreateFrame("Frame", "PDKP_Ledger_EventsFrame")
+    f:RegisterEvent("CHAT_MSG_SYSTEM")
+    f:SetScript("OnEvent", function(_, eventName, arg1, ...)
+        if eventName == 'CHAT_MSG_SYSTEM' and PDKP.canEdit then
+            local isOnlineEvent, _ = strfind(arg1, "has come online", 1, true)
+            if isOnlineEvent ~= nil then
+                local formattedPlayerName, _ = strsplit(" ", arg1, 2)
+                local _, firstItter = strsplit(":", formattedPlayerName, 2)
+                local playerName, _ = strsplit("|h", firstItter, 2)
+                if Guild.initiated then
+                    local member = Guild:GetMemberByName(playerName)
+                    if member ~= nil and member.canEdit then
+                        C_Timer.After(5, function()
+                            self:CheckSyncStatus()
+                        end)
+                    end
+                end
+            end
+        end
+    end)
 
     self:CheckSyncStatus()
 end
