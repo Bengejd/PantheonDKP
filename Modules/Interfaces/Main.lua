@@ -73,8 +73,9 @@ function Main:Initialize()
 
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
-    addon_version:SetSize(50, 14)
+    addon_version:SetHeight(14)
     addon_version:SetText(MODULES.Constants.COLORED_ADDON_VERSION)
+    addon_version:SetWidth(addon_version:GetStringWidth() + 10)
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
     --- Addon Author
