@@ -81,6 +81,7 @@ function Ledger:CheckRequestKeys(message, sender)
 
     local missing_keys = {}
     local requestHasKeys = false
+    local mismatchedKeys = false
     for weekNumber, weekTable in pairs(requestData) do
         for officerName, officerTable in pairs(weekTable) do
             local myOfficerTable = self:_GetOfficerTable(weekNumber, officerName)
@@ -94,11 +95,14 @@ function Ledger:CheckRequestKeys(message, sender)
                 for i=1, #entry_keys do
                     table.insert(missing_keys, entry_keys[i])
                 end
+            elseif officerTable[theirLastEntry] ~= myOfficerTable[myLastEntry] then
+                mismatchedKeys = true
             end
         end
     end
 
-    if Utils:tEmpty(missing_keys) and not requestHasKeys then -- Request User has 0 keys from the last 4 weeks
+    -- Request User has 0 keys from the last 4 weeks, or your keys got mismatched somehow.
+    if (Utils:tEmpty(missing_keys) and not requestHasKeys) or mismatchedKeys then
         missing_keys = self:GetLastFourWeekEntryIds()
     end
 
