@@ -199,14 +199,11 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     local self = comm
     if self.ogPrefix == 'SyncSmall' then
         local data = MODULES.CommsManager:DataDecoder(message)
-        return MODULES.DKPManager:ImportEntry(data, sender)
+        return MODULES.DKPManager:ImportEntry(data)
     elseif self.ogPrefix == 'SyncLarge' then
         return MODULES.DKPManager:ImportBulkEntries(message, sender)
     elseif self.ogPrefix == 'SyncAd' then
         local data = MODULES.CommsManager:DataDecoder(message)
-
-        
-
         for _, entry in pairs(data) do
             MODULES.DKPManager:ImportEntry(entry)
         end
