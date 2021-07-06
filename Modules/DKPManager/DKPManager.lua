@@ -279,7 +279,7 @@ function DKP:AddNewEntryToDB(entry, updateTable)
         entry:GetSaveDetails()
 
         if #entryMembers == 0 then
-            PDKP.CORE:Print('No members found for:', entry.reason)
+            PDKP.CORE:Print('No members found for:', entry.reason, ' Skipping import')
             DKP:_UpdateTables()
             return
         end
