@@ -36,18 +36,6 @@ function DKP:Initialize()
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
 
-    self.eventsFrame = CreateFrame("Frame", "PDKP_DKP_EventsFrame")
-    self.eventsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-    self.eventsFrame:SetScript("OnEvent", function(_, eventName)
-        --if eventName == 'GUILD_ROSTER_UPDATE' then
-        --    local currentTime = GetServerTime()
-        --    if Utils:SubtractTime(self.lastAutoSync, currentTime) >= 2 and not self.autoSyncInProgress  then
-        --        self.lastAutoSync = currentTime
-        --        --MODULES.CommsManager:SendCommsMessage('SyncAd', self.compressedCurrentWeekEntries, true)
-        --    end
-        --end
-    end)
-
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 end
