@@ -22,7 +22,7 @@ function Lockouts:Initialize()
 end
 
 function Lockouts:AddMemberLockouts(entry)
-    if entry.lockoutsChecked then return entry.names end
+    if entry.lockoutsChecked or entry.reason ~= 'Boss Kill' then return entry.names end
     local no_lockout_members = {}
     entry.lockoutsChecked = true
 
