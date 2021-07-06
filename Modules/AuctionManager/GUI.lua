@@ -402,20 +402,6 @@ function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
 
     self.frame:Show()
     MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy}
-
-    --local bidders = {
-    --    { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },
-    --    { ['name'] = 'Neekio', ['bid'] = 17, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Veltrix', ['bid'] = 12, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Nightshelf', ['bid'] = 05, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Advanty', ['bid'] = 01, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Athico', ['bid'] = 14, ['dkpTotal'] = 30, },
-    --}
-
-    --for i=1, #bidders do
-    --    self:CreateNewBidder(bidders[i])
-    --end
-
 end
 
 
