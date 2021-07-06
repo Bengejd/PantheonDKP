@@ -62,7 +62,7 @@ function DKP:_LoadEncodedDatabase()
         self.numOfEncoded = self.numOfEncoded + 1
     end
     if PDKP:IsDev() then
-        PDKP.CORE:Print('Loaded', self.numOfEncoded, 'Encoded entries');
+        PDKP.CORE:Print('DEV: Loaded', self.numOfEncoded, 'Encoded entries');
     end
 end
 
