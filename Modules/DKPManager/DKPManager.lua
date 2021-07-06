@@ -121,7 +121,16 @@ end
 
 function DKP:ImportEntry(entry, sender)
     local importEntry = MODULES.DKPEntry:new(entry)
-    local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(entry)
+
+    local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
+
+    if #no_lockout_members == 0 then
+        self:_UpdateTables()
+        PDKP.CORE:Print('No eligible members found for', entry.reason, 'Skipping import')
+        return
+    end
+
+    local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(importEntry)
 
     if saved_ledger_entry then
         importEntry:Save(true)

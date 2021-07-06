@@ -55,6 +55,8 @@ function entry:new(entry_details)
     self.members = {}
     self.sd = {} -- Save Details
 
+    self.lockoutsChecked = false
+
     -- Grab the members, and non-members in the entry for later use.
     self:GetMembers()
 

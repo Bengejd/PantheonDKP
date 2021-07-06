@@ -80,11 +80,21 @@ function Ledger:CheckRequestKeys(message, sender)
         missing_keys = self:GetLastFourWeekEntryIds()
     end
 
+    if PDKP:IsDev() then
+        PDKP.CORE:Print('DEV: RequestHasKeys', requestHasKeys)
+        PDKP.CORE:Print('DEV: missing_keys Empty', Utils:tEmpty(missing_keys))
+    end
+
     local entries = {}
     for _, entry_id in pairs(missing_keys) do
         local entry = MODULES.DKPManager:GetEntryByID(entry_id)
-        local save_details = entry:GetSaveDetails()
-        entries[entry_id] = save_details
+
+        if entry ~= nil then
+            local save_details = entry:GetSaveDetails()
+            entries[entry_id] = save_details
+        elseif PDKP:IsDev() then
+            PDKP.CORE:Print('DEV: Could not find entry', entry_id)
+        end
     end
 
     if Utils:tEmpty(entries) then
@@ -146,7 +156,7 @@ function Ledger:ImportEntry(entry)
 
     local weekNumber = tonumber(tbl[1])
     local officer = tbl[2]
-    local index = tbl[3]
+    --local index = tbl[3]
 
     weekNumber = tonumber(weekNumber)
 

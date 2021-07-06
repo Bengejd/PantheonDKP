@@ -22,13 +22,16 @@ function Lockouts:Initialize()
 end
 
 function Lockouts:AddMemberLockouts(entry)
+    if entry.lockoutsChecked then return entry.names end
     local no_lockout_members = {}
+    entry.lockoutsChecked = true
 
     if entry.weekNumber == self.weekNumber then
         if self.db[self.weekNumber][entry.boss] == nil then
             self.db[self.weekNumber][entry.boss] = {}
         end
-        for _, memberName in pairs(entry.names) do
+        for i=#entry.names, 1, -1 do
+            local memberName = entry.names[i]
             if not tContains(self.db[self.weekNumber][entry.boss], memberName) then
                 table.insert(self.db[self.weekNumber][entry.boss], memberName)
                 table.insert(no_lockout_members, memberName)
@@ -38,6 +41,7 @@ function Lockouts:AddMemberLockouts(entry)
             end
         end
     end
+
     return no_lockout_members
 end
 
