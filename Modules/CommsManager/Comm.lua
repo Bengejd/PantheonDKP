@@ -229,7 +229,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
             GUI.Adjustment:InsertItemLink(itemLink)
         end
 
-        if GroupManager:IsDKPOfficer() then
+        if sender == Utils:GetMyName() then
             local channel = "RAID"
             if GroupManager:IsAssist() or GroupManager:IsLeader() then
                 channel = "RAID_WARNING"
