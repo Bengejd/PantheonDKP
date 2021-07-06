@@ -32,8 +32,18 @@ function MemberTable:Initialize()
                 return a['name'] < b['name']
             end
             a, b = a['class'], b['class']
-        elseif sortBy == 'dkp' then
-            a, b = a:GetDKP(nil, 'total'), b:GetDKP(nil, 'total')
+        end
+
+        if sortBy == 'dkp' then
+            local aDKP = a:GetDKP(nil, 'total')
+            local bDKP = b:GetDKP(nil, 'total')
+            if aDKP ~= bDKP then
+                a, b = aDKP, bDKP
+            elseif a['class'] ~= b['class'] then
+                b, a = a['class'], b['class']
+            else
+                b, a = a['name'], b['name']
+            end
         end
 
         if sortDir == 'ASC' then
