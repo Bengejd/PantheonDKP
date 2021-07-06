@@ -26,6 +26,8 @@ function Lockouts:AddMemberLockouts(entry)
     local no_lockout_members = {}
     entry.lockoutsChecked = true
 
+    local removedNames = {}
+
     if entry.weekNumber == self.weekNumber then
         if self.db[self.weekNumber][entry.boss] == nil then
             self.db[self.weekNumber][entry.boss] = {}
@@ -36,10 +38,21 @@ function Lockouts:AddMemberLockouts(entry)
                 table.insert(self.db[self.weekNumber][entry.boss], memberName)
                 table.insert(no_lockout_members, memberName)
             else
-                PDKP.CORE:Print(memberName, 'Is ineligible for DKP on this boss')
+                table.insert(removedNames, memberName)
                 entry:RemoveMember(memberName)
             end
         end
+    end
+
+    if #removedNames ~= 0 and PDKP.canEdit then
+        local removedNameText = ""
+        for i=1, #removedNames do
+            if i ~= #removedNames and i ~= 1 then
+                removedNameText = removedNameText .. ", "
+            end
+            removedNameText = removedNameText .. removedNames[i]
+        end
+        PDKP.CORE:Print('Entry members who are ineligible for DKP: \n', removedNameText)
     end
 
     return no_lockout_members
