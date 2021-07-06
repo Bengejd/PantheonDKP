@@ -252,7 +252,7 @@ function Utils:RemoveAllNonNumerics(str)
     if str == nil then
         return str
     end
-    return str:gsub("[^0-9]", "")
+    return str:gsub("^-?[0-9]", "")
 end
 
 function Utils:RemoveNonAlphaNumerics(str)
