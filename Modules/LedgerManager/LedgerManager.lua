@@ -97,6 +97,7 @@ function Ledger:CheckRequestKeys(message, sender)
                 end
             elseif officerTable[theirLastEntry] ~= myOfficerTable[myLastEntry] then
                 mismatchedKeys = true
+                break
             end
         end
     end
