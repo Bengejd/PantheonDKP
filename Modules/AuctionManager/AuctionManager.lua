@@ -68,7 +68,7 @@ end
 
 function Auction:HookIntoLootBag()
     local numLootItems = GetNumLootItems();
-    for i=1, numLootItems do
+    for i = 1, numLootItems do
         local btnName = 'LootButton'
         btnName = btnName .. tostring(i)
         local btn = _G[btnName]
@@ -87,7 +87,9 @@ function Auction:EndAuction(manualStop, sender)
     self.auctionInProgress = false
     GUI.AuctionGUI:ResetAuctionInterface()
 
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
 
     local GroupManager = MODULES.GroupManager
 
@@ -137,8 +139,10 @@ end
 
 function Auction:HandleTimerFinished(manualEnd)
     manualEnd = manualEnd or false
-    if not PDKP.canEdit or not MODULES.AuctionManager:CanChangeAuction() then return end
-    MODULES.CommsManager:SendCommsMessage('stopBids', {['manualEnd'] = manualEnd})
+    if not PDKP.canEdit or not MODULES.AuctionManager:CanChangeAuction() then
+        return
+    end
+    MODULES.CommsManager:SendCommsMessage('stopBids', { ['manualEnd'] = manualEnd })
 end
 
 function Auction:_GetWinnerInfo(itemLink)
@@ -160,7 +164,7 @@ function Auction:_GetWinnerInfo(itemLink)
         local winningText = ''
         local winningAmt;
 
-        for i=1, #self.CURRENT_BIDDERS do
+        for i = 1, #self.CURRENT_BIDDERS do
             local bidder = self.CURRENT_BIDDERS[i]
             if i == 1 then
                 tinsert(winners, bidder)
@@ -171,7 +175,8 @@ function Auction:_GetWinnerInfo(itemLink)
             end
         end
 
-        if #winners == 1 and numBidders > 1 then -- Multiple Bidders
+        if #winners == 1 and numBidders > 1 then
+            -- Multiple Bidders
             winningAmt = (tonumber(self.CURRENT_BIDDERS[2]['bid']) + 1)
             winningText = string.format("%s won by %s, for %d DKP", itemLink, winners[1].name, winningAmt)
         elseif #winners == 1 and numBidders == 1 then
@@ -179,7 +184,7 @@ function Auction:_GetWinnerInfo(itemLink)
             winningText = string.format("%s won by %s, for %d DKP", itemLink, winners[1].name, winningAmt)
         elseif #winners > 1 and numBidders > 1 then
             local names = ''
-            for i=1, #winners do
+            for i = 1, #winners do
                 local member = winners[i]
                 names = names .. member.name
                 if i ~= #winners then
@@ -204,7 +209,7 @@ function Auction:_GetWinners()
     if #self.CURRENT_BIDDERS == 1 then
         tinsert(winners, self.CURRENT_BIDDERS[1])
     elseif #self.CURRENT_BIDDERS > 1 then
-        for i=2, #self.CURRENT_BIDDERS do
+        for i = 2, #self.CURRENT_BIDDERS do
             local bidder = self.CURRENT_BIDDERS[i]
             if bidder['bid'] == self.CURRENT_BIDDERS[1] then
                 tinsert(winners, self.CURRENT_BIDDERS[i])
@@ -215,7 +220,6 @@ function Auction:_GetWinners()
     end
     return winners
 end
-
 
 MODULES.AuctionManager = Auction
 
