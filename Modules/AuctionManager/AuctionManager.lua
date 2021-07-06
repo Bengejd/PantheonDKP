@@ -49,10 +49,6 @@ end
 
 function Auction:HandleSlashCommands(msg)
     local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
-
-    print(cmd, arg1, arg2)
-
-    --print('Auction:', cmd, args)
 end
 
 function Auction:HookBagSlots()
