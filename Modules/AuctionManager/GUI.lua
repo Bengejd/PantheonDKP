@@ -84,7 +84,7 @@ function AuctionGUI:Initialize()
     end)
     sb:SetEnabled(false)
 
-    local cb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    local cb = CreateFrame("Button", "$parent_cancelBid", f, "UIPanelButtonTemplate")
     cb:SetSize(80, 22) -- width, height
     cb:SetText("Cancel Bid")
     cb:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
@@ -113,7 +113,7 @@ function AuctionGUI:Initialize()
     stopBid:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 15, -22)
     stopBid:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -10, 0)
     stopBid:SetScript("OnClick", function()
-        MODULES.AuctionManager:HandleTimerFinished()
+        MODULES.AuctionManager:HandleTimerFinished(true)
     end)
     stopBid:SetEnabled(false)
     stopBid:Hide()
@@ -393,11 +393,11 @@ function AuctionGUI:CancelBidder(bidder)
     self:RefreshBidders()
 end
 
-function AuctionGUI:StartAuction(itemLink, itemName, itemTexture)
+function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
     self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
     self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
     self.frame:Show()
-    MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture}
+    MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy}
 
     --local bidders = {
     --    { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },

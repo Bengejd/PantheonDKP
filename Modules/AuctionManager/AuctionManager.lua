@@ -38,7 +38,8 @@ end
 
 function Auction:CanChangeAuction()
     local gm = MODULES.GroupManager;
-    return (gm:IsDKPOfficer() or gm:IsMasterLoot()) and gm:IsInRaid()
+    local IStartedBid = self.CurrentAuctionInfo['startedBy'] == Utils:GetMyName()
+    return (gm:IsDKPOfficer() or gm:IsMasterLoot() or IStartedBid) and gm:IsInRaid()
 end
 
 function Auction:Initialize()
@@ -85,20 +86,41 @@ function Auction:HookIntoLootBag()
     end
 end
 
-function Auction:EndAuction()
+function Auction:EndAuction(manualStop, sender)
     PDKP.AuctionTimer.reset()
     self.auctionInProgress = false
     GUI.AuctionGUI:ResetAuctionInterface()
 
+    if not PDKP.canEdit then return end
+
     local GroupManager = MODULES.GroupManager
 
-    if GroupManager:IsDKPOfficer() then
+    local canContinue = false
+    if GroupManager:HasDKPOfficer() then
+        if GroupManager:IsDKPOfficer() then
+            canContinue = true
+        end
+    elseif GroupManager:IsMasterLoot() then
+        PDKP.CORE:Print('Warning: No DKP Officer Set')
+        canContinue = true
+    else
+        PDKP.CORE:Print('Warning: No DKP Officer Set')
+    end
+
+    if canContinue then
         local channel = "RAID"
         if GroupManager:IsAssist() or GroupManager:IsLeader() then
             channel = "RAID_WARNING"
         end
         local bidInfo = self.CurrentAuctionInfo
-        local text = string.format("Bids for %s have closed", bidInfo['itemLink'])
+
+        local text;
+        if manualStop then
+            text = string.format("%s closed bids for %s", sender, bidInfo['itemLink'])
+        else
+            text = string.format("Bids for %s have closed", bidInfo['itemLink'])
+        end
+
         SendChatMessage(text, channel, nil, nil)
 
         local winners, winningText, amount = self:_GetWinnerInfo(bidInfo['itemLink'])
@@ -117,9 +139,10 @@ function Auction:EndAuction()
     end
 end
 
-function Auction:HandleTimerFinished()
+function Auction:HandleTimerFinished(manualEnd)
+    manualEnd = manualEnd or false
     if not PDKP.canEdit or not MODULES.AuctionManager:CanChangeAuction() then return end
-    MODULES.CommsManager:SendCommsMessage('stopBids', {['startBid'] = true})
+    MODULES.CommsManager:SendCommsMessage('stopBids', {['manualEnd'] = manualEnd})
 end
 
 function Auction:_GetWinnerInfo(itemLink)

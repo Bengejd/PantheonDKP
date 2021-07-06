@@ -223,7 +223,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     if self.ogPrefix == 'startBids' then
         local itemLink, itemName, iTexture = unpack(data)
         Auction.auctionInProgress = true
-        AuctionGUI:StartAuction(itemLink, itemName, iTexture)
+        AuctionGUI:StartAuction(itemLink, itemName, iTexture, sender)
         PDKP.AuctionTimer.startTimer()
         if PDKP.canEdit then
             GUI.Adjustment:InsertItemLink(itemLink)
@@ -245,7 +245,8 @@ function PDKP_OnComm_BidSync(comm, message, sender)
         CommsManager:SendCommsMessage('AddBid', bidder_info)
     elseif self.ogPrefix == 'stopBids' then
         if Auction:IsAuctionInProgress() then
-            Auction:EndAuction()
+            local manualStop = data['manualEnd']
+            Auction:EndAuction(manualStop, sender)
         end
     elseif self.ogPrefix == 'AddBid' then
         GUI.AuctionGUI:CreateNewBidder(data)
