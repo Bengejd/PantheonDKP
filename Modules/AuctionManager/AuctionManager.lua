@@ -121,7 +121,7 @@ function Auction:EndAuction(manualStop, sender)
 
         SendChatMessage(text, channel, nil, nil)
 
-        local winners, winningText, amount = self:_GetWinnerInfo(bidInfo['itemLink'])
+        local _, winningText, amount = self:_GetWinnerInfo(bidInfo['itemLink'])
 
         SendChatMessage(winningText, channel, nil, nil)
 
@@ -133,7 +133,10 @@ function Auction:EndAuction(manualStop, sender)
         local amtBox = AdjustChildren[3]
 
         mainDD.setAutoValue('Item Win')
-        amtBox:SetText(amount)
+
+        if amount ~= nil then
+            amtBox:SetText(amount)
+        end
     end
 end
 
