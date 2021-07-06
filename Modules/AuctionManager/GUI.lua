@@ -33,6 +33,7 @@ function AuctionGUI:Initialize()
             stopBid:SetEnabled(true)
             stopBid:Show()
         end
+        f.reopenFrame:Hide()
     end)
 
     local sourceWidth, sourceHeight = 256, 512
@@ -392,6 +393,11 @@ end
 function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
     self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
     self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
+
+    if self.frame:IsVisible() then
+        self.frame:Hide()
+    end
+
     self.frame:Show()
     MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy}
 
