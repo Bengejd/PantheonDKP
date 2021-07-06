@@ -494,6 +494,8 @@ function GUtils:createEditBox(opts)
         box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
     end
 
+    box:SetHitRectInsets(-5, -5, -5, -5)
+
     local title_font = 'GameFontNormal'
 
     if small_title then
