@@ -376,7 +376,10 @@ function HistoryTable:_OnLoad()
                     local cf = col.click_frame;
                     if cf == nil then
                         cf = CreateFrame("Frame", nil, row)
-                        cf:SetAllPoints(col)
+
+                        cf:SetPoint("TOPLEFT", col, "TOPLEFT")
+                        cf:SetPoint("BOTTOMRIGHT", col, "BOTTOMRIGHT")
+                        cf:SetFrameStrata("")
                         cf.value = val;
                         cf.label = header['display']
                         cf:SetScript("OnMouseUp", PDKP_History_OnClick)
@@ -391,14 +394,6 @@ function HistoryTable:_OnLoad()
                     col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
                 end
                 col:SetText(displayName .. ": " .. val)
-
-                if string.find(val, "Item Win -") then
-                    local _, item = strsplit(' - ', val)
-                    item = strtrim(item)
-                    if item then
-                        --PDKP:Print('Need to do fancy Tooltip stuff here')
-                    end
-                end
                 row.max_height = row.max_height + col:GetStringHeight() + 6
                 row.cols[key] = col
             end
@@ -448,8 +443,12 @@ function HistoryTable:_EntriesFound()
 end
 
 function PDKP_History_OnClick(frame, buttonType)
-    --if not PDKP.canEdit or not IsShiftKeyDown() then return end
-    --
+    print('Entry clicked')
+
+    if not PDKP.canEdit or not IsShiftKeyDown() then return end
+
+    print(frame, buttonType)
+
     --local label = frame.label;
     --local dataObj = frame:GetParent()['dataObj']
     --
