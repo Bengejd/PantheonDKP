@@ -60,7 +60,6 @@ function AuctionGUI:Initialize()
     bid_counter_frame:SetPoint('TOPLEFT', f, 'TOPLEFT', 5, 0)
     bid_counter_frame:SetSize(78, 64)
 
-    --- Old
     local bid_counter = bid_counter_frame:CreateFontString(bid_counter_frame, 'OVERLAY', 'BossEmoteNormalHuge')
     bid_counter:SetText("0")
     bid_counter:SetPoint("CENTER", bid_counter_frame, "CENTER")

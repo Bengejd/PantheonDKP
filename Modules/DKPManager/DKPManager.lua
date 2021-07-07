@@ -374,14 +374,12 @@ function DKP:GetNumEncoded()
 end
 
 function DKP:GetMyDKP()
-    local dkpTotal = 0
-    if PDKP.char ~= nil then
-        dkpTotal = PDKP.char:GetDKP('total')
-    end
-    if dkpTotal == nil then
+    local myMember = MODULES.GuildManager:GetMemberByName(Utils:GetMyName())
+    if myMember ~= nil then
+        return myMember:GetDKP('total')
+    else
         return 0
     end
-    return dkpTotal
 end
 
 MODULES.DKPManager = DKP
