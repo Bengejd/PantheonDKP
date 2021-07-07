@@ -19,7 +19,7 @@ local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
     { ['variable'] = 'formattedOfficer', ['display'] = 'Officer', },
-    { ['variable'] = 'historyText', ['display'] = 'Reason', ['OnClick'] = true, },
+    { ['variable'] = 'historyText', ['display'] = 'Reason' },
     { ['variable'] = 'formattedNames', ['display'] = 'Members', ['OnClick'] = true, },
     { ['variable'] = 'change_text', ['display'] = 'Amount' }
 }
@@ -391,21 +391,6 @@ function HistoryTable:_OnLoad()
                     col.click_frame = nil;
                 end
 
-                if header['OnClick'] then
-                    local cf = col.click_frame;
-                    if cf == nil then
-                        cf = CreateFrame("Frame", nil, row)
-
-                        cf:SetPoint("TOPLEFT", col, "TOPLEFT")
-                        cf:SetPoint("BOTTOMRIGHT", col, "BOTTOMRIGHT")
-                        cf:SetFrameStrata("")
-                        cf.value = val;
-                        cf.label = header['display']
-                        cf:SetScript("OnMouseUp", PDKP_History_OnClick)
-                        col.click_frame = cf;
-                    end
-                end
-
                 col:SetWidth(content:GetWidth() - 5)
                 if key == 1 then
                     col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
@@ -414,7 +399,21 @@ function HistoryTable:_OnLoad()
                 end
                 col:SetText(displayName .. ": " .. val)
                 row.max_height = row.max_height + col:GetStringHeight() + 6
+
+                if header['OnClick'] then
+                    local cf = col.click_frame;
+                    if cf == nil then
+                        cf = CreateFrame("Frame", nil, row)
+                        cf.value = val;
+                        cf.label = header['display']
+                        cf:SetAllPoints(col)
+                        cf:SetScript("OnMouseDown", PDKP_History_OnClick)
+                        col.click_frame = cf;
+                    end
+                end
+
                 row.cols[key] = col
+
             end
 
             row:SetHeight(row.max_height + ROW_MARGIN_TOP)
@@ -464,24 +463,16 @@ function HistoryTable:_EntriesFound()
 end
 
 function PDKP_History_OnClick(frame, buttonType)
-    print('Entry clicked')
-
     if not PDKP.canEdit or not IsShiftKeyDown() then
         return
     end
 
-    print(frame, buttonType)
+    local label = frame.label;
+    local dataObj = frame:GetParent()['dataObj']
 
-    --local label = frame.label;
-    --local dataObj = frame:GetParent()['dataObj']
-    --
-    --if label == 'Members' then
-    --    return GUI.memberTable:SelectNames(dataObj['names'])
-    --elseif label == 'Reason' and buttonType == 'RightButton' then
-    --    GUI.popup_entry = dataObj
-    --    StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
-    --    deleted_row = frame:GetParent() -- This only gets used if the deletion goes through.
-    --end
+    if label == 'Members' then
+        return PDKP.memberTable:SelectNames(dataObj['names'])
+    end
 end
 
 function PDKP_History_EntryDeleted(_)

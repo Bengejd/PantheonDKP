@@ -500,7 +500,7 @@ function LootTable:_OnClick(frame, buttonType)
     end
 end
 
-function PDKP_History_OnClick(_, _, _)
+function PDKP_Loot_OnClick(_, _, _)
     --if not PDKP.canEdit or not IsShiftKeyDown() then return end
     --
     --local label = frame.label;

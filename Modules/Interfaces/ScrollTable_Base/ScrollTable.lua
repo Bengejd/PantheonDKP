@@ -190,9 +190,6 @@ function ScrollTable:SelectNames(names)
             end
         end
     end
-
-    _G['pdkp_filter_selected']:Click()
-
     self:RefreshLayout()
 end
 
