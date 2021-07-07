@@ -9,7 +9,7 @@ local CreateFrame = CreateFrame
 local GameFontNormalSmall = GameFontNormalSmall
 local tinsert, pairs = tinsert, pairs
 
-local MemberTable = {}
+local MemberTable = { _initialized = false }
 
 function MemberTable:Initialize()
     local st = {};
@@ -126,7 +126,7 @@ function MemberTable:Initialize()
     st = PDKP.ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     PDKP.memberTable = st;
-    --GUI.memberTable = st;
+    PDKP.memberTable._initialized = true
 
     st.searchFrame = self:TableSearch()
     --
@@ -140,6 +140,8 @@ function MemberTable:Initialize()
     st.entryLabel = label
 
     PDKP.memberTable.filter_frame = self:Filters()
+
+    self._initialized = true
 end
 
 function MemberTable:TableSearch()

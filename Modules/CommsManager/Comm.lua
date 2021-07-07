@@ -13,7 +13,7 @@ local setmetatable, pairs, tremove, tinsert = setmetatable, pairs, table.remove,
 local substr, type, floor = string.sub, type, math.floor
 
 local function _prefix(prefix)
-    return 'pdkpV2' .. substr(prefix, 0, 12)
+    return 'pdkp' .. substr(prefix, 0, 12)
 end
 
 function Comm:new(opts)
@@ -94,7 +94,8 @@ function Comm:_Setup()
     -- Comm: Channel, SendTo, Prio, CallbackFunc, OnCommReceivedFunc
     local commParams = {
         -- Sync Section
-        ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds/Deletes
+        ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds
+        ['SyncDelete'] = { 'GUILD', nil, 'BULK', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
         ['SyncReq'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
@@ -179,17 +180,24 @@ end
 
 function PDKP_OnComm_EntrySync(comm, message, sender)
     local self = comm
-    if self.ogPrefix == 'SyncSmall' then
-        local data = MODULES.CommsManager:DataDecoder(message)
+    local pfx = self.ogPrefix
+    local data
+
+    if pfx == 'SyncSmall' or pfx == 'SyncDelete' or pfx == 'SyncAd' then
+        data = MODULES.CommsManager:DataDecoder(message)
+    end
+
+    if pfx == 'SyncSmall' then
         return MODULES.DKPManager:ImportEntry(data)
-    elseif self.ogPrefix == 'SyncLarge' then
+    elseif pfx == 'SyncDelete' then
+        return MODULES.DKPManager:DeleteEntry(data, sender)
+    elseif pfx == 'SyncLarge' then
         return MODULES.DKPManager:ImportBulkEntries(message, sender)
-    elseif self.ogPrefix == 'SyncAd' then
-        local data = MODULES.CommsManager:DataDecoder(message)
+    elseif pfx == 'SyncAd' then
         for _, entry in pairs(data) do
             MODULES.DKPManager:ImportEntry(entry)
         end
-    elseif self.ogPrefix == 'SyncReq' and PDKP.canEdit then
+    elseif pfx == 'SyncReq' and PDKP.canEdit then
         MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end

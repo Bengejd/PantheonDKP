@@ -87,7 +87,6 @@ function Member:_UpdateDKP(entry)
     end
 
     table.insert(self.dkp['entries'], entry.id)
-
 end
 
 function Member:_InitializeDKP()

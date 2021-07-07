@@ -51,7 +51,21 @@ function Dialogs:Initialize()
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
         ['PDKP_DKP_ENTRY_POPUP'] = {
-
+            text = "Are you sure you want to delete this entry?",
+            button1 = "Delete",
+            button2 = "Cancel",
+            OnAccept = function(_, data, _)
+                if data['reason'] == 'Decay' then
+                    PDKP.CORE:Print('Deleting Decay entries is not currently supported')
+                    return
+                end
+                MODULES.CommsManager:SendCommsMessage('SyncDelete', data)
+            end,
+            OnCancel = function(_) end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = false,
+            preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
         ['PDKP_CONFIRM_DKP_ENTRY_DELETE'] = {
 

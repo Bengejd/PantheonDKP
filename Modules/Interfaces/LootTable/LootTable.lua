@@ -5,7 +5,7 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local LootTable = {}
+local LootTable = { _initialized = false }
 
 local SimpleScrollFrame, MemberTable, Media, DKPManager;
 
@@ -145,11 +145,11 @@ function LootTable:Initialize()
         end
     end)
 
-    -- TODO: Change border color on the frame to be dark and the rows to be light.
-
     self:_OnLoad()
 
     self:RefreshData()
+
+    self._initialized = true
 
     return self
 end

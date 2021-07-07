@@ -5,7 +5,7 @@ local MODULES = PDKP.MODULES
 local Comms = {}
 
 local function _prefix(prefix)
-    return 'pdkpV2' .. string.sub(prefix, 0, 12)
+    return 'pdkp' .. string.sub(prefix, 0, 12)
 end
 
 function Comms:Initialize()
@@ -29,6 +29,7 @@ function Comms:RegisterComms()
         --- GUILD COMMS
         ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, },
         ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
+        ['SyncDelete'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, ['self'] = true },
 
         ['SyncAd'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = false },
         ['SyncReq'] = { ['channel'] = 'GUILD', ['requireCheck'] = false, ['self'] = false, },
@@ -75,7 +76,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
     end
 
-    PDKP:PrintD('Could not complete comm request ', prefix, 'channel', comm.channel, 'Params',  comm:GetSendParams())
+    PDKP:PrintD('Could not complete comm request ', prefix)
 end
 
 -----------------------------

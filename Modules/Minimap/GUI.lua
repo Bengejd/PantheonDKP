@@ -130,6 +130,7 @@ function map:HandleIconClicks(buttonType)
             end,
             [hasShift and hasAlt and hasCtrl] = function()
                 MODULES.Database:ResetAllDatabases()
+                ReloadUI()
             end,
             ['default'] = function()
                 if pdkp_frame:IsVisible() then

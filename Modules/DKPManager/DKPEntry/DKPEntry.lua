@@ -40,7 +40,10 @@ function entry:new(entry_details)
     self.raid = entry_details['raid'] or self:_GetRaid()
 
     self.edited = entry_details['edited'] or false
+
     self.deleted = entry_details['deleted'] or false
+    self.deletedBy = entry_details['deletedBy'] or ''
+
     self.item = entry_details['item'] or 'Not linked'
     self.other_text = entry_details['other_text'] or ''
     self.edited_time = entry_details['edited_time'] or nil
@@ -74,21 +77,24 @@ function entry:new(entry_details)
     return self;
 end
 
-function entry:Save(updateTable, exportEntry)
+function entry:Save(updateTable, exportEntry, skipLockouts)
     wipe(self.sd)
 
     exportEntry = exportEntry or false
+    skipLockouts = skipLockouts or false
 
     self:GetSaveDetails()
 
     if exportEntry == false then
-        MODULES.DKPManager:AddNewEntryToDB(self, updateTable)
+        MODULES.DKPManager:AddNewEntryToDB(self, updateTable, skipLockouts)
     elseif PDKP.canEdit and exportEntry then
         MODULES.DKPManager:ExportEntry(self)
     end
 end
 
 function entry:GetSaveDetails()
+    wipe(self.sd)
+
     self.sd['id'] = self.id or GetServerTime()
     self.sd['reason'] = self.reason or 'No Valid Reason'
     self.sd['dkp_change'] = self.dkp_change or 0
@@ -108,6 +114,11 @@ function entry:GetSaveDetails()
         self.sd['previousTotals'] = self.previousTotals
     end
 
+    if self.deleted then
+        self.sd['deleted'] = self.deleted
+        self.sd['deletedBy'] = self.deletedBy
+    end
+
     return self.sd
 end
 
@@ -124,6 +135,11 @@ function entry:GetMembers()
         end
     end
     return self.members, self.nonMemberNames
+end
+
+function entry:MarkAsDeleted(deletedBy)
+    self.deleted = true
+    self.deletedBy = deletedBy
 end
 
 function entry:RemoveMember(name)

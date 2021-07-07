@@ -51,7 +51,7 @@ function Lockouts:AddMemberLockouts(entry)
             end
             removedNameText = removedNameText .. removedNames[i]
         end
-        PDKP.CORE:Print('Entry members who are ineligible for DKP: \n', removedNameText)
+        PDKP.CORE:Print('Entry members who are ineligible for DKP:', removedNameText)
     end
 
     return no_lockout_members

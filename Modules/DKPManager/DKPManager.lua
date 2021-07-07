@@ -106,25 +106,70 @@ end
 --     Import Functions    --
 -----------------------------
 
-function DKP:ImportEntry(entry, _)
+function DKP:ImportEntry(entry, skipLockoutCheck)
+    skipLockoutCheck = skipLockoutCheck or false
     local importEntry = MODULES.DKPEntry:new(entry)
+
+    if skipLockoutCheck then
+        importEntry.lockoutsChecked = true
+    end
 
     local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
 
-    if #no_lockout_members == 0 then
+    if #no_lockout_members == 0 and not skipLockoutCheck then
         self:_UpdateTables()
-        PDKP.CORE:Print('No eligible members found for', entry.reason, 'Skipping import')
+        PDKP:PrintD('No eligible members found for', entry.reason, 'Skipping import')
         return
     end
 
     local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(importEntry)
 
-    if saved_ledger_entry then
+    if saved_ledger_entry or skipLockoutCheck then
         importEntry:Save(true)
 
         self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
         self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
         self:_RecompressCurrentLoaded()
+    end
+
+    return importEntry
+end
+
+function DKP:DeleteEntry(entry, sender)
+    local importEntry = MODULES.DKPEntry:new(entry)
+    local temp_entry = {
+        ['reason'] = 'Other',
+        ['names'] = importEntry['names'],
+        ['officer'] = importEntry['officer'],
+        ['dkp_change'] = importEntry['dkp_change'] * -1,
+        ['other_text'] = 'DKP Correction'
+    }
+
+    PDKP:PrintD('Deleting Entry', entry.id)
+
+    if importEntry['previousTotals'] and next(importEntry['previousTotals']) ~= nil then
+        temp_entry['previousTotals'] = importEntry['previousTotals']
+    end
+
+    if self:GetEntryByID(entry.id) ~= nil then
+        if importEntry['deleted'] and sender ~= importEntry['deletedBy'] then
+            PDKP:PrintD("Entry has previously been deleted, skipping delete sequence")
+            return
+        else
+            PDKP:PrintD("Entry was found during delete")
+            importEntry:MarkAsDeleted(sender)
+            local import_sd = importEntry:GetSaveDetails()
+            DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(import_sd)
+            self.entries[entry.id] = importEntry
+        end
+    else
+        PDKP:PrintD("Entry was not found during delete")
+        self:ImportEntry(entry, false)
+    end
+
+    if PDKP.canEdit and sender == Utils:GetMyName() then
+        local corrected_entry = MODULES.DKPEntry:new(temp_entry)
+        corrected_entry:Save(false, true)
     end
 end
 
@@ -244,12 +289,11 @@ function DKP:_ProcessEntryBatch(batch)
     end
 end
 
-function DKP:AddNewEntryToDB(entry, updateTable)
-    if updateTable == nil then
-        updateTable = true
-    end
+function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
+    updateTable = updateTable or true
+    skipLockouts = skipLockouts or false
 
-    if entry.reason == 'Boss Kill' then
+    if entry.reason == 'Boss Kill' and not skipLockouts then
         MODULES.Lockouts:AddMemberLockouts(entry)
         entry:GetMembers()
     end
@@ -278,7 +322,7 @@ function DKP:AddNewEntryToDB(entry, updateTable)
         entry:GetSaveDetails()
 
         if #entryMembers == 0 then
-            PDKP.CORE:Print('No members found for:', entry.reason, ' Skipping import')
+            PDKP:PrintD('No members found for:', entry.reason, ' Skipping import')
             DKP:_UpdateTables()
             return
         end
@@ -295,9 +339,15 @@ function DKP:AddNewEntryToDB(entry, updateTable)
 end
 
 function DKP:_UpdateTables()
-    PDKP.memberTable:DataChanged()
-    GUI.HistoryGUI:RefreshData()
-    GUI.LootGUI:RefreshData()
+    if PDKP.memberTable._initialized then
+        PDKP.memberTable:DataChanged()
+    end
+    if GUI.HistoryGUI._initialized then
+        GUI.HistoryGUI:RefreshData()
+    end
+    if GUI.LootGUI._initialized then
+        GUI.LootGUI:RefreshData()
+    end
 end
 
 -----------------------------

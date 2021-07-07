@@ -5,7 +5,7 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local HistoryTable = {}
+local HistoryTable = { _initialized = false }
 
 local SimpleScrollFrame, MemberTable, Media, DKPManager;
 
@@ -19,7 +19,7 @@ local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
     { ['variable'] = 'formattedOfficer', ['display'] = 'Officer', },
-    { ['variable'] = 'historyText', ['display'] = 'Reason' },
+    { ['variable'] = 'historyText', ['display'] = 'Reason', ['OnClick'] = true, },
     { ['variable'] = 'formattedNames', ['display'] = 'Members', ['OnClick'] = true, },
     { ['variable'] = 'change_text', ['display'] = 'Amount' }
 }
@@ -104,9 +104,6 @@ function HistoryTable:Initialize()
 
     self.title_text = 'PantheonDKP History'
 
-    --self.appliedFilters['raid'] = Settings.current_raid
-
-    --self.previous_raid = Settings.current_raid;
     for i = 1, #MODULES.Constants.RAID_NAMES do
         local raid_name = MODULES.Constants.RAID_NAMES[i]
         self.collapsed_raids[raid_name] = true
@@ -150,6 +147,8 @@ function HistoryTable:Initialize()
 
     self:RefreshData()
 
+    self._initialized = true
+
     return self
 end
 
@@ -172,6 +171,8 @@ function HistoryTable:ToggleRows()
 end
 
 function HistoryTable:RefreshData(justData)
+    if self.scrollContent == nil then return end
+
     self.scrollContent:WipeChildren(self.scrollContent)
 
     wipe(self.entry_keys)
@@ -463,7 +464,7 @@ function HistoryTable:_EntriesFound()
     self.collapse_all:Show()
 end
 
-function PDKP_History_OnClick(frame, _)
+function PDKP_History_OnClick(frame, buttonType)
     if not PDKP.canEdit or not IsShiftKeyDown() then
         return
     end
@@ -471,8 +472,15 @@ function PDKP_History_OnClick(frame, _)
     local label = frame.label;
     local dataObj = frame:GetParent()['dataObj']
 
+    if dataObj['deleted'] then
+        PDKP:PrintD("Entry has already been deleted")
+        return
+    end
+
     if label == 'Members' then
         return PDKP.memberTable:SelectNames(dataObj['names'])
+    elseif label == 'Reason' and buttonType == 'RightButton' then
+        GUI.Dialogs:Show('PDKP_DKP_ENTRY_POPUP', nil, dataObj)
     end
 end
 
