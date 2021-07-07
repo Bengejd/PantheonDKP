@@ -2,8 +2,6 @@ local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
 
-local ReloadUI = ReloadUI
-
 local DB = {}
 
 local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot', 'ledger' }
@@ -90,11 +88,6 @@ function DB:ResetAllDatabases()
         local db = database_names[i]
         PDKP_DB[self.server_faction_guild][db] = {}
     end
-    PDKP.CORE:Print('Databases have been reset... reloading in 5 seconds');
-
-    C_Timer.After(5, function()
-        ReloadUI();
-    end)
 end
 
 function DB:ResetLockouts()
