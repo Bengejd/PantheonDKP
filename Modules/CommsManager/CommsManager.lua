@@ -47,6 +47,8 @@ function Comms:RegisterComms()
 
         ['AddBid'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
         ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
+
+        ['SentInv'] = { ['channel'] = 'WHISPER', ['self'] = false, ['combat'] = false },
     }
     for prefix, opts in pairs(commChannels) do
         local commOpts = { ['prefix'] = prefix, ['combat'] = opts['combat'], ['self'] = opts['self'], ['requireCheck'] = opts['requireCheck'] }
@@ -73,6 +75,9 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
 
     if comm ~= nil and comm:IsValid() then
         local params = comm:GetSendParams()
+        if prefix == 'SentInv' then
+            params[2] = data
+        end
         return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
     end
 

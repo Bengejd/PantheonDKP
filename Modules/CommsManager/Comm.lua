@@ -95,10 +95,10 @@ function Comm:_Setup()
     local commParams = {
         -- Sync Section
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds
-        ['SyncDelete'] = { 'GUILD', nil, 'BULK', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
+        ['SyncDelete'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
-        ['SyncReq'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
+        ['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 
         -- Auction Section
         ['startBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -115,6 +115,8 @@ function Comm:_Setup()
         -- DKP Section
         ['DkpOfficer'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_SetDKPOfficer },
         ['WhoIsDKP'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_GetDKPOfficer },
+
+        ['SentInv'] = { 'WHISPER', nil, 'NORMAL', nil, PDKP_OnComm_SentInv },
     }
 
     if commParams[p] then
@@ -128,6 +130,11 @@ function Comm:_InitializeCache()
     self.open = true
     self.eventsFrame = CreateFrame("Frame", nil, UIParent)
     local COMMS_EVENTS = { 'PLAYER_REGEN_DISABLED', 'PLAYER_REGEN_ENABLED' };
+
+    if self.ogPrefix == 'SentInv' then
+        COMMS_EVENTS = { unpack(COMMS_EVENTS), 'GROUP_ROSTER_UPDATE'}
+    end
+
     self.eventsFrame.comm = self
     for _, eventName in pairs(COMMS_EVENTS) do
         self.eventsFrame:RegisterEvent(eventName)
@@ -163,6 +170,8 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
             comm:_ProcessCache(comm.cache)
             PDKP.CORE:Print('End Cached message', #comm.cache)
         end
+    elseif event == 'GROUP_ROSTER_UPDATE' then
+        StaticPopup_Hide("PARTY_INVITE")
     end
 end
 
@@ -171,7 +180,10 @@ function PDKP_OnComm_SetDKPOfficer(_, message, _)
     MODULES.GroupManager:SetDKPOfficer(data)
 end
 
-function PDKP_OnComm_GetDKPOfficer(_, message, _)
+function PDKP_OnComm_GetDKPOfficer(_, message, sender)
+
+    PDKP:PrintD(sender, "RequestingDKP Officer")
+
     local data = MODULES.CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
         MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true })
@@ -245,6 +257,12 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     elseif self.ogPrefix == 'CancelBid' then
         GUI.AuctionGUI:CancelBidder(sender)
     end
+end
+
+function PDKP_OnComm_SentInv(comm, message, sender)
+    local self = comm
+    if self.ogPrefix ~= 'SentInv' then return end
+    AcceptGroup();
 end
 
 function PDKP_SyncLockout(_, sent, total)

@@ -136,8 +136,8 @@ function Ledger:CheckRequestKeys(message, sender)
         if entry ~= nil then
             local save_details = entry:GetSaveDetails()
             entries[entry_id] = save_details
-        elseif PDKP:IsDev() then
-            PDKP.CORE:Print('DEV: Could not find entry', entry_id)
+        else
+            PDKP:PrintD('Could not find entry', entry_id)
         end
     end
 
@@ -211,7 +211,6 @@ function Ledger:ImportEntry(entry)
     self:_GetOfficerTable(weekNumber, officer)
 
     if tContains(LEDGER[weekNumber][officer], entry.id) then
-        PDKP:PrintD('Entry already exists')
         return false
     end
 
