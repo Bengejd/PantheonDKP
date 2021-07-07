@@ -1,9 +1,6 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils
 local Utils = PDKP.Utils
 
 local GetGuildRosterInfo = GetGuildRosterInfo
@@ -12,7 +9,7 @@ local strsplit = strsplit
 
 local Member = {}
 
-local guildDB, pugDB;
+local guildDB, _;
 
 local playerName = UnitName("PLAYER")
 

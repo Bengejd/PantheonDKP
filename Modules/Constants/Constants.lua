@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 
 local Constants = {}

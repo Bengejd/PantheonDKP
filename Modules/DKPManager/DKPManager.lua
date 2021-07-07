@@ -1,9 +1,7 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
@@ -11,7 +9,7 @@ local tinsert, tsort, pairs = table.insert, table.sort, pairs
 
 local DKP = {}
 
-local DKP_DB, GUILD_DB, CommsManager, LEDGER;
+local DKP_DB, _, CommsManager, LEDGER;
 
 function DKP:Initialize()
     DKP_DB = MODULES.Database:DKP()
@@ -109,7 +107,7 @@ end
 --     Import Functions    --
 -----------------------------
 
-function DKP:ImportEntry(entry, sender)
+function DKP:ImportEntry(entry, _)
     local importEntry = MODULES.DKPEntry:new(entry)
 
     local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
@@ -131,7 +129,7 @@ function DKP:ImportEntry(entry, sender)
     end
 end
 
-function DKP:ImportBulkEntries(message, sender)
+function DKP:ImportBulkEntries(message, _)
     local data = MODULES.CommsManager:DataDecoder(message)
     local total, entries = data['total'], data['entries']
     local batches, total_batches = self:_CreateBatches(entries, total)
@@ -151,7 +149,7 @@ end
 --      Boss Functions     --
 -----------------------------
 
-function DKP:BossKillDetected(bossID, bossName)
+function DKP:BossKillDetected(_, bossName)
     if not PDKP.canEdit then
         return
     end

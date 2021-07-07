@@ -1,10 +1,7 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
-local Utils = PDKP.Utils;
 
 local Dialogs = {}
 
@@ -16,7 +13,7 @@ function Dialogs:Initialize()
             text = "%s was killed! Award %d DKP?",
             button1 = "Award DKP",
             button2 = "Cancel",
-            OnAccept = function(self, data, data2)
+            OnAccept = function(_, data, _)
                 MODULES.DKPManager:AwardBossKill(data)
             end,
             OnCancel = function()
@@ -76,11 +73,11 @@ function Dialogs:Initialize()
                 button1 = "Edit (Disabled)",
                 button3 = 'Cancel',
                 button2 = "Delete",
-                OnAccept = function(self)
+                OnAccept = function(_)
                     -- Edit
                     --print('Edit Clicked')
                 end,
-                OnCancel = function(self)
+                OnCancel = function(_)
                     -- Delete
                     StaticPopup_Show('PDKP_CONFIRM_DKP_ENTRY_DELETE')
 
@@ -89,7 +86,7 @@ function Dialogs:Initialize()
                     --StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry = entry;
                     --StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_CONFIRM')
                 end,
-                OnAlt = function(self)
+                OnAlt = function(_)
                     -- Cancel
                     print('Cancel clicked')
                 end,
@@ -102,7 +99,7 @@ function Dialogs:Initialize()
                 text = "Are you sure you want to DELETE this entry?",
                 button1 = "Confirm",
                 button2 = "Cancel",
-                OnAccept = function(self)
+                OnAccept = function(_)
                     -- Confirm
                     local id = DKP:DeleteEntry()
                     PDKP_History_EntryDeleted(id)
@@ -119,7 +116,7 @@ function Dialogs:Initialize()
                 text = "You are on a fresh version of PantheonDKP. Please Reload to continue.",
                 button1 = "Reload",
                 button2 = "Cancel",
-                OnAccept = function(self)
+                OnAccept = function(_)
                     -- Confirm
                     ReloadUI()
                 end,

@@ -7,12 +7,12 @@ local SimpleScrollFrame = PDKP.SimpleScrollFrame
 SimpleScrollFrame.__index = SimpleScrollFrame; -- Set the __index parameter to reference
 
 -- Lua APIs
-local pairs, assert, type = pairs, assert, type
+local _, _, _ = pairs, assert, type
 local min, max, floor = math.min, math.max, math.floor
 local tinsert = table.insert
 
 -- WoW APIs
-local CreateFrame, UIParent = CreateFrame, UIParent
+local CreateFrame, _ = CreateFrame, UIParent
 
 function SimpleScrollFrame:FixScrollOnUpdate()
     if self.updateLock then
@@ -97,7 +97,7 @@ function SimpleScrollFrame:SetScroll(value)
     self.elapsed_update = 0
 end
 
-function PDKP_SimpleScroll_SetScroll(self, value)
+function PDKP_SimpleScroll_SetScroll(_, _)
 
 end
 

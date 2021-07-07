@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
@@ -12,9 +11,8 @@ local RaidManager, Media, Constants;
 
 local RaidFrame = RaidFrame
 local CreateFrame, unpack, GameTooltip = CreateFrame, unpack, GameTooltip
-local floor, fmod = math.floor, math.fmod
+local floor, _ = math.floor, math.fmod
 local strupper, strlower = string.upper, string.lower
-local tinsert = table.insert
 
 function RaidTools:Initialize()
     RaidManager = MODULES.RaidManager
@@ -394,7 +392,7 @@ function RaidTools:_CreateGroupIcons(class_group)
         end
 
         if class ~= 'Total' then
-            i_frame:SetScript("OnEnter", function(self)
+            i_frame:SetScript("OnEnter", function(_)
                 GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
                 GameTooltip:ClearLines()
                 local tip_text = ''

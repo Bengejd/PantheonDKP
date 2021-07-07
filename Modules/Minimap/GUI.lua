@@ -1,31 +1,21 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local LibStub = LibStub
 local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
-local StaticPopup_Show = StaticPopup_Show
-local InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
 local unpack, tinsert = unpack, table.insert
 
 local map = {}
 
-local success = '22bb33'
-local warning = 'E71D36'
 local info = 'F4A460'
-local system = '1E90FF'
 
 local clickText = Utils:FormatTextColor('Click', info) .. ' to open PDKP. '
 local shiftRightClickText = Utils:FormatTextColor('Right-Shift-Click', info) .. ' to open Officer push'
 local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
-
-local shiftClickText = Utils:FormatTextColor('Shift-Click', info) .. ' to request a push.'
-local altShiftText = Utils:FormatTextColor('Alt-Shift-Click', info) .. ' to wipe your tables.'
 
 local Dialogs;
 
@@ -56,7 +46,7 @@ function map:_GetToolTipTexts()
     local title = { "PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION }
     local lineBreak = { " ", 1, 1, 1, 1 }
     local leftClick = { clickText, 1, 1, 1 }
-    local rightClick = { rightClickText, 1, 1, 1 }
+    --local rightClick = { rightClickText, 1, 1, 1 }
     local shiftRightClick = { shiftRightClickText, 1, 1, 1 }
     local databaseResetClick = { resetDatabaseText, 1, 1, 1 }
 

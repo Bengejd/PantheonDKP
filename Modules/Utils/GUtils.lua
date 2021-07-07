@@ -5,9 +5,7 @@ local unpack, CreateFrame = unpack, CreateFrame
 local GameFontHighlightSmall = GameFontHighlightSmall
 local UIParent = UIParent
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local Utils = PDKP.Utils;
 
 local GUtils = PDKP.GUtils
 
@@ -288,6 +286,10 @@ function GUtils:createNestedDropdown(opts)
 
     local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
 
+    if hide then
+        dropdown:Hide()
+    end
+
     local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOPLEFT", 20, 10)
 
@@ -304,7 +306,7 @@ function GUtils:createNestedDropdown(opts)
     local itemsCopy = PDKP.Utils.ShallowCopy(menu_items)
 
     local table_keys = {} -- We use a header vs button for separation.
-    for key, v in pairs(itemsCopy) do
+    for key, _ in pairs(itemsCopy) do
         table.insert(table_keys, key)
     end
 
@@ -339,13 +341,13 @@ function GUtils:createNestedDropdown(opts)
         UIDropDownMenu_SetText(dropdown, default_val)
     end
 
-    dropdown.setAutoValue = function(val)
+    dropdown.setAutoValue = function(_)
         UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
         UIDropDownMenu_SetText(dropdown, default_val)
     end
 
     -- We need to define the initialize function via blizzard's method.
-    function PDKP_DropDown_Initialize(self, level)
+    function PDKP_DropDown_Initialize(_, level)
         level = level or 1;
 
         if level == 1 then
@@ -553,8 +555,8 @@ function GUtils:createItemLink(parent)
         GetItemInfoInstant(itemIdentifier)
 
         -- Then call the actual item info, so we can get the texture, and link.
-        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
-        itemSellPrice = GetItemInfo(itemIdentifier)
+        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture,
+        _ = GetItemInfo(itemIdentifier)
 
         if iName and iTexture then
             itemLink = itemIdentifier

@@ -1,10 +1,7 @@
 local _, PDKP = ...
 local _G = _G
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local Group = {}
@@ -152,7 +149,7 @@ function Group:RegisterEvents()
     for _, eventName in pairs(events) do
         f:RegisterEvent(eventName)
     end
-    f:SetScript("OnEvent", function(self, event, arg1, ...)
+    f:SetScript("OnEvent", function(_, event, arg1, ...)
         Group:_HandleEvent(event, arg1, ...)
     end)
 end

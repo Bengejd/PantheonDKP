@@ -1,14 +1,12 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local Main = {}
 
-local CreateFrame, strlower, unpack = CreateFrame, strlower, unpack
+local CreateFrame, _, _ = CreateFrame, strlower, unpack
 local tinsert = tinsert
 local UIParent, UISpecialFrames = UIParent, UISpecialFrames
 
@@ -102,7 +100,7 @@ function Main:Initialize()
     return pdkp_frame
 end
 
-function Main:HandleSlashCommands(msg)
+function Main:HandleSlashCommands(_)
     if pdkp_frame == nil then
         return
     end

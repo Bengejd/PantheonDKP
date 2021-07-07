@@ -1,12 +1,6 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
-local Utils = PDKP.Utils;
-
-local SendChatMessage = SendChatMessage;
 
 local Comms = {}
 
@@ -23,7 +17,7 @@ function Comms:Initialize()
     self.channels = {}
 end
 
-function PDKP_OnCommsReceived(prefix, message, distribution, sender)
+function PDKP_OnCommsReceived(prefix, message, _, sender)
     local channel = Comms.channels[prefix]
     if channel then
         return channel:VerifyCommSender(message, sender)

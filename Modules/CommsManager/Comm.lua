@@ -1,9 +1,7 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local CommsManager;
@@ -170,7 +168,7 @@ end
 --    OnComm Functions     --
 -----------------------------
 
-function PDKP_Comms_OnEvent(eventsFrame, event, arg1, ...)
+function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
     local comm = eventsFrame.comm
 
     if event == 'PLAYER_REGEN_DISABLED' then
@@ -190,7 +188,7 @@ function PDKP_OnComm_SetDKPOfficer(_, message, _)
     MODULES.GroupManager:SetDKPOfficer(data)
 end
 
-function PDKP_OnComm_GetDKPOfficer(comm, message, sender)
+function PDKP_OnComm_GetDKPOfficer(_, message, _)
     local data = MODULES.CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
         MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true })
@@ -259,7 +257,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     end
 end
 
-function PDKP_SyncLockout(arg, sent, total)
+function PDKP_SyncLockout(_, sent, total)
     local DKP = MODULES.DKPManager
     local percentage = floor((sent / total) * 100)
     if percentage < 100 then
@@ -269,7 +267,7 @@ function PDKP_SyncLockout(arg, sent, total)
     end
 end
 
-function PDKP_SyncProgressBar(arg, sent, total)
+function PDKP_SyncProgressBar(_, sent, total)
     local percentage = floor((sent / total) * 100)
 
     if Comm.start_time == nil then
@@ -293,7 +291,7 @@ end
 
 function PDKP_UpdatePushBar(percent, elapsed)
     local remaining = 100 - percent
-    local pps = percent / elapsed -- Percent per second
+    -- Percent per second
     local eta = (elapsed / percent) * remaining
     eta = math.floor(eta)
 

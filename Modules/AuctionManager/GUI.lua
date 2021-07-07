@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils
@@ -11,8 +10,6 @@ local tinsert = table.insert
 
 local AuctionGUI = {}
 AuctionGUI.itemLink = nil;
-
-local DKPManager;
 
 function AuctionGUI:Initialize()
     local title_str = Utils:FormatTextColor('PDKP Active Bids', MODULES.Constants.ADDON_HEX)
@@ -60,7 +57,6 @@ function AuctionGUI:Initialize()
     dkp_title:SetPoint("TOP", title, "BOTTOM", -5, -25)
 
     local bid_counter_frame = CreateFrame('Frame', nil, f)
-    local bid_tex = bid_counter_frame:CreateTexture(nil, 'BACKGROUND')
     bid_counter_frame:SetPoint('TOPLEFT', f, 'TOPLEFT', 5, 0)
     bid_counter_frame:SetSize(78, 64)
 
@@ -315,7 +311,6 @@ end
 ---Name, Bid Amount, Total DKP
 function AuctionGUI:CreateNewBidder(bid_info)
     local bidders_frame = self.current_bidders_frame;
-    local scrollContent = bidders_frame.scrollContent;
 
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
     local bidFound, bidIndex = false, nil

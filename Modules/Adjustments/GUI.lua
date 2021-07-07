@@ -1,12 +1,11 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local tinsert, tContains, pairs, next = table.insert, tContains, pairs, next;
+local tinsert, _, pairs, next = table.insert, tContains, pairs, next;
 
 local Adjust = {}
 local tabName = 'view_adjust_button';

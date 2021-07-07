@@ -1,21 +1,20 @@
 local _, PDKP = ...
-local LOG = PDKP.LOG
 PDKP.Utils = {}
 
 local Utils = PDKP.Utils;
 local MODULES = PDKP.MODULES;
 
-local strsplit, strlower, strmatch, strfind, strupper = strsplit, strlower, strmatch, strfind, strupper;
-local replace, format, tostring, gsub, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
+local strsplit, strlower, strmatch, _, _ = strsplit, strlower, strmatch, strfind, strupper;
+local _, format, tostring, _, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
 local floor, fmod = math.floor, math.fmod;
-local insert, sort, next = table.insert, table.sort, next;
+local _, _, next = table.insert, table.sort, next;
 local date, type, print = date, type, print
-local getn, pairs, ipairs = table.getn, pairs, ipairs
+local _, pairs, _ = table.getn, pairs, ipairs
 local GetServerTime, GetQuestResetTime = GetServerTime, GetQuestResetTime
 
-local daysInWeek = 7
+--local daysInWeek = 7
 local daysInYear = 365
-local hoursInDay = 24
+--local hoursInDay = 24
 local secondsInHour = 60 * 60
 
 function Utils:Initialize()
@@ -182,8 +181,8 @@ function Utils:GetItemLink(itemIdentifier)
     -- Call instant first, since it assures that we'll get the item info.
     GetItemInfoInstant(itemIdentifier)
     -- Then call the actual item info, so we can get the texture, and link.
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
-    itemSellPrice = GetItemInfo(itemIdentifier)
+    local _, itemLink, _, _, _, _, _, _, _, _,
+    _ = GetItemInfo(itemIdentifier)
 
     return itemLink
 end
@@ -364,7 +363,7 @@ function Utils:tEmpty(t)
 end
 
 local waitTable = {};
-local waitFrame = nil;
+local waitFrame;
 
 function PDKP__wait(delay, func, ...)
     if (type(delay) ~= "number" or type(func) ~= "function") then
@@ -372,7 +371,7 @@ function PDKP__wait(delay, func, ...)
     end
     if (waitFrame == nil) then
         waitFrame = CreateFrame("Frame", "WaitFrame", UIParent);
-        waitFrame:SetScript("onUpdate", function(self, elapse)
+        waitFrame:SetScript("onUpdate", function(_, elapse)
             local count = #waitTable;
             local i = 1;
             while (i <= count) do

@@ -1,16 +1,13 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
-local tinsert, tsort, pairs = table.insert, table.sort, pairs
+local _, _, pairs = table.insert, table.sort, pairs
 local strfind = string.find
 
-local DKP_DB, Guild, CommsManager, LEDGER;
+local _, Guild, CommsManager, LEDGER;
 
 local Ledger = {}
 
@@ -159,8 +156,6 @@ function Ledger:GenerateEntryHash(entry)
     if LEDGER[weekNumber] == nil then
         LEDGER[weekNumber] = {}
     end
-
-    local ledger_path = LEDGER[weekNumber][officer]
 
     if LEDGER[weekNumber][officer] == nil then
         LEDGER[weekNumber][officer] = {}

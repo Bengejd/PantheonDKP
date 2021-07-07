@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
@@ -11,8 +10,8 @@ local LootTable = {}
 local SimpleScrollFrame, MemberTable, Media, DKPManager;
 
 local CreateFrame = CreateFrame
-local type, floor, strupper, pi, substr, strreplace = type, math.floor, strupper, math.pi, string.match, string.gsub
-local tinsert, tremove = tinsert, tremove
+local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
+local tinsert, _ = tinsert, tremove
 
 local tabName = 'view_loot_button';
 
@@ -501,7 +500,7 @@ function LootTable:_OnClick(frame, buttonType)
     end
 end
 
-function PDKP_History_OnClick(frame, buttonType, arg2)
+function PDKP_History_OnClick(_, _, _)
     --if not PDKP.canEdit or not IsShiftKeyDown() then return end
     --
     --local label = frame.label;
@@ -516,7 +515,7 @@ function PDKP_History_OnClick(frame, buttonType, arg2)
     --end
 end
 
-function PDKP_History_EntryDeleted(id)
+function PDKP_History_EntryDeleted(_)
     --local self = GUI.history_table;
     --
     --local row = self.rows[deleted_row.index]

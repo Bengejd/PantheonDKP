@@ -1,9 +1,7 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils
 local Utils = PDKP.Utils
 
 local hooksecurefunc, GameTooltip, IsAltKeyDown = hooksecurefunc, GameTooltip, IsAltKeyDown
@@ -14,14 +12,14 @@ Auction.CurrentAuctionInfo = {}
 Auction.CURRENT_BIDDERS = {}
 
 local function GetItemCommInfo(itemIdentifier)
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
-    itemSellPrice = GetItemInfo(itemIdentifier)
+    local itemName, itemLink, _, _, _, _, _, _, _, itemTexture,
+    _ = GetItemInfo(itemIdentifier)
     return itemLink, itemName, itemTexture
 end
 
 local function HandleModifiedTooltipClick()
     if PDKP.canEdit and GameTooltip and IsAltKeyDown() and not Auction:IsAuctionInProgress() and MODULES.AuctionManager:CanChangeAuction() then
-        local itemName, itemLink = GameTooltip:GetItem()
+        local _, itemLink = GameTooltip:GetItem()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
             local commsData = { iLink, iName, iTexture }
@@ -48,7 +46,7 @@ function Auction:Initialize()
 end
 
 function Auction:HandleSlashCommands(msg)
-    local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
+    local _, _, _ = PDKP.CORE:GetArgs(msg, 3)
 end
 
 function Auction:HookBagSlots()
@@ -57,7 +55,7 @@ function Auction:HookBagSlots()
     local eventsFrame = CreateFrame("Frame", "PDKP_AuctionEvents")
     eventsFrame:RegisterEvent('LOOT_OPENED')
     eventsFrame:RegisterEvent('LOOT_SLOT_CLEARED')
-    eventsFrame:SetScript("OnEvent", function(self, eventName, ...)
+    eventsFrame:SetScript("OnEvent", function(_, eventName, ...)
         if eventName == 'LOOT_OPENED' then
             Auction:HookIntoLootBag()
         elseif eventName == 'LOOT_SLOT_CLEARED' then
@@ -73,7 +71,7 @@ function Auction:HookIntoLootBag()
         btnName = btnName .. tostring(i)
         local btn = _G[btnName]
         if btn then
-            btn:SetScript("OnMouseDown", function(b, buttonType)
+            btn:SetScript("OnMouseDown", function(_, buttonType)
                 if buttonType == 'LeftButton' and IsAltKeyDown() then
                     HandleModifiedTooltipClick()
                 end

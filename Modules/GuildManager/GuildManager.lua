@@ -1,10 +1,6 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
-local Utils = PDKP.Utils;
 
 local Member;
 
@@ -13,7 +9,7 @@ local tContains = tContains
 local GetServerTime = GetServerTime
 
 local IsInGuild, GetNumGuildMembers, GuildRoster = IsInGuild, GetNumGuildMembers, GuildRoster
-local GuildRosterSetOfficerNote, GetGuildInfo = GuildRosterSetOfficerNote, GetGuildInfo
+local _, _ = GuildRosterSetOfficerNote, GetGuildInfo
 
 local GuildManager = {}
 
@@ -69,7 +65,6 @@ function GuildManager:GetMembers()
     for i = 1, self.numOfMembers do
         local member = Member:new(i, server_time, { self.officerRank, self.classLeadRank })
         local isNew = self:IsNewMemberObject(member.name)
-        local inDatabase = self:IsMemberInDatabase(member.name);
 
         if member.name ~= nil then
             self.guildies[#self.guildies + 1] = member.name;

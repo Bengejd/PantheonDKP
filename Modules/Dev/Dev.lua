@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils
 --@do-not-package@
@@ -20,7 +19,7 @@ function Dev:HandleSlashCommands(msg)
         return
     end
 
-    local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
+    local cmd, arg1, _ = PDKP.CORE:GetArgs(msg, 3)
 
     if cmd == 'databasePopulate' then
         return self:PopulateDummyDatabase(arg1)
@@ -191,7 +190,7 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     end
 end
 
-function Dev:WhoTest(msg)
+function Dev:WhoTest(_)
     PDKP:Print('Dev: Testing Who');
     SendWho('Lariese');
 end
