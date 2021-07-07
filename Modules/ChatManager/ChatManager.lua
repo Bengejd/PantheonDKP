@@ -166,6 +166,7 @@ function Chat:_DisplayHelp()
         local msg = slash_addon .. ' ' .. cmd .. ' ' .. helpCmd['desc']
         print(msg)
     end
+    print(" ")
 end
 
 MODULES.ChatManager = Chat

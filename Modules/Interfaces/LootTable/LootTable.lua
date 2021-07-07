@@ -80,7 +80,7 @@ function LootTable:Initialize()
     end
 
     sb:SetScript("OnClick", function()
-        local numLeft = MODULES.DKPManager:LoadPrevFourWeeks()
+        MODULES.DKPManager:LoadPrevFourWeeks()
         toggleSB()
     end)
 

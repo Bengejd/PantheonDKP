@@ -309,8 +309,6 @@ end
 ---
 ---Name, Bid Amount, Total DKP
 function AuctionGUI:CreateNewBidder(bid_info)
-    local bidders_frame = self.current_bidders_frame;
-
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
     local bidFound, bidIndex = false, nil
 

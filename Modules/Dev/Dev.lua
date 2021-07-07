@@ -68,7 +68,7 @@ function Dev:DecayTest()
     m2DKP = member2:GetDKP()
 
     if m1DKP <= m2DKP then
-        print(Utils:FormatTextColor('OXFORD CAUGHT UP TO MARIKU on week: ' .. tostring(decayCount), MODULES.Constants.WARNING))
+        PDKP:PrintD(Utils:FormatTextColor('OXFORD CAUGHT UP TO MARIKU on week: ' .. tostring(decayCount), MODULES.Constants.WARNING))
     end
 
     MODULES.DKPManager:_UpdateTables()

@@ -164,7 +164,7 @@ local watchedVars = {};
 function Utils:WatchVar(tData, strName)
     if ViragDevTool_AddData ~= nil and PDKP:IsDev() and watchedVars[strName] ~= true then
         ViragDevTool_AddData(tData, strName)
-        print('Watching Var', strName)
+        PDKP:PrintD('Watching Var', strName)
         watchedVars[strName] = true
     end
 end

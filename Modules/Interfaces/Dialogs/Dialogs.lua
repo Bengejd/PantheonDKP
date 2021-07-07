@@ -39,7 +39,6 @@ function Dialogs:Initialize()
                 -- Second (Merge)
                 --local _, _, clickType = ...
                 --if clickType == 'clicked' then
-                --    PDKP.CORE:Print('TODO: push-merge');
                 --    --Export:New('push-merge')
                 --end
             end,
@@ -65,71 +64,6 @@ function Dialogs:Initialize()
     for popupName, value in pairs(self.popups) do
         StaticPopupDialogs[popupName] = value
     end
-
-    if (false) then
-        PDKP_POPUP_DIALOG_SETTINGS = {
-            ['PDKP_DKP_ENTRY_POPUP'] = {
-                text = "What would you like to do to this entry?",
-                button1 = "Edit (Disabled)",
-                button3 = 'Cancel',
-                button2 = "Delete",
-                OnAccept = function(_)
-                    -- Edit
-                    --print('Edit Clicked')
-                end,
-                OnCancel = function(_)
-                    -- Delete
-                    StaticPopup_Show('PDKP_CONFIRM_DKP_ENTRY_DELETE')
-
-                    --StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].text = 'Are you sure you want to DELETE this entry?'
-                    --local entry = StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_POPUP'].entry
-                    --StaticPopupDialogs['PDKP_EDIT_DKP_ENTRY_CONFIRM'].entry = entry;
-                    --StaticPopup_Show('PDKP_EDIT_DKP_ENTRY_CONFIRM')
-                end,
-                OnAlt = function(_)
-                    -- Cancel
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = false,
-                preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-            }, -- TODO: Hook this up eventually
-            ['PDKP_CONFIRM_DKP_ENTRY_DELETE'] = {
-                text = "Are you sure you want to DELETE this entry?",
-                button1 = "Confirm",
-                button2 = "Cancel",
-                OnAccept = function(_)
-                    -- Confirm
-                    local id = DKP:DeleteEntry()
-                    PDKP_History_EntryDeleted(id)
-                end,
-                OnCancel = function()
-                    -- Cancel
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = false,
-                preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-            }, -- TODO: Hook this up eventually
-            ['PDKP_RELOAD_UI'] = {
-                text = "You are on a fresh version of PantheonDKP. Please Reload to continue.",
-                button1 = "Reload",
-                button2 = "Cancel",
-                OnAccept = function(_)
-                    -- Confirm
-                    ReloadUI()
-                end,
-                OnCancel = function()
-                    -- Cancel
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = false,
-                preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-            },
-        }
-    end
-
 end
 
 function Dialogs:Show(dialogName, textTable, data)

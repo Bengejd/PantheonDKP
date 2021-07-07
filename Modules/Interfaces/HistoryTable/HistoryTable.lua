@@ -129,7 +129,6 @@ function HistoryTable:Initialize()
 
     self.frame:SetScript("OnShow", function()
         if self.updateNextOpen then
-            --- hmmmm. Table size isn't being updated properly. self:_OnLoad()
             self:RefreshData(true)
             self:HistoryUpdated(true)
             self:CollapseAllRows(self.collapsed)
@@ -464,7 +463,7 @@ function HistoryTable:_EntriesFound()
     self.collapse_all:Show()
 end
 
-function PDKP_History_OnClick(frame, buttonType)
+function PDKP_History_OnClick(frame, _)
     if not PDKP.canEdit or not IsShiftKeyDown() then
         return
     end
