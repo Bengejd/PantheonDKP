@@ -127,7 +127,9 @@ function Group:InvitePlayer(name)
         if self:IsLeader() and GetNumGroupMembers() == 5 then
             ConvertToRaid()
         end
-        return InviteUnit(name)
+        InviteUnit(name)
+        MODULES.CommsManager:SendCommsMessage('SentInv', name)
+        return
     end
 end
 
@@ -213,6 +215,8 @@ function Group:SetDKPOfficer(data)
 end
 
 function Group:RequestDKPOfficer()
+    PDKP:PrintD('Requesting DKP officer');
+
     if self.requestedDKPOfficer or self:HasDKPOfficer() then
         return
     end

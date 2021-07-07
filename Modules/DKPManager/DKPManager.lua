@@ -36,6 +36,10 @@ function DKP:Initialize()
 
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
+
+    C_Timer.After(5, function()
+        PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
+    end)
 end
 
 -----------------------------
@@ -83,9 +87,6 @@ function DKP:LoadPrevFourWeeks()
             self.numOfEncoded = self.numOfEncoded - 1
         end
     end
-
-    PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
-
     return self.numOfEncoded
 end
 
@@ -223,7 +224,8 @@ function DKP:AwardBossKill(boss_name)
         ['reason'] = 'Boss Kill',
         ['names'] = {},
         ['dkp_change'] = 10,
-        ['boss'] = boss_name
+        ['boss'] = boss_name,
+        ['pugNames'] = {},
     }
 
     for i = 1, #memberNames do
@@ -231,7 +233,8 @@ function DKP:AwardBossKill(boss_name)
         local member = GuildManager:GetMemberByName(memberName)
         if member then
             tinsert(dummy_entry['names'], member.name)
-        elseif true then
+        else
+            tinsert(dummy_entry['pugNames'], memberName)
         end
     end
 

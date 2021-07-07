@@ -32,6 +32,7 @@ function entry:new(entry_details)
 
     self.officer = entry_details['officer']
     self.names = entry_details['names']
+    self.pugNames = entry_details['pugNames'] or {}
 
     self.entry_type = entry_details['entry_type'] or nil
 
@@ -51,7 +52,7 @@ function entry:new(entry_details)
     self.hash = entry_details['hash'] or nil
     self.previousTotals = entry_details['previousTotals'] or {}
 
-    self.nonMemberNames = {}
+
     self.members = {}
     self.sd = {} -- Save Details
 
@@ -110,8 +111,17 @@ function entry:GetSaveDetails()
         self.sd['other_text'] = self.other_text
     end
 
-    if self.previousTotals and next(self.previousTotals) ~= nil then
-        self.sd['previousTotals'] = self.previousTotals
+    local dependants = {
+        ['previousTotals'] = self.previousTotals,
+        ['pugNames'] = self.pugNames,
+    }
+
+    for name, val in pairs(dependants) do
+        if type(val) == "table" then
+            if val and next(val) ~= nil then
+                self.sd[name] = val
+            end
+        end
     end
 
     if self.deleted then
@@ -124,17 +134,17 @@ end
 
 function entry:GetMembers()
     wipe(self.members)
-    wipe(self.nonMemberNames)
+    wipe(self.pugNames)
 
     for _, name in pairs(self.names) do
         local member = Guild:GetMemberByName(name)
         if member ~= nil then
             tinsert(self.members, member)
         else
-            tinsert(self.nonMemberNames, name)
+            tinsert(self.pugNames, name)
         end
     end
-    return self.members, self.nonMemberNames
+    return self.members, self.pugNames
 end
 
 function entry:MarkAsDeleted(deletedBy)
@@ -211,7 +221,7 @@ function entry:_GetFormattedNames()
         formattedNames = formattedNames .. member.formattedName
     end
 
-    for key, nonMember in pairs(self.nonMemberNames) do
+    for key, nonMember in pairs(self.pugNames) do
         if nonMember ~= nil then
             if key ~= 1 then
                 formattedNames = formattedNames .. ', '
