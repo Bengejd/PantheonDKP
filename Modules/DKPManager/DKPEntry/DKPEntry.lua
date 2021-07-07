@@ -134,7 +134,6 @@ end
 
 function entry:GetMembers()
     wipe(self.members)
-    wipe(self.pugNames)
 
     for _, name in pairs(self.names) do
         local member = Guild:GetMemberByName(name)
@@ -221,12 +220,15 @@ function entry:_GetFormattedNames()
         formattedNames = formattedNames .. member.formattedName
     end
 
-    for key, nonMember in pairs(self.pugNames) do
+    tsort(self.pugNames, function(a,b)
+        return a < b
+    end)
+
+    for _, nonMember in pairs(self.pugNames) do
         if nonMember ~= nil then
-            if key ~= 1 then
-                formattedNames = formattedNames .. ', '
-            end
-            formattedNames = formattedNames .. nonMember .. ' (PUG)'
+            formattedNames = formattedNames .. ', '
+            --formattedNames = formattedNames .. nonMember .. ' (PUG)'
+            formattedNames = formattedNames .. '|cffE71D36' .. nonMember .. ' (P)' .. "|r"
         end
     end
 

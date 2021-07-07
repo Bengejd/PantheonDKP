@@ -188,6 +188,7 @@ function Ledger:GenerateEntryHash(entry)
 
     local entry_index = #LEDGER[weekNumber][officer] + 1
     entry.hash = string.format("%d__%s__%d", weekNumber, officer, entry_index)
+
     return entry:GetSaveDetails()
 end
 
