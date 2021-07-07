@@ -9,7 +9,7 @@ local strfind = string.find
 
 local _, Guild, CommsManager, LEDGER;
 
-local Ledger = {}
+local Ledger = { _initialized = false }
 
 function Ledger:Initialize()
     CommsManager = MODULES.CommsManager;
@@ -55,8 +55,14 @@ function Ledger:Initialize()
 end
 
 function Ledger:CheckSyncStatus()
-    PDKP.CORE:Print('Synchronizing databases')
+    if not self._initialized then
+        PDKP.CORE:Print('Synchronizing databases...')
+    else
+        PDKP.CORE:Print('Re-syncing database... this may take 30 seconds to complete.')
+    end
+
     CommsManager:SendCommsMessage('SyncReq', self.weekHashes)
+    self._initialized = true
 end
 
 function Ledger:CheckRequestKeys(message, sender)
@@ -71,7 +77,7 @@ function Ledger:CheckRequestKeys(message, sender)
         self.syncLocked = true
         self:_StartSyncUnlockTimer()
         if PDKP:IsDev() then
-            PDKP.CORE:Print('Locking sync responses for 3 minutes')
+            PDKP.CORE:Print('DEV: Locking sync responses for 3 minutes')
         end
     end
     local requestData = CommsManager:DataDecoder(message)
@@ -79,22 +85,42 @@ function Ledger:CheckRequestKeys(message, sender)
     local missing_keys = {}
     local requestHasKeys = false
     local mismatchedKeys = false
-    for weekNumber, weekTable in pairs(requestData) do
+
+    for weekNumber, weekTable in pairs(self.weekHashes) do
+        local theirWeekTable = requestData[weekNumber]
         for officerName, officerTable in pairs(weekTable) do
-            local myOfficerTable = self:_GetOfficerTable(weekNumber, officerName)
-            local myLastEntry = #myOfficerTable
-            local theirLastEntry = #officerTable
-
-            requestHasKeys = true
-
-            if myLastEntry > theirLastEntry then
-                local entry_keys = self:_GetEntriesBetweenRange(weekNumber, officerName, theirLastEntry, myLastEntry)
-                for i = 1, #entry_keys do
-                    table.insert(missing_keys, entry_keys[i])
+            if theirWeekTable ~= nil then
+                local theirOfficerTable = theirWeekTable[officerName]
+                if theirOfficerTable == nil then -- They have not gotten this officer table before.
+                    mismatchedKeys = true
+                elseif theirOfficerTable[#theirOfficerTable] ~= officerTable[#officerTable] then
+                    mismatchedKeys = true
                 end
-            elseif officerTable[theirLastEntry] ~= myOfficerTable[myLastEntry] then
+            else
                 mismatchedKeys = true
-                break
+            end
+        end
+    end
+
+    if not mismatchedKeys then
+        for weekNumber, weekTable in pairs(requestData) do
+            for officerName, officerTable in pairs(weekTable) do
+                local myOfficerTable = self:_GetOfficerTable(weekNumber, officerName)
+
+                local myLastEntry = #myOfficerTable
+                local theirLastEntry = #officerTable
+
+                requestHasKeys = true
+
+                if myLastEntry > theirLastEntry then
+                    local entry_keys = self:_GetEntriesBetweenRange(weekNumber, officerName, 1, myLastEntry)
+                    for i = 1, #entry_keys do
+                        table.insert(missing_keys, entry_keys[i])
+                    end
+                elseif officerTable[theirLastEntry] ~= myOfficerTable[myLastEntry] then
+                    mismatchedKeys = true
+                    break
+                end
             end
         end
     end
@@ -112,6 +138,8 @@ function Ledger:CheckRequestKeys(message, sender)
     local entries = {}
     for _, entry_id in pairs(missing_keys) do
         local entry = MODULES.DKPManager:GetEntryByID(entry_id)
+
+        print(entry_id, entry)
 
         if entry ~= nil then
             local save_details = entry:GetSaveDetails()
@@ -131,6 +159,8 @@ function Ledger:CheckRequestKeys(message, sender)
 end
 
 function Ledger:GetLastFourWeekEntryIds()
+    self:GetLastFourWeeks()
+
     local keys = {}
     for _, weekTable in pairs(self.weekHashes) do
         for _, officerTable in pairs(weekTable) do
@@ -146,6 +176,11 @@ function Ledger:GetLastFourWeeks()
     local fourWeeksAgo = self.weekNumber - 4
     for i = fourWeeksAgo, self.weekNumber do
         self.weekHashes[i] = self:_GetWeekTable(i)
+        if PDKP:IsDev() then
+            for key, v in pairs(self.weekHashes[i]) do
+                print(key, #v)
+            end
+        end
     end
 end
 
@@ -197,6 +232,8 @@ function Ledger:ImportEntry(entry)
     table.sort(LEDGER[weekNumber][officer], function(a, b)
         return a < b
     end)
+
+    self:GetLastFourWeeks()
     return true
 end
 
@@ -233,7 +270,7 @@ function Ledger:_GetEntriesBetweenRange(weekNumber, officerName, startIndex, end
 end
 
 function Ledger:_StartSyncUnlockTimer()
-    C_Timer.After(180, function()
+    C_Timer.After(30, function()
         Ledger.syncLocked = false
     end)
 end
