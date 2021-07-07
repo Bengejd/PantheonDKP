@@ -26,7 +26,6 @@
     <Script file="AuctionManager\AuctionManager.lua"/>
     <Script file="Lockouts\Lockouts.lua"/>
     <Script file="Options\Options.lua"/>
-    <Script file="Loot\Loot.lua"/>
     <Script file="Adjustments\Adjustments.lua"/>
 
     <!-- Standalone Views  -->
@@ -35,10 +34,8 @@
     <!-- Dependent Views   -->
     <Include file="RaidManager\GUI.lua"/>
     <Include file="AuctionManager\GUI.lua"/>
-    <Include file="History\GUI.lua"/>
     <Include file="Lockouts\GUI.lua"/>
     <Include file="Options\GUI.lua"/>
-    <Include file="Loot\GUI.lua"/>
     <Include file="Adjustments\GUI.lua"/>
     <Script file="Minimap\GUI.lua"/>
 </Ui>

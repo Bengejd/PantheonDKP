@@ -5,7 +5,7 @@ local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local HistoryTable = {}
+local LootTable = {}
 
 local SimpleScrollFrame, MemberTable, Media, DKPManager;
 
@@ -13,22 +13,22 @@ local CreateFrame = CreateFrame
 local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
 local tinsert, _ = tinsert, tremove
 
-local tabName = 'view_history_button';
+local tabName = 'view_loot_button';
 
 local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
     { ['variable'] = 'formattedOfficer', ['display'] = 'Officer', },
-    { ['variable'] = 'historyText', ['display'] = 'Reason' },
+    { ['variable'] = 'historyText', ['display'] = 'Reason', ['OnClick'] = true, },
     { ['variable'] = 'formattedNames', ['display'] = 'Members', ['OnClick'] = true, },
     { ['variable'] = 'change_text', ['display'] = 'Amount' }
 }
 
 local ROW_MARGIN_TOP = 16 -- The margin between rows.
 
-HistoryTable.__index = HistoryTable; -- Set the __index parameter to reference
+LootTable.__index = LootTable; -- Set the __index parameter to reference
 
-function HistoryTable:Initialize()
+function LootTable:Initialize()
     if not GUI.TabController._initialized then
         return C_Timer.After(0.1, function()
             self:Initialize()
@@ -58,7 +58,12 @@ function HistoryTable:Initialize()
     self.frame.title:SetPoint("TOPLEFT", 14, -15)
     self.frame.title:SetPoint("TOPRIGHT", -14, -15)
 
-    HistoryTable.frame = self.frame
+    local scroll = SimpleScrollFrame:new(self.frame.content)
+    local scrollFrame = scroll.scrollFrame
+    local scrollContent = scrollFrame.content;
+    local scrollBar = scrollFrame.scrollBar
+
+    scrollBar.bg:SetColorTexture(unpack({ 0, 0, 0, 1 }))
 
     local sb = CreateFrame("Button", "$parent_load_more_btn", self.frame, "UIPanelButtonTemplate")
     sb:SetSize(80, 22) -- width, height
@@ -75,20 +80,13 @@ function HistoryTable:Initialize()
     end
 
     sb:SetScript("OnClick", function()
-        MODULES.DKPManager:LoadPrevFourWeeks()
+        local numLeft = MODULES.DKPManager:LoadPrevFourWeeks()
         toggleSB()
     end)
 
     self.frame.content:SetScript("OnShow", function()
         toggleSB()
     end)
-
-    local scroll = SimpleScrollFrame:new(self.frame.content)
-    local scrollFrame = scroll.scrollFrame
-    local scrollContent = scrollFrame.content;
-    local scrollBar = scrollFrame.scrollBar
-
-    scrollBar.bg:SetColorTexture(unpack({ 0, 0, 0, 1 }))
 
     self.scrollContent = scrollContent;
 
@@ -147,6 +145,8 @@ function HistoryTable:Initialize()
         end
     end)
 
+    -- TODO: Change border color on the frame to be dark and the rows to be light.
+
     self:_OnLoad()
 
     self:RefreshData()
@@ -154,7 +154,7 @@ function HistoryTable:Initialize()
     return self
 end
 
-function HistoryTable:CollapseAllRows(collapse)
+function LootTable:CollapseAllRows(collapse)
     for i = 1, #self.rows do
         local row = self.rows[i]
         row:collapse_frame(collapse)
@@ -165,20 +165,21 @@ function HistoryTable:CollapseAllRows(collapse)
     self.collapse_all:UpdateTexture()
 end
 
-function HistoryTable:ToggleRows()
+function LootTable:ToggleRows()
     for i = 1, #self.displayedRows do
         local row = self.displayedRows[i]
         row:collapse_frame(row.collapsed)
     end
 end
 
-function HistoryTable:RefreshData(justData)
+function LootTable:RefreshData(justData)
     self.scrollContent:WipeChildren(self.scrollContent)
 
     wipe(self.entry_keys)
     wipe(self.entries)
 
-    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Item Win' });
+    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Boss Kill', 'Other' });
+
     for i = 1, #self.entry_keys do
         self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])
     end
@@ -194,7 +195,7 @@ function HistoryTable:RefreshData(justData)
     end
 end
 
-function HistoryTable:RefreshTable()
+function LootTable:RefreshTable()
     wipe(self.displayedRows)
     for i = 1, #self.entry_keys do
         local row = self.rows[i]
@@ -209,18 +210,22 @@ function HistoryTable:RefreshTable()
             row.display_index = #self.displayedRows
         end
     end
+
     self.scrollContent:AddBulkChildren(self.displayedRows)
 
     self:CollapseAllRows(self.collapsed)
 end
 
 -- Refresh the data, resize the table, re-add the children?
-function HistoryTable:HistoryUpdated(selectedUpdate)
+function LootTable:HistoryUpdated(selectedUpdate)
     -- Don't do unnecessary updates.
 
     if self.table_init and not selectedUpdate then
         return
     end
+    --if self.previous_raid == Settings.current_raid and self.table_init and not selectedUpdate then return end
+
+    --self.appliedFilters['raid']=Settings.current_raid
 
     local selected = PDKP.memberTable.selected;
     if #selected > 0 then
@@ -231,6 +236,8 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     self:UpdateTitleText(selected)
 
     local collapse_rows = false
+    --if self.collapsed ~= self.collapsed_raids[Settings.current_raid] then collapse_rows = true end
+    --self.collapsed = self.collapsed_raids[Settings.current_raid];
     if collapse_rows then
         self:CollapseAllRows(self.collapsed)
     end
@@ -242,19 +249,32 @@ function HistoryTable:HistoryUpdated(selectedUpdate)
     if not self.table_init then
         self.table_init = true
     end
+    --self.previous_raid = Settings.current_raid
 end
 
-function HistoryTable:UpdateTitleText(selected)
+function LootTable:UpdateTitleText(selected)
     local text;
-
     if #selected == 1 then
-        text = selected[1] .. ' History';
+        text = selected[1] .. ' Loot History';
     end
-
     self.frame.title:SetText(text)
 end
 
-function HistoryTable:_OnLoad()
+function LootTable:_NoEntriesFound()
+    self.frame.title:SetText("No Loot Item Entries Found")
+    self.frame.desc:SetText("This will be populated once your database has a valid item entry")
+
+    self.collapse_all:Hide()
+end
+
+function LootTable:_EntriesFound()
+    self.frame.title:SetText("")
+    self.frame.desc:SetText("")
+
+    self.collapse_all:Show()
+end
+
+function LootTable:_OnLoad()
     local rows = setmetatable({}, { __index = function(t, i)
         local row = CreateFrame("Frame", nil, self.scrollContent, Media.BackdropTemplate)
         row:SetSize(350, 50)
@@ -373,6 +393,7 @@ function HistoryTable:_OnLoad()
         end
 
         function row:UpdateRowValues(entry)
+            local self = row.super;
 
             if entry then
                 row.dataObj = entry
@@ -391,6 +412,20 @@ function HistoryTable:_OnLoad()
                     col.click_frame = nil;
                 end
 
+                if header['OnClick'] then
+                    local cf = col.click_frame;
+                    if cf == nil then
+                        cf = CreateFrame("Frame", nil, row)
+                        cf:SetAllPoints(col)
+                        cf.value = val;
+                        cf.label = header['display']
+                        cf:SetScript("OnMouseUp", function(frame, buttonType)
+                            self:_OnClick(frame, buttonType)
+                        end)
+                        col.click_frame = cf;
+                    end
+                end
+
                 col:SetWidth(content:GetWidth() - 5)
                 if key == 1 then
                     col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
@@ -398,22 +433,16 @@ function HistoryTable:_OnLoad()
                     col:SetPoint("TOPLEFT", row.cols[key - 1], "BOTTOMLEFT", 0, -2)
                 end
                 col:SetText(displayName .. ": " .. val)
-                row.max_height = row.max_height + col:GetStringHeight() + 6
 
-                if header['OnClick'] then
-                    local cf = col.click_frame;
-                    if cf == nil then
-                        cf = CreateFrame("Frame", nil, row)
-                        cf.value = val;
-                        cf.label = header['display']
-                        cf:SetAllPoints(col)
-                        cf:SetScript("OnMouseDown", PDKP_History_OnClick)
-                        col.click_frame = cf;
+                if string.find(val, "Item Win -") then
+                    local _, item = strsplit(' - ', val)
+                    item = strtrim(item)
+                    if item then
+                        --PDKP:Print('Need to do fancy Tooltip stuff here')
                     end
                 end
-
+                row.max_height = row.max_height + col:GetStringHeight() + 6
                 row.cols[key] = col
-
             end
 
             row:SetHeight(row.max_height + ROW_MARGIN_TOP)
@@ -422,22 +451,23 @@ function HistoryTable:_OnLoad()
 
         function row:UpdateTextValues()
             row_title:SetText(row.dataObj['formattedID'])
-            local c_raid = row.dataObj['raid'] or ''
             local c_officer = row.dataObj['formattedOfficer'] or ''
             local c_hist = row.dataObj['collapsedHistoryText'] or ''
+            local c_name = row.dataObj['formattedNames'] or ''
             local c_sep = ' | '
-            local c_text = c_officer .. c_sep
-            if c_raid ~= '' then
-                c_text = c_text .. c_raid .. c_sep
-            end
-
-            c_text = c_text .. c_hist
+            local c_text = c_officer .. c_sep .. c_name .. c_sep .. c_hist
 
             collapse_text:SetText(c_text)
             if collapse_text:GetStringWidth() > 325 then
                 collapse_text:SetWidth(315)
             end
         end
+
+        row:SetScript("OnMouseDown", function()
+            if row.collapsed == true then
+                collapse_button:Click()
+            end
+        end)
 
         row:UpdateRowValues()
 
@@ -448,31 +478,41 @@ function HistoryTable:_OnLoad()
     self.rows = rows
 end
 
-function HistoryTable:_NoEntriesFound()
-    self.frame.title:SetText("No Entries Found")
-    self.frame.desc:SetText("This will be populated once your database has a valid entry")
+function LootTable:_OnClick(frame, buttonType)
+    local parent = frame:GetParent()
+    local dataObj = parent.dataObj
+    local item = dataObj.item
 
-    self.collapse_all:Hide()
-end
-
-function HistoryTable:_EntriesFound()
-    self.frame.title:SetText("")
-    self.frame.desc:SetText("")
-
-    self.collapse_all:Show()
-end
-
-function PDKP_History_OnClick(frame, buttonType)
-    if not PDKP.canEdit or not IsShiftKeyDown() then
+    if not Utils:IsItemLink(item) then
         return
     end
 
-    local label = frame.label;
-    local dataObj = frame:GetParent()['dataObj']
-
-    if label == 'Members' then
-        return PDKP.memberTable:SelectNames(dataObj['names'])
+    if buttonType == 'LeftButton' then
+        if GameTooltip:GetItem() then
+            GameTooltip:SetHyperlink(item)
+        else
+            GameTooltip:SetOwner(frame, "ANCHOR_NONE");
+            GameTooltip:ClearAllPoints()
+            GameTooltip:ClearLines()
+            GameTooltip:SetPoint("TOP", frame, "BOTTOM", 0, -20);
+            GameTooltip:SetHyperlink(item)
+        end
     end
+end
+
+function PDKP_Loot_OnClick(_, _, _)
+    --if not PDKP.canEdit or not IsShiftKeyDown() then return end
+    --
+    --local label = frame.label;
+    --local dataObj = frame:GetParent()['dataObj']
+    --
+    --if label == 'Members' then
+    --    return GUI.memberTable:SelectNames(dataObj['names'])
+    --elseif label == 'Reason' and buttonType == 'RightButton' then
+    --    GUI.popup_entry = dataObj
+    --    StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
+    --    deleted_row = frame:GetParent() -- This only gets used if the deletion goes through.
+    --end
 end
 
 function PDKP_History_EntryDeleted(_)
@@ -485,6 +525,6 @@ function PDKP_History_EntryDeleted(_)
     --GUI.history_table:HistoryUpdated()
 end
 
-pdkp_HistoryTableMixin = HistoryTable;
+pdkp_LootTableMixin = LootTable;
 
-GUI.HistoryGUI = HistoryTable;
+GUI.LootGUI = LootTable;

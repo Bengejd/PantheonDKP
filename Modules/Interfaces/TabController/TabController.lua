@@ -8,6 +8,13 @@ local CreateFrame = CreateFrame
 local Tab = { _initialized = false }
 
 function Tab:Initialize()
+    if PDKP.memberTable == nil then
+        C_Timer.After(1, function()
+            Tab:Initialize()
+        end)
+        return
+    end
+
     Tab.tabs = {};
     Tab.tab_btns = {};
     Tab.tab_names = {};
