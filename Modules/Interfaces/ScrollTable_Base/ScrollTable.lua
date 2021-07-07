@@ -153,11 +153,13 @@ function ScrollTable:_CheckSelect(row, clickType)
     end
 end
 
-function ScrollTable:ClearAll()
-    self:SelectAll(true)
+function ScrollTable:ClearAll(isNamesSelect)
+    self:SelectAll(true, isNamesSelect)
 end
 
-function ScrollTable:SelectAll(remove)
+function ScrollTable:SelectAll(remove, isNamesSelect)
+    isNamesSelect = isNamesSelect or false
+
     for i = 1, #self.displayData do
         local row = self.rows[i];
         if not row.isFiltered then
@@ -172,12 +174,15 @@ function ScrollTable:SelectAll(remove)
             end
         end
     end
-    self.onSelectChanged()
+
+    if not isNamesSelect then
+        self.onSelectChanged()
+    end
     self:RefreshLayout()
 end
 
 function ScrollTable:SelectNames(names)
-    self:ClearAll()
+    self:ClearAll(true)
     for i = 1, #self.displayedRows do
         local row = self.rows[i]
         local selectOn = row.selectOn
