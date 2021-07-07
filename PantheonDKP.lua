@@ -1,4 +1,3 @@
-local _G = _G
 local addonName, PDKP = ...;
 
 local LibStub = LibStub
@@ -90,7 +89,6 @@ function CORE:_InitializeFeatures()
     MODULES.RaidManager:Initialize()
     MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
-    MODULES.Loot:Initialize()
     MODULES.Options:Initialize()
 end
 

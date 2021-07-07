@@ -1,10 +1,6 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
-local Utils = PDKP.Utils;
 
 local Options = {}
 
@@ -31,7 +27,7 @@ function Options:IsPlayerIgnored(playerName)
 end
 
 function Options:GetInviteCommands()
-    return self.db['invite_cmds'] or {'inv', 'invite'}
+    return self.db['invite_cmds'] or { 'inv', 'invite' }
 end
 
 MODULES.Options = Options

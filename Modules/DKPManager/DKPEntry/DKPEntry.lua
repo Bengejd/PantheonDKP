@@ -1,9 +1,6 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local Guild;
@@ -54,6 +51,8 @@ function entry:new(entry_details)
     self.nonMemberNames = {}
     self.members = {}
     self.sd = {} -- Save Details
+
+    self.lockoutsChecked = false
 
     -- Grab the members, and non-members in the entry for later use.
     self:GetMembers()
@@ -130,7 +129,7 @@ end
 function entry:RemoveMember(name)
     local memberIndex;
 
-    for i=1, #self.names do
+    for i = 1, #self.names do
         if self.names[i] == name then
             memberIndex = i
         end
@@ -241,11 +240,11 @@ end
 
 function entry:_GetCollapsedHistoryText()
     local texts = {
-        ['On Time Bonus']= self.reason,
-        ['Completion Bonus']= self.reason,
-        ['Unexcused Absence']= self.reason,
-        ['Boss Kill']= self.boss,
-        ['Item Win']= 'Item Win - ' .. self.item,
+        ['On Time Bonus'] = self.reason,
+        ['Completion Bonus'] = self.reason,
+        ['Unexcused Absence'] = self.reason,
+        ['Boss Kill'] = self.boss,
+        ['Item Win'] = 'Item Win - ' .. self.item,
         ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
         ['Decay'] = 'Weekly Decay'
     }

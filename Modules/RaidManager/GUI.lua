@@ -1,20 +1,18 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
-local RaidTools = { _initialized = false}
+local RaidTools = { _initialized = false }
 
 local RaidManager, Media, Constants;
 
 local RaidFrame = RaidFrame
 local CreateFrame, unpack, GameTooltip = CreateFrame, unpack, GameTooltip
-local floor, fmod = math.floor, math.fmod
+local floor, _ = math.floor, math.fmod
 local strupper, strlower = string.upper, string.lower
-local tinsert = table.insert
 
 function RaidTools:Initialize()
     RaidManager = MODULES.RaidManager
@@ -140,7 +138,7 @@ function RaidTools:Initialize()
     inv_edit_box:SetPoint("TOPRIGHT", GROUPS['inv_control_group'].content, "TOPRIGHT", 12, 8)
     inv_edit_box.desc:SetText("You will auto-invite when whispered one of the words or phrases listed above.")
 
-    local invite_commands = RaidManager.invite_commands or {'invite', 'inv'}
+    local invite_commands = RaidManager.invite_commands or { 'invite', 'inv' }
     local inv_text = strlower(strjoin(", ", tostringall(unpack(invite_commands))))
     inv_edit_box:SetText(inv_text)
 
@@ -290,8 +288,13 @@ function RaidTools:Initialize()
 end
 
 function PDKP_RaidTools_TextValidFunc(box)
-    if (not box.touched) or not RaidTools._initialized then return end
-    if not box.touched and not box.init then box.init = true; return end
+    if (not box.touched) or not RaidTools._initialized then
+        return
+    end
+    if not box.touched and not box.init then
+        box.init = true;
+        return
+    end
 
     local boxID, text = box.uniqueID, box:GetText()
     local text_arr = Utils:SplitString(text, ',')
@@ -311,7 +314,9 @@ function PDKP_RaidTools_TextValidFunc(box)
 
     print(boxID, text)
 
-    if box_funcs[boxID] then return box_funcs[boxID]() end
+    if box_funcs[boxID] then
+        return box_funcs[boxID]()
+    end
 
     --local box_funcs = {
     --    ['invite_spam'] = function()
@@ -387,7 +392,7 @@ function RaidTools:_CreateGroupIcons(class_group)
         end
 
         if class ~= 'Total' then
-            i_frame:SetScript("OnEnter", function(self)
+            i_frame:SetScript("OnEnter", function(_)
                 GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
                 GameTooltip:ClearLines()
                 local tip_text = ''

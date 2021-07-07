@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils
@@ -11,8 +10,6 @@ local tinsert = table.insert
 
 local AuctionGUI = {}
 AuctionGUI.itemLink = nil;
-
-local DKPManager;
 
 function AuctionGUI:Initialize()
     local title_str = Utils:FormatTextColor('PDKP Active Bids', MODULES.Constants.ADDON_HEX)
@@ -33,6 +30,7 @@ function AuctionGUI:Initialize()
             stopBid:SetEnabled(true)
             stopBid:Show()
         end
+        f.reopenFrame:Hide()
     end)
 
     local sourceWidth, sourceHeight = 256, 512
@@ -42,7 +40,7 @@ function AuctionGUI:Initialize()
         startX / sourceWidth,
         (startX + width) / sourceWidth,
         startY / sourceHeight,
-        (startY+height) / sourceHeight
+        (startY + height) / sourceHeight
     }
 
     local tex = f:CreateTexture(nil, 'BACKGROUND')
@@ -59,7 +57,6 @@ function AuctionGUI:Initialize()
     dkp_title:SetPoint("TOP", title, "BOTTOM", -5, -25)
 
     local bid_counter_frame = CreateFrame('Frame', nil, f)
-    local bid_tex = bid_counter_frame:CreateTexture(nil, 'BACKGROUND')
     bid_counter_frame:SetPoint('TOPLEFT', f, 'TOPLEFT', 5, 0)
     bid_counter_frame:SetSize(78, 64)
 
@@ -84,7 +81,7 @@ function AuctionGUI:Initialize()
     end)
     sb:SetEnabled(false)
 
-    local cb = CreateFrame("Button", "$parent_submit", f, "UIPanelButtonTemplate")
+    local cb = CreateFrame("Button", "$parent_cancelBid", f, "UIPanelButtonTemplate")
     cb:SetSize(80, 22) -- width, height
     cb:SetText("Cancel Bid")
     cb:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
@@ -94,7 +91,7 @@ function AuctionGUI:Initialize()
         f.current_bid:SetText("")
         f.cancel_btn:SetEnabled(false)
         f.cancel_btn:Hide()
-        MODULES.CommsManager:SendCommsMessage('CancelBid', {['cancelBid'] = true})
+        MODULES.CommsManager:SendCommsMessage('CancelBid', { ['cancelBid'] = true })
     end)
     cb:SetScript("OnShow", function()
         if f.current_bid.getValue() > 0 then
@@ -113,7 +110,7 @@ function AuctionGUI:Initialize()
     stopBid:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 15, -22)
     stopBid:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -10, 0)
     stopBid:SetScript("OnClick", function()
-        MODULES.AuctionManager:HandleTimerFinished()
+        MODULES.AuctionManager:HandleTimerFinished(true)
     end)
     stopBid:SetEnabled(false)
     stopBid:Hide()
@@ -135,7 +132,9 @@ function AuctionGUI:Initialize()
         ['hide'] = false,
         ['max_chars'] = 5,
         ['textValidFunc'] = function(box)
-            if box == nil then box = bid_box end
+            if box == nil then
+                box = bid_box
+            end
             local box_val = box.getValue()
             local curr_bid_val = f.current_bid.getValue()
             local myDKP = MODULES.DKPManager:GetMyDKP()
@@ -236,9 +235,9 @@ function AuctionGUI:Initialize()
     local pushBarOpts = {
         ['name'] = 'AuctionTimer',
         ['type'] = 'timer',
-        ['default'] = 15,
+        ['default'] = 20,
         ['min'] = 0,
-        ['max'] = 15,
+        ['max'] = 20,
         ['func'] = function()
             MODULES.AuctionManager:HandleTimerFinished()
         end,
@@ -283,10 +282,6 @@ function AuctionGUI:CreateBiddersWindow()
     f.scroll = scroll;
     f.scrollFrame = scrollFrame;
 
-    --local shroud_events = {'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER'}
-    --for _, eventName in pairs(shroud_events) do f:RegisterEvent(eventName) end
-    --f:SetScript("OnEvent", PDKP_Shroud_OnEvent)
-
     f:Hide()
 
     self.current_bidders_frame = f;
@@ -316,12 +311,11 @@ end
 ---Name, Bid Amount, Total DKP
 function AuctionGUI:CreateNewBidder(bid_info)
     local bidders_frame = self.current_bidders_frame;
-    local scrollContent = bidders_frame.scrollContent;
 
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
     local bidFound, bidIndex = false, nil
 
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local bidder = bidders[i]
         if bidder.name == bid_info['name'] then
             MODULES.AuctionManager.CURRENT_BIDDERS[i].bid = bid_info['bid']
@@ -358,7 +352,7 @@ function AuctionGUI:RefreshBidders()
         return f
     end
 
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local prospect_frame = createProspectFrame()
         local prospect_info = bidders[i]
 
@@ -383,37 +377,28 @@ end
 
 function AuctionGUI:CancelBidder(bidder)
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local b = bidders[i]
         if b.name == bidder then
             MODULES.AuctionManager.CURRENT_BIDDERS[i] = nil
-            break;
+            break ;
         end
     end
     self:RefreshBidders()
 end
 
-function AuctionGUI:StartAuction(itemLink, itemName, itemTexture)
+function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
     self.frame.item_link.SetItemLink(itemLink, itemName, itemTexture)
     self.frame.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
+
+    self:RefreshBidders()
+
+    if self.frame:IsVisible() then
+        self.frame:Hide()
+    end
+
     self.frame:Show()
-    MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture}
-
-    --local bidders = {
-    --    { ['name'] = 'Pamplemousse', ['bid'] = 16, ['dkpTotal'] = 3000, },
-    --    { ['name'] = 'Neekio', ['bid'] = 17, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Veltrix', ['bid'] = 12, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Nightshelf', ['bid'] = 05, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Advanty', ['bid'] = 01, ['dkpTotal'] = 30, },
-    --    { ['name'] = 'Athico', ['bid'] = 14, ['dkpTotal'] = 30, },
-    --}
-
-    --for i=1, #bidders do
-    --    self:CreateNewBidder(bidders[i])
-    --end
-
+    MODULES.AuctionManager.CurrentAuctionInfo = { ['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy }
 end
-
-
 
 GUI.AuctionGUI = AuctionGUI

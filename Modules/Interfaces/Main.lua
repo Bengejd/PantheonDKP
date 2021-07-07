@@ -1,19 +1,19 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local Main = {}
 
-local CreateFrame, strlower, unpack = CreateFrame, strlower, unpack
+local CreateFrame, _, _ = CreateFrame, strlower, unpack
 local tinsert = tinsert
 local UIParent, UISpecialFrames = UIParent, UISpecialFrames
 
 function Main:Initialize()
-    if pdkp_frame ~= nil then return end
+    if pdkp_frame ~= nil then
+        return
+    end
 
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
     f:SetFrameStrata("HIGH");
@@ -54,7 +54,9 @@ function Main:Initialize()
         { ['dir'] = 'TOPLEFT', ['file'] = 'BG.tga', }
     }
 
-    for _, t in pairs(textures) do createTextures(t) end
+    for _, t in pairs(textures) do
+        createTextures(t)
+    end
 
     f:SetPoint("TOP", 0, 0)
 
@@ -73,8 +75,9 @@ function Main:Initialize()
 
     --- Addon Version
     local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
-    addon_version:SetSize(50, 14)
+    addon_version:SetHeight(14)
     addon_version:SetText(MODULES.Constants.COLORED_ADDON_VERSION)
+    addon_version:SetWidth(addon_version:GetStringWidth() + 10)
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
     --- Addon Author
@@ -97,10 +100,16 @@ function Main:Initialize()
     return pdkp_frame
 end
 
-function Main:HandleSlashCommands(msg)
-    if pdkp_frame == nil then return end
+function Main:HandleSlashCommands(_)
+    if pdkp_frame == nil then
+        return
+    end
 
-    if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+    if pdkp_frame:IsVisible() then
+        pdkp_frame:Hide()
+    else
+        pdkp_frame:Show()
+    end
 end
 
 function Main:SetupPushProgress()

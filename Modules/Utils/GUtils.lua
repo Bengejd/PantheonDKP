@@ -5,9 +5,7 @@ local unpack, CreateFrame = unpack, CreateFrame
 local GameFontHighlightSmall = GameFontHighlightSmall
 local UIParent = UIParent
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
-local Utils = PDKP.Utils;
 
 local GUtils = PDKP.GUtils
 
@@ -63,8 +61,7 @@ function GUtils:createCheckButton(opts)
     end
 
     --- BUG FIX: HitInset should be set to avoid overlapping other content with check box's click frame.
-    --- Defaults to (l,r,t,b) = 0, -145, 0, 0
-    cb:SetHitRectInsets(0, cbText:GetWidth() * -1, 0, 0)
+    --- Defaults to (l,r,t,b) = 0, -145, 0, 0 cb:SetHitRectInsets(0, cbText:GetWidth() * -1, 0, 0)
 
     cb:SetChecked(enabled)
 
@@ -289,6 +286,10 @@ function GUtils:createNestedDropdown(opts)
 
     local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
 
+    if hide then
+        dropdown:Hide()
+    end
+
     local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOPLEFT", 20, 10)
 
@@ -305,7 +306,7 @@ function GUtils:createNestedDropdown(opts)
     local itemsCopy = PDKP.Utils.ShallowCopy(menu_items)
 
     local table_keys = {} -- We use a header vs button for separation.
-    for key, v in pairs(itemsCopy) do
+    for key, _ in pairs(itemsCopy) do
         table.insert(table_keys, key)
     end
 
@@ -340,13 +341,13 @@ function GUtils:createNestedDropdown(opts)
         UIDropDownMenu_SetText(dropdown, default_val)
     end
 
-    dropdown.setAutoValue = function(val)
+    dropdown.setAutoValue = function(_)
         UIDropDownMenu_SetSelectedValue(dropdown, default_val, default_val)
         UIDropDownMenu_SetText(dropdown, default_val)
     end
 
     -- We need to define the initialize function via blizzard's method.
-    function PDKP_DropDown_Initialize(self, level)
+    function PDKP_DropDown_Initialize(_, level)
         level = level or 1;
 
         if level == 1 then
@@ -494,6 +495,8 @@ function GUtils:createEditBox(opts)
         box_frame:SetFrameLevel(box:GetFrameLevel() - 4)
     end
 
+    box:SetHitRectInsets(-5, -5, -5, -5)
+
     local title_font = 'GameFontNormal'
 
     if small_title then
@@ -552,8 +555,8 @@ function GUtils:createItemLink(parent)
         GetItemInfoInstant(itemIdentifier)
 
         -- Then call the actual item info, so we can get the texture, and link.
-        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, _, _, itemStackCount, _, itemTexture,
-        itemSellPrice = GetItemInfo(itemIdentifier)
+        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture,
+        _ = GetItemInfo(itemIdentifier)
 
         if iName and iTexture then
             itemLink = itemIdentifier
@@ -590,13 +593,13 @@ function GUtils:createStrikethroughText(parent)
 
     fc:SetHeight(fs:GetStringHeight() / 2)
 
-    fc:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-                   edgeFile = "Interface/BUTTONS/UI-SliderBar-Border.png",
-                   edgeSize = 4,
-                   insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    fc:SetBackdrop({ bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+                     edgeFile = "Interface/BUTTONS/UI-SliderBar-Border.png",
+                     edgeSize = 4,
+                     insets = { left = 1, right = 1, top = 1, bottom = 1 }
     });
-    fc:SetBackdropColor(1,0,0, 1);
-    fc:SetBackdropBorderColor(1, 0,0, 0);
+    fc:SetBackdropColor(1, 0, 0, 1);
+    fc:SetBackdropBorderColor(1, 0, 0, 0);
 
     fs.line = fc
     return fs
@@ -608,7 +611,8 @@ function GUtils:createStatusBar(opts)
     local default = opts['default'] or 0
     local min = opts['min'] or 0
     local max = opts['max'] or 100
-    local onTimerFinished = opts['func'] or function()  end
+    local onTimerFinished = opts['func'] or function()
+    end
     local parent = UIParent
 
     local pb = CreateFrame("StatusBar", 'PDKP_' .. name, parent)
@@ -673,7 +677,6 @@ function GUtils:createStatusBar(opts)
             pb.value:SetText(tostring(math.ceil(amount)) .. extra)
         end
 
-
         pb:SetValue(amount)
 
         local currVal = pb:GetValue()
@@ -699,7 +702,7 @@ function GUtils:createStatusBar(opts)
             local currVal = pb:GetValue()
             pb.setAmount(currVal - 0.1)
             pb:SetWidth(pb:GetWidth() - (reductionAmt * 0.1))
-        end, (max*10) + 0.1)
+        end, (max * 10) + 0.1)
     end,
 
     pb:reset()

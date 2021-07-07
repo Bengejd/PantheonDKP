@@ -1,9 +1,7 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
@@ -11,7 +9,7 @@ local tinsert, tsort, pairs = table.insert, table.sort, pairs
 
 local DKP = {}
 
-local DKP_DB, GUILD_DB, CommsManager, LEDGER;
+local DKP_DB, _, CommsManager, LEDGER;
 
 function DKP:Initialize()
     DKP_DB = MODULES.Database:DKP()
@@ -36,18 +34,6 @@ function DKP:Initialize()
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
 
-    self.eventsFrame = CreateFrame("Frame", "PDKP_DKP_EventsFrame")
-    self.eventsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-    self.eventsFrame:SetScript("OnEvent", function(_, eventName)
-        --if eventName == 'GUILD_ROSTER_UPDATE' then
-        --    local currentTime = GetServerTime()
-        --    if Utils:SubtractTime(self.lastAutoSync, currentTime) >= 2 and not self.autoSyncInProgress  then
-        --        self.lastAutoSync = currentTime
-        --        --MODULES.CommsManager:SendCommsMessage('SyncAd', self.compressedCurrentWeekEntries, true)
-        --    end
-        --end
-    end)
-
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 end
@@ -62,7 +48,7 @@ function DKP:_LoadEncodedDatabase()
         self.numOfEncoded = self.numOfEncoded + 1
     end
     if PDKP:IsDev() then
-        PDKP.CORE:Print('Loaded', self.numOfEncoded, 'Encoded entries');
+        PDKP.CORE:Print('DEV: Loaded', self.numOfEncoded, 'Encoded entries');
     end
 end
 
@@ -76,7 +62,9 @@ function DKP:LoadPrevFourWeeks()
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= self.currentLoadedWeek then
             local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
-            if decoded_entry == nil then decoded_entry = encoded_entry; end
+            if decoded_entry == nil then
+                decoded_entry = encoded_entry;
+            end
             local entry = MODULES.DKPEntry:new(decoded_entry)
             self.entries[index] = entry
             self.numOfEntries = self.numOfEntries + 1
@@ -103,7 +91,7 @@ function DKP:LoadPrevFourWeeks()
 end
 
 function DKP:_RecompressCurrentLoaded()
-    self.compressedCurrentWeekEntries = MODULES.CommsManager:DataEncoder( { ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries } )
+    self.compressedCurrentWeekEntries = MODULES.CommsManager:DataEncoder({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries })
 end
 
 -----------------------------
@@ -119,9 +107,18 @@ end
 --     Import Functions    --
 -----------------------------
 
-function DKP:ImportEntry(entry, sender)
+function DKP:ImportEntry(entry, _)
     local importEntry = MODULES.DKPEntry:new(entry)
-    local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(entry)
+
+    local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
+
+    if #no_lockout_members == 0 then
+        self:_UpdateTables()
+        PDKP.CORE:Print('No eligible members found for', entry.reason, 'Skipping import')
+        return
+    end
+
+    local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(importEntry)
 
     if saved_ledger_entry then
         importEntry:Save(true)
@@ -132,7 +129,7 @@ function DKP:ImportEntry(entry, sender)
     end
 end
 
-function DKP:ImportBulkEntries(message, sender)
+function DKP:ImportBulkEntries(message, _)
     local data = MODULES.CommsManager:DataDecoder(message)
     local total, entries = data['total'], data['entries']
     local batches, total_batches = self:_CreateBatches(entries, total)
@@ -152,17 +149,21 @@ end
 --      Boss Functions     --
 -----------------------------
 
-function DKP:BossKillDetected(bossID, bossName)
-    if not PDKP.canEdit then return end
+function DKP:BossKillDetected(_, bossName)
+    if not PDKP.canEdit then
+        return
+    end
     local dkpAwardAmount = 10
 
     if MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil then
-        GUI.Dialogs:Show( 'PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
+        GUI.Dialogs:Show('PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
     end
 end
 
 function DKP:AwardBossKill(boss_name)
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
 
     PDKP.CORE:Print('Awarding DKP for ' .. boss_name .. ' Kill')
     MODULES.GroupManager:Refresh()
@@ -181,7 +182,7 @@ function DKP:AwardBossKill(boss_name)
         ['boss'] = boss_name
     }
 
-    for i=1, #memberNames do
+    for i = 1, #memberNames do
         local memberName = memberNames[i]
         local member = GuildManager:GetMemberByName(memberName)
         if member then
@@ -207,7 +208,7 @@ function DKP:_CreateBatches(entries, total)
     local index = 1
 
     local total_batches = math.ceil(total / 50)
-    for i=1, total_batches do
+    for i = 1, total_batches do
         batches[i] = {}
     end
     for key, entry in pairs(entries) do
@@ -248,7 +249,9 @@ function DKP:_ProcessEntryBatch(batch)
 end
 
 function DKP:AddNewEntryToDB(entry, updateTable)
-    if updateTable == nil then updateTable = true end
+    if updateTable == nil then
+        updateTable = true
+    end
 
     if entry.reason == 'Boss Kill' then
         MODULES.Lockouts:AddMemberLockouts(entry)
@@ -256,7 +259,7 @@ function DKP:AddNewEntryToDB(entry, updateTable)
     end
 
     if entry ~= nil then
-        for i=#entry.members, 1, -1 do
+        for i = #entry.members, 1, -1 do
             local member = entry.members[i]
 
             if entry.reason == "Decay" then
@@ -279,11 +282,10 @@ function DKP:AddNewEntryToDB(entry, updateTable)
         entry:GetSaveDetails()
 
         if #entryMembers == 0 then
-            PDKP.CORE:Print('No members found for:', entry.reason)
+            PDKP.CORE:Print('No members found for:', entry.reason, ' Skipping import')
             DKP:_UpdateTables()
             return
         end
-
 
         DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
 
@@ -342,7 +344,7 @@ function DKP:GetEntryKeys(sorted, filterReasons)
 
     local excludedTypes = {}
     if type(filterReasons) == "table" then
-        for i=1, #filterReasons do
+        for i = 1, #filterReasons do
             excludedTypes[filterReasons[i]] = true
         end
     elseif type(filterReasons) == "string" then
@@ -355,7 +357,11 @@ function DKP:GetEntryKeys(sorted, filterReasons)
         end
     end
 
-    if sorted then tsort(keys, function(a, b) return a > b end) end
+    if sorted then
+        tsort(keys, function(a, b)
+            return a > b
+        end)
+    end
 
     return keys;
 end

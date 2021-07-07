@@ -1,14 +1,20 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 
 local CreateFrame = CreateFrame
 
-local Tab = { _initialized=false }
+local Tab = { _initialized = false }
 
 function Tab:Initialize()
+    if PDKP.memberTable == nil then
+        C_Timer.After(1, function()
+            Tab:Initialize()
+        end)
+        return
+    end
+
     Tab.tabs = {};
     Tab.tab_btns = {};
     Tab.tab_names = {};
@@ -39,14 +45,14 @@ function Tab:Initialize()
         },
     }
 
-    local tab_names = {'view_history_button', 'view_loot_button', 'view_lockouts_button', 'view_options_button'}
+    local tab_names = { 'view_history_button', 'view_loot_button', 'view_lockouts_button', 'view_options_button' }
     if PDKP.canEdit then
-        tab_names = {'view_adjust_button', unpack(tab_names)}
+        tab_names = { 'view_adjust_button', unpack(tab_names) }
     end
 
     local btn_pad = 35
 
-    for i=1, #tab_names do
+    for i = 1, #tab_names do
         local name = tab_names[i]
         local tab_opt = tab_opts[name]
         local tf = CreateFrame("Frame", name .. '_frame', f, MODULES.Media.BackdropTemplate)
