@@ -1,8 +1,8 @@
 ## Interface: 20501
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 4.0.0
+## Version: 4.0.6
 ## Title: |cff33ff99PantheonDKP|r
-## Notes: Shrouding based DPK addon for Pantheon
+## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
 ## SavedVariables: PDKP_DB, PDKP_Logs
 ## LoadOnDemand: 0
