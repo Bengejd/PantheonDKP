@@ -26,28 +26,7 @@ end
 
 function Comms:RegisterComms()
     local commChannels = {
-        --['GUILD'] = {
-        --    --['V2PushReceive'] = { ['self']=true, ['combat']=false, }, -- Officer check -- When a new push is received.
-        --    --['V2EntryDelete'] = { ['self']=true, ['combat']=true, }, -- Officer check -- When an entry is deleted.
-        --    --['V2SyncRes']= { }, -- When an officer's sync request goes through.
-        --
-        --    --['V2Version']= { }, -- When someone requests the latest version of the addon.
-        --    ['V2SyncSmall']= { ['self']=true, ['combat']=true, }, -- Single adds/deletes
-        --    ['V2SyncLarge']= { }, -- Large merges / overwrites.
-        --    --['V2SyncProgress']= { ['self']=false, ['combat']=false, },
-        --},
-        --['RAID'] = {
-        --    --['ClearBids']= { ['combat']=true, }, -- Officer check -- When the DKP Officer clears the Shrouding Window.
-        --    --['UpdateBid']= { ['combat']=true, }, -- Officer check -- When someone new shrouds, comes from DKP Officer.
-        --    --['V2SetDkpOfficer']= { ['combat']=true, }, -- Officer check -- Sets the DKP officer for everyone.
-        --    --['V2WhoIsDKP']= { ['self']=false, ['combat']=true, }, -- Requests who the DKP officer is.
-        --},
-        --['OFFICER'] = {
-        --    --['V2SyncReq'] = {},
-        --},
-
         --- GUILD COMMS
-
         ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, },
         ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
 
@@ -96,9 +75,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
     end
 
-    if PDKP:IsDev() then
-        PDKP.CORE:Print('Could not complete comm request ', prefix, 'channel', comm.channel, 'Params', comm:GetSendParams())
-    end
+    PDKP:PrintD('Could not complete comm request ', prefix, 'channel', comm.channel, 'Params',  comm:GetSendParams())
 end
 
 -----------------------------

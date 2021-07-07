@@ -99,12 +99,6 @@ function Chat:_HandleSlashCommands(msg)
         ['thirst'] = function()
             MODULES.AuctionManager:HandleSlashCommands(msg)
         end,
-        [''] = function()
-        end,
-        [''] = function()
-        end,
-        [''] = function()
-        end,
 
         -- DKP Handlers
         ['LoadMoreEntries'] = function()
@@ -153,8 +147,8 @@ function Chat:_DisplayHelp()
     local helpCommands = {
         { ['cmd'] = 'show / hide', ['desc'] = 'PantheonDKP window', },
         { ['cmd'] = 'bid <number>', ['desc'] = 'To place a bid', },
-        { ['cmd'] = 'bid <itemLink>', ['desc'] = 'To start a bid', },
-        --{ ['cmd'] = '', ['desc'] = '', },
+        --{ ['cmd'] = 'bid <itemLink>', ['desc'] = 'To start a bid', },
+        { ['cmd'] = 'databaseReset', ['desc'] = 'To wipe your database', },
         --{ ['cmd'] = '', ['desc'] = '', },
         --{ ['cmd'] = '', ['desc'] = '', },
         --{ ['cmd'] = '', ['desc'] = '', },

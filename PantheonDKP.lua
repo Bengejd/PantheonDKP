@@ -20,17 +20,25 @@ local CORE = PDKP.CORE
 local MODULES = PDKP.MODULES
 
 local C_Timer = C_Timer
+local tonumber, strmatch = tonumber, string.match
+
+-- Args: major, minor, patch, changeset
+local function Initialize_Default_Version(args)
+    args = args or { nil, nil, nil, nil }
+    return {
+        major = tonumber(args[1]) or 0,
+        minor = tonumber(args[2]) or 0,
+        patch = tonumber(args[3]) or 0,
+        changeset = args[4] or ""
+    }
+end
 
 local function Initialize_SavedVariables()
     if type(PDKP_DB) ~= "table" then
         PDKP_DB = {
             global = {
-                version = {
-                    major = 0,
-                    minor = 0,
-                    patch = 0,
-                    changeset = ""
-                },
+                version = Initialize_Default_Version(),
+                previous = Initialize_Default_Version()
             }
         }
     end
@@ -38,23 +46,17 @@ end
 
 local function Initialize_Versioning()
     -- Parse autoversion
-    local major, minor, patch, changeset = string.match(PDKP.AUTOVERSION, "^v(%d+).(%d+).(%d+)-?(.*)")
+    local major, minor, patch, changeset = strmatch(PDKP.AUTOVERSION, "^v(%d+).(%d+).(%d+)-?(.*)")
     local old = PDKP_DB.global.version
-    local new = {
-        major = tonumber(major) or 0,
-        minor = tonumber(minor) or 0,
-        patch = tonumber(patch) or 0,
-        changeset = changeset or ""
-    }
+    local new = Initialize_Default_Version({ major, minor, patch, changeset })
+
     -- set new version
     PDKP_DB.global.version = new
     -- update string
     changeset = new.changeset
-    if changeset and changeset ~= "" then
-        changeset = "-" .. changeset
-    else
-        changeset = ""
-    end
+
+    changeset = PDKP.Utils:ternaryAssign(PDKP.Utils:IsEmpty(changeset), "", "-" .. changeset)
+
     CORE.versionString = string.format(
             "v%s.%s.%s%s",
             new.major or 0,
@@ -168,4 +170,11 @@ end
 
 function PDKP:IsDev()
     return MODULES.Dev and type(MODULES.Dev) == "table"
+end
+
+function PDKP:PrintD(...)
+    if PDKP:IsDev() then
+        local text = "|cffF4A460" .. strjoin(" ", tostringall(...)) .. "|r"
+        PDKP.CORE:Print(text)
+    end
 end

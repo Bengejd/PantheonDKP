@@ -47,9 +47,8 @@ function DKP:_LoadEncodedDatabase()
         self.encoded_entries[index] = entry
         self.numOfEncoded = self.numOfEncoded + 1
     end
-    if PDKP:IsDev() then
-        PDKP.CORE:Print('DEV: Loaded', self.numOfEncoded, 'Encoded entries');
-    end
+
+    PDKP:PrintD('Loaded', self.numOfEncoded, 'Encoded entries')
 end
 
 function DKP:LoadPrevFourWeeks()
@@ -228,9 +227,7 @@ function DKP:_ProcessEntryBatch(batch)
             local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
             local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
             shouldContinue = dbAdler ~= eAdler
-            if PDKP:IsDev() then
-                PDKP.CORE:Print('Skipping Entry')
-            end
+            PDKP:PrintD('Skipping Entry')
         end
 
         -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.

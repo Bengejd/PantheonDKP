@@ -68,17 +68,13 @@ end
 function Ledger:CheckRequestKeys(message, sender)
     local isOfficer = Guild:IsMemberOfficer(sender)
     if self.syncLocked and not isOfficer then
-        if PDKP:IsDev() then
-            PDKP.CORE:Print('Sync is locked, returning')
-        end
+        PDKP:PrintD('Sync is locked, returning')
         return
     end
     if not isOfficer then
         self.syncLocked = true
         self:_StartSyncUnlockTimer()
-        if PDKP:IsDev() then
-            PDKP.CORE:Print('DEV: Locking sync responses for 3 minutes')
-        end
+        PDKP:PrintD('Locking sync responses for 3 minutes')
     end
     local requestData = CommsManager:DataDecoder(message)
 
@@ -130,10 +126,8 @@ function Ledger:CheckRequestKeys(message, sender)
         missing_keys = self:GetLastFourWeekEntryIds()
     end
 
-    if PDKP:IsDev() then
-        PDKP.CORE:Print('DEV: RequestHasKeys', requestHasKeys)
-        PDKP.CORE:Print('DEV: missing_keys Empty', Utils:tEmpty(missing_keys))
-    end
+    PDKP:PrintD('requestHasKeys', requestHasKeys)
+    PDKP:PrintD('missing_keys Empty', Utils:tEmpty(missing_keys))
 
     local entries = {}
     for _, entry_id in pairs(missing_keys) do
@@ -148,9 +142,7 @@ function Ledger:CheckRequestKeys(message, sender)
     end
 
     if Utils:tEmpty(entries) then
-        if PDKP:IsDev() then
-            PDKP.CORE:Print('DEV: Entries were empty, returning')
-        end
+        PDKP:PrintD('Entries were empty, returning')
         return
     end
     CommsManager:SendCommsMessage('SyncAd', entries)
@@ -176,7 +168,7 @@ function Ledger:GetLastFourWeeks()
         self.weekHashes[i] = self:_GetWeekTable(i)
         if PDKP:IsDev() then
             for key, v in pairs(self.weekHashes[i]) do
-                print(key, #v)
+                PDKP:PrintD('WeekEntries', i, key, #v)
             end
         end
     end
@@ -219,9 +211,7 @@ function Ledger:ImportEntry(entry)
     self:_GetOfficerTable(weekNumber, officer)
 
     if tContains(LEDGER[weekNumber][officer], entry.id) then
-        if PDKP:IsDev() then
-            PDKP.CORE:Print('Entry already exists')
-        end
+        PDKP:PrintD('Entry already exists')
         return false
     end
 

@@ -91,7 +91,7 @@ end
 
 function Comm:_Setup()
     local p = self.ogPrefix
-    -- Comm Channel, SendTo, Prio, CallbackFunc, OnCommReceivedFunc
+    -- Comm: Channel, SendTo, Prio, CallbackFunc, OnCommReceivedFunc
     local commParams = {
         -- Sync Section
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds/Deletes
@@ -111,25 +111,9 @@ function Comm:_Setup()
         ['bidSubmit'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['bidCancel'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
 
+        -- DKP Section
         ['DkpOfficer'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_SetDKPOfficer },
         ['WhoIsDKP'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_GetDKPOfficer },
-
-        --['GUILD'] = {
-        --    --['V2PushReceive'] = { ['self']=true, ['combat']=false, }, -- Officer check -- When a new push is received.
-        --    --['V2EntryDelete'] = { ['self']=true, ['combat']=true, }, -- Officer check -- When an entry is deleted.
-        --    --['V2SyncRes']= { }, -- When an officer's sync request goes through.
-        --
-        --    --['V2Version']= { }, -- When someone requests the latest version of the addon.
-        --    --['V2SyncProgress']= { ['self']=false, ['combat']=false, },
-        --},
-        --['RAID'] = {
-        --    --['ClearBids']= { ['combat']=true, }, -- Officer check -- When the DKP Officer clears the Shrouding Window.
-        --    --['UpdateBid']= { ['combat']=true, }, -- Officer check -- When someone new shrouds, comes from DKP Officer.
-        --    --['V2WhoIsDKP']= { ['self']=false, ['combat']=true, }, -- Requests who the DKP officer is.
-        --},
-        --['OFFICER'] = {
-        --    --['V2SyncReq'] = {},
-        --},
     }
 
     if commParams[p] then
@@ -152,9 +136,7 @@ function Comm:_InitializeCache()
 end
 
 function Comm:_ProcessCache(frameCache)
-    if PDKP:IsDev() then
-        PDKP.CORE:Print('Processing', #self.cache, 'cached messages')
-    end
+    PDKP:PrintD('Processing', #self.cache, 'cached messages')
 
     for i = #self.cache, 1, -1 do
         local transmission = self.cache[i]
