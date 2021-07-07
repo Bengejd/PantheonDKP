@@ -139,8 +139,6 @@ function Ledger:CheckRequestKeys(message, sender)
     for _, entry_id in pairs(missing_keys) do
         local entry = MODULES.DKPManager:GetEntryByID(entry_id)
 
-        print(entry_id, entry)
-
         if entry ~= nil then
             local save_details = entry:GetSaveDetails()
             entries[entry_id] = save_details

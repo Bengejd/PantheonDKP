@@ -188,7 +188,6 @@ function DKP:AwardBossKill(boss_name)
         if member then
             tinsert(dummy_entry['names'], member.name)
         elseif true then
-            --print('FUCK', memberName)
         end
     end
 

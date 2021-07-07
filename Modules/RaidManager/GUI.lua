@@ -312,8 +312,6 @@ function PDKP_RaidTools_TextValidFunc(box)
         end,
     }
 
-    print(boxID, text)
-
     if box_funcs[boxID] then
         return box_funcs[boxID]()
     end

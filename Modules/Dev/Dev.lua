@@ -71,8 +71,6 @@ function Dev:DecayTest()
         print(Utils:FormatTextColor('OXFORD CAUGHT UP TO MARIKU on week: ' .. tostring(decayCount), MODULES.Constants.WARNING))
     end
 
-    print(decayCount)
-
     MODULES.DKPManager:_UpdateTables()
 end
 

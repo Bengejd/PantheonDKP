@@ -88,7 +88,6 @@ function Dialogs:Initialize()
                 end,
                 OnAlt = function(_)
                     -- Cancel
-                    print('Cancel clicked')
                 end,
                 timeout = 0,
                 whileDead = true,
