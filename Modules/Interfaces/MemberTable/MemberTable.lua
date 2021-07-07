@@ -175,7 +175,11 @@ function MemberTable:TableSearch()
     eb:SetAutoFocus(false)
 
     local function toggleClearButton(text)
-        if text == nil or text == "" then clearButton:Hide() else clearButton:Show() end
+        if text == nil or text == "" then
+            clearButton:Hide()
+        else
+            clearButton:Show()
+        end
     end
 
     local function resetSearch()
@@ -183,15 +187,23 @@ function MemberTable:TableSearch()
         toggleClearButton(eb:GetText())
     end
 
-    eb:SetScript("OnEscapePressed", function() resetSearch() end)
-    eb:SetScript("OnEnterPressed", function() resetSearch() end)
+    eb:SetScript("OnEscapePressed", function()
+        resetSearch()
+    end)
+    eb:SetScript("OnEnterPressed", function()
+        resetSearch()
+    end)
     eb:SetScript("OnTextChanged", function()
         local text = eb:GetText()
         toggleClearButton(text)
         PDKP.memberTable:SearchChanged(text)
     end)
-    eb:SetScript("OnEditFocusLost", function() toggleClearButton(eb:GetText()) end)
-    eb:SetScript("OnEditFocusGained", function() toggleClearButton(eb:GetText()) end)
+    eb:SetScript("OnEditFocusLost", function()
+        toggleClearButton(eb:GetText())
+    end)
+    eb:SetScript("OnEditFocusGained", function()
+        toggleClearButton(eb:GetText())
+    end)
 
     clearButton:SetScript("OnClick", function()
         eb:SetText("")
@@ -287,7 +299,9 @@ function MemberTable:Filters()
             local cb = GUtils:createCheckButton(opts)
 
             -- Clear all points, to reassign their points to the previous section's checkbutton.
-            if rowKey >= 2 then cb:ClearAllPoints(); end
+            if rowKey >= 2 then
+                cb:ClearAllPoints();
+            end
 
             if rowKey == 2 then
                 cb:SetPoint("LEFT", self.FilterButtons[#self.FilterButtons - 4], "LEFT", 0, -30);
@@ -338,6 +352,5 @@ function MemberTable:Filters()
 
     return f;
 end
-
 
 GUI.MemberScrollTable = MemberTable;

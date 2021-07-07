@@ -19,10 +19,10 @@ local tabName = 'view_loot_button';
 local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
-    { ['variable']='formattedOfficer', ['display']='Officer', },
-    { ['variable']='historyText', ['display']='Reason', ['OnClick']=true,},
-    { ['variable']='formattedNames', ['display']='Members', ['OnClick']=true, },
-    { ['variable']='change_text', ['display']='Amount'}
+    { ['variable'] = 'formattedOfficer', ['display'] = 'Officer', },
+    { ['variable'] = 'historyText', ['display'] = 'Reason', ['OnClick'] = true, },
+    { ['variable'] = 'formattedNames', ['display'] = 'Members', ['OnClick'] = true, },
+    { ['variable'] = 'change_text', ['display'] = 'Amount' }
 }
 
 local ROW_MARGIN_TOP = 16 -- The margin between rows.
@@ -64,7 +64,7 @@ function LootTable:Initialize()
     local scrollContent = scrollFrame.content;
     local scrollBar = scrollFrame.scrollBar
 
-    scrollBar.bg:SetColorTexture(unpack({0, 0, 0, 1}))
+    scrollBar.bg:SetColorTexture(unpack({ 0, 0, 0, 1 }))
 
     local sb = CreateFrame("Button", "$parent_load_more_btn", self.frame, "UIPanelButtonTemplate")
     sb:SetSize(80, 22) -- width, height
@@ -85,7 +85,9 @@ function LootTable:Initialize()
         toggleSB()
     end)
 
-    self.frame.content:SetScript("OnShow", function() toggleSB() end)
+    self.frame.content:SetScript("OnShow", function()
+        toggleSB()
+    end)
 
     self.scrollContent = scrollContent;
 
@@ -104,7 +106,7 @@ function LootTable:Initialize()
     --self.appliedFilters['raid'] = Settings.current_raid
 
     --self.previous_raid = Settings.current_raid;
-    for i=1, #MODULES.Constants.RAID_NAMES do
+    for i = 1, #MODULES.Constants.RAID_NAMES do
         local raid_name = MODULES.Constants.RAID_NAMES[i]
         self.collapsed_raids[raid_name] = true
     end
@@ -126,8 +128,7 @@ function LootTable:Initialize()
 
     self.frame:SetScript("OnShow", function()
         if self.updateNextOpen then
-            --- hmmmm. Table size isn't being updated properly.
-            self:_OnLoad()
+            --- hmmmm. Table size isn't being updated properly. self:_OnLoad()
             self:RefreshData(true)
             self:HistoryUpdated(true)
             self:CollapseAllRows(self.collapsed)
@@ -155,7 +156,7 @@ function LootTable:Initialize()
 end
 
 function LootTable:CollapseAllRows(collapse)
-    for i=1, #self.rows do
+    for i = 1, #self.rows do
         local row = self.rows[i]
         row:collapse_frame(collapse)
     end
@@ -166,7 +167,7 @@ function LootTable:CollapseAllRows(collapse)
 end
 
 function LootTable:ToggleRows()
-    for i=1, #self.displayedRows do
+    for i = 1, #self.displayedRows do
         local row = self.displayedRows[i]
         row:collapse_frame(row.collapsed)
     end
@@ -178,9 +179,11 @@ function LootTable:RefreshData(justData)
     wipe(self.entry_keys)
     wipe(self.entries)
 
-    self.entry_keys = DKPManager:GetEntryKeys(true, {'Boss Kill', 'Other'});
+    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Boss Kill', 'Other' });
 
-    for i=1, #self.entry_keys do self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]) end
+    for i = 1, #self.entry_keys do
+        self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])
+    end
 
     if justData == nil then
         self:RefreshTable()
@@ -195,7 +198,7 @@ end
 
 function LootTable:RefreshTable()
     wipe(self.displayedRows)
-    for i=1, #self.entry_keys do
+    for i = 1, #self.entry_keys do
         local row = self.rows[i]
         row:Hide()
         row:ClearAllPoints()
@@ -218,33 +221,43 @@ end
 function LootTable:HistoryUpdated(selectedUpdate)
     -- Don't do unnecessary updates.
 
-    if self.table_init and not selectedUpdate then return end
+    if self.table_init and not selectedUpdate then
+        return
+    end
     --if self.previous_raid == Settings.current_raid and self.table_init and not selectedUpdate then return end
 
     --self.appliedFilters['raid']=Settings.current_raid
 
     local selected = PDKP.memberTable.selected;
-    if #selected > 0 then self.appliedFilters['selected']=selected;
-    elseif #selected == 0 then self.appliedFilters['selected'] = nil;
+    if #selected > 0 then
+        self.appliedFilters['selected'] = selected;
+    elseif #selected == 0 then
+        self.appliedFilters['selected'] = nil;
     end
     self:UpdateTitleText(selected)
 
     local collapse_rows = false
     --if self.collapsed ~= self.collapsed_raids[Settings.current_raid] then collapse_rows = true end
     --self.collapsed = self.collapsed_raids[Settings.current_raid];
-    if collapse_rows then self:CollapseAllRows(self.collapsed) end
+    if collapse_rows then
+        self:CollapseAllRows(self.collapsed)
+    end
 
     self:RefreshTable()
 
     self:ToggleRows()
 
-    if not self.table_init then self.table_init = true end
+    if not self.table_init then
+        self.table_init = true
+    end
     --self.previous_raid = Settings.current_raid
 end
 
 function LootTable:UpdateTitleText(selected)
     local text;
-    if #selected == 1 then text = selected[1] .. ' Loot History'; end
+    if #selected == 1 then
+        text = selected[1] .. ' Loot History';
+    end
     self.frame.title:SetText(text)
 end
 
@@ -338,19 +351,24 @@ function LootTable:_OnLoad()
             local self = row.super;
             local dataObj = row.dataObj;
             row.isFiltered = false;
-            if dataObj['deleted'] == true then row.isFiltered = true end
+            if dataObj['deleted'] == true then
+                row.isFiltered = true
+            end
 
             local selected = self.appliedFilters['selected']
 
-
-
             for filter, val in pairs(self.appliedFilters or {}) do
-                if row.isFiltered then break end -- No need to continue the loop.
-                if filter == 'raid' then row.isFiltered = row.dataObj['raid'] ~= val
+                if row.isFiltered then
+                    break
+                end -- No need to continue the loop.
+                if filter == 'raid' then
+                    row.isFiltered = row.dataObj['raid'] ~= val
                 elseif filter == 'selected' and selected ~= nil and #selected == 1 then
                     for _, n in pairs(selected) do
                         row.isFiltered = not row.dataObj:IsMemberInEntry(n)
-                        if row.isFiltered then break end
+                        if row.isFiltered then
+                            break
+                        end
                     end
                 end
             end
@@ -363,10 +381,14 @@ function LootTable:_OnLoad()
                 local cf = c.click_frame
                 if row.content:IsVisible() then
                     c:Show()
-                    if cf then cf:Show() end
+                    if cf then
+                        cf:Show()
+                    end
                 else
                     c:Hide()
-                    if cf then cf:Hide() end
+                    if cf then
+                        cf:Hide()
+                    end
                 end
             end
         end
@@ -374,11 +396,13 @@ function LootTable:_OnLoad()
         function row:UpdateRowValues(entry)
             local self = row.super;
 
-            if entry then row.dataObj = entry end
+            if entry then
+                row.dataObj = entry
+            end
             row.max_height = 0
             row:SetID(row.dataObj['id'])
 
-            for key=1, #ROW_COL_HEADERS do
+            for key = 1, #ROW_COL_HEADERS do
                 local header = ROW_COL_HEADERS[key]
                 local variable, displayName = header['variable'], header['display']
                 local col = row.cols[key]
@@ -396,7 +420,9 @@ function LootTable:_OnLoad()
                         cf:SetAllPoints(col)
                         cf.value = val;
                         cf.label = header['display']
-                        cf:SetScript("OnMouseUp", function(frame, buttonType) self:_OnClick(frame, buttonType) end)
+                        cf:SetScript("OnMouseUp", function(frame, buttonType)
+                            self:_OnClick(frame, buttonType)
+                        end)
                         col.click_frame = cf;
                     end
                 end
@@ -405,7 +431,7 @@ function LootTable:_OnLoad()
                 if key == 1 then
                     col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
                 else
-                    col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
+                    col:SetPoint("TOPLEFT", row.cols[key - 1], "BOTTOMLEFT", 0, -2)
                 end
                 col:SetText(displayName .. ": " .. val)
 
@@ -433,18 +459,22 @@ function LootTable:_OnLoad()
             local c_text = c_officer .. c_sep .. c_name .. c_sep .. c_hist
 
             collapse_text:SetText(c_text)
-            if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
+            if collapse_text:GetStringWidth() > 325 then
+                collapse_text:SetWidth(315)
+            end
         end
 
         row:SetScript("OnMouseDown", function()
-            if row.collapsed == true then collapse_button:Click() end
+            if row.collapsed == true then
+                collapse_button:Click()
+            end
         end)
 
         row:UpdateRowValues()
 
         rawset(t, i, row)
         return row
-    end})
+    end })
 
     self.rows = rows
 end
@@ -454,7 +484,9 @@ function LootTable:_OnClick(frame, buttonType)
     local dataObj = parent.dataObj
     local item = dataObj.item
 
-    if not Utils:IsItemLink(item) then return end
+    if not Utils:IsItemLink(item) then
+        return
+    end
 
     if buttonType == 'LeftButton' then
         if GameTooltip:GetItem() then

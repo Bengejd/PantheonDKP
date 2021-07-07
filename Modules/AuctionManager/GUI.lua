@@ -43,7 +43,7 @@ function AuctionGUI:Initialize()
         startX / sourceWidth,
         (startX + width) / sourceWidth,
         startY / sourceHeight,
-        (startY+height) / sourceHeight
+        (startY + height) / sourceHeight
     }
 
     local tex = f:CreateTexture(nil, 'BACKGROUND')
@@ -95,7 +95,7 @@ function AuctionGUI:Initialize()
         f.current_bid:SetText("")
         f.cancel_btn:SetEnabled(false)
         f.cancel_btn:Hide()
-        MODULES.CommsManager:SendCommsMessage('CancelBid', {['cancelBid'] = true})
+        MODULES.CommsManager:SendCommsMessage('CancelBid', { ['cancelBid'] = true })
     end)
     cb:SetScript("OnShow", function()
         if f.current_bid.getValue() > 0 then
@@ -136,7 +136,9 @@ function AuctionGUI:Initialize()
         ['hide'] = false,
         ['max_chars'] = 5,
         ['textValidFunc'] = function(box)
-            if box == nil then box = bid_box end
+            if box == nil then
+                box = bid_box
+            end
             local box_val = box.getValue()
             local curr_bid_val = f.current_bid.getValue()
             local myDKP = MODULES.DKPManager:GetMyDKP()
@@ -318,7 +320,7 @@ function AuctionGUI:CreateNewBidder(bid_info)
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
     local bidFound, bidIndex = false, nil
 
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local bidder = bidders[i]
         if bidder.name == bid_info['name'] then
             MODULES.AuctionManager.CURRENT_BIDDERS[i].bid = bid_info['bid']
@@ -355,7 +357,7 @@ function AuctionGUI:RefreshBidders()
         return f
     end
 
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local prospect_frame = createProspectFrame()
         local prospect_info = bidders[i]
 
@@ -380,11 +382,11 @@ end
 
 function AuctionGUI:CancelBidder(bidder)
     local bidders = MODULES.AuctionManager.CURRENT_BIDDERS
-    for i=1, #bidders do
+    for i = 1, #bidders do
         local b = bidders[i]
         if b.name == bidder then
             MODULES.AuctionManager.CURRENT_BIDDERS[i] = nil
-            break;
+            break ;
         end
     end
     self:RefreshBidders()
@@ -401,9 +403,7 @@ function AuctionGUI:StartAuction(itemLink, itemName, itemTexture, startedBy)
     end
 
     self.frame:Show()
-    MODULES.AuctionManager.CurrentAuctionInfo = {['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy}
+    MODULES.AuctionManager.CurrentAuctionInfo = { ['itemName'] = itemName, ['itemLink'] = itemLink, ['itemTexture'] = itemTexture, ['startedBy'] = startedBy }
 end
-
-
 
 GUI.AuctionGUI = AuctionGUI

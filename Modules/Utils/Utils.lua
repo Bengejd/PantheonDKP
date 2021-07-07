@@ -267,14 +267,16 @@ function Utils:GetMyName()
 end
 
 function Utils:RemoveServerName(name)
-    if Utils:IsEmpty(name) then return nil end;
+    if Utils:IsEmpty(name) then
+        return nil
+    end ;
     return strsplit('-', name)
 end
 
 function Utils:SplitString(string, delim)
     local arr = { split(delim, string) }
 
-    for i=1, #arr do
+    for i = 1, #arr do
         local v = arr[i]
         arr[i] = trim(v, " \t\r") -- Trims  spaces, tabs or newlines from the left or right of the string.
     end

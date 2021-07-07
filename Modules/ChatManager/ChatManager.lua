@@ -11,7 +11,9 @@ local Chat = {}
 local trim, lower, contains = strtrim, strlower, tContains
 
 function Chat:Initialize()
-    PDKP.CORE:RegisterChatCommand("pdkp", function(msg) Chat:_HandleSlashCommands(msg) end)
+    PDKP.CORE:RegisterChatCommand("pdkp", function(msg)
+        Chat:_HandleSlashCommands(msg)
+    end)
 
     self.eventsFrame = CreateFrame("Frame", "PDKP_Chat_EventsFrame")
     self.eventsFrame:SetScript("OnEvent", Chat.HandleChatEvent)
@@ -65,48 +67,86 @@ function Chat:UnregisterEvent(eventName)
     self.eventsFrame:UnregisterEvent(eventName)
 end
 
-
 --- Slash commands stuff
 function Chat:_HandleSlashCommands(msg)
-    if msg == "" then msg = 'pdkp' end --- Default command doesn't display in the msg.
+    if msg == "" then
+        msg = 'pdkp'
+    end --- Default command doesn't display in the msg.
 
     local command = PDKP.CORE:GetArgs(msg)
 
     local SLASH_COMMANDS = {
         -- Help Handlers
-        ['help'] = function() Chat:_DisplayHelp() end,
+        ['help'] = function()
+            Chat:_DisplayHelp()
+        end,
 
         -- Main Handlers
-        ['pdkp'] = function() MODULES.Main:HandleSlashCommands(msg) end,
-        ['show'] = function() MODULES.Main:HandleSlashCommands(msg) end,
-        ['hide'] = function() MODULES.Main:HandleSlashCommands(msg) end,
+        ['pdkp'] = function()
+            MODULES.Main:HandleSlashCommands(msg)
+        end,
+        ['show'] = function()
+            MODULES.Main:HandleSlashCommands(msg)
+        end,
+        ['hide'] = function()
+            MODULES.Main:HandleSlashCommands(msg)
+        end,
 
         -- Auction Handlers
-        ['bid'] = function() MODULES.AuctionManager:HandleSlashCommands(msg) end,
-        ['shroud'] = function() MODULES.AuctionManager:HandleSlashCommands(msg) end,
-        ['thirst'] = function() MODULES.AuctionManager:HandleSlashCommands(msg) end,
-        [''] = function()  end,
-        [''] = function()  end,
-        [''] = function()  end,
+        ['bid'] = function()
+            MODULES.AuctionManager:HandleSlashCommands(msg)
+        end,
+        ['shroud'] = function()
+            MODULES.AuctionManager:HandleSlashCommands(msg)
+        end,
+        ['thirst'] = function()
+            MODULES.AuctionManager:HandleSlashCommands(msg)
+        end,
+        [''] = function()
+        end,
+        [''] = function()
+        end,
+        [''] = function()
+        end,
 
         -- DKP Handlers
-        ['LoadMoreEntries'] = function() MODULES.DKPManager:LoadPrevFourWeeks() end,
+        ['LoadMoreEntries'] = function()
+            MODULES.DKPManager:LoadPrevFourWeeks()
+        end,
 
         -- Database Handlers
-        ['databaseReset'] = function() MODULES.Database:ResetAllDatabases() end,
+        ['databaseReset'] = function()
+            MODULES.Database:ResetAllDatabases()
+        end,
     }
-    if SLASH_COMMANDS[command] then return SLASH_COMMANDS[command]() end
+    if SLASH_COMMANDS[command] then
+        return SLASH_COMMANDS[command]()
+    end
 
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
-        ['whoTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
-        ['databasePopulate'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
-        ['largeDataSync'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
-        ['decayTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
-        ['bossKillTest'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
-        ['testAuctionTimer'] = function() MODULES.Dev:HandleSlashCommands(msg) end,
+        ['whoTest'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['databasePopulate'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['largeDataSync'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['decayTest'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['bossKillTest'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['testAuctionTimer'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
     }
-    if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then return DEV_SLASH_COMMANDS[command]() end
+    if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
+        return DEV_SLASH_COMMANDS[command]()
+    end
 end
 
 function Chat:_DisplayHelp()
@@ -129,13 +169,12 @@ function Chat:_DisplayHelp()
 
     print(" ")
 
-    for i=1, #helpCommands do
+    for i = 1, #helpCommands do
         local helpCmd = helpCommands[i]
         local cmd = CMD_COLOR .. helpCmd['cmd'] .. ':|r'
         local msg = slash_addon .. ' ' .. cmd .. ' ' .. helpCmd['desc']
         print(msg)
     end
 end
-
 
 MODULES.ChatManager = Chat

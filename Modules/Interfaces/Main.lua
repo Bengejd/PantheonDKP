@@ -13,7 +13,9 @@ local tinsert = tinsert
 local UIParent, UISpecialFrames = UIParent, UISpecialFrames
 
 function Main:Initialize()
-    if pdkp_frame ~= nil then return end
+    if pdkp_frame ~= nil then
+        return
+    end
 
     local f = CreateFrame("Frame", "pdkp_frame", UIParent)
     f:SetFrameStrata("HIGH");
@@ -54,7 +56,9 @@ function Main:Initialize()
         { ['dir'] = 'TOPLEFT', ['file'] = 'BG.tga', }
     }
 
-    for _, t in pairs(textures) do createTextures(t) end
+    for _, t in pairs(textures) do
+        createTextures(t)
+    end
 
     f:SetPoint("TOP", 0, 0)
 
@@ -99,9 +103,15 @@ function Main:Initialize()
 end
 
 function Main:HandleSlashCommands(msg)
-    if pdkp_frame == nil then return end
+    if pdkp_frame == nil then
+        return
+    end
 
-    if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+    if pdkp_frame:IsVisible() then
+        pdkp_frame:Hide()
+    else
+        pdkp_frame:Show()
+    end
 end
 
 function Main:SetupPushProgress()

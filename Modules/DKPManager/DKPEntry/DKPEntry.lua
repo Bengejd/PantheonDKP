@@ -132,7 +132,7 @@ end
 function entry:RemoveMember(name)
     local memberIndex;
 
-    for i=1, #self.names do
+    for i = 1, #self.names do
         if self.names[i] == name then
             memberIndex = i
         end
@@ -243,11 +243,11 @@ end
 
 function entry:_GetCollapsedHistoryText()
     local texts = {
-        ['On Time Bonus']= self.reason,
-        ['Completion Bonus']= self.reason,
-        ['Unexcused Absence']= self.reason,
-        ['Boss Kill']= self.boss,
-        ['Item Win']= 'Item Win - ' .. self.item,
+        ['On Time Bonus'] = self.reason,
+        ['Completion Bonus'] = self.reason,
+        ['Unexcused Absence'] = self.reason,
+        ['Boss Kill'] = self.boss,
+        ['Item Win'] = 'Item Win - ' .. self.item,
         ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
         ['Decay'] = 'Weekly Decay'
     }

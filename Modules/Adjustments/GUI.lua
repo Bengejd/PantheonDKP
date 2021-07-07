@@ -15,7 +15,9 @@ Adjust.dropdowns = {}
 Adjust.editBoxes = {}
 
 function Adjust:Initialize()
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
 
     local tabNames = GUI.TabController.tab_names
 
@@ -77,15 +79,15 @@ function Adjust:Initialize()
 
     --- Amount section
     local amount_opts = {
-        ['name']='amount',
-        ['parent']=mainDD,
-        ['title']='Amount',
-        ['multi']=false,
-        ['max_chars']=7,
-        ['numeric']=false,
+        ['name'] = 'amount',
+        ['parent'] = mainDD,
+        ['title'] = 'Amount',
+        ['multi'] = false,
+        ['max_chars'] = 7,
+        ['numeric'] = false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Always',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc'] = self.DropdownChanged
     }
     amount_box = GUtils:createEditBox(amount_opts)
     amount_box.frame:SetWidth(75)
@@ -96,14 +98,14 @@ function Adjust:Initialize()
 
     --- Item Name Box Section
     local item_opts = {
-        ['name']= 'item',
-        ['parent']= mainDD,
-        ['title']='Item Name',
-        ['multi']=false,
-        ['numeric']=false,
+        ['name'] = 'item',
+        ['parent'] = mainDD,
+        ['title'] = 'Item Name',
+        ['multi'] = false,
+        ['numeric'] = false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Item Win',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc'] = self.DropdownChanged
     }
     item_box = GUtils:createEditBox(item_opts)
     item_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -113,14 +115,14 @@ function Adjust:Initialize()
 
     --- Other Edit Box Section
     local other_opts = {
-        ['name']= 'other',
-        ['parent']= mainDD,
-        ['title']='Other',
-        ['multi']=true,
-        ['numeric']=false,
+        ['name'] = 'other',
+        ['parent'] = mainDD,
+        ['title'] = 'Other',
+        ['multi'] = true,
+        ['numeric'] = false,
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Other',
-        ['textValidFunc']=self.DropdownChanged
+        ['textValidFunc'] = self.DropdownChanged
     }
     other_box = GUtils:createEditBox(other_opts)
     other_box:SetPoint("LEFT", mainDD, "RIGHT", 20, 0)
@@ -148,23 +150,27 @@ function Adjust:Initialize()
 end
 
 function Adjust:_CreateEntryPreview(tf)
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
 
     local f = GUtils:createBackdropFrame('entry_preview', tf, 'Entry Preview');
     f:SetPoint("TOPLEFT", tf, "TOPLEFT", 10, -20)
     f:SetPoint("TOPRIGHT", tf, "TOPRIGHT", -10, -20)
     f:SetSize(340, 250);
 
-    local PREVIEW_HEADERS = {'Officer', 'Reason', 'Amount', 'Members'}
+    local PREVIEW_HEADERS = { 'Officer', 'Reason', 'Amount', 'Members' }
 
     local padding = 20
 
-    for i=1, #PREVIEW_HEADERS do
+    for i = 1, #PREVIEW_HEADERS do
         local head = PREVIEW_HEADERS[i]
         local label = f.content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
 
         label.setVal = function(_, value)
-            if value == nil or value == '' then return label:resetVal() end
+            if value == nil or value == '' then
+                return label:resetVal()
+            end
             label:SetText(head .. ': ' .. value)
         end
         label.resetVal = function()
@@ -177,12 +183,14 @@ function Adjust:_CreateEntryPreview(tf)
         if i == 1 then
             label:SetPoint("TOPLEFT", f.content, "TOPLEFT", 5, -5)
         else
-            label:SetPoint("TOPLEFT", f.children[i -1], "BOTTOMLEFT", 0, -2)
+            label:SetPoint("TOPLEFT", f.children[i - 1], "BOTTOMLEFT", 0, -2)
         end
 
         label:setDefault()
 
-        if head == 'Members' then label:SetMaxLines(12) end
+        if head == 'Members' then
+            label:SetMaxLines(12)
+        end
 
         label:SetWidth(f.content:GetWidth() - padding)
 
@@ -199,7 +207,9 @@ function Adjust:_CreateEntryPreview(tf)
 end
 
 function Adjust:UpdatePreview()
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
 
     local entry = MODULES.Adjustment.entry
     local isValid = entry:IsValid()
@@ -225,10 +235,14 @@ end
 
 -- Just helps break up everything, gathering all of the data into one place before shipping it off.
 function Adjust:DropdownChanged()
-    if not PDKP.canEdit then return end
+    if not PDKP.canEdit then
+        return
+    end
     --if self.entry_preview == nil then return end
 
-    if Adjust.entry_details == nil then return end
+    if Adjust.entry_details == nil then
+        return
+    end
 
     --- There will always be either 2 or 3 valid adjustments.
     local valid_adjustments = {}
@@ -278,7 +292,7 @@ function Adjust:DropdownChanged()
 end
 
 function Adjust:InsertItemLink(itemLink)
-    for i=1, #self.editBoxes do
+    for i = 1, #self.editBoxes do
         local eb = self.editBoxes[i]
         if eb.uniqueID == 'item' then
             eb:SetText("");
@@ -287,6 +301,5 @@ function Adjust:InsertItemLink(itemLink)
         end
     end
 end
-
 
 GUI.Adjustment = Adjust

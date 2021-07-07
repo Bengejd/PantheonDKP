@@ -92,7 +92,7 @@ function Ledger:CheckRequestKeys(message, sender)
 
             if myLastEntry > theirLastEntry then
                 local entry_keys = self:_GetEntriesBetweenRange(weekNumber, officerName, theirLastEntry, myLastEntry)
-                for i=1, #entry_keys do
+                for i = 1, #entry_keys do
                     table.insert(missing_keys, entry_keys[i])
                 end
             elseif officerTable[theirLastEntry] ~= myOfficerTable[myLastEntry] then
@@ -147,7 +147,7 @@ end
 
 function Ledger:GetLastFourWeeks()
     local fourWeeksAgo = self.weekNumber - 4
-    for i=fourWeeksAgo, self.weekNumber do
+    for i = fourWeeksAgo, self.weekNumber do
         self.weekHashes[i] = self:_GetWeekTable(i)
     end
 end
@@ -175,7 +175,7 @@ function Ledger:ImportEntry(entry)
     local hashMakeup = { strsplit("__", entry.hash) }
     local tbl = {}
 
-    for i=1, #hashMakeup do
+    for i = 1, #hashMakeup do
         if hashMakeup[i] ~= "" then
             table.insert(tbl, hashMakeup[i])
         end
@@ -199,7 +199,7 @@ function Ledger:ImportEntry(entry)
 
     --self.weekHashes[weekNumber][officer][index] = entry.id
     table.insert(LEDGER[weekNumber][officer], entry.id)
-    table.sort(LEDGER[weekNumber][officer], function(a,b)
+    table.sort(LEDGER[weekNumber][officer], function(a, b)
         return a < b
     end)
     return true
@@ -230,7 +230,7 @@ end
 
 function Ledger:_GetEntriesBetweenRange(weekNumber, officerName, startIndex, endIndex)
     local entry_keys = {}
-    for i=startIndex + 1, endIndex do
+    for i = startIndex + 1, endIndex do
         local entry_key = LEDGER[weekNumber][officerName][i]
         table.insert(entry_keys, entry_key)
     end

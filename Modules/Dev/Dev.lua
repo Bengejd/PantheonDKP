@@ -16,7 +16,9 @@ local wipe = wipe
 local decayCount = 0
 
 function Dev:HandleSlashCommands(msg)
-    if not PDKP:IsDev() then return end
+    if not PDKP:IsDev() then
+        return
+    end
 
     local cmd, arg1, arg2 = PDKP.CORE:GetArgs(msg, 3)
 
@@ -59,7 +61,7 @@ function Dev:DecayTest()
             PDKP.CORE:Print('50% Decay')
         end
 
-        member1.dkp['total'] = math.floor((m1DKP + diffOffset) * 0.9 )
+        member1.dkp['total'] = math.floor((m1DKP + diffOffset) * 0.9)
         member2.dkp['total'] = math.floor((m2DKP) * 0.9)
     end
 
@@ -129,7 +131,7 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     -- Random epoch timestamp between January 1st, 2021 and now.
     local entry_id = random(1609480800, GetServerTime())
 
-    local adjust_reasons = {'Boss Kill', 'Item Win', 'Other'}
+    local adjust_reasons = { 'Boss Kill', 'Item Win', 'Other' }
     local reason = adjust_reasons[random(3)]
 
     local reason_dkp = {
@@ -140,7 +142,7 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     local dkp_change = reason_dkp[reason]
 
     local random_names = {}
-    for i=member_index_start, member_index_end do
+    for i = member_index_start, member_index_end do
         tinsert(random_names, memberNames[i])
     end
 

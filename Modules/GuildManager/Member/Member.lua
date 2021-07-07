@@ -75,7 +75,9 @@ end
 
 function Member:_UpdateDKP(entry)
     local amount = entry.sd.dkp_change
-    if amount == nil then return end
+    if amount == nil then
+        return
+    end
 
     if entry.reason == 'Decay' then
         if self.dkp['entries'] == nil or #self.dkp['entries'] <= 30 or not self:IsRaidReady() then

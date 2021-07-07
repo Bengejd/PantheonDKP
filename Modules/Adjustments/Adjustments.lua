@@ -10,7 +10,9 @@ local Adjust = {}
 Adjust.entry = {}
 
 function Adjust:Update(adjustments)
-    if tonumber(adjustments['amount']) == nil then return end
+    if tonumber(adjustments['amount']) == nil then
+        return
+    end
 
     local temp_entry = {
         ['reason'] = adjustments['reason'],

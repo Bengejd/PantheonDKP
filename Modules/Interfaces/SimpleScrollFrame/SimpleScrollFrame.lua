@@ -15,7 +15,9 @@ local tinsert = table.insert
 local CreateFrame, UIParent = CreateFrame, UIParent
 
 function SimpleScrollFrame:FixScrollOnUpdate()
-    if self.updateLock then return end
+    if self.updateLock then
+        return
+    end
     self.updateLock = true
     local status = self.status or self.localstatus
     local height, viewheight = self.scrollFrame:GetHeight(), self.content:GetHeight()
@@ -44,7 +46,9 @@ function SimpleScrollFrame:FixScrollOnUpdate()
         end
 
         local value = (offset / (viewheight - height) * 1000)
-        if value > 1000 then value = 1000 end
+        if value > 1000 then
+            value = 1000
+        end
         self.scrollBar:SetValue(value)
         self:SetScroll(value)
         if value < 1000 then
@@ -65,8 +69,10 @@ function SimpleScrollFrame:MoveScroll(value)
     if self.scrollBar:IsVisible() then
         local diff = height - viewheight;
         local delta = 1
-        if value < 0 then delta = -1 end
-        self.scrollBar:SetValue(min(max(status.scrollvalue + delta*(1000/(diff/45)), 0), 1000))
+        if value < 0 then
+            delta = -1
+        end
+        self.scrollBar:SetValue(min(max(status.scrollvalue + delta * (1000 / (diff / 45)), 0), 1000))
     end
 end
 
@@ -125,7 +131,8 @@ function SimpleScrollFrame:new(parent)
     sf:SetScript("OnMouseWheel", function(_, value)
         self.waiting_on_update = false;
         self.elapsed_update = 0;
-        self:MoveScroll(value) end)
+        self:MoveScroll(value)
+    end)
 
     -- Handles dragging the scroll bar to change what content is being shown currently.
     -- Only allows content updates every 0.05 seconds to prevent tearing while manually dragging the scroll bar.
@@ -143,7 +150,9 @@ function SimpleScrollFrame:new(parent)
     -- Creates an internal "timer" of sorts, that only updates the frame every 0.05 seconds.
     -- This is necessary, because otherwise the content gets updated every time the slider
     sb:SetScript("OnUpdate", function(_, elapsed)
-        if self.waiting_on_update then self.elapsed_update = self.elapsed_update + elapsed end
+        if self.waiting_on_update then
+            self.elapsed_update = self.elapsed_update + elapsed
+        end
     end)
 
     sf.scrollBar = sb
@@ -184,7 +193,7 @@ function SimpleScrollFrame:new(parent)
     sc.WipeChildren = function(content)
         local children_height = 0
         local childCount = #content.children;
-        for i=1, childCount do
+        for i = 1, childCount do
             local child = content.children[i]
             child:Hide()
             children_height = children_height + child:GetHeight()
@@ -198,14 +207,14 @@ function SimpleScrollFrame:new(parent)
         content:WipeChildren(content) -- Wipe the children first, before doing a mass add.
 
         local children_height = 0
-        for i=1, #frames do
+        for i = 1, #frames do
             local child = frames[i]
             local childCount = #content.children;
             if childCount == 0 then
                 child:SetPoint("TOPLEFT", 0, 0)
                 child:SetPoint("TOPRIGHT", 0, 0)
             else
-                local previous_frame = content.children[i-1]
+                local previous_frame = content.children[i - 1]
                 child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
                 child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
             end
@@ -229,7 +238,7 @@ function SimpleScrollFrame:new(parent)
 
         sc:SetHeight(0)
         local new_height = 0
-        for i=1, #sc.children do
+        for i = 1, #sc.children do
             local child = sc.children[i]
             new_height = child:GetHeight() + new_height;
         end
@@ -243,22 +252,22 @@ function SimpleScrollFrame:new(parent)
         offsetX2 = offsetX2 or -15
 
         local temp_children = {}
-        for i=1, #sc.children do
+        for i = 1, #sc.children do
             local child_frame = sc.children[i]
             if child_frame:IsVisible() then
                 table.insert(temp_children, child_frame)
             end
         end
 
-        for i=1, #temp_children do
+        for i = 1, #temp_children do
             local child_frame = temp_children[i]
             child_frame:ClearAllPoints()
             if i == 1 then
                 child_frame:SetPoint("TOPLEFT", offsetX1, 0)
                 child_frame:SetPoint("TOPRIGHT", offsetX2, 0)
             else
-                child_frame:SetPoint("TOPLEFT", temp_children[i-1], "BOTTOMLEFT", 0, 0)
-                child_frame:SetPoint("TOPRIGHT", temp_children[i-1], "BOTTOMRIGHT", 0, 0)
+                child_frame:SetPoint("TOPLEFT", temp_children[i - 1], "BOTTOMLEFT", 0, 0)
+                child_frame:SetPoint("TOPRIGHT", temp_children[i - 1], "BOTTOMRIGHT", 0, 0)
             end
             sc:SetHeight(sc:GetHeight() + child_frame:GetHeight())
         end

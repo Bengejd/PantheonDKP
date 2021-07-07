@@ -59,7 +59,7 @@ function Comm:VerifyCommSender(message, sender)
 
     if not self.allowed_in_combat and not self.open then
         PDKP.CORE:Print("Message received, waiting for combat to drop to process it.")
-        tinsert(self.cache, {['message'] = message, ['sender'] = sender})
+        tinsert(self.cache, { ['message'] = message, ['sender'] = sender })
         return
     end
 
@@ -144,9 +144,11 @@ function Comm:_InitializeCache()
     self.cache = {};
     self.open = true
     self.eventsFrame = CreateFrame("Frame", nil, UIParent)
-    local COMMS_EVENTS = {'PLAYER_REGEN_DISABLED', 'PLAYER_REGEN_ENABLED'};
+    local COMMS_EVENTS = { 'PLAYER_REGEN_DISABLED', 'PLAYER_REGEN_ENABLED' };
     self.eventsFrame.comm = self
-    for _, eventName in pairs(COMMS_EVENTS) do self.eventsFrame:RegisterEvent(eventName) end
+    for _, eventName in pairs(COMMS_EVENTS) do
+        self.eventsFrame:RegisterEvent(eventName)
+    end
 
     self.eventsFrame:SetScript("OnEvent", PDKP_Comms_OnEvent)
 end
@@ -191,7 +193,7 @@ end
 function PDKP_OnComm_GetDKPOfficer(comm, message, sender)
     local data = MODULES.CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
-        MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true } )
+        MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true })
     end
 end
 
@@ -239,7 +241,9 @@ function PDKP_OnComm_BidSync(comm, message, sender)
         end
 
     elseif self.ogPrefix == 'bidSubmit' then
-        if not MODULES.AuctionManager:CanChangeAuction() then return end
+        if not MODULES.AuctionManager:CanChangeAuction() then
+            return
+        end
         local member = MODULES.GuildManager:GetMemberByName(sender)
         local bidder_info = { ['name'] = member.name, ['bid'] = data, ['dkpTotal'] = member:GetDKP('total') }
         CommsManager:SendCommsMessage('AddBid', bidder_info)
@@ -268,7 +272,9 @@ end
 function PDKP_SyncProgressBar(arg, sent, total)
     local percentage = floor((sent / total) * 100)
 
-    if Comm.start_time == nil then Comm.start_time = time() end
+    if Comm.start_time == nil then
+        Comm.start_time = time()
+    end
 
     if Comm.progress ~= percentage then
         Comm.progress = percentage
@@ -291,9 +297,9 @@ function PDKP_UpdatePushBar(percent, elapsed)
     local eta = (elapsed / percent) * remaining
     eta = math.floor(eta)
 
-    local hours = string.format("%02.f", math.floor(eta/3600));
-    local mins = string.format("%02.f", math.floor(eta/60 - (hours*60)));
-    local secs = string.format("%02.f", math.floor(eta - hours*3600 - mins *60));
+    local hours = string.format("%02.f", math.floor(eta / 3600));
+    local mins = string.format("%02.f", math.floor(eta / 60 - (hours * 60)));
+    local secs = string.format("%02.f", math.floor(eta - hours * 3600 - mins * 60));
 
     local etatext = mins .. ':' .. secs
     local statusText = 'PDKP Push: ' .. percent .. '%' .. ' ETA: ' .. etatext

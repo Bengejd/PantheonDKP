@@ -46,7 +46,9 @@ function Group:Initialize()
 end
 
 function Group:Refresh()
-    if not self.available then return end
+    if not self.available then
+        return
+    end
     self.available = false
 
     local numGroupMembers = GetNumGroupMembers()
@@ -57,7 +59,7 @@ function Group:Refresh()
 
     local myName = Utils:GetMyName()
 
-    for i=1, numGroupMembers do
+    for i = 1, numGroupMembers do
         local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
 
         if role == 'MAINTANK' then
@@ -144,7 +146,7 @@ function Group:CanInvite(name)
 end
 
 function Group:RegisterEvents()
-    local events = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL' };
+    local events = { 'GROUP_ROSTER_UPDATE', 'BOSS_KILL' };
     local f = CreateFrame("Frame", "PDKP_Group_EventsFrame");
 
     for _, eventName in pairs(events) do
@@ -191,7 +193,9 @@ function Group:SetDKPOfficer(data)
 
     local isDKPOfficer = charName == previous
 
-    if isDKPOfficer and fromRequest and self:IsMemberDKPOfficer(charName) then return end
+    if isDKPOfficer and fromRequest and self:IsMemberDKPOfficer(charName) then
+        return
+    end
 
     if fromRequest then
         isDKPOfficer = false
@@ -200,7 +204,7 @@ function Group:SetDKPOfficer(data)
     self.leadership.dkpOfficer = Utils:ternaryAssign(isDKPOfficer, nil, charName);
     local officerText = Utils:ternaryAssign(isDKPOfficer, 'is no longer the DKP Officer', 'is now the DKP Officer')
     PDKP.CORE:Print(charName .. ' ' .. officerText)
-    self.classes['DKP'] = {charName}
+    self.classes['DKP'] = { charName }
 
     self.isDKP = Utils:GetMyName() == self.leadership.dkpOfficer
 
@@ -212,7 +216,9 @@ function Group:SetDKPOfficer(data)
 end
 
 function Group:RequestDKPOfficer()
-    if self.requestedDKPOfficer or self:HasDKPOfficer() then return end
+    if self.requestedDKPOfficer or self:HasDKPOfficer() then
+        return
+    end
     self.requestedDKPOfficer = true
     MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
 
@@ -234,7 +240,7 @@ end
 
 function Group:GetRaidMemberObjects()
     local members = {}
-    for i=1, #self.memberNames do
+    for i = 1, #self.memberNames do
         local member = GuildManager:GetMemberByName(self.memberNames[i])
         if member then
             tinsert(members, member.name)
@@ -245,7 +251,7 @@ end
 
 function Group:_RefreshClasses()
     local CLASSES = MODULES.Constants.CLASSES
-    for i=1, #CLASSES do
+    for i = 1, #CLASSES do
         if type(self.classes[CLASSES[i]]) == "table" then
             wipe(self.classes[CLASSES[i]])
         end
@@ -302,7 +308,9 @@ function Group:_IsMemberInRaid(name)
 end
 
 function Group:InitializePortrait()
-    if (not PDKP.canEdit) and (not self:IsLeader()) then return end
+    if (not PDKP.canEdit) and (not self:IsLeader()) then
+        return
+    end
 
     local lineSep = _G['UIDropDownMenu_AddSeparator']
     local addBtn = _G['UIDropDownMenu_AddButton']
@@ -328,7 +336,7 @@ function Group:InitializePortrait()
         text = '',
         isTitle = false;
         isUninteractable = false;
-        keepShownOnClick=false;
+        keepShownOnClick = false;
         func = nil;
     }
 
@@ -342,11 +350,13 @@ function Group:InitializePortrait()
         local charName = strtrim(_G['DropDownList1Button1']:GetText())
         local member = GuildManager:GetMemberByName(charName)
 
-        if not (member and self:_IsMemberInRaid(charName) and member.canEdit) then return end
+        if not (member and self:_IsMemberInRaid(charName) and member.canEdit) then
+            return
+        end
 
         dkpOfficerSettings.text = Utils:ternaryAssign(self:IsMemberDKPOfficer(charName), 'Demote from DKP Officer', 'Promote to DKP Officer')
         dkpOfficerSettings.func = function(...)
-            MODULES.CommsManager:SendCommsMessage('DkpOfficer', {charName, self.leadership.dkpOfficer, false})
+            MODULES.CommsManager:SendCommsMessage('DkpOfficer', { charName, self.leadership.dkpOfficer, false })
         end
 
         lineSep(1)

@@ -24,8 +24,8 @@ Constants.WARNING = 'E71D36'
 Constants.CLASSES = { 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior' }
 -- The TBC Classic Class colors
 Constants.CLASS_COLORS = {
-    ["Druid"] = "FF7C0A", ["Hunter"] = "AAD372" , ["Mage"] = "3FC7EB", ["Paladin"] = "F48CBA",
-    ["Priest"] = "FFFFFF", ["Rogue"] = "FFF468", ["Shaman"]="0070DD", ["Warlock"] = "8788EE", ["Warrior"] = "C69B6D"
+    ["Druid"] = "FF7C0A", ["Hunter"] = "AAD372", ["Mage"] = "3FC7EB", ["Paladin"] = "F48CBA",
+    ["Priest"] = "FFFFFF", ["Rogue"] = "FFF468", ["Shaman"] = "0070DD", ["Warlock"] = "8788EE", ["Warrior"] = "C69B6D"
 }
 
 Constants.RAID_NAMES = {}
@@ -35,18 +35,18 @@ Constants.BOSS_TO_RAID = {}
 Constants.RAIDS = {
     ["Gruul's Lair"] = {
         ["phase"] = 1,
-        ['index']= 1,
+        ['index'] = 1,
         [649] = "High King Maulgar",
         [650] = "Gruul the Dragonkiller",
     },
     ["Magtheridon's Lair"] = {
         ["phase"] = 1,
-        ['index']= 2,
+        ['index'] = 2,
         [651] = "Magtheridon",
     },
     ["Serpentshrine Cavern"] = {
         ["phase"] = 2,
-        ['index']= 3,
+        ['index'] = 3,
         [623] = "Hydross the Unstable",
         [624] = "The Lurker Below",
         [625] = "Leotheras the Blind",
@@ -56,7 +56,7 @@ Constants.RAIDS = {
     },
     ["Tempest Keep"] = {
         ["phase"] = 2,
-        ['index']= 4,
+        ['index'] = 4,
         [730] = "Al'ar",
         [731] = "Void Reaver",
         [732] = "High Astromancer Solarian",
@@ -64,7 +64,7 @@ Constants.RAIDS = {
     },
     ["The Battle for Mount Hyjal"] = {
         ["phase"] = 3,
-        ['index']= 5,
+        ['index'] = 5,
         [618] = "Rage Winterchill",
         [619] = "Anetheron",
         [620] = "Kaz'rogal",
@@ -73,7 +73,7 @@ Constants.RAIDS = {
     },
     ["Black Temple"] = {
         ["phase"] = 3,
-        ['index']= 6,
+        ['index'] = 6,
         [601] = "High Warlord Naj'entus",
         [602] = "Supremus",
         [603] = "Shade of Akama",
@@ -86,7 +86,7 @@ Constants.RAIDS = {
     },
     ["The Sunwell"] = {
         ["phase"] = 5,
-        ['index']= 7,
+        ['index'] = 7,
         [724] = "Kalecgos",
         [725] = "Brutallus",
         [726] = "Felmyst",
@@ -127,7 +127,9 @@ do
         end
     end
 
-    tsort(Constants.RAID_NAMES, function(a,b) return Constants.RAID_INDEXES[a] < Constants.RAID_INDEXES[b] end)
+    tsort(Constants.RAID_NAMES, function(a, b)
+        return Constants.RAID_INDEXES[a] < Constants.RAID_INDEXES[b]
+    end)
 end
 
 

@@ -75,11 +75,15 @@ function Comms:RegisterComms()
         ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
     }
     for prefix, opts in pairs(commChannels) do
-        local commOpts = {['prefix'] = prefix, ['combat'] = opts['combat'], ['self'] = opts['self'], ['requireCheck'] = opts['requireCheck'] }
+        local commOpts = { ['prefix'] = prefix, ['combat'] = opts['combat'], ['self'] = opts['self'], ['requireCheck'] = opts['requireCheck'] }
         local comm = MODULES.Comm:new(commOpts)
         self.channels[comm.prefix] = comm
-        if comm.allow_in_combat then self.allow_in_combat[comm.prefix] = true end
-        if comm.allowed_from_self then self.allow_from_self[comm.prefix] = true end
+        if comm.allow_in_combat then
+            self.allow_in_combat[comm.prefix] = true
+        end
+        if comm.allowed_from_self then
+            self.allow_from_self[comm.prefix] = true
+        end
     end
 end
 
@@ -95,7 +99,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
 
     if comm ~= nil and comm:IsValid() then
         local params = comm:GetSendParams()
-        return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack( params ))
+        return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
     end
 
     if PDKP:IsDev() then
@@ -112,7 +116,7 @@ function Comms:_Serialize(data)
 end
 
 function Comms:_Compress(serialized)
-    return PDKP.LibDeflate:CompressDeflate(serialized, {level = 9})
+    return PDKP.LibDeflate:CompressDeflate(serialized, { level = 9 })
 end
 
 function Comms:_Encode(compressed)
@@ -125,7 +129,9 @@ end
 
 function Comms:_Deserialize(string)
     local success, data = PDKP.CORE:Deserialize(string)
-    if not success then return nil end
+    if not success then
+        return nil
+    end
     return data;
 end
 
@@ -151,7 +157,8 @@ end
 function Comms:DataDecoder(data)
     local detransmit = self:_Decode(data)
     local decompressed = self:_Decompress(detransmit)
-    if decompressed == nil then -- It wasn't a message that can be decompressed.
+    if decompressed == nil then
+        -- It wasn't a message that can be decompressed.
         return self:_Deserialize(detransmit) -- Return the regular deserialized messge
     end
     local deserialized = self:_Deserialize(decompressed)
@@ -166,12 +173,11 @@ end
 
 function Comms:DatabaseDecoder(data)
     local decompressed = self:_Decompress(data)
-    if decompressed == nil then -- It wasn't a message that can be decompressed.
+    if decompressed == nil then
+        -- It wasn't a message that can be decompressed.
         return self:_Deserialize(data) -- Return the regular deserialized messge
     end
     return self:_Deserialize(decompressed)
 end
-
-
 
 MODULES.CommsManager = Comms

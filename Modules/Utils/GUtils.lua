@@ -63,8 +63,7 @@ function GUtils:createCheckButton(opts)
     end
 
     --- BUG FIX: HitInset should be set to avoid overlapping other content with check box's click frame.
-    --- Defaults to (l,r,t,b) = 0, -145, 0, 0
-    cb:SetHitRectInsets(0, cbText:GetWidth() * -1, 0, 0)
+    --- Defaults to (l,r,t,b) = 0, -145, 0, 0 cb:SetHitRectInsets(0, cbText:GetWidth() * -1, 0, 0)
 
     cb:SetChecked(enabled)
 
@@ -592,13 +591,13 @@ function GUtils:createStrikethroughText(parent)
 
     fc:SetHeight(fs:GetStringHeight() / 2)
 
-    fc:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-                   edgeFile = "Interface/BUTTONS/UI-SliderBar-Border.png",
-                   edgeSize = 4,
-                   insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    fc:SetBackdrop({ bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+                     edgeFile = "Interface/BUTTONS/UI-SliderBar-Border.png",
+                     edgeSize = 4,
+                     insets = { left = 1, right = 1, top = 1, bottom = 1 }
     });
-    fc:SetBackdropColor(1,0,0, 1);
-    fc:SetBackdropBorderColor(1, 0,0, 0);
+    fc:SetBackdropColor(1, 0, 0, 1);
+    fc:SetBackdropBorderColor(1, 0, 0, 0);
 
     fs.line = fc
     return fs
@@ -610,7 +609,8 @@ function GUtils:createStatusBar(opts)
     local default = opts['default'] or 0
     local min = opts['min'] or 0
     local max = opts['max'] or 100
-    local onTimerFinished = opts['func'] or function()  end
+    local onTimerFinished = opts['func'] or function()
+    end
     local parent = UIParent
 
     local pb = CreateFrame("StatusBar", 'PDKP_' .. name, parent)
@@ -675,7 +675,6 @@ function GUtils:createStatusBar(opts)
             pb.value:SetText(tostring(math.ceil(amount)) .. extra)
         end
 
-
         pb:SetValue(amount)
 
         local currVal = pb:GetValue()
@@ -701,7 +700,7 @@ function GUtils:createStatusBar(opts)
             local currVal = pb:GetValue()
             pb.setAmount(currVal - 0.1)
             pb:SetWidth(pb:GetWidth() - (reductionAmt * 0.1))
-        end, (max*10) + 0.1)
+        end, (max * 10) + 0.1)
     end,
 
     pb:reset()

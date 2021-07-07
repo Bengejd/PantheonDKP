@@ -24,7 +24,7 @@ local shiftRightClickText = Utils:FormatTextColor('Right-Shift-Click', info) .. 
 local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
 
-local shiftClickText = Utils:FormatTextColor('Shift-Click', info) ..  ' to request a push.'
+local shiftClickText = Utils:FormatTextColor('Shift-Click', info) .. ' to request a push.'
 local altShiftText = Utils:FormatTextColor('Alt-Shift-Click', info) .. ' to wipe your tables.'
 
 local Dialogs;
@@ -34,12 +34,14 @@ function map:Initialize()
     Dialogs = GUI.Dialogs;
 
     map.LDB = LibStub("LibDataBroker-1.1"):NewDataObject("PantheonDKP", {
-        type="launcher",
-        text='PantheonDKP',
+        type = "launcher",
+        text = 'PantheonDKP',
         icon = MODULES.Media.PDKP_ADDON_ICON,
         OnTooltipShow = function(tooltip)
             local texts = map:_GetToolTipTexts()
-            for i=1, #texts do tooltip:AddLine(unpack(texts[i])) end
+            for i = 1, #texts do
+                tooltip:AddLine(unpack(texts[i]))
+            end
             tooltip:Show()
         end,
         OnClick = function(_, button)
@@ -51,7 +53,7 @@ function map:Initialize()
 end
 
 function map:_GetToolTipTexts()
-    local title = {"PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION}
+    local title = { "PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION }
     local lineBreak = { " ", 1, 1, 1, 1 }
     local leftClick = { clickText, 1, 1, 1 }
     local rightClick = { rightClickText, 1, 1, 1 }
@@ -59,7 +61,7 @@ function map:_GetToolTipTexts()
     local databaseResetClick = { resetDatabaseText, 1, 1, 1 }
 
     local texts = { title, lineBreak, leftClick,
-                    --rightClick
+        --rightClick
     }
 
     if PDKP.canEdit then
@@ -125,7 +127,11 @@ function map:HandleIconClicks(buttonType)
                 --print('Left, hasShift');
             end,
             ['default'] = function()
-                if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+                if pdkp_frame:IsVisible() then
+                    pdkp_frame:Hide()
+                else
+                    pdkp_frame:Show()
+                end
             end,
         },
         ['RightButton'] = {
@@ -136,7 +142,11 @@ function map:HandleIconClicks(buttonType)
                 MODULES.Database:ResetAllDatabases()
             end,
             ['default'] = function()
-                if pdkp_frame:IsVisible() then pdkp_frame:Hide() else pdkp_frame:Show() end
+                if pdkp_frame:IsVisible() then
+                    pdkp_frame:Hide()
+                else
+                    pdkp_frame:Show()
+                end
             end,
         }
     }

@@ -31,7 +31,7 @@ function Options:IsPlayerIgnored(playerName)
 end
 
 function Options:GetInviteCommands()
-    return self.db['invite_cmds'] or {'inv', 'invite'}
+    return self.db['invite_cmds'] or { 'inv', 'invite' }
 end
 
 MODULES.Options = Options

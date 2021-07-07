@@ -22,7 +22,9 @@ function Lockouts:Initialize()
 end
 
 function Lockouts:AddMemberLockouts(entry)
-    if entry.lockoutsChecked or entry.reason ~= 'Boss Kill' then return entry.names end
+    if entry.lockoutsChecked or entry.reason ~= 'Boss Kill' then
+        return entry.names
+    end
     local no_lockout_members = {}
     entry.lockoutsChecked = true
 
@@ -32,7 +34,7 @@ function Lockouts:AddMemberLockouts(entry)
         if self.db[self.weekNumber][entry.boss] == nil then
             self.db[self.weekNumber][entry.boss] = {}
         end
-        for i=#entry.names, 1, -1 do
+        for i = #entry.names, 1, -1 do
             local memberName = entry.names[i]
             if not tContains(self.db[self.weekNumber][entry.boss], memberName) then
                 table.insert(self.db[self.weekNumber][entry.boss], memberName)
@@ -46,7 +48,7 @@ function Lockouts:AddMemberLockouts(entry)
 
     if #removedNames ~= 0 and PDKP.canEdit then
         local removedNameText = ""
-        for i=1, #removedNames do
+        for i = 1, #removedNames do
             if i ~= #removedNames and i ~= 1 then
                 removedNameText = removedNameText .. ", "
             end

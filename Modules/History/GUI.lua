@@ -1,6 +1,5 @@
 local _, PDKP = ...
 
-local LOG = PDKP.LOG
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
@@ -11,22 +10,19 @@ local HistoryTable = {}
 local SimpleScrollFrame, MemberTable, Media, DKPManager;
 
 local CreateFrame = CreateFrame
-local type, floor, strupper, pi, substr, strreplace = type, math.floor, strupper, math.pi, string.match, string.gsub
-local tinsert, tremove = tinsert, tremove
-
+local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
+local tinsert, _ = tinsert, tremove
 
 local tabName = 'view_history_button';
 
 local EXPAND_ALL, COLLAPSE_ALL
 
 local ROW_COL_HEADERS = {
-    { ['variable']='formattedOfficer', ['display']='Officer', },
-    { ['variable']='historyText', ['display']='Reason', ['OnClick']=true,},
-    { ['variable']='formattedNames', ['display']='Members', ['OnClick']=true, },
-    { ['variable']='change_text', ['display']='Amount'}
+    { ['variable'] = 'formattedOfficer', ['display'] = 'Officer', },
+    { ['variable'] = 'historyText', ['display'] = 'Reason', ['OnClick'] = true, },
+    { ['variable'] = 'formattedNames', ['display'] = 'Members', ['OnClick'] = true, },
+    { ['variable'] = 'change_text', ['display'] = 'Amount' }
 }
-
-local deleted_row = nil;
 
 local ROW_MARGIN_TOP = 16 -- The margin between rows.
 
@@ -83,14 +79,16 @@ function HistoryTable:Initialize()
         toggleSB()
     end)
 
-    self.frame.content:SetScript("OnShow", function() toggleSB() end)
+    self.frame.content:SetScript("OnShow", function()
+        toggleSB()
+    end)
 
     local scroll = SimpleScrollFrame:new(self.frame.content)
     local scrollFrame = scroll.scrollFrame
     local scrollContent = scrollFrame.content;
     local scrollBar = scrollFrame.scrollBar
 
-    scrollBar.bg:SetColorTexture(unpack({0, 0, 0, 1}))
+    scrollBar.bg:SetColorTexture(unpack({ 0, 0, 0, 1 }))
 
     self.scrollContent = scrollContent;
 
@@ -109,7 +107,7 @@ function HistoryTable:Initialize()
     --self.appliedFilters['raid'] = Settings.current_raid
 
     --self.previous_raid = Settings.current_raid;
-    for i=1, #MODULES.Constants.RAID_NAMES do
+    for i = 1, #MODULES.Constants.RAID_NAMES do
         local raid_name = MODULES.Constants.RAID_NAMES[i]
         self.collapsed_raids[raid_name] = true
     end
@@ -131,8 +129,7 @@ function HistoryTable:Initialize()
 
     self.frame:SetScript("OnShow", function()
         if self.updateNextOpen then
-            --- hmmmm. Table size isn't being updated properly.
-            self:_OnLoad()
+            --- hmmmm. Table size isn't being updated properly. self:_OnLoad()
             self:RefreshData(true)
             self:HistoryUpdated(true)
             self:CollapseAllRows(self.collapsed)
@@ -157,10 +154,8 @@ function HistoryTable:Initialize()
     return self
 end
 
-
-
 function HistoryTable:CollapseAllRows(collapse)
-    for i=1, #self.rows do
+    for i = 1, #self.rows do
         local row = self.rows[i]
         row:collapse_frame(collapse)
     end
@@ -171,7 +166,7 @@ function HistoryTable:CollapseAllRows(collapse)
 end
 
 function HistoryTable:ToggleRows()
-    for i=1, #self.displayedRows do
+    for i = 1, #self.displayedRows do
         local row = self.displayedRows[i]
         row:collapse_frame(row.collapsed)
     end
@@ -183,8 +178,10 @@ function HistoryTable:RefreshData(justData)
     wipe(self.entry_keys)
     wipe(self.entries)
 
-    self.entry_keys = DKPManager:GetEntryKeys(true, {'Item Win'});
-    for i=1, #self.entry_keys do self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]) end
+    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Item Win' });
+    for i = 1, #self.entry_keys do
+        self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])
+    end
 
     if justData == nil then
         self:RefreshTable()
@@ -199,7 +196,7 @@ end
 
 function HistoryTable:RefreshTable()
     wipe(self.displayedRows)
-    for i=1, #self.entry_keys do
+    for i = 1, #self.entry_keys do
         local row = self.rows[i]
         row:Hide()
         row:ClearAllPoints()
@@ -221,28 +218,38 @@ end
 function HistoryTable:HistoryUpdated(selectedUpdate)
     -- Don't do unnecessary updates.
 
-    if self.table_init and not selectedUpdate then return end
+    if self.table_init and not selectedUpdate then
+        return
+    end
 
     local selected = PDKP.memberTable.selected;
-    if #selected > 0 then self.appliedFilters['selected']=selected;
-    elseif #selected == 0 then self.appliedFilters['selected'] = nil;
+    if #selected > 0 then
+        self.appliedFilters['selected'] = selected;
+    elseif #selected == 0 then
+        self.appliedFilters['selected'] = nil;
     end
     self:UpdateTitleText(selected)
 
     local collapse_rows = false
-    if collapse_rows then self:CollapseAllRows(self.collapsed) end
+    if collapse_rows then
+        self:CollapseAllRows(self.collapsed)
+    end
 
     self:RefreshTable()
 
     self:ToggleRows()
 
-    if not self.table_init then self.table_init = true end
+    if not self.table_init then
+        self.table_init = true
+    end
 end
 
 function HistoryTable:UpdateTitleText(selected)
     local text;
 
-    if #selected == 1 then text = selected[1] .. ' History'; end
+    if #selected == 1 then
+        text = selected[1] .. ' History';
+    end
 
     self.frame.title:SetText(text)
 end
@@ -323,17 +330,24 @@ function HistoryTable:_OnLoad()
             local self = row.super;
             local dataObj = row.dataObj;
             row.isFiltered = false;
-            if dataObj['deleted'] == true then row.isFiltered = true end
+            if dataObj['deleted'] == true then
+                row.isFiltered = true
+            end
 
             local selected = self.appliedFilters['selected']
 
             for filter, val in pairs(self.appliedFilters or {}) do
-                if row.isFiltered then break end -- No need to continue the loop.
-                if filter == 'raid' then row.isFiltered = row.dataObj['raid'] ~= val
+                if row.isFiltered then
+                    break
+                end -- No need to continue the loop.
+                if filter == 'raid' then
+                    row.isFiltered = row.dataObj['raid'] ~= val
                 elseif filter == 'selected' and selected ~= nil and #selected == 1 then
                     for _, n in pairs(selected) do
                         row.isFiltered = not row.dataObj:IsMemberInEntry(n)
-                        if row.isFiltered then break end
+                        if row.isFiltered then
+                            break
+                        end
                     end
                 end
             end
@@ -346,22 +360,27 @@ function HistoryTable:_OnLoad()
                 local cf = c.click_frame
                 if row.content:IsVisible() then
                     c:Show()
-                    if cf then cf:Show() end
+                    if cf then
+                        cf:Show()
+                    end
                 else
                     c:Hide()
-                    if cf then cf:Hide() end
+                    if cf then
+                        cf:Hide()
+                    end
                 end
             end
         end
 
         function row:UpdateRowValues(entry)
-            local self = row.super;
 
-            if entry then row.dataObj = entry end
+            if entry then
+                row.dataObj = entry
+            end
             row.max_height = 0
             row:SetID(row.dataObj['id'])
 
-            for key=1, #ROW_COL_HEADERS do
+            for key = 1, #ROW_COL_HEADERS do
                 local header = ROW_COL_HEADERS[key]
                 local variable, displayName = header['variable'], header['display']
                 local col = row.cols[key]
@@ -391,7 +410,7 @@ function HistoryTable:_OnLoad()
                 if key == 1 then
                     col:SetPoint("TOPLEFT", content, "TOPLEFT", 5, -5)
                 else
-                    col:SetPoint("TOPLEFT", row.cols[key -1], "BOTTOMLEFT", 0, -2)
+                    col:SetPoint("TOPLEFT", row.cols[key - 1], "BOTTOMLEFT", 0, -2)
                 end
                 col:SetText(displayName .. ": " .. val)
                 row.max_height = row.max_height + col:GetStringHeight() + 6
@@ -416,14 +435,16 @@ function HistoryTable:_OnLoad()
             c_text = c_text .. c_hist
 
             collapse_text:SetText(c_text)
-            if collapse_text:GetStringWidth() > 325 then collapse_text:SetWidth(315) end
+            if collapse_text:GetStringWidth() > 325 then
+                collapse_text:SetWidth(315)
+            end
         end
 
         row:UpdateRowValues()
 
         rawset(t, i, row)
         return row
-    end})
+    end })
 
     self.rows = rows
 end
@@ -445,7 +466,9 @@ end
 function PDKP_History_OnClick(frame, buttonType)
     print('Entry clicked')
 
-    if not PDKP.canEdit or not IsShiftKeyDown() then return end
+    if not PDKP.canEdit or not IsShiftKeyDown() then
+        return
+    end
 
     print(frame, buttonType)
 
@@ -461,7 +484,7 @@ function PDKP_History_OnClick(frame, buttonType)
     --end
 end
 
-function PDKP_History_EntryDeleted(id)
+function PDKP_History_EntryDeleted(_)
     --local self = GUI.history_table;
     --
     --local row = self.rows[deleted_row.index]
@@ -472,6 +495,5 @@ function PDKP_History_EntryDeleted(id)
 end
 
 pdkp_HistoryTableMixin = HistoryTable;
-
 
 GUI.HistoryGUI = HistoryTable;
