@@ -25,8 +25,23 @@ function GuildBank:Initialize()
         end
 
         if self._opened then
-            local numSlots, full = GetNumBankSlots();
-            print(eventName, numSlots, full)
+            local numBags, _ = GetNumBankSlots(); -- Purchased bank slots.
+            for i=5, numBags+5 do
+                local bagID = i
+                local invSlot = ContainerIDToInventoryID(bagID)
+                local bagSlots = GetContainerNumSlots(bagID)
+
+                print(invSlot, bagSlots)
+
+                --for slotID=1, bagSlots do
+                --    local ItemLink = GetContainerItemLink(invSlot, slotID)
+                --    if i == 0 and slotID <= 2 then
+                --        local texture, itemCount, locked, quality, readable, lootable, itemLink = GetContainerItemInfo(invSlot, slotID);
+                --        print(ItemLink)
+                --    end
+                --end
+
+            end
         end
 
     end)
