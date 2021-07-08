@@ -27,25 +27,25 @@ end
 function Comms:RegisterComms()
     local commChannels = {
         --- GUILD COMMS
-        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, },
-        ['SyncLarge'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, },
-        ['SyncDelete'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['combat'] = true, ['self'] = true },
+        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['combat'] = true, },
+        ['SyncLarge'] = { ['channel'] = 'GUILD', },
+        ['SyncDelete'] = { ['channel'] = 'GUILD', ['combat'] = true, ['self'] = true },
 
-        ['SyncAd'] = { ['channel'] = 'GUILD', ['requireCheck'] = true, ['self'] = false },
-        ['SyncReq'] = { ['channel'] = 'GUILD', ['requireCheck'] = false, ['self'] = false, },
+        ['SyncAd'] = { ['channel'] = 'GUILD', ['self'] = false },
+        ['SyncReq'] = { ['channel'] = 'GUILD',  ['self'] = false, },
 
         --- RAID COMMS
 
-        ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID', ['requireCheck'] = true, ['combat'] = true, },
+        ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID', ['combat'] = true, },
         ['WhoIsDKP'] = { ['self'] = false, ['channel'] = 'RAID', ['requireCheck'] = false, ['combat'] = true, },
 
-        ['startBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
-        ['stopBids'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
+        ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
+        ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, ['combat'] = true },
 
         ['bidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
         ['bidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
 
-        ['AddBid'] = { ['channel'] = 'RAID', ['requireCheck'] = true, ['self'] = true, ['combat'] = true },
+        ['AddBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
         ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
 
         ['SentInv'] = { ['channel'] = 'WHISPER', ['self'] = false, ['combat'] = false },
@@ -74,6 +74,10 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
     local comm = self.channels[_prefix(prefix)]
 
     if comm ~= nil and comm:IsValid() then
+        if comm.requireCheck and not comm:CanSend() then
+            return
+        end
+
         local params = comm:GetSendParams()
         if prefix == 'SentInv' then
             params[2] = data

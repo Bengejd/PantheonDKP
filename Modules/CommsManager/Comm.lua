@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local Utils = PDKP.Utils;
 
-local CommsManager, GroupManager, DKPManager;
+local CommsManager, GroupManager, DKPManager, GuildManager;
 local Comm = {}
 
 Comm.__index = Comm
@@ -23,14 +23,14 @@ function Comm:new(opts)
     CommsManager = MODULES.CommsManager
     GroupManager = MODULES.GroupManager
     DKPManager = MODULES.DKPManager
-
+    GuildManager = MODULES.GuildManager
 
     self.ogPrefix = opts['prefix']
     self.prefix = _prefix(self.ogPrefix)
     self.allowed_from_self = opts['self'] or false
     self.allowed_in_combat = opts['combat'] or false
     self.channel = opts['channel'] or "GUILD"
-    self.requireCheck = opts['requireCheck'] or false
+    self.requireCheck = opts['requireCheck'] or true
 
     self.officersSyncd = {}
 
@@ -48,6 +48,11 @@ function Comm:new(opts)
     return self
 end
 
+function Comm:CanSend()
+    local member = GuildManager:GetMemberByName(Utils:GetMyName())
+    return member.canEdit
+end
+
 function Comm:VerifyCommSender(message, sender)
     if self.requireCheck then
         local sentMember = MODULES.GuildManager:GetMemberByName(sender)
@@ -56,7 +61,7 @@ function Comm:VerifyCommSender(message, sender)
         end
     end
 
-    if not self.allowed_from_self and sender == PDKP.char.name then
+    if not self.allowed_from_self and sender == Utils:GetMyName() then
         return
     end
 
