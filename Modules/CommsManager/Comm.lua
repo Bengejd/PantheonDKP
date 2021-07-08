@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local Utils = PDKP.Utils;
 
-local CommsManager;
+local CommsManager, GroupManager, DKPManager;
 local Comm = {}
 
 Comm.__index = Comm
@@ -21,6 +21,9 @@ function Comm:new(opts)
     setmetatable(self, Comm); -- Set the metatable so we used entry's __index
 
     CommsManager = MODULES.CommsManager
+    GroupManager = MODULES.GroupManager
+    DKPManager = MODULES.DKPManager
+
 
     self.ogPrefix = opts['prefix']
     self.prefix = _prefix(self.ogPrefix)
@@ -181,17 +184,17 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
 end
 
 function PDKP_OnComm_SetDKPOfficer(_, message, _)
-    local data = MODULES.CommsManager:DataDecoder(message)
-    MODULES.GroupManager:SetDKPOfficer(data)
+    local data = CommsManager:DataDecoder(message)
+    GroupManager:SetDKPOfficer(data)
 end
 
 function PDKP_OnComm_GetDKPOfficer(_, message, sender)
 
     PDKP:PrintD(sender, "RequestingDKP Officer")
 
-    local data = MODULES.CommsManager:DataDecoder(message)
-    if data == 'request' and PDKP.canEdit and MODULES.GroupManager:HasDKPOfficer() then
-        MODULES.CommsManager:SendCommsMessage('DkpOfficer', { MODULES.GroupManager.leadership.dkpOfficer, MODULES.GroupManager.leadership.dkpOfficer, true })
+    local data = CommsManager:DataDecoder(message)
+    if data == 'request' and PDKP.canEdit and GroupManager:HasDKPOfficer() then
+        CommsManager:SendCommsMessage('DkpOfficer', { GroupManager.leadership.dkpOfficer, GroupManager.leadership.dkpOfficer, true })
     end
 end
 
@@ -200,24 +203,31 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     local pfx = self.ogPrefix
     local data
 
-    if pfx == 'SyncSmall' or pfx == 'SyncDelete' or pfx == 'SyncAd' then
-        data = MODULES.CommsManager:DataDecoder(message)
+    if pfx == 'SyncSmall' or pfx == 'SyncDelete' then
+        data = CommsManager:DataDecoder(message)
     end
 
     if pfx == 'SyncSmall' then
-        return MODULES.DKPManager:ImportEntry(data)
+        return DKPManager:ImportEntry(data)
     elseif pfx == 'SyncDelete' then
-        return MODULES.DKPManager:DeleteEntry(data, sender)
+        return DKPManager:DeleteEntry(data, sender)
     elseif pfx == 'SyncLarge' then
-        return MODULES.DKPManager:ImportBulkEntries(message, sender)
+        return DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncAd' then
         if self.officersSyncd[sender] then
             PDKP:PrintD(sender, "Has already been syncd")
             return
         end
-        
+        -- Ignore SyncAds when you're not in the group with the player, but are in a raid.
+        if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
+            PDKP:PrintD("Ignoring syncAd")
+            return
+        end
+
+        data = CommsManager:DataDecoder(message)
+
         for _, entry in pairs(data) do
-            MODULES.DKPManager:ImportEntry(entry)
+            DKPManager:ImportEntry(entry)
         end
         self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
@@ -227,11 +237,11 @@ end
 
 function PDKP_OnComm_BidSync(comm, message, sender)
     local self = comm
-    local data = MODULES.CommsManager:DataDecoder(message)
+    local data = CommsManager:DataDecoder(message)
 
     local Auction = MODULES.AuctionManager
     local AuctionGUI = GUI.AuctionGUI
-    local GroupManager = MODULES.GroupManager
+    local GroupManager = GroupManager
 
     if self.ogPrefix == 'startBids' then
         local itemLink, itemName, iTexture = unpack(data)
@@ -277,7 +287,7 @@ function PDKP_OnComm_SentInv(comm, message, sender)
 end
 
 function PDKP_SyncLockout(_, sent, total)
-    local DKP = MODULES.DKPManager
+    local DKP = DKPManager
     local percentage = floor((sent / total) * 100)
     if percentage < 100 then
         DKP.autoSyncInProgress = true

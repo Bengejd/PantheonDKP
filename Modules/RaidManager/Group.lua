@@ -303,7 +303,7 @@ function Group:_HandleEvent(event, arg1, ...)
     end
 end
 
-function Group:_IsMemberInRaid(name)
+function Group:IsMemberInRaid(name)
     return tContains(self.memberNames, name) or false
     --for i=1, #self.memberNames do
     --    if self.memberNames[i] == name then
@@ -356,7 +356,7 @@ function Group:InitializePortrait()
         local charName = strtrim(_G['DropDownList1Button1']:GetText())
         local member = GuildManager:GetMemberByName(charName)
 
-        if not (member and self:_IsMemberInRaid(charName) and member.canEdit) then
+        if not (member and self:IsMemberInRaid(charName) and member.canEdit) then
             return
         end
 
