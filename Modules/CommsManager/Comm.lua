@@ -29,6 +29,8 @@ function Comm:new(opts)
     self.channel = opts['channel'] or "GUILD"
     self.requireCheck = opts['requireCheck'] or false
 
+    self.officersSyncd = {}
+
     self.channel, self.sendTo, self.priority, self.callbackFunc, self.onCommReceivedFunc = self:_Setup()
 
     if self:IsValid() then
@@ -56,7 +58,10 @@ function Comm:VerifyCommSender(message, sender)
     end
 
     if not self.allowed_in_combat and not self.open then
-        PDKP.CORE:Print("Message received, waiting for combat to drop to process it.")
+        if #self.cache == 0 then
+            PDKP.CORE:Print("Message received, waiting for combat to drop to process it.")
+        end
+
         tinsert(self.cache, { ['message'] = message, ['sender'] = sender })
         return
     end
@@ -86,7 +91,7 @@ function Comm:GetSendParams()
 end
 
 -----------------------------
---    Private Functions     --
+--    Private Functions    --
 -----------------------------
 
 function Comm:_Setup()
@@ -166,9 +171,9 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
     elseif event == 'PLAYER_REGEN_ENABLED' then
         comm.open = true
         if #comm.cache > 0 then
-            PDKP.CORE:Print('Start Cached message', #comm.cache)
+            PDKP:PrintD("Start Cached message', #comm.cache")
             comm:_ProcessCache(comm.cache)
-            PDKP.CORE:Print('End Cached message', #comm.cache)
+            PDKP:PrintD('End Cached message', #comm.cache)
         end
     elseif event == 'GROUP_ROSTER_UPDATE' then
         StaticPopup_Hide("PARTY_INVITE")
@@ -206,9 +211,15 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     elseif pfx == 'SyncLarge' then
         return MODULES.DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncAd' then
+        if self.officersSyncd[sender] then
+            PDKP:PrintD(sender, "Has already been syncd")
+            return
+        end
+        
         for _, entry in pairs(data) do
             MODULES.DKPManager:ImportEntry(entry)
         end
+        self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
         MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end

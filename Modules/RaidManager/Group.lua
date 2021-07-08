@@ -250,6 +250,11 @@ function Group:GetRaidMemberObjects()
     return members
 end
 
+function Group:IsInInstance()
+    local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
+    return type ~= "none" and type ~= nil
+end
+
 function Group:_RefreshClasses()
     local CLASSES = MODULES.Constants.CLASSES
     for i = 1, #CLASSES do
