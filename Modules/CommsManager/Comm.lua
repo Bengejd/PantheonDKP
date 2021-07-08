@@ -50,7 +50,10 @@ end
 
 function Comm:CanSend()
     local member = GuildManager:GetMemberByName(Utils:GetMyName())
-    return member.canEdit
+    if member ~= nil then
+        return member.canEdit
+    end
+    return false
 end
 
 function Comm:VerifyCommSender(message, sender)

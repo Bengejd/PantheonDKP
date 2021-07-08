@@ -57,7 +57,6 @@ end
 function Ledger:CheckSyncStatus()
     if not self._initialized then
         PDKP.CORE:Print('Synchronizing databases...')
-    else
     end
 
     CommsManager:SendCommsMessage('SyncReq', self.weekHashes)
