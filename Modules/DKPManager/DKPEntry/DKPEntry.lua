@@ -52,6 +52,8 @@ function entry:new(entry_details)
     self.hash = entry_details['hash'] or nil
     self.previousTotals = entry_details['previousTotals'] or {}
 
+    self.decayMigrated = false
+    self.decayAmounts = {}
 
     self.members = {}
     self.sd = {} -- Save Details

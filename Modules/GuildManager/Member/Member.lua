@@ -77,11 +77,16 @@ function Member:_UpdateDKP(entry)
     end
 
     if entry.reason == 'Decay' then
-        if self.dkp['entries'] == nil or #self.dkp['entries'] == 0 or self.dkp['total'] <= 30 or not self:IsRaidReady() then
+        if (self.dkp['entries'] == nil or #self.dkp['entries'] == 0 or self.dkp['total'] <= 30 or not self:IsRaidReady()) and not entry['decayMigrated'] then
             entry:RemoveMember(self.name)
             return
         end -- Do not decay non-active members or members without at least 31 DKP.
-        self.dkp['total'] = math.floor(self.dkp['total'] * 0.9)
+
+        if entry['decayMigrated'] and entry['decayAmounts'][self.name] ~= nil then
+            self.dkp['total'] = self.dkp['total'] + entry['decayAmounts'][self.name]
+        else
+            self.dkp['total'] = math.floor(self.dkp['total'] * 0.9)
+        end
     else
         self.dkp['total'] = self.dkp['total'] + amount
     end

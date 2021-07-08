@@ -223,12 +223,12 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncAd' then
         if self.officersSyncd[sender] then
-            PDKP:PrintD(sender, "Has already been syncd")
+            --PDKP:PrintD(sender, "Has already been syncd")
             return
         end
         -- Ignore SyncAds when you're not in the group with the player, but are in a raid.
         if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
-            PDKP:PrintD("Ignoring syncAd")
+            --PDKP:PrintD("Ignoring syncAd")
             return
         end
 

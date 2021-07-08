@@ -119,7 +119,7 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
 
     if #no_lockout_members == 0 and not skipLockoutCheck then
         self:_UpdateTables()
-        PDKP:PrintD('No eligible members found for', entry.reason, 'Skipping import')
+        --PDKP:PrintD('No eligible members found for', entry.reason, 'Skipping import')
         return
     end
 
@@ -310,8 +310,10 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
                     entry['previousTotals'][member.name] = member.dkp['total']
                 else
                     if member.dkp['total'] ~= entry['previousTotals'][member.name] then
-                        PDKP:PrintD("Missing entries, skipping decay calculations")
-                        return -- Skipping the Decay, because the numbers don't match up.
+                        entry['decayMigrated'] = true
+                        local member_previous = entry['previousTotals'][member.name]
+                        local member_decay_amount = math.floor((member_previous * 0.1) * -1)
+                        entry['decayAmounts'][member.name] = member_decay_amount
                     end
                 end
             end

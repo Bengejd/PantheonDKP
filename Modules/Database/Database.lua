@@ -33,6 +33,28 @@ function DB:Initialize()
     end
 
     self:Personal()[UnitName("PLAYER")] = true
+
+    self:_Migrations()
+end
+
+function DB:_Migrations()
+    local ldb = self:Ledger()
+    local dkp = self:DKP()
+
+    -- entry 1625706965
+
+    if dkp[1625706965] == nil then
+        if ldb[2689] ~= nil then
+            if ldb[2689]['Huntswomann'] then
+                local temp_entries = {}
+                for k, v in pairs(ldb[2689]['Huntswomann']) do
+                    if v == 1625706965 then
+                        local removed = table.remove(ldb[2689]['Huntswomann'], k)
+                    end
+                end
+            end
+        end
+    end
 end
 
 function DB:Global()
