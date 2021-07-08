@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot', 'ledger' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot', 'ledger', 'guildBank' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -61,8 +61,8 @@ function DB:Global()
     return PDKP_DB['global']
 end
 
-function DB:Logger()
-    return PDKP_DB['global']['logger']
+function DB:GuildBank()
+    return PDKP_DB['guildBank']
 end
 
 function DB:Server()
