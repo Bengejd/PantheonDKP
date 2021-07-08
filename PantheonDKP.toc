@@ -1,6 +1,6 @@
 ## Interface: 20501
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 4.1.3
+## Version: 4.1.4
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
