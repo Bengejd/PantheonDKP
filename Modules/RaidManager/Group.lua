@@ -251,7 +251,7 @@ function Group:GetRaidMemberObjects()
 end
 
 function Group:IsInInstance()
-    local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
+    local name, type, _, _, _, _, _, _, _ = GetInstanceInfo()
     return type ~= "none" and type ~= nil
 end
 
@@ -290,6 +290,12 @@ function Group:_RefreshMembers()
 end
 
 function Group:_HandleEvent(event, arg1, ...)
+    if event == 'BOSS_KILL' then
+        if MODULES.Constants.BOSS_TO_RAID[arg1] == nil then
+            return
+        end
+    end
+
     self:Refresh()
     if not self.available then
         return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...))
