@@ -310,7 +310,7 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
                     entry['previousTotals'][member.name] = member.dkp['total']
                 else
                     if member.dkp['total'] ~= entry['previousTotals'][member.name] then
-                        PDKP.CORE:Print("Missing entries, skipping decay calculations")
+                        PDKP:PrintD("Missing entries, skipping decay calculations")
                         return -- Skipping the Decay, because the numbers don't match up.
                     end
                 end

@@ -39,7 +39,7 @@ function Comm:new(opts)
         end
         self:RegisterComm()
     else
-        PDKP.CORE:Print('Comm is not valid', self.ogPrefix)
+        PDKP:PrintD('Comm is not valid', self.ogPrefix)
     end
 
     return self
