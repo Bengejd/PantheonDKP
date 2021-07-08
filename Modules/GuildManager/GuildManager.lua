@@ -1,6 +1,7 @@
 local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils;
 
 local Member;
 
@@ -26,7 +27,7 @@ function GuildManager:Initialize()
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
     PDKP.player = {}
-    self.playerName = GetUnitName("PLAYER", false)
+    self.playerName = Utils:GetMyName()
 
     if not IsInGuild() then
         return
