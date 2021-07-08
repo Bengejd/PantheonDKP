@@ -59,7 +59,7 @@ function Comm:VerifyCommSender(message, sender)
 
     if not self.allowed_in_combat and not self.open then
         if #self.cache == 0 then
-            PDKP.CORE:Print("Message received, waiting for combat to drop to process it.")
+            PDKP:PrintD("Message received, waiting for combat to drop to process it.")
         end
 
         tinsert(self.cache, { ['message'] = message, ['sender'] = sender })
