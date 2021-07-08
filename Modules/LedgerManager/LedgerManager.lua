@@ -145,7 +145,9 @@ function Ledger:CheckRequestKeys(message, sender)
         PDKP:PrintD('Entries were empty, returning')
         return
     end
-    CommsManager:SendCommsMessage('SyncAd', entries)
+    if PDKP.canEdit then
+        CommsManager:SendCommsMessage('SyncAd', entries)
+    end
 end
 
 function Ledger:GetLastFourWeekEntryIds()
