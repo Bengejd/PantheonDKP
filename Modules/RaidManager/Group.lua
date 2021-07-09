@@ -94,31 +94,6 @@ function Group:Refresh()
     if self:IsInRaid() and not self:HasDKPOfficer() then
         self:RequestDKPOfficer()
     end
-
-    --if not Raid:InRaid() then return Util:Debug("Not In Raid, Ignoring event") end
-    --local raid_size = GetNumGroupMembers()
-    --    --local raid_group_events = {
-    --    --    ['GROUP_ROSTER_UPDATE']=function(_, _)
-    --    --        if not GetRaidRosterInfo(raid_size) then return end
-    --    --        Raid.raid:Init()
-    --    --        GUI:UpdateInRaidFilter()
-    --    --    end,
-    --    --    ['BOSS_KILL']=function(arg1, arg2)
-    --    --        local bossID, bossName = arg1, arg2
-    --    --        Raid:BossKill(bossID, bossName)
-    --    --    end,
-    --    --    ['ZONE_CHANGED_NEW_AREA']=function()
-    --    --        if not UnitIsDeadOrGhost("player") then
-    --    --            Raid:CheckCombatLogging()
-    --    --        end
-    --    --    end
-    --    --}
-    --    else
-    --        ConvertToRaid()
-    --    end
-    --    InviteUnit(name)
-    --end
-
     self.available = true
 end
 

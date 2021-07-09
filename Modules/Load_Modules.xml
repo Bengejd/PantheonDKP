@@ -27,7 +27,6 @@
     <Script file="Lockouts\Lockouts.lua"/>
     <Script file="Options\Options.lua"/>
     <Script file="Adjustments\Adjustments.lua"/>
-    <Script file="GuildBank\GuildBank.lua"/>
 
     <!-- Standalone Views  -->
     <Include file="Interfaces\Load_interfaces.xml"/>
@@ -39,5 +38,4 @@
     <Include file="Options\GUI.lua"/>
     <Include file="Adjustments\GUI.lua"/>
     <Script file="Minimap\GUI.lua"/>
-    <Script file="GuildBank\GUI.lua"/>
 </Ui>

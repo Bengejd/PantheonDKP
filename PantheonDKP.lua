@@ -92,7 +92,6 @@ function CORE:_InitializeFeatures()
     MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
     MODULES.Options:Initialize()
-    MODULES.GuildBank:Initialize()
 end
 
 function CORE:_InitializeFrontend()
