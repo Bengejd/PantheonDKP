@@ -27,7 +27,7 @@ end
 function Comms:RegisterComms()
     local commChannels = {
         --- GUILD COMMS
-        -- defaults: ['self'] = false, ['combat'] = false, ['channel'] = Guild, requireCheck = true, officerOnly = false
+        -- defaults: self = false, combat = false, channel = Guild, requireCheck = true, officerOnly = false
         ['SyncSmall'] = { ['self'] = true, ['combat'] = true, },
         ['SyncDelete'] = { ['combat'] = true, ['self'] = true },
         ['SyncLarge'] = { },

@@ -93,6 +93,8 @@ function Group:Refresh()
 
     if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
         self:RequestDKPOfficer()
+    elseif not self:IsInRaid() then
+        self.leadership.dkpOfficer = nil
     end
     self.available = true
 end

@@ -33,8 +33,10 @@ function Dev:HandleSlashCommands(msg)
         self:BossKillTest(msg)
     elseif cmd == 'testAuctionTimer' then
         PDKP.AuctionTimer.startTimer()
-    elseif cmd == 'rapidReq' then
-        PDKP.AuctionTimer.startTimer()
+    elseif cmd == 'rapidDKPReq' then
+        C_Timer.NewTicker(0.1, function()
+            MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
+        end, 40)
     end
 end
 
