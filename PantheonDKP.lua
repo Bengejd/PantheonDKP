@@ -78,11 +78,12 @@ function CORE:_InitializeCore()
     PDKP.Utils:Initialize()
     MODULES.Database:Initialize()
     MODULES.ChatManager:Initialize()
-    MODULES.CommsManager:Initialize()
 end
 
 function CORE:_InitializeFeatures()
     MODULES.GuildManager:Initialize()
+    MODULES.CommsManager:Initialize()
+
     MODULES.Main:Initialize()
     MODULES.CommsManager:RegisterComms()
     MODULES.LedgerManager:Initialize()

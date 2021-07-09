@@ -31,12 +31,14 @@ function Comm:new(opts)
     self.allowed_in_combat = opts['combat'] or false
     self.channel = opts['channel'] or "GUILD"
     self.requireCheck = opts['requireCheck'] or true
+    self.officerOnly = opts['officerOnly'] or false
 
     self.officersSyncd = {}
 
     self.channel, self.sendTo, self.priority, self.callbackFunc, self.onCommReceivedFunc = self:_Setup()
 
-    if self:IsValid() then
+    if self:IsValid() and (not self.officerOnly or PDKP.canEdit) then
+
         if not opts['combat'] then
             self:_InitializeCache()
         end
@@ -113,6 +115,7 @@ function Comm:_Setup()
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds
         ['SyncDelete'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
+
         ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
         ['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 

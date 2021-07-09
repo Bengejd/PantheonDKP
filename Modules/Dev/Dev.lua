@@ -33,6 +33,8 @@ function Dev:HandleSlashCommands(msg)
         self:BossKillTest(msg)
     elseif cmd == 'testAuctionTimer' then
         PDKP.AuctionTimer.startTimer()
+    elseif cmd == 'rapidReq' then
+        PDKP.AuctionTimer.startTimer()
     end
 end
 

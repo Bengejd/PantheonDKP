@@ -141,7 +141,7 @@ function Member:_GetMemberData(index)
     self.isBank = self.name == MODULES.Constants.BANK_NAME
 
     --@do-not-package@
-    if (self.name == 'Lariese' or self.name == 'Karenbaskins') and PDKP:IsDev() then
+    if (self.name == 'Lariese') and PDKP:IsDev() then
         self.canEdit = true
         self.isOfficer = true
         self.isInLeadership = true

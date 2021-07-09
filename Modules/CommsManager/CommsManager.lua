@@ -27,17 +27,17 @@ end
 function Comms:RegisterComms()
     local commChannels = {
         --- GUILD COMMS
-        ['SyncSmall'] = { ['self'] = true, ['channel'] = 'GUILD', ['combat'] = true, },
-        ['SyncLarge'] = { ['channel'] = 'GUILD', },
-        ['SyncDelete'] = { ['channel'] = 'GUILD', ['combat'] = true, ['self'] = true },
+        -- defaults: ['self'] = false, ['combat'] = false, ['channel'] = Guild, requireCheck = true, officerOnly = false
+        ['SyncSmall'] = { ['self'] = true, ['combat'] = true, },
+        ['SyncDelete'] = { ['combat'] = true, ['self'] = true },
+        ['SyncLarge'] = { },
 
-        ['SyncAd'] = { ['channel'] = 'GUILD', ['self'] = false },
-        ['SyncReq'] = { ['channel'] = 'GUILD',  ['self'] = false, },
+        ['SyncAd'] = { },
+        ['SyncReq'] = { ['self'] = false, ['officerOnly'] = true, ['requireCheck'] = false },
 
         --- RAID COMMS
-
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID', ['combat'] = true, },
-        ['WhoIsDKP'] = { ['self'] = false, ['channel'] = 'RAID', ['requireCheck'] = false, ['combat'] = true, },
+        ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['combat'] = true, },
 
         ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
         ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, ['combat'] = true },
@@ -51,8 +51,8 @@ function Comms:RegisterComms()
         ['SentInv'] = { ['channel'] = 'WHISPER', ['self'] = false, ['combat'] = false },
     }
     for prefix, opts in pairs(commChannels) do
-        local commOpts = { ['prefix'] = prefix, ['combat'] = opts['combat'], ['self'] = opts['self'], ['requireCheck'] = opts['requireCheck'] }
-        local comm = MODULES.Comm:new(commOpts)
+        opts['prefix'] = prefix
+        local comm = MODULES.Comm:new(opts)
         self.channels[comm.prefix] = comm
         if comm.allow_in_combat then
             self.allow_in_combat[comm.prefix] = true
