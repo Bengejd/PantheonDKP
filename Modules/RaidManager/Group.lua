@@ -91,7 +91,7 @@ function Group:Refresh()
         PDKP.raid_frame:updateClassGroups()
     end
 
-    if self:IsInRaid() and not self:HasDKPOfficer() then
+    if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
         self:RequestDKPOfficer()
     end
     self.available = true
@@ -191,18 +191,11 @@ end
 
 function Group:RequestDKPOfficer()
     PDKP:PrintD('Requesting DKP officer');
-
     if self.requestedDKPOfficer or self:HasDKPOfficer() then
         return
     end
     self.requestedDKPOfficer = true
     MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
-
-    C_Timer.After(5, function()
-        if not self:HasDKPOfficer() then
-            self.requestedDKPOfficer = false
-        end
-    end)
 end
 
 function Group:GetNumClass(class)
