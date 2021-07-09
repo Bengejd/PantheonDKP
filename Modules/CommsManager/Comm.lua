@@ -186,7 +186,7 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
             comm:_ProcessCache(comm.cache)
             PDKP:PrintD('End Cached message', #comm.cache)
         end
-    elseif event == 'GROUP_ROSTER_UPDATE' then
+    elseif event == 'GROUP_ROSTER_UPDATE' and comm.ogPrefix == 'SentInv' then
         StaticPopup_Hide("PARTY_INVITE")
     end
 end
