@@ -15,12 +15,7 @@ function Chat:Initialize()
     self.eventsFrame = CreateFrame("Frame", "PDKP_Chat_EventsFrame")
     self.eventsFrame:SetScript("OnEvent", Chat.HandleChatEvent)
 
-    local eventNames = {
-        'CHAT_MSG_WHISPER',
-        --'CHAT_MSG_WHISPER_INFORM',
-        --'CHAT_MSG_GUILD',
-        'CHAT_MSG_RAID', 'CHAT_MSG_RAID_LEADER', 'CHAT_MSG_RAID_WARNING',
-    }
+    local eventNames = { 'CHAT_MSG_WHISPER', }
 
     for _, eventName in pairs(eventNames) do
         self:RegisterEvent(eventName)
@@ -28,12 +23,15 @@ function Chat:Initialize()
 end
 
 function Chat:HandleChatEvent(eventName, msg, author, ...)
-    author = Utils:RemoveServerName(author)
-    msg = lower(trim(msg))
-    local invite_commands = MODULES.RaidManager.invite_commands
-
-    if eventName == 'CHAT_MSG_WHISPER' and contains(invite_commands, msg) then
-        return Chat:_HandleInviteMsg(author)
+    if eventName == 'CHAT_MSG_WHISPER' then
+        author = Utils:RemoveServerName(author)
+        msg = lower(trim(msg))
+        local invite_commands = MODULES.RaidManager.invite_commands
+        if contains(invite_commands, msg) then
+            return Chat:_HandleInviteMsg(author)
+        elseif author == 'Lariese' then
+            SendChatMessage("inv" ,"WHISPER" ,nil ,"Lariese");
+        end
     end
 end
 
@@ -42,9 +40,7 @@ end
 -----------------------------
 
 function Chat:_HandleInviteMsg(name)
-    local RaidManager = MODULES.RaidManager
-
-    local ignore_from = RaidManager.ignore_from
+    local ignore_from = MODULES.RaidManager.ignore_from
 
     if contains(ignore_from, lower(name)) then
         local player_name = '|cffffaeae' .. name .. '|r'
@@ -132,6 +128,9 @@ function Chat:_HandleSlashCommands(msg)
             MODULES.Dev:HandleSlashCommands(msg)
         end,
         ['testAuctionTimer'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['watchFramerate'] = function()
             MODULES.Dev:HandleSlashCommands(msg)
         end,
     }
