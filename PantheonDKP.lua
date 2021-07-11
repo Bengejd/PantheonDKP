@@ -16,6 +16,8 @@ PDKP.OPTIONS = {}
 
 PDKP.AUTOVERSION = "@project-version@"
 
+PDKP.newVersionDetected = false
+
 local CORE = PDKP.CORE
 local MODULES = PDKP.MODULES
 
@@ -38,10 +40,22 @@ local function Initialize_SavedVariables()
         PDKP_DB = {
             global = {
                 version = Initialize_Default_Version(),
-                previous = Initialize_Default_Version()
+                previous = Initialize_Default_Version(),
+                locked = false
             }
         }
     end
+end
+
+local function IsNewVersion(old, new)
+    if old.major < new.major then
+        return true
+    elseif old.minor < new.minor then
+        return true
+    elseif old.patch < new.patch then
+        return true
+    end
+    return false
 end
 
 local function Initialize_Versioning()
@@ -49,6 +63,11 @@ local function Initialize_Versioning()
     local major, minor, patch, changeset = strmatch(PDKP.AUTOVERSION, "^v(%d+).(%d+).(%d+)-?(.*)")
     local old = PDKP_DB.global.version
     local new = Initialize_Default_Version({ major, minor, patch, changeset })
+
+    if IsNewVersion(old, new) then
+        PDKP_GB.global.locked = false
+        PDKP.newVersionDetected = true
+    end
 
     -- set new version
     PDKP_DB.global.version = new
