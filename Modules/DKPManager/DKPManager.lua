@@ -100,12 +100,35 @@ end
 
 function DKP:ExportEntry(entry)
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+    if entry.reason == 'Decay' then
+        local hasPreviousDecay, decayWeek = self:_CheckForPreviousDecay()
+        if hasPreviousDecay then
+            return
+        end
+    end
+
     MODULES.CommsManager:SendCommsMessage('SyncSmall', save_details)
 end
 
 -----------------------------
 --     Import Functions    --
 -----------------------------
+
+function DKP:_CheckForPreviousDecay()
+    local decayDB = MODULES.Database:Decay()
+    local weekDecay = decayDB[self.weekNumber]
+    if weekDecay then
+        if next(weekDecay) ~= nil then
+            PDKP:Print("Error: decay already submitted for this week");
+            self.previousDecayEntry = decayDB[self.weekNumber][1]
+            return true, decayDB[self.weekNumber]
+        end
+    else
+        decayDB[self.weekNumber] = {}
+    end
+    return false, decayDB[self.weekNumber]
+end
 
 function DKP:ImportEntry(entry, skipLockoutCheck)
     skipLockoutCheck = skipLockoutCheck or false
@@ -119,7 +142,6 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
 
     if #no_lockout_members == 0 and not skipLockoutCheck then
         self:_UpdateTables()
-        --PDKP:PrintD('No eligible members found for', entry.reason, 'Skipping import')
         return
     end
 
@@ -130,10 +152,20 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
 
         self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
         self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
-        self:_RecompressCurrentLoaded()
+        self:_StartRecompressTimer()
     end
 
     return importEntry
+end
+
+function DKP:_StartRecompressTimer()
+    if self.recompressTimer ~= nil then
+        self.recompressTimer:Cancel()
+        self.recompressTimer = nil
+    end
+    self.recompressTimer = C_Timer.NewTicker(5, function()
+        self:_RecompressCurrentLoaded()
+    end, 1)
 end
 
 function DKP:DeleteEntry(entry, sender)
