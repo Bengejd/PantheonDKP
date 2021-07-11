@@ -27,28 +27,28 @@ end
 function Comms:RegisterComms()
     local commChannels = {
         --- GUILD COMMS
-        -- defaults: self = false, combat = false, channel = Guild, requireCheck = true, officerOnly = false
-        ['SyncSmall'] = { ['self'] = true, ['combat'] = true, },
-        ['SyncDelete'] = { ['combat'] = true, ['self'] = true },
-        ['SyncLarge'] = { },
+        -- defaults: self = false, combat = true, channel = Guild, requireCheck = true, officerOnly = false
+        ['SyncSmall'] = { ['self'] = true, },
+        ['SyncDelete'] = { ['self'] = true },
+        ['SyncLarge'] = { ['combat'] = false, },
 
-        ['SyncAd'] = { },
-        ['SyncReq'] = { ['self'] = false, ['officerOnly'] = true, ['requireCheck'] = false },
+        ['SyncAd'] = { ['combat'] = false, },
+        ['SyncReq'] = { ['self'] = false, ['officerOnly'] = true, ['requireCheck'] = false, ['combat'] = false, },
 
         --- RAID COMMS
-        ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID', ['combat'] = true, },
-        ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['combat'] = true, },
+        ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
+        ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false,  },
 
-        ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
-        ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, ['combat'] = true },
+        ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, },
+        ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, },
 
-        ['bidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
-        ['bidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, ['combat'] = true },
+        ['bidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
+        ['bidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
 
-        ['AddBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
-        ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, ['combat'] = true },
+        ['AddBid'] = { ['channel'] = 'RAID', ['self'] = true, },
+        ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, },
 
-        ['SentInv'] = { ['channel'] = 'WHISPER', ['self'] = false, ['combat'] = false },
+        ['SentInv'] = { ['channel'] = 'WHISPER', },
     }
     for prefix, opts in pairs(commChannels) do
         opts['prefix'] = prefix

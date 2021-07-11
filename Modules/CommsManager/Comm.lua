@@ -28,7 +28,7 @@ function Comm:new(opts)
     self.ogPrefix = opts['prefix']
     self.prefix = _prefix(self.ogPrefix)
     self.allowed_from_self = opts['self'] or false
-    self.allowed_in_combat = opts['combat'] or false
+    self.allowed_in_combat = opts['combat'] or true
     self.channel = opts['channel'] or "GUILD"
     self.requireCheck = opts['requireCheck'] or true
     self.officerOnly = opts['officerOnly'] or false
@@ -38,7 +38,6 @@ function Comm:new(opts)
     self.channel, self.sendTo, self.priority, self.callbackFunc, self.onCommReceivedFunc = self:_Setup()
 
     if self:IsValid() and (not self.officerOnly or PDKP.canEdit) then
-
         if not opts['combat'] then
             self:_InitializeCache()
         end
@@ -190,7 +189,7 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
             PDKP:PrintD('End Cached message', #comm.cache)
         end
     elseif event == 'GROUP_ROSTER_UPDATE' and comm.ogPrefix == 'SentInv' then
-        StaticPopup_Hide("PARTY_INVITE")
+        --StaticPopup_Hide("PARTY_INVITE")
     end
 end
 
@@ -226,12 +225,10 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncAd' then
         if self.officersSyncd[sender] then
-            --PDKP:PrintD(sender, "Has already been syncd")
             return
         end
         -- Ignore SyncAds when you're not in the group with the player, but are in a raid.
         if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
-            --PDKP:PrintD("Ignoring syncAd")
             return
         end
 
@@ -242,6 +239,7 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         end
         self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
+
         MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end
