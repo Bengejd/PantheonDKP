@@ -33,10 +33,32 @@ function Dev:HandleSlashCommands(msg)
         self:BossKillTest(msg)
     elseif cmd == 'testAuctionTimer' then
         PDKP.AuctionTimer.startTimer()
-    elseif cmd == 'rapidDKPReq' then
+    elseif cmd == 'rapidDKPOfficerReq' then
         C_Timer.NewTicker(0.1, function()
             MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
         end, 40)
+    elseif cmd == 'rapidAdReq' then
+        C_Timer.NewTicker(0.1, function()
+            MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
+        end, 40)
+    elseif cmd == 'watchFramerate' then
+        if self.frameRateTimer ~= nil then
+            self.frameRateTimer:Cancel()
+            self.frameRateTimer = nil
+            return
+        end
+        self.frameRateTimer = C_Timer.NewTicker(1, function()
+            PDKP:PrintD("FrameRate", GetFramerate())
+        end)
+    elseif cmd == 'watchFramerate' then
+        if self.frameRateTimer ~= nil then
+            self.frameRateTimer:Cancel()
+            self.frameRateTimer = nil
+            return
+        end
+        self.frameRateTimer = C_Timer.NewTicker(1, function()
+            PDKP:PrintD("FrameRate", GetFramerate())
+        end)
     end
 end
 
