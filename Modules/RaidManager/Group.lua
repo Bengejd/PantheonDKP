@@ -2,9 +2,10 @@ local _, PDKP = ...
 local _G = _G
 
 local MODULES = PDKP.MODULES
-local Utils = PDKP.Utils;
-
+local Utils = PDKP.Utils
+local GUtils = PDKP.GUtils
 local Group = {}
+local GuildManager
 
 local IsInRaid = IsInRaid
 local tinsert = table.insert
@@ -12,23 +13,28 @@ local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterI
 local UnitIsGroupLeader = UnitIsGroupLeader
 local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
 local strtrim = strtrim
-
-local GuildManager;
+local wipe = wipe
+local C_Timer = C_Timer
+local GetFrameRate = GetFramerate
 
 function Group:Initialize()
-    setmetatable(self, Group); -- Set the metatable so we used Group's __index
+    setmetatable(self, Group) -- Set the metatable so we used Group's __index
 
-    GuildManager = MODULES.GuildManager;
+    GuildManager = MODULES.GuildManager
 
-    self.classes = {};
+    self.classes = {}
     self.available = true
     self.requestedDKPOfficer = false
+    self.portraitInitialized = false
+
+    self.myName = Utils:GetMyName()
+
+    self.numGroupMembers = 0
 
     self:_RefreshClasses()
-
     self:InitializePortrait()
 
-    self.memberNames = {};
+    self.memberNames = {}
     self.player = {}
     self.leadership = {
         assist = {},
@@ -37,66 +43,9 @@ function Group:Initialize()
         leader = nil,
     }
 
-    self:RegisterEvents();
+    self:RegisterEvents()
 
     self:Refresh()
-end
-
-function Group:Refresh()
-    if not self.available then
-        return
-    end
-    self.available = false
-
-    local numGroupMembers = GetNumGroupMembers()
-
-    self:_RefreshClasses()
-    self:_RefreshLeadership()
-    self:_RefreshMembers()
-
-    local myName = Utils:GetMyName()
-
-    for i = 1, numGroupMembers do
-        local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
-
-        if role == 'MAINTANK' then
-            tinsert(self.classes['Tank'], name)
-        else
-            tinsert(self.classes[class], name)
-        end
-
-        tinsert(self.memberNames, name)
-
-        -- leadership
-        if rank > 0 then
-            tinsert(self.leadership.assist, name)
-            if rank == 2 then
-                self.leadership.leader = name
-            end
-        end
-
-        if isML then
-            self.leadership.masterLoot = name
-        end
-
-        if name == myName then
-            self.isML = isML
-            self.isLeader = rank == 2
-            self.isAssist = rank >= 1
-            self.isDKP = name == self.leadership.dkpOfficer
-        end
-    end
-
-    if PDKP.raid_frame ~= nil then
-        PDKP.raid_frame:updateClassGroups()
-    end
-
-    if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
-        self:RequestDKPOfficer()
-    elseif not self:IsInRaid() then
-        self.leadership.dkpOfficer = nil
-    end
-    self.available = true
 end
 
 function Group:InvitePlayer(name)
@@ -121,20 +70,98 @@ function Group:CanInvite(name)
     return not self:IsInRaid() or self:IsLeader() or self:IsAssist()
 end
 
-function Group:RegisterEvents()
-    local events = { 'GROUP_ROSTER_UPDATE', 'BOSS_KILL' };
-    local f = CreateFrame("Frame", "PDKP_Group_EventsFrame");
+-----------------------------
+--     Event Functions     --
+-----------------------------
 
-    for _, eventName in pairs(events) do
-        f:RegisterEvent(eventName)
-    end
-    f:SetScript("OnEvent", function(_, event, arg1, ...)
-        Group:_HandleEvent(event, arg1, ...)
-    end)
+function Group:RegisterEvents()
+    local opts = {
+        ['name'] = 'GROUP',
+        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL'},
+        ['tickInterval'] = 0.5,
+        ['onEventFunc'] = function(arg1, arg2, arg3)
+            self:_HandleEvent(arg1, arg2, arg3)
+        end
+    }
+    self.eventFrame = GUtils:createThrottledEventFrame(opts)
 end
 
+function Group:_HandleEvent(event, arg1, ...)
+    if not self:IsInRaid() then return end
+    if event == 'BOSS_KILL' and MODULES.Constants.BOSS_TO_RAID[arg1] == nil then return end
+
+    self:Refresh()
+    if not self.available then
+        return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...) )
+    end
+    if event == 'BOSS_KILL' then
+        local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
+        local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
+        if isDKP or isMLNoDKP then
+            MODULES.DKPManager:BossKillDetected(arg1, ...)
+        end
+    end
+end
+
+function Group:Refresh()
+    PDKP:PrintD("Refreshing Group", self:IsInRaid());
+
+    local numGroupMembers = GetNumGroupMembers()
+
+    self:_RefreshClasses()
+    self:_RefreshLeadership()
+    self:_RefreshMembers()
+
+    for i = 1, numGroupMembers do
+        local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
+
+        if role == 'MAINTANK' then
+            tinsert(self.classes['Tank'], name)
+        else
+            tinsert(self.classes[class], name)
+        end
+
+        tinsert(self.memberNames, name)
+
+        -- leadership
+        if rank > 0 then
+            tinsert(self.leadership.assist, name)
+            if rank == 2 then
+                self.leadership.leader = name
+            end
+        end
+
+        if isML then
+            self.leadership.masterLoot = name
+        end
+
+        if name == self.myName then
+            self.isML = isML
+            self.isLeader = rank == 2
+            self.isAssist = rank >= 1
+            self.isDKP = name == self.leadership.dkpOfficer
+        end
+    end
+
+    if PDKP.raid_frame ~= nil then
+        PDKP.raid_frame:updateClassGroups()
+    end
+
+    if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
+        self:RequestDKPOfficer()
+    elseif not self:IsInRaid() then
+        PDKP:PrintD("Resetting DKP Officer");
+        self.requestedDKPOfficer = false;
+        self.leadership.dkpOfficer = nil
+    end
+    self.available = true
+end
+
+-----------------------------
+--    Get/Set Functions    --
+-----------------------------
+
 function Group:IsInRaid()
-    --local isAlone = (not IsInRaid() and GetNumGroupMembers() == 0)
     return IsInRaid() and GetNumGroupMembers() >= 1
 end
 
@@ -225,13 +252,25 @@ function Group:IsInInstance()
     return type ~= "none" and type ~= nil
 end
 
+function Group:IsMemberInRaid(name)
+    return tContains(self.memberNames, name) or false
+end
+
+-----------------------------
+--    Refresh Functions    --
+-----------------------------
+
 function Group:_RefreshClasses()
     local CLASSES = MODULES.Constants.CLASSES
     for i = 1, #CLASSES do
         if type(self.classes[CLASSES[i]]) == "table" then
             wipe(self.classes[CLASSES[i]])
+            if self.classes[CLASSES[i]] == nil then
+                self.classes[CLASSES[i]] = {}
+            end
+        else
+            self.classes[CLASSES[i]] = {}
         end
-        self.classes[CLASSES[i]] = {}
     end
     self.classes['Tank'] = {}
     self.classes['Total'] = {}
@@ -245,7 +284,7 @@ function Group:_RefreshLeadership()
         else
             if key ~= 'dkpOfficer' then
                 self.leadership[key] = nil
-            elseif key == 'dkpOfficer' and val == nil then
+            elseif key == 'dkpOfficer' and (not self:IsInRaid() or val == nil) then
                 self.leadership[key] = nil
             end
         end
@@ -257,36 +296,6 @@ function Group:_RefreshMembers()
     if type(self.memberNames) ~= "table" then
         self.memberNames = {}
     end
-end
-
-function Group:_HandleEvent(event, arg1, ...)
-    if event == 'BOSS_KILL' then
-        if MODULES.Constants.BOSS_TO_RAID[arg1] == nil then
-            return
-        end
-    end
-
-    self:Refresh()
-    if not self.available then
-        return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...))
-    end
-    if event == 'BOSS_KILL' then
-        local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
-        local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
-        if isDKP or isMLNoDKP then
-            MODULES.DKPManager:BossKillDetected(arg1, ...)
-        end
-    end
-end
-
-function Group:IsMemberInRaid(name)
-    return tContains(self.memberNames, name) or false
-    --for i=1, #self.memberNames do
-    --    if self.memberNames[i] == name then
-    --        return true
-    --    end
-    --end
-    --return false
 end
 
 function Group:InitializePortrait()
