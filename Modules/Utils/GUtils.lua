@@ -4,10 +4,12 @@ PDKP.GUtils = {}
 local unpack, CreateFrame = unpack, CreateFrame
 local GameFontHighlightSmall = GameFontHighlightSmall
 local UIParent = UIParent
+local NewTicker = C_Timer.NewTicker
 
 local MODULES = PDKP.MODULES
-
 local GUtils = PDKP.GUtils
+
+local eventFrames = {}
 
 function GUtils:setMovable(f)
     if f == nil then
@@ -709,4 +711,45 @@ function GUtils:createStatusBar(opts)
     pb.onTimerFinished = onTimerFinished
 
     return pb
+end
+
+
+function GUtils:createThrottledEventFrame(opts)
+    local name = 'PDKP_' .. opts['name'] .. '_EventFrame'
+    local events = opts['events'] or {}
+    local onEventFunc = opts['onEventFunc'] or function() end;
+    local tickInterval = opts['tickInterval'] or 1
+    local tickAmount = opts['tickAmount'] or 1
+
+    local f;
+
+    if eventFrames[name] ~= nil then
+        f = eventFrames[name]
+        for _, eventName in pairs(f.registeredEvents) do
+            f:UnregisterEvent(eventName)
+        end
+        wipe(f.registeredEvents)
+        wipe(f.timers)
+    else
+        f = CreateFrame("Frame", name)
+    end
+
+    if f.registeredEvents == nil then f.registeredEvents = {} end
+    if f.timers == nil then f.timers = {} end
+
+    for _, eventName in pairs(events) do
+        f:RegisterEvent(eventName)
+        table.insert(f.registeredEvents, eventName)
+    end
+    f:SetScript("OnEvent", function(_, event, arg1, ...)
+        if f.timers[event] ~= nil then
+            f.timers[event]:Cancel();
+            f.timers[event] = nil
+        end
+        local args = { [1] = event, [2] = arg1, [3] = ... }
+        f.timers[event] = NewTicker(tickInterval, function()
+            return onEventFunc(args[1], args[2], args[3])
+        end, tickAmount)
+    end)
+    return f;
 end
