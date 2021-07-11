@@ -22,6 +22,8 @@ function entry:new(entry_details)
     local self = {}
     setmetatable(self, entry); -- Set the metatable so we used entry's __index
 
+    if entry_details == nil then return end
+
     Guild = MODULES.GuildManager;
 
     --- Core Entry Details
