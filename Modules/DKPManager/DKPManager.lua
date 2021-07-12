@@ -222,6 +222,42 @@ function DKP:ImportBulkEntries(message, _)
     end, total_batches)
 end
 
+function DKP:RecalibrateDKP()
+    PDKP:PrintD("Recalibrating DKP")
+    local members = MODULES.GuildManager.members
+    for _, member in pairs(members) do
+        member.dkp['total'] = 30
+        member:Save()
+    end
+
+    local entryIDS = {}
+
+    for entryID, _ in pairs(DKP_DB) do
+        table.insert(entryIDS, entryID)
+    end
+    table.sort(entryIDS)
+
+    for i=1, #entryIDS do
+        local encoded_entry = DKP_DB[entryIDS[i]]
+        local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
+        local names = entry.names
+        for j=1, #names do
+            local member = MODULES.GuildManager:GetMemberByName(names[j])
+            if member ~= nil then
+                if entry.reason == 'Decay' then
+                    member.dkp['total'] = math.floor(member.dkp['total'] * 0.9)
+                else
+                    member.dkp['total'] = member.dkp['total'] + entry.dkp_change
+                end
+                member:Save()
+            else
+                PDKP:PrintD("Could not find member", names[j])
+            end
+        end
+    end
+    self:_UpdateTables();
+end
+
 -----------------------------
 --      Boss Functions     --
 -----------------------------

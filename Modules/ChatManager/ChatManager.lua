@@ -105,6 +105,10 @@ function Chat:_HandleSlashCommands(msg)
         ['databaseReset'] = function()
             MODULES.Database:ResetAllDatabases()
         end,
+
+        ['recalibrateTotals'] = function()
+            MODULES.DKPManager:RecalibrateDKP()
+        end,
     }
     if SLASH_COMMANDS[command] then
         return SLASH_COMMANDS[command]()
@@ -131,6 +135,9 @@ function Chat:_HandleSlashCommands(msg)
             MODULES.Dev:HandleSlashCommands(msg)
         end,
         ['watchFramerate'] = function()
+            MODULES.Dev:HandleSlashCommands(msg)
+        end,
+        ['compareDatabases'] = function()
             MODULES.Dev:HandleSlashCommands(msg)
         end,
     }
