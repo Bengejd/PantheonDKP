@@ -55,10 +55,6 @@ function Dialogs:Initialize()
             button1 = "Delete",
             button2 = "Cancel",
             OnAccept = function(_, data, _)
-                if data['reason'] == 'Decay' then
-                    PDKP.CORE:Print('Deleting Decay entries is not currently supported')
-                    return
-                end
                 MODULES.CommsManager:SendCommsMessage('SyncDelete', data)
             end,
             OnCancel = function(_) end,
