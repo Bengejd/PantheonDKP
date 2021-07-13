@@ -66,8 +66,6 @@ function Comms:RegisterComms()
 end
 
 function Comms:SendCommsMessage(prefix, data, skipEncoding)
-    PDKP.CORE:Print("Sending Comms Message", prefix)
-
     skipEncoding = skipEncoding or false
     local transmitData = data
 
