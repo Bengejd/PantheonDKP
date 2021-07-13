@@ -38,8 +38,17 @@ function DKP:Initialize()
     self.entrySyncCache = {}
     self.entrySyncTimer = nil
 
+    self.decayEntry = nil
+
+    self.rolledBackEntries = {}
+
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
+
+    if self.decayEntry ~= nil then
+        self:RollBackEntries(self.decayEntry)
+        self:RollForwardEntries()
+    end
 
     C_Timer.After(5, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
@@ -73,6 +82,10 @@ function DKP:LoadPrevFourWeeks()
                 decoded_entry = encoded_entry;
             end
             local entry = MODULES.DKPEntry:new(decoded_entry)
+
+            -- TODO: DELETE THIS
+            if entry.id == 1625715127 then self.decayEntry = entry end
+
             self.entries[index] = entry
             self.numOfEntries = self.numOfEntries + 1
 
@@ -106,7 +119,7 @@ function DKP:ExportEntry(entry)
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
 
     if entry.reason == 'Decay' then
-        local hasPreviousDecay, decayWeek = self:_CheckForPreviousDecay()
+        --local hasPreviousDecay, decayWeek = self:_CheckForPreviousDecay()
         --if hasPreviousDecay then
         --    return
         --end
@@ -138,6 +151,10 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     skipLockoutCheck = skipLockoutCheck or false
     local importEntry = MODULES.DKPEntry:new(entry)
 
+    if entry.reason == 'Decay' then
+        self:RollBackEntries(importEntry)
+    end
+
     if skipLockoutCheck then
         importEntry.lockoutsChecked = true
     end
@@ -157,6 +174,10 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
         self.currentLoadedWeekEntries[entry['id']] = MODULES.CommsManager:DataEncoder(entry)
         self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
         self:_StartRecompressTimer()
+
+        if #self.rolledBackEntries then
+            self:RollForwardEntries()
+        end
     end
 
     return importEntry
@@ -260,6 +281,76 @@ function DKP:RecalibrateDKP()
         end
     end
     self:_UpdateTables();
+end
+
+function DKP:RollBackEntries(decayEntry)
+    local all_keys = {}
+    local keys_to_rollback = {}
+
+    for entryID, _ in pairs(DKP_DB) do
+        table.insert(all_keys, entryID)
+    end
+    table.sort(all_keys)
+
+    if all_keys[#all_keys] > decayEntry.id then
+        for i=1, #all_keys do
+            local key = all_keys[i]
+            if key > decayEntry.id then
+                table.insert(keys_to_rollback, key)
+            end
+        end
+    end
+    -- Reverse them in order from newest to oldest.
+    table.sort(keys_to_rollback, function(a,b) return a>b end)
+
+    local entries = {}
+    for i=1, #keys_to_rollback do
+        local encoded_entry = DKP_DB[keys_to_rollback[i]]
+        local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
+        local entry = MODULES.DKPEntry:new(decoded_entry)
+        table.insert(entries, entry)
+    end
+
+    PDKP:PrintD("Rolling back", #entries, "Entries")
+
+    for i=1, #entries do
+        local entry = entries[i]
+        for _, member in pairs(entry.members) do
+            if member ~= nil then
+                local dkp_change = entry.dkp_change
+                if entry.reason == 'Decay' then
+                    if next(entry['decayAmounts']) == nil or entry['decayAmounts'][member.name] == nil then
+                        entry['decayAmounts'][member.name] = 0
+                        local member_previous = entry['previousTotals'][member.name]
+                        local member_decay_amount = math.floor((member_previous * 0.1))
+                        entry['decayAmounts'][member.name] = member_decay_amount
+                    end
+                    dkp_change = entry['decayAmounts'][member.name]
+                end
+                member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
+                member:Save()
+            end
+        end
+        table.insert(self.rolledBackEntries, entry)
+    end
+end
+
+function DKP:RollForwardEntries()
+    --- Since they are sorted in reverse, just start at the oldest entry (end)
+    --- and work you way to the newest entry (start).
+    for i=#self.rolledBackEntries, 1, -1 do
+        local entry = self.rolledBackEntries[i]
+
+        for _, member in pairs(entry.members) do
+            local dkp_change = entry.dkp_change
+            if entry.reason == 'Decay' then
+                dkp_change = entry['decayAmounts'][member.name]
+            end
+            member.dkp['total'] = member.dkp['total'] + dkp_change
+            member:Save()
+        end
+    end
+    wipe(self.rolledBackEntries)
 end
 
 function DKP:AddToCache(entry)
