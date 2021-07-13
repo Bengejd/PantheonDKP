@@ -106,9 +106,9 @@ function DKP:ExportEntry(entry)
 
     if entry.reason == 'Decay' then
         local hasPreviousDecay, decayWeek = self:_CheckForPreviousDecay()
-        if hasPreviousDecay then
-            return
-        end
+        --if hasPreviousDecay then
+        --    return
+        --end
     end
 
     MODULES.CommsManager:SendCommsMessage('SyncSmall', save_details)
