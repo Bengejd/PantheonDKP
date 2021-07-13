@@ -27,12 +27,13 @@ function Comm:new(opts)
 
     self.ogPrefix = opts['prefix']
     self.prefix = _prefix(self.ogPrefix)
-    self.allowed_from_self = opts['self'] or false
-    self.allowed_in_combat = opts['combat'] or true
-    self.channel = opts['channel'] or "GUILD"
-    self.requireCheck = opts['requireCheck'] or true
-    self.officerOnly = opts['officerOnly'] or false
-    self.forcedCache = opts['forcedCache'] or false
+
+    self.allowed_from_self = Utils:ternaryAssign(opts['self'] ~= nil, opts['self'], false)
+    self.allowed_in_combat = Utils:ternaryAssign(opts['combat'] ~= nil, opts['combat'], true)
+    self.channel = Utils:ternaryAssign(opts['channel'] ~= nil, opts['channel'], 'GUILD')
+    self.requireCheck = Utils:ternaryAssign(opts['requireCheck'] ~= nil, opts['requireCheck'], true)
+    self.officerOnly = Utils:ternaryAssign(opts['officerOnly'] ~= nil, opts['officerOnly'], false)
+    self.forcedCache = Utils:ternaryAssign(opts['forcedCache'] ~= nil, opts['forcedCache'], false)
     self.forcedCacheTimer = nil
 
     self.officersSyncd = {}
@@ -60,6 +61,8 @@ function Comm:CanSend()
 end
 
 function Comm:VerifyCommSender(message, sender)
+    PDKP:PrintD(self.ogPrefix, "RequireCheck", self.requireCheck)
+
     if self.requireCheck then
         local sentMember = MODULES.GuildManager:GetMemberByName(sender)
         if sentMember == nil or not sentMember.canEdit then
@@ -237,11 +240,10 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         data = CommsManager:DataDecoder(message)
 
         for _, entry in pairs(data) do
-            DKPManager:ImportEntry(entry)
+            DKPManager:AddToCache(entry)
         end
         self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
-
         MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end

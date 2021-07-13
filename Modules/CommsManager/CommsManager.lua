@@ -21,6 +21,8 @@ function PDKP_OnCommsReceived(prefix, message, _, sender)
     local channel = Comms.channels[prefix]
     if channel then
         return channel:VerifyCommSender(message, sender)
+    else
+        PDKP:PrintD("Could not find comm channel", prefix)
     end
 end
 
@@ -32,8 +34,8 @@ function Comms:RegisterComms()
         ['SyncDelete'] = { ['self'] = true },
         ['SyncLarge'] = { ['combat'] = false, },
 
-        ['SyncAd'] = { ['combat'] = false, },
-        ['SyncReq'] = { ['self'] = false, ['officerOnly'] = true, ['requireCheck'] = false, ['combat'] = false, },
+        ['SyncAd'] = { ['combat'] = false },
+        ['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = false, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
@@ -64,6 +66,8 @@ function Comms:RegisterComms()
 end
 
 function Comms:SendCommsMessage(prefix, data, skipEncoding)
+    PDKP.CORE:Print("Sending Comms Message", prefix)
+
     skipEncoding = skipEncoding or false
     local transmitData = data
 
@@ -83,6 +87,8 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
             params[2] = data
         end
         return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
+    else
+        PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
     end
 
     PDKP:PrintD('Could not complete comm request ', prefix)
