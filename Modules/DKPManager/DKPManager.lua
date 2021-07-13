@@ -34,6 +34,9 @@ function DKP:Initialize()
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
 
+    self.entrySyncCache = {}
+    self.entrySyncTimer = nil
+
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 
@@ -256,6 +259,17 @@ function DKP:RecalibrateDKP()
         end
     end
     self:_UpdateTables();
+end
+
+function DKP:AddToCache(entry)
+    if self.entrySyncTimer ~= nil then
+        self.entrySyncTimer:Cancel();
+        self.entrySyncTimer = nil
+    end
+    self.entrySyncCache[entry.id] = entry
+    self.entrySyncTimer = C_Timer.NewTicker(2, function()
+        PDKP:Print("Processing Sync Cache...")
+    end, 1)
 end
 
 -----------------------------

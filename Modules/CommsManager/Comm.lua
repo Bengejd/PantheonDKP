@@ -32,7 +32,8 @@ function Comm:new(opts)
     self.channel = opts['channel'] or "GUILD"
     self.requireCheck = opts['requireCheck'] or true
     self.officerOnly = opts['officerOnly'] or false
-    self.timedCache = opts['timedCache'] or false
+    self.forcedCache = opts['forcedCache'] or false
+    self.forcedCacheTimer = nil
 
     self.officersSyncd = {}
 
