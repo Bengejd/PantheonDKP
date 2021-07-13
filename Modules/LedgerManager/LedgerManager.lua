@@ -168,7 +168,7 @@ function Ledger:GetLastFourWeeks()
         self.weekHashes[i] = self:_GetWeekTable(i)
         if PDKP:IsDev() then
             for key, v in pairs(self.weekHashes[i]) do
-                PDKP:PrintD('WeekEntries', i, key, #v)
+                --PDKP:PrintD('WeekEntries', i, key, #v)
             end
         end
     end
@@ -215,7 +215,6 @@ function Ledger:ImportEntry(entry)
         return false
     end
 
-    --self.weekHashes[weekNumber][officer][index] = entry.id
     table.insert(LEDGER[weekNumber][officer], entry.id)
     table.sort(LEDGER[weekNumber][officer], function(a, b)
         return a < b
