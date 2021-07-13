@@ -293,6 +293,7 @@ function HistoryTable:_OnLoad()
         collapse_text = border:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         collapse_text:SetHeight(18)
         collapse_text:SetPoint("LEFT", 14, 0)
+        collapse_text:SetJustifyH("LEFT")
         collapse_text:Hide()
 
         row.border = border
