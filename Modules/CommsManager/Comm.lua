@@ -61,8 +61,6 @@ function Comm:CanSend()
 end
 
 function Comm:VerifyCommSender(message, sender)
-    PDKP:PrintD(self.ogPrefix, "RequireCheck", self.requireCheck)
-
     if self.requireCheck then
         local sentMember = MODULES.GuildManager:GetMemberByName(sender)
         if sentMember == nil or not sentMember.canEdit then
