@@ -33,6 +33,7 @@ function DKP:Initialize()
     self.compressedCurrentWeekEntries = ''
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
+    self.entrySyncCacheCounter = 0
 
     self.entrySyncCache = {}
     self.entrySyncTimer = nil
@@ -262,13 +263,34 @@ function DKP:RecalibrateDKP()
 end
 
 function DKP:AddToCache(entry)
-    if self.entrySyncTimer ~= nil then
+    if self.entrySyncTimer ~= nil and not self.autoSyncInProgress then
         self.entrySyncTimer:Cancel();
         self.entrySyncTimer = nil
     end
-    self.entrySyncCache[entry.id] = entry
+
+    if self.autoSyncInProgress then
+        return C_Timer.After(2, self:AddToCache(entry))
+    end
+
+    if self.entrySyncCache[entry.id] == nil and DKP_DB[entry.id] == nil then
+        self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
+        self.entrySyncCache[entry.id] = entry
+    end
+
     self.entrySyncTimer = C_Timer.NewTicker(2, function()
-        PDKP:Print("Processing Sync Cache...")
+        self.autoSyncInProgress = true
+        PDKP:PrintD("Processing", self.entrySyncCacheCounter, "Cached Sync entries...")
+        local keys = {}
+        for key, _ in pairs(self.entrySyncCache) do table.insert(keys, key) end
+        table.sort(keys)
+
+        for i=1, #keys do
+            local cache_entry = self.entrySyncCache[keys[i]]
+            self:ImportEntry(cache_entry)
+        end
+
+        wipe(self.entrySyncCache)
+        self.autoSyncInProgress = false
     end, 1)
 end
 
