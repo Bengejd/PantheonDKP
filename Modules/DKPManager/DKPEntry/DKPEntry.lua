@@ -15,6 +15,7 @@ local core_details = { 'reason', 'dkp_change', 'officer', 'names' }
 local _BOSS_KILL = 'Boss Kill'
 local _ITEM_WIN = 'Item Win'
 local _OTHER = 'Other'
+local _DECAY = 'Decay'
 
 entry.__index = entry
 
@@ -25,6 +26,8 @@ function entry:new(entry_details)
     if entry_details == nil then return end
 
     Guild = MODULES.GuildManager;
+
+    self.entry_initiated = false
 
     --- Core Entry Details
     self.id = entry_details['id'] or GetServerTime()
@@ -56,6 +59,7 @@ function entry:new(entry_details)
 
     self.decayMigrated = false
     self.decayAmounts = {}
+    self.decayReversal = entry_details['decayReversal'] or false
 
     self.members = {}
     self.sd = {} -- Save Details
@@ -77,7 +81,13 @@ function entry:new(entry_details)
     self.formattedID = Utils:Format12HrDateTime(self.id)
     self.collapsedHistoryText = self:_GetCollapsedHistoryText()
 
+    if self.reason == 'Decay' then
+        self:CalculateDecayAmounts()
+    end
+
     self.edited_fields = entry_details['edited_fields'] or {}
+
+    self.entry_initiated = true
 
     return self;
 end
@@ -97,6 +107,12 @@ function entry:Save(updateTable, exportEntry, skipLockouts)
     end
 end
 
+function entry:GetPreviousTotals()
+    for _, member in pairs(self.members) do
+        self.previousTotals[member.name] = member:GetDKP()
+    end
+end
+
 function entry:GetSaveDetails()
     wipe(self.sd)
 
@@ -113,12 +129,24 @@ function entry:GetSaveDetails()
         self.sd['item'] = self.item
     elseif self.reason == _OTHER then
         self.sd['other_text'] = self.other_text
+    elseif self.reason == _DECAY then
+        if self.previousTotals == nil or next(self.previousTotals) == nil then
+            self:GetPreviousTotals()
+            self:CalculateDecayAmounts()
+        end
+        if self.decayReversal then
+            self.sd['decayReversal'] = true
+        end
     end
 
     local dependants = {
         ['previousTotals'] = self.previousTotals,
         ['pugNames'] = self.pugNames,
     }
+
+    if self.reason == _DECAY then
+        dependants['decayAmounts'] = self.decayAmounts
+    end
 
     for name, val in pairs(dependants) do
         if type(val) == "table" then
@@ -150,9 +178,37 @@ function entry:GetMembers()
     return self.members, self.pugNames
 end
 
+function entry:CalculateDecayAmounts(refresh)
+    refresh = refresh or false
+    wipe(self.decayAmounts)
+
+    if refresh then
+        wipe(self.members)
+        self:GetMembers()
+        wipe(self.decayAmounts)
+    end
+
+    for _, member in pairs(self.members) do
+        if next(self.decayAmounts) == nil or self.decayAmounts[member.name] == nil then
+            self['decayAmounts'][member.name] = 0
+            local member_previous = self['previousTotals'][member.name]
+            if member_previous == nil or refresh then
+                member_previous = member:GetDKP()
+            end
+            local member_decay_amount = math.floor(member_previous) - math.floor( (member_previous * 0.9) )
+            self['decayAmounts'][member.name] = member_decay_amount * -1
+        end
+    end
+    self.decayMigrated = true
+end
+
 function entry:MarkAsDeleted(deletedBy)
     self.deleted = true
     self.deletedBy = deletedBy
+
+    if self.reason == 'Decay' then
+        self.decayReversal = true
+    end
 end
 
 function entry:RemoveMember(name)
@@ -243,6 +299,9 @@ function entry:_GetChangeText()
     local color = Utils:ternaryAssign(self.dkp_change >= 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
 
     if self.reason == 'Decay' then
+        if self.decayReversal then
+            return Utils:FormatTextColor('10% DKP', MODULES.Constants.SUCCESS)
+        end
         return Utils:FormatTextColor('10% DKP', MODULES.Constants.WARNING)
     else
         return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
@@ -257,12 +316,14 @@ function entry:_GetHistoryText()
     local text;
     if self.reason == _BOSS_KILL then
         text = self.raid .. ' - ' .. self.boss
-    elseif self.reason == 'Item Win' then
+    elseif self.reason == _ITEM_WIN then
         text = 'Item Win - ' .. self.item
-    elseif self.reason == 'Other' then
+    elseif self.reason == _OTHER then
         text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
-    elseif self.reason == 'Decay' then
-        text = 'Weekly Decay'
+    elseif self.reason == _DECAY then
+        if self.decayReversal then
+            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
+        end
         return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
     end
 
@@ -283,6 +344,9 @@ function entry:_GetCollapsedHistoryText()
     local text = texts[self.reason]
 
     if self.reason == 'Decay' then
+        if self.decayReversal then
+            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
+        end
         return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
     end
 

@@ -77,6 +77,11 @@ function Dialogs:Initialize()
 end
 
 function Dialogs:Show(dialogName, textTable, data)
+    if data ~= nil and data['reason'] ~= nil and data['reason'] == "Decay" and data['decayReversal'] then
+        PDKP.CORE:Print("Reversed Decay entries, cannot be deleted. \n Please apply a new decay entry instead.")
+        return
+    end
+
     local dialog
     if type(textTable) == "table" then
         dialog = StaticPopup_Show(dialogName, unpack(textTable))

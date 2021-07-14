@@ -107,6 +107,7 @@ function Chat:_HandleSlashCommands(msg)
         end,
 
         ['recalibrateTotals'] = function()
+            PDKP.CORE:Print("Calibrating DKP Totals")
             MODULES.DKPManager:RecalibrateDKP()
         end,
     }
