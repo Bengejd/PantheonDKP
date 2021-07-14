@@ -237,9 +237,12 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
 
         data = CommsManager:DataDecoder(message)
 
-        for _, entry in pairs(data) do
-            DKPManager:AddToCache(entry)
+        if data ~= nil then
+            for _, entry in pairs(data) do
+                DKPManager:AddToCache(entry)
+            end
         end
+
         self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
         MODULES.LedgerManager:CheckRequestKeys(message, sender)

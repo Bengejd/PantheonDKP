@@ -76,16 +76,14 @@ function DKP:LoadPrevFourWeeks()
             end
             local entry = MODULES.DKPEntry:new(decoded_entry)
 
-            if entry.id == 1626229305 then
-                self.decayEntry = entry
-            end
+            if entry ~= nil then
+                self.entries[index] = entry
+                self.numOfEntries = self.numOfEntries + 1
 
-            self.entries[index] = entry
-            self.numOfEntries = self.numOfEntries + 1
-
-            if not self.currentLoadedSet then
-                self.currentLoadedWeekEntries[index] = encoded_entry
-                self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+                if not self.currentLoadedSet then
+                    self.currentLoadedWeekEntries[index] = encoded_entry
+                    self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+                end
             end
         end
     end
