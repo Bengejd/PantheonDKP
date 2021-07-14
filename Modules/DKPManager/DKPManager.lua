@@ -271,16 +271,15 @@ function DKP:RecalibrateDKP()
         for _, member in pairs(entry.members) do
             local dkp_change = entry.dkp_change
             if entry.reason == 'Decay' then
-                if (entry['decayAmounts'] == nil or next(entry['decayAmounts']) == nil) then
-                    entry:CalculateDecayAmounts(true)
-                end
+                entry:CalculateDecayAmounts(true)
+
                 dkp_change = entry['decayAmounts'][member.name]
 
                 if entry.decayReversal and dkp_change < 0 then
                     dkp_change = dkp_change * -1
                 end
-
             end
+
             member.dkp['total'] = member.dkp['total'] + dkp_change
             member:Save()
         end
@@ -347,6 +346,8 @@ end
 function DKP:RollForwardEntries()
     --- Since they are sorted in reverse, just start at the oldest entry (end)
     --- and work you way to the newest entry (start).
+
+    local shouldCalibrate = #self.rolledBackEntries >= 1
     for i=#self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
 
@@ -365,10 +366,13 @@ function DKP:RollForwardEntries()
     if self.calibrationTimer ~= nil then
         self.calibrationTimer:Cancel()
         self.calibrationTimer = nil
+        shouldCalibrate = true
     end
-    self.calibrationTimer = C_Timer.NewTicker(1, function()
-        self:RecalibrateDKP()
-    end, 1)
+    if shouldCalibrate then
+        self.calibrationTimer = C_Timer.NewTicker(1, function()
+            self:RecalibrateDKP()
+        end, 1)
+    end
 end
 
 function DKP:AddToCache(entry)
