@@ -64,11 +64,6 @@ local function Initialize_Versioning()
     local old = PDKP_DB.global.version
     local new = Initialize_Default_Version({ major, minor, patch, changeset })
 
-    if IsNewVersion(old, new) then
-        PDKP_GB.global.locked = false
-        PDKP.newVersionDetected = true
-    end
-
     -- set new version
     PDKP_DB.global.version = new
     -- update string

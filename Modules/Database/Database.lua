@@ -61,10 +61,6 @@ function DB:Global()
     return PDKP_DB['global']
 end
 
-function DB:GuildBank()
-    return PDKP_DB['guildBank']
-end
-
 function DB:Server()
     return PDKP_DB[self.server_faction_guild]
 end
