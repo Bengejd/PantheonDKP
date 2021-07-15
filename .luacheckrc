@@ -1,6 +1,7 @@
 -- File is licensed on CC Share-Alike license by https://github.com/DeadlyBossMods and is taken from that repository
 std = "lua51"
 max_line_length = false
+codes = true
 exclude_files = {
 	"**/Libraries/**", "Modules/Dev/**"
 }
