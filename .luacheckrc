@@ -2,7 +2,7 @@
 std = "lua51"
 max_line_length = false
 exclude_files = {
-	"**/Libraries/**",
+	"**/Libraries/**", "Modules/Dev/**"
 }
 ignore = {
 	"11./SLASH_.*", -- Setting an undefined (Slash handler) global variable
@@ -22,6 +22,22 @@ globals = {
 	"LibStub",
 	-- Saved Variable
 	"PDKP_DB",
+	-- PDKP Globals
+	pdkp_frame
+
+	-- PDKP Global Functions
+	PDKP_Comms_OnEvent
+    PDKP_OnCommsReceived
+    PDKP_OnComm_EntrySync
+    PDKP_SyncProgressBar
+    PDKP_SyncLockout
+    PDKP_OnComm_BidSync
+    PDKP_OnComm_SetDKPOfficer
+    PDKP_OnComm_GetDKPOfficer
+    PDKP_OnComm_SentInv
+    PDKP_UpdatePushBar
+    PDKP_OnCommsReceived
+
 	-- WoW
 	"_G",
 	"MAX_RAID_MEMBERS",
