@@ -288,10 +288,7 @@ function ScrollTable:UpdateLabelTotals()
         return
     end
 
-    local notify_history = false
     local entry_label_text = #self.displayedRows .. " Players shown | " .. #self.selected .. " selected"
-
-    notify_history = not (entry_label_text == self.entryLabel:GetText())
 
     self.entryLabel:SetText(entry_label_text)
 end
@@ -388,7 +385,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.displayData, self.displayedRows, self.appliedFilters, self.selected, self.online = {}, {}, {}, {}, {}
     self.raid_members, self.cols, self.data = {}, {}, {};
-    self.searchText, self.entryLabel, self.lastSelect, self.sortBy, self.sortDir = nil;
+    self.searchText, self.entryLabel, self.lastSelect, self.sortBy, self.sortDir = nil, nil, nil, nil, nil;
     self.sortCol = nil;
 
     self.firstSort = col_settings['firstSort'] or nil;

@@ -70,6 +70,7 @@ globals = {
     "UIDropDownMenu_SetWidth",
     "UIDropDownMenu_GetSelectedValue",
     "UIDROPDOWNMENU_MENU_VALUE",
+    "RaidFrame",
 
 	-- WoW
 	"_G",

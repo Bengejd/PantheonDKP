@@ -14,7 +14,7 @@ local info = 'F4A460'
 
 local clickText = Utils:FormatTextColor('Click', info) .. ' to open PDKP. '
 local shiftRightClickText = Utils:FormatTextColor('Right-Shift-Click', info) .. ' to open Officer push'
-local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
+--local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
 
 local Dialogs;

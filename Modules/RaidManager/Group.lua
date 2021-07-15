@@ -15,7 +15,6 @@ local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
 local strtrim = strtrim
 local wipe = wipe
 local C_Timer = C_Timer
-local GetFrameRate = GetFramerate
 
 function Group:Initialize()
     setmetatable(self, Group) -- Set the metatable so we used Group's __index
@@ -248,7 +247,7 @@ function Group:GetRaidMemberObjects()
 end
 
 function Group:IsInInstance()
-    local name, type, _, _, _, _, _, _, _ = GetInstanceInfo()
+    local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
     return type ~= "none" and type ~= nil
 end
 

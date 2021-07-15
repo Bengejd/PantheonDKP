@@ -166,11 +166,6 @@ function Ledger:GetLastFourWeeks()
     local fourWeeksAgo = self.weekNumber - 4
     for i = fourWeeksAgo, self.weekNumber do
         self.weekHashes[i] = self:_GetWeekTable(i)
-        if PDKP:IsDev() then
-            for key, v in pairs(self.weekHashes[i]) do
-                --PDKP:PrintD('WeekEntries', i, key, #v)
-            end
-        end
     end
 end
 

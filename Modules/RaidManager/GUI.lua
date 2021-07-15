@@ -39,12 +39,12 @@ function RaidTools:Initialize()
     f.content:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -8, 8)
     f.content:SetSize(f:GetWidth(), f:GetHeight())
 
-    local b = CreateFrame("Button", 'pdkp_raid_frame_button', RaidFrame, 'UIPanelButtonTemplate')
-    b:SetHeight(30)
-    b:SetWidth(80)
-    b:SetText("Raid Tools")
-    b:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0)
-    b:SetScript("OnClick", function()
+    local raid_open_button = CreateFrame("Button", 'pdkp_raid_frame_button', RaidFrame, 'UIPanelButtonTemplate')
+    raid_open_button:SetHeight(30)
+    raid_open_button:SetWidth(80)
+    raid_open_button:SetText("Raid Tools")
+    raid_open_button:SetPoint("TOPRIGHT", RaidFrame, "TOPRIGHT", 80, 0)
+    raid_open_button:SetScript("OnClick", function()
         if f:IsVisible() then
             f:Hide()
         else
@@ -212,7 +212,7 @@ function RaidTools:Initialize()
     spam_button:SetScript("OnClick", function()
         RaidTools.SpamRunning = not RaidTools.SpamRunning
 
-        local b_text = ''
+        local b_text
 
         if RaidTools.SpamRunning then
             b_text = 'Stop Raid Inv Spam'

@@ -8,7 +8,7 @@ local strsplit, strlower, strmatch, _, _ = strsplit, strlower, strmatch, strfind
 local _, format, tostring, _, split, trim = string.rep, string.format, tostring, string.gsub, strsplit, strtrim
 local floor, fmod = math.floor, math.fmod;
 local _, _, next = table.insert, table.sort, next;
-local date, type, print = date, type, print
+local date, type, _ = date, type, print
 local _, pairs, _ = table.getn, pairs, ipairs
 local GetServerTime, GetQuestResetTime = GetServerTime, GetQuestResetTime
 

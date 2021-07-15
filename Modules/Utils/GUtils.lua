@@ -557,12 +557,11 @@ function GUtils:createItemLink(parent)
         GetItemInfoInstant(itemIdentifier)
 
         -- Then call the actual item info, so we can get the texture, and link.
-        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture,
+        local _, itemLink, _, _, _, _, _, _, _, itemTexture,
         _ = GetItemInfo(itemIdentifier)
 
         if iName and iTexture then
             itemLink = itemIdentifier
-            itemName = iName
             itemTexture = iTexture
         end
 
