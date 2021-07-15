@@ -13,7 +13,9 @@ ignore = {
 --	"211", -- Unused local variable
 --	"211/L", -- Unused local variable "L"
 	"211/PDKP",
+	"211/_",
 	"212", -- Unused argument
+	"412",
 --	"431", -- shadowing upvalue
 --	"43.", -- Shadowing an upvalue, an upvalue argument, an upvalue loop variable.
 	"542", -- An empty if branch
