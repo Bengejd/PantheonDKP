@@ -13,3 +13,4 @@ tools-used:
 ignore:
     - Markdown
     - PantheonDKP-bac.lua
+    - Media/Unused
