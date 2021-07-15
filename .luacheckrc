@@ -24,20 +24,20 @@ globals = {
 	-- Saved Variable
 	"PDKP_DB",
 	-- PDKP Globals
-	"pdkp_frame"
+	"pdkp_frame",
 
 	-- PDKP Global Functions
-	"PDKP_Comms_OnEvent"
-    "PDKP_OnCommsReceived"
-    "PDKP_OnComm_EntrySync"
-    "PDKP_SyncProgressBar"
-    "PDKP_SyncLockout"
-    "PDKP_OnComm_BidSync"
-    "PDKP_OnComm_SetDKPOfficer"
-    "PDKP_OnComm_GetDKPOfficer"
-    "PDKP_OnComm_SentInv"
-    "PDKP_UpdatePushBar"
-    "PDKP_OnCommsReceived"
+	"PDKP_Comms_OnEvent",
+    "PDKP_OnCommsReceived",
+    "PDKP_OnComm_EntrySync",
+    "PDKP_SyncProgressBar",
+    "PDKP_SyncLockout",
+    "PDKP_OnComm_BidSync",
+    "PDKP_OnComm_SetDKPOfficer",
+    "PDKP_OnComm_GetDKPOfficer",
+    "PDKP_OnComm_SentInv",
+    "PDKP_UpdatePushBar",
+    "PDKP_OnCommsReceived",
 
 	-- WoW
 	"_G",
