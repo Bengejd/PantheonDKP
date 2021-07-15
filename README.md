@@ -1,7 +1,7 @@
 PantheonDKP
 ====================
 
-[![Lint](https://github.com/Bengejd/PantheonDKP/actions/workflows/lint.yml/badge.svg)](https://github.com/bengejd/PantheonDKP)
+[![Lint](https://github.com/Bengejd/PantheonDKP/actions/workflows/lint.yml/badge.svg)](https://github.com/Bengejd/PantheonDKP/actions/workflows/lint.yml)
 [![Release](https://img.shields.io/github/v/release/PantheonDKP/pantheondkp.svg?color=important)](https://github.com/Bengejd/PantheonDKP/releases)
 [![Issues](https://img.shields.io/github/issues/PantheonDKP/pantheondkp?color=blue)](https://github.com/Bengejd/PantheonDKP/issues)
 
