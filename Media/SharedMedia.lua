@@ -1,3 +1,24 @@
+--[[ Local Files:
+
+    Icons/icon.tga
+    Icons/collapse_all.tga
+    Icons/expand_all.tga
+
+    Frames/PDKPFrame-TopRight.tga
+    Frames/PDKPFrame-TopLeft.tga
+    Frames/PDKPFrame-Top.tga
+    Frames/PDKPFrame-MidRight.tga
+    Frames/PDKPFrame-MidLeft.tga
+    Frames/PDKPFrame-Middle.tga
+    Frames/PDKPFrame-BotRight.tga
+    Frames/PDKPFrame-BotMid.tga
+    Frames/PDKPFrame-BotLeft.tga
+    Frames/PDKPFrame-BG.tga
+
+    Frames/BidFrame.tga
+]]--
+
+
 local _, PDKP = ...
 
 local LOG = PDKP.LOG
