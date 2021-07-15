@@ -15,10 +15,13 @@ ignore = {
 	"211/PDKP",
 	"211/_", -- Unused local variable "_"
 	"212", -- Unused argument
+	"311/child", -- Value assigned is unused
 	"412",
 --	"431", -- shadowing upvalue
 --	"43.", -- Shadowing an upvalue, an upvalue argument, an upvalue loop variable.
     "432/self", -- Shadowing an up-value argument self.
+
+    "531", -- Right side of assignment has more values than left side expects.
 	"542", -- An empty if branch
 }
 globals = {
