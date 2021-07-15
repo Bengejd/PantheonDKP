@@ -379,10 +379,6 @@ function DKP:AddToCache(entry)
         self.entrySyncTimer = nil
     end
 
-    if self.autoSyncInProgress then
-        return C_Timer.After(2, self:AddToCache(entry))
-    end
-
     if self.entrySyncCache[entry.id] == nil and DKP_DB[entry.id] == nil then
         self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
         self.entrySyncCache[entry.id] = entry
