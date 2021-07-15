@@ -255,7 +255,6 @@ function PDKP_OnComm_BidSync(comm, message, sender)
 
     local Auction = MODULES.AuctionManager
     local AuctionGUI = GUI.AuctionGUI
-    local GroupManager = GroupManager
 
     if self.ogPrefix == 'startBids' then
         local itemLink, itemName, iTexture = unpack(data)

@@ -13,11 +13,12 @@ ignore = {
 --	"211", -- Unused local variable
 --	"211/L", -- Unused local variable "L"
 	"211/PDKP",
-	"211/_",
+	"211/_", -- Unused local variable "_"
 	"212", -- Unused argument
 	"412",
 --	"431", -- shadowing upvalue
 --	"43.", -- Shadowing an upvalue, an upvalue argument, an upvalue loop variable.
+    "432/self", -- Shadowing an up-value argument self.
 	"542", -- An empty if branch
 }
 globals = {
@@ -27,8 +28,10 @@ globals = {
 	"PDKP_DB",
 	-- PDKP Globals
 	"pdkp_frame",
+	"ViragDevTool_AddData",
 
 	-- PDKP Global Functions
+	"PDKP_DropDown_Initialize",
 	"PDKP_Comms_OnEvent",
     "PDKP_OnCommsReceived",
     "PDKP_OnComm_EntrySync",
@@ -40,6 +43,33 @@ globals = {
     "PDKP_OnComm_SentInv",
     "PDKP_UpdatePushBar",
     "PDKP_OnCommsReceived",
+    "PDKP_History_OnClick",
+    "PDKP_History_EntryDeleted",
+    "pdkp_HistoryTableMixin",
+    "PDKP_Loot_OnClick",
+    "PDKP_Loot_EntryDeleted",
+    "pdkp_LootTableMixin",
+    "PDKP_RaidTools_TextValidFunc",
+    "PDKP__wait",
+
+    -- Scroll Table Globals
+    "pdkp_ScrollTableMixin",
+    "PDKP_SimpleScroll_SetScroll",
+    "pdkp_SimpleScrollFrameMixin",
+
+    "HybridScrollFrame_SetDoNotHideScrollBar",
+    "HybridScrollFrame_GetOffset",
+    "HybridScrollFrame_Update",
+
+    "ConvertToRaid",
+    "InviteUnit",
+    "GetFrameRate",
+
+    "UIDropDownMenu_SetSelectedValue",
+    "UIDropDownMenu_SetText",
+    "UIDropDownMenu_SetWidth",
+    "UIDropDownMenu_GetSelectedValue",
+    "UIDROPDOWNMENU_MENU_VALUE",
 
 	-- WoW
 	"_G",

@@ -9,7 +9,7 @@ local tinsert, tsort, pairs = table.insert, table.sort, pairs
 
 local DKP = {}
 
-local DKP_DB, _, CommsManager, LEDGER;
+local DKP_DB, _, CommsManager;
 
 function DKP:Initialize()
     DKP_DB = MODULES.Database:DKP()

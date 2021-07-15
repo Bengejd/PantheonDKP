@@ -516,7 +516,7 @@ function PDKP_Loot_OnClick(_, _, _)
     --end
 end
 
-function PDKP_History_EntryDeleted(_)
+function PDKP_Loot_EntryDeleted(_)
     --local self = GUI.history_table;
     --
     --local row = self.rows[deleted_row.index]
