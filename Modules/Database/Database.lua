@@ -46,10 +46,9 @@ function DB:_Migrations()
     if dkp[1625706965] == nil then
         if ldb[2689] ~= nil then
             if ldb[2689]['Huntswomann'] then
-                local temp_entries = {}
                 for k, v in pairs(ldb[2689]['Huntswomann']) do
                     if v == 1625706965 then
-                        local removed = table.remove(ldb[2689]['Huntswomann'], k)
+                        table.remove(ldb[2689]['Huntswomann'], k)
                     end
                 end
             end

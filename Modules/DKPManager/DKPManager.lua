@@ -15,8 +15,6 @@ function DKP:Initialize()
     DKP_DB = MODULES.Database:DKP()
     CommsManager = MODULES.CommsManager;
 
-    LEDGER = MODULES.Database:Ledger()
-
     self.entries = {}
     self.encoded_entries = {}
     self.decoded_entries = {}
@@ -574,8 +572,8 @@ function DKP:GetEncodedEntries()
     return self.encoded_entries;
 end
 
-function DKP:GetEntriesForSync(loadAfterWeek)
-    loadAfterWeek = loadAfterWeek or 0
+function DKP:GetEntriesForSync()
+    --loadAfterWeek = loadAfterWeek or 0
 
     local encoded_entries = self:GetEncodedEntries()
     local decoded_entries = self:GetEntries()
