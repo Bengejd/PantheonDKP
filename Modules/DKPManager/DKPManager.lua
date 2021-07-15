@@ -374,7 +374,7 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:AddToCache(entry)
-    if self.entrySyncTimer ~= nil and not self.autoSyncInProgress then
+    if self.entrySyncTimer ~= nil then
         self.entrySyncTimer:Cancel();
         self.entrySyncTimer = nil
     end
