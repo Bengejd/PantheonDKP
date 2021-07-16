@@ -65,6 +65,7 @@ function entry:new(entry_details)
     self.sd = {} -- Save Details
 
     self.lockoutsChecked = false
+    self.adEntry = entry_details['adEntry'] or false
 
     -- Grab the members, and non-members in the entry for later use.
     self:GetMembers()
@@ -103,6 +104,7 @@ function entry:Save(updateTable, exportEntry, skipLockouts)
     if exportEntry == false then
         MODULES.DKPManager:AddNewEntryToDB(self, updateTable, skipLockouts)
     elseif PDKP.canEdit and exportEntry then
+        entry.exportedBy = Utils:GetMyName()
         MODULES.DKPManager:ExportEntry(self)
     end
 end
@@ -171,7 +173,7 @@ function entry:GetMembers()
         local member = Guild:GetMemberByName(name)
         if member ~= nil then
             tinsert(self.members, member)
-        else
+        elseif not tContains(self.pugNames, name) then
             tinsert(self.pugNames, name)
         end
     end

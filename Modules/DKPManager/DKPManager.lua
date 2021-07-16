@@ -35,6 +35,7 @@ function DKP:Initialize()
 
     self.entrySyncCache = {}
     self.entrySyncTimer = nil
+    self.processedCacheEntries = {}
 
     self.rolledBackEntries = {}
 
@@ -108,6 +109,24 @@ end
 function DKP:ExportEntry(entry)
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
     MODULES.CommsManager:SendCommsMessage('SyncSmall', save_details)
+end
+
+function DKP:PrepareOverwriteExport()
+    local exportDetails = {
+        ['dkp'] = MODULES.Database:DKP(),
+        ['ledger'] = MODULES.Database:Ledger(),
+        ['lockouts'] = MODULES.Database:Lockouts(),
+        ['guild'] = MODULES.Database:Guild(),
+    }
+    MODULES.CommsManager:SendCommsMessage('SyncOver', exportDetails)
+end
+
+function DKP:ProcessOverwriteSync(message, sender)
+    PDKP.CORE:Print("Processing database overwrite from", sender)
+    for dbName, db in pairs(message) do
+        MODULES.Database:ProcessDBOverwrite(dbName, db)
+    end
+    PDKP.CORE:Print("Database overwrite has completed. Please reload for it to take effect.");
 end
 
 -----------------------------
@@ -313,29 +332,30 @@ function DKP:RollBackEntries(decayEntry)
         table.insert(entries, entry)
     end
 
-    PDKP:PrintD("Rolling back", #entries, "Entries")
+    if #entries >= 1 then
+        PDKP:PrintD("Rolling back", #entries, "Entries")
+        for i=1, #entries do
+            local entry = entries[i]
 
-    for i=1, #entries do
-        local entry = entries[i]
-
-        if entry.reason == 'Decay' and (entry['decayAmounts'] == nil or next(entry['decayAmounts']) == nil) then
-            entry:CalculateDecayAmounts(true)
-        end
-
-        for _, member in pairs(entry.members) do
-            if member ~= nil then
-                local dkp_change = entry.dkp_change
-                if entry.reason == 'Decay' then
-                    if entry['decayAmounts'][member.name] == nil then
-                        entry:CalculateDecayAmounts(true)
-                    end
-                    dkp_change = entry['decayAmounts'][member.name]
-                end
-                member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
-                member:Save()
+            if entry.reason == 'Decay' and (entry['decayAmounts'] == nil or next(entry['decayAmounts']) == nil) then
+                entry:CalculateDecayAmounts(true)
             end
+
+            for _, member in pairs(entry.members) do
+                if member ~= nil then
+                    local dkp_change = entry.dkp_change
+                    if entry.reason == 'Decay' then
+                        if entry['decayAmounts'][member.name] == nil then
+                            entry:CalculateDecayAmounts(true)
+                        end
+                        dkp_change = entry['decayAmounts'][member.name]
+                    end
+                    member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
+                    member:Save()
+                end
+            end
+            table.insert(self.rolledBackEntries, entry)
         end
-        table.insert(self.rolledBackEntries, entry)
     end
 end
 
@@ -372,7 +392,7 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:AddToCache(entry)
-    if self.entrySyncCache[entry.id] ~= nil and DKP_DB[entry.id] ~= nil then return end
+    if (self.entrySyncCache[entry.id] ~= nil and DKP_DB[entry.id] ~= nil) or self.processedCacheEntries[entry.id] ~= nil then return end
 
     if self.entrySyncTimer ~= nil then
         self.entrySyncTimer:Cancel();
@@ -381,8 +401,9 @@ function DKP:AddToCache(entry)
 
     self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
     self.entrySyncCache[entry.id] = entry
+    self.processedCacheEntries[entry.id] = true
 
-    self.entrySyncTimer = C_Timer.NewTicker(2, function()
+    self.entrySyncTimer = C_Timer.NewTicker(5, function()
         self.autoSyncInProgress = true
         PDKP:PrintD("Processing", self.entrySyncCacheCounter, "Cached Sync entries...")
         local keys = {}

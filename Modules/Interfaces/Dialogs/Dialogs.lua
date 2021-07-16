@@ -24,23 +24,24 @@ function Dialogs:Initialize()
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
         ['PDKP_OFFICER_PUSH_CONFIRM'] = {
-            text = "MANUAL DKP PUSH \n This will broadcast all of your entries to the guild. May cause brief lag spikes.",
+            text = "MANUAL DKP Merge / Overwrite \n This will broadcast all of your entries to the guild. May cause brief lag spikes.",
             button1 = "Merge",
-            button2 = 'Cancel',
-            --button2 = "Merge",
+            button2 = 'Overwrite',
+            button3 = "Cancel",
             OnAccept = function(...)
-                -- First (Overwrite)
+                -- First (Merge)
                 local DKP = MODULES.DKPManager
                 local entries, total = DKP.currentLoadedWeekEntries, DKP.numCurrentLoadedWeek
                 local transmission_data = { ['total'] = total, ['entries'] = entries }
                 MODULES.CommsManager:SendCommsMessage('SyncLarge', transmission_data)
             end,
             OnCancel = function(...)
-                -- Second (Merge)
-                --local _, _, clickType = ...
-                --if clickType == 'clicked' then
-                --    --Export:New('push-merge')
-                --end
+                -- Second (Overwrite)
+                local _, _, clickType = ...
+                if clickType == 'clicked' then
+                    PDKP:PrintD("Preparing Overwrite")
+                    MODULES.DKPManager:PrepareOverwriteExport()
+                end
             end,
             OnAlt = function(...)
                 -- Third (Cancel)

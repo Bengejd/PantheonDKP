@@ -81,7 +81,7 @@ function Member:_UpdateDKP(entry)
     end
 
     if entry.reason == 'Decay' then
-        if (not self:HasEntries() or self.dkp['total'] <= 30 or not self:IsRaidReady()) and not entry['decayReversal'] then
+        if (not self:HasEntries() or self.dkp['total'] <= 30 or not self:IsRaidReady()) and not entry['decayReversal'] and not entry['adEntry'] then
             entry:RemoveMember(self.name)
             return
         end -- Do not decay non-active members or members without at least 31 DKP.

@@ -117,6 +117,7 @@ function Comm:_Setup()
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds
         ['SyncDelete'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
+        ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
 
         ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
         ['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
@@ -226,6 +227,9 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return DKPManager:DeleteEntry(data, sender)
     elseif pfx == 'SyncLarge' then
         return DKPManager:ImportBulkEntries(message, sender)
+    elseif pfx == 'SyncOver' then
+        data = CommsManager:DataDecoder(message)
+        DKPManager:ProcessOverwriteSync(data, sender)
     elseif pfx == 'SyncAd' then
         if self.officersSyncd[sender] then
             return
@@ -239,6 +243,7 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
 
         if data ~= nil then
             for _, entry in pairs(data) do
+                entry.adEntry = true
                 DKPManager:AddToCache(entry)
             end
         end

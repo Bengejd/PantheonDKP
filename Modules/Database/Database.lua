@@ -111,6 +111,13 @@ function DB:ResetAllDatabases()
     end
 end
 
+function DB:ProcessDBOverwrite(db, data)
+    wipe(PDKP_DB[self.server_faction_guild][db])
+    for k, v in pairs(data) do
+        PDKP_DB[self.server_faction_guild][db][k] = v
+    end
+end
+
 function DB:ResetLockouts()
     PDKP_DB[self.server_faction_guild]['lockouts'] = {}
     return PDKP_DB[self.server_faction_guild]['lockouts']

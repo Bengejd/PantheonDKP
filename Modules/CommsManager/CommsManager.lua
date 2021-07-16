@@ -33,6 +33,7 @@ function Comms:RegisterComms()
         ['SyncSmall'] = { ['self'] = true, },
         ['SyncDelete'] = { ['self'] = true },
         ['SyncLarge'] = { ['combat'] = false, },
+        ['SyncOver'] = { ['combat'] = false, },
 
         ['SyncAd'] = { ['combat'] = false },
         ['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = false, },
