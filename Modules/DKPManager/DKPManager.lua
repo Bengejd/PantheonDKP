@@ -372,15 +372,15 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:AddToCache(entry)
+    if self.entrySyncCache[entry.id] ~= nil and DKP_DB[entry.id] ~= nil then return end
+
     if self.entrySyncTimer ~= nil then
         self.entrySyncTimer:Cancel();
         self.entrySyncTimer = nil
     end
 
-    if self.entrySyncCache[entry.id] == nil and DKP_DB[entry.id] == nil then
-        self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
-        self.entrySyncCache[entry.id] = entry
-    end
+    self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
+    self.entrySyncCache[entry.id] = entry
 
     self.entrySyncTimer = C_Timer.NewTicker(2, function()
         self.autoSyncInProgress = true
@@ -390,11 +390,13 @@ function DKP:AddToCache(entry)
         table.sort(keys)
 
         for i=1, #keys do
-            local cache_entry = self.entrySyncCache[keys[i]]
+            local key = keys[i]
+            local cache_entry = self.entrySyncCache[key]
             self:ImportEntry(cache_entry)
+            self.entrySyncCache[key] = nil
+            self.entrySyncCacheCounter = self.entrySyncCacheCounter - 1
         end
 
-        wipe(self.entrySyncCache)
         self.autoSyncInProgress = false
     end, 1)
 end
