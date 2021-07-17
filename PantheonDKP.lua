@@ -17,6 +17,7 @@ PDKP.OPTIONS = {}
 PDKP.AUTOVERSION = "@project-version@"
 
 PDKP.newVersionDetected = false
+PDKP.disableDev = true
 
 local CORE = PDKP.CORE
 local MODULES = PDKP.MODULES
@@ -193,7 +194,7 @@ function PDKP:IsDev()
 end
 
 function PDKP:PrintD(...)
-    if PDKP:IsDev() then
+    if PDKP:IsDev() and not PDKP.disableDev then
         local text = "|cffF4A460" .. strjoin(" ", tostringall(...)) .. "|r"
         PDKP.CORE:Print(text)
     end
