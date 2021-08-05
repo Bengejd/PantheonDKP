@@ -89,8 +89,7 @@ function Comm:RegisterComm()
 end
 
 function Comm:UnregisterComm()
-    PDKP.CORE:RegisterComms(self.prefix, function()
-    end)
+    PDKP.CORE:UnregisterComm(self.prefix);
 end
 
 function Comm:IsValid()
