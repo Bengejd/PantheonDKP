@@ -144,7 +144,7 @@ function Ledger:CheckRequestKeys(message, sender)
         return
     end
     if PDKP.canEdit then
-        CommsManager:SendCommsMessage('SyncAd', entries)
+        --CommsManager:SendCommsMessage('SyncAd', entries)
     end
 end
 
