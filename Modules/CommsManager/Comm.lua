@@ -234,6 +234,7 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         if self.officersSyncd[sender] then
             return
         end
+
         -- Ignore SyncAds when you're not in the group with the player, but are in a raid.
         if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
             return
@@ -250,7 +251,8 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
 
         self.officersSyncd[sender] = true
     elseif pfx == 'SyncReq' and PDKP.canEdit then
-        MODULES.LedgerManager:CheckRequestKeys(message, sender)
+
+        --MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end
 

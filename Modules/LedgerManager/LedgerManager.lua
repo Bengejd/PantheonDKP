@@ -42,9 +42,9 @@ function Ledger:Initialize()
                 if Guild.initiated then
                     local member = Guild:GetMemberByName(playerName)
                     if member ~= nil and member.canEdit then
-                        C_Timer.After(5, function()
-                            self:CheckSyncStatus()
-                        end)
+                        --C_Timer.After(5, function()
+                        --    self:CheckSyncStatus()
+                        --end)
                     end
                 end
             end
@@ -59,7 +59,7 @@ function Ledger:CheckSyncStatus()
         PDKP.CORE:Print('Synchronizing databases...')
     end
 
-    CommsManager:SendCommsMessage('SyncReq', self.weekHashes)
+    --CommsManager:SendCommsMessage('SyncReq', self.weekHashes)
     self._initialized = true
 end
 
