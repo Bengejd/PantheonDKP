@@ -59,6 +59,12 @@ function Dev:HandleSlashCommands(msg)
         self.frameRateTimer = C_Timer.NewTicker(1, function()
             PDKP:PrintD("FrameRate", GetFramerate())
         end)
+    elseif cmd == 'unregisterCommTest' then
+        MODULES.CommsManager:UnregisterComms()
+        PDKP:PrintD('Unregistering Comms');
+    elseif cmd == 'registerCommTest' then
+        MODULES.CommsManager:RegisterComms()
+        PDKP:PrintD('Unregistering Comms');
     end
 end
 

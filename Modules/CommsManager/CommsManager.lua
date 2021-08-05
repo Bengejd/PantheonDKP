@@ -66,6 +66,10 @@ function Comms:RegisterComms()
     end
 end
 
+function Comms:UnregisterComms()
+    PDKP.CORE:UnregisterAllComm()
+end
+
 function Comms:SendCommsMessage(prefix, data, skipEncoding)
     skipEncoding = skipEncoding or false
     local transmitData = data
