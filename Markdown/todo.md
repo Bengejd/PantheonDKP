@@ -11,6 +11,12 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
 - [ ] Tooltip hover on Bid item.
 - [ ] Add 10 seconds to bid button.
+- [ ] Add "bid" chat message filters to auto-add people who didn't use addon.
+- [ ] Add ability to remove "faulty" bids.
+- [ ] Add ability to re-calculate who was the winner.
+- [ ] Sort the bids by amount after the bidding has ended.
+- [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
+- [ ] Calculate cost based on the winner's principle.
 
  
 
