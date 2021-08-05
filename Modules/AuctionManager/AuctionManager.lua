@@ -85,10 +85,6 @@ function Auction:EndAuction(manualStop, sender)
     self.auctionInProgress = false
     GUI.AuctionGUI:ResetAuctionInterface()
 
-    if not PDKP.canEdit then
-        return
-    end
-
     local GroupManager = MODULES.GroupManager
 
     local canContinue = false
@@ -123,9 +119,6 @@ function Auction:EndAuction(manualStop, sender)
 
         SendChatMessage(winningText, channel, nil, nil)
 
-        wipe(self.CURRENT_BIDDERS)
-        wipe(self.CurrentAuctionInfo)
-
         local AdjustChildren = GUI.Adjustment.entry_details.children
         local mainDD = AdjustChildren[1]
         local amtBox = AdjustChildren[3]
@@ -136,6 +129,9 @@ function Auction:EndAuction(manualStop, sender)
             amtBox:SetText(amount)
         end
     end
+
+    wipe(self.CURRENT_BIDDERS)
+    wipe(self.CurrentAuctionInfo)
 end
 
 function Auction:HandleTimerFinished(manualEnd)
