@@ -4,7 +4,15 @@ They can then, play any other character on their account that has the PDKP addon
 Officers can request that they join the raid group via a "request" button. The benched list will be accessible via the raid-tools frame.
 
 - [ ] Enable marking one's self as "benched".
+- [ ] Allow for different Decay Amounts.
+- [ ] Disable Comms while in non-guild party, raid or battleground.
+- [ ] Bid Windows not clearing old bids (visual artifact).
+- [ ] Unregister DKP WhoIsDKP after it has been set, but re-register when joining group.
+- [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
+- [ ] Tooltip hover on Bid item.
+- [ ] Add 10 seconds to bid button.
 
+ 
 
 TBC UPDATES:
     
