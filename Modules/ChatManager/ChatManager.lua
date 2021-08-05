@@ -117,33 +117,14 @@ function Chat:_HandleSlashCommands(msg)
 
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
-        ['whoTest'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['databasePopulate'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['largeDataSync'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['decayTest'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['bossKillTest'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['testAuctionTimer'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['watchFramerate'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
-        ['compareDatabases'] = function()
-            MODULES.Dev:HandleSlashCommands(msg)
-        end,
+        ['whoTest'] = true, ['databasePopulate'] = true,
+        ['largeDataSync'] = true, ['decayTest'] = true,
+        ['bossKillTest'] = true, ['testAuctionTimer'] = true,
+        ['watchFramerate'] = true, ['compareDatabases'] = true,
+        ['unregisterCommTest'] = true, ['unregisterCommTest'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
-        return DEV_SLASH_COMMANDS[command]()
+        return MODULES.Dev:HandleSlashCommands(msg)
     end
 end
 
