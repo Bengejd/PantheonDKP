@@ -29,6 +29,10 @@ function AuctionGUI:Initialize()
         if PDKP.canEdit and MODULES.AuctionManager:IsAuctionInProgress() then
             stopBid:SetEnabled(true)
             stopBid:Show()
+
+            if MODULES.AuctionManager:CanChangeAuction() then
+                PDKP.AuctionTimer.addTime:Show()
+            end
         end
         f.reopenFrame:Hide()
     end)
@@ -231,24 +235,40 @@ function AuctionGUI:Initialize()
 
     AuctionGUI.frame = f
 
+    -- Interface\CHATFRAME\UI-ChatInputBorder for the item-link
+
     local pushBarOpts = {
         ['name'] = 'AuctionTimer',
         ['type'] = 'timer',
-        ['default'] = 20,
+        ['default'] = 30,
         ['min'] = 0,
-        ['max'] = 20,
+        ['max'] = 30,
         ['func'] = function()
             MODULES.AuctionManager:HandleTimerFinished()
         end,
     }
+
+    if PDKP.canEdit then
+        pushBarOpts['addTime'] = true
+    end
+
     PDKP.AuctionTimer = GUtils:createStatusBar(pushBarOpts)
 
-    PDKP.AuctionTimer:SetPoint("BOTTOMLEFT", f, "TOPLEFT")
-    PDKP.AuctionTimer:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT")
+    PDKP.AuctionTimer:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 10, 0)
+    PDKP.AuctionTimer:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, 0)
 
     PDKP.AuctionTimer.bg:SetPoint("TOPLEFT", PDKP.AuctionTimer, "TOPLEFT")
     PDKP.AuctionTimer.bg:SetPoint("BOTTOMLEFT", PDKP.AuctionTimer, "BOTTOMLEFT")
     PDKP.AuctionTimer.bg:SetWidth(PDKP.AuctionTimer:GetWidth())
+
+    PDKP.AuctionTimer.bgFrame:SetPoint("TOPLEFT", PDKP.AuctionTimer, "TOPLEFT", -33, 20)
+    PDKP.AuctionTimer.bgFrame:SetPoint("BOTTOMRIGHT", PDKP.AuctionTimer, "BOTTOMRIGHT", 33, -20)
+
+    PDKP.AuctionTimer.addTime:SetScript("OnClick", function()
+        if MODULES.AuctionManager:CanChangeAuction() then
+            MODULES.CommsManager:SendCommsMessage('AddTime', {['addTime'] = true})
+        end
+    end)
 
     f:SetScript("OnHide", function()
         if MODULES.AuctionManager:IsAuctionInProgress() then
@@ -262,6 +282,11 @@ function AuctionGUI:Initialize()
     self:CreateBiddersWindow()
 
     f:Hide()
+end
+
+function AuctionGUI:AddTimeToAuction(sender)
+    PDKP.CORE:Print(sender, "extended the auction timer");
+    PDKP.AuctionTimer.setAmount(PDKP.AuctionTimer:GetValue() + 10)
 end
 
 function AuctionGUI:CreateBiddersWindow()

@@ -35,12 +35,12 @@ function Comms:RegisterComms()
         ['SyncLarge'] = { ['combat'] = false, },
         ['SyncOver'] = { ['combat'] = false, },
 
-        ['SyncAd'] = { ['combat'] = false },
-        ['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = false, },
+        --['SyncAd'] = { ['combat'] = false },
+        --['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = false, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
-        ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false,  },
+        ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false, },
 
         ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, },
         ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, },
@@ -50,6 +50,7 @@ function Comms:RegisterComms()
 
         ['AddBid'] = { ['channel'] = 'RAID', ['self'] = true, },
         ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, },
+        ['AddTime'] = { ['channel'] = 'RAID', ['self'] = true, ['requireCheck'] = false },
 
         ['SentInv'] = { ['channel'] = 'WHISPER', },
     }

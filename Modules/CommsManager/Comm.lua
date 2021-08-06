@@ -132,6 +132,7 @@ function Comm:_Setup()
         -- Player Bid section
         ['bidSubmit'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['bidCancel'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+        ['AddTime'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
 
         -- DKP Section
         ['DkpOfficer'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_SetDKPOfficer },
@@ -280,7 +281,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
         end
 
     elseif self.ogPrefix == 'bidSubmit' then
-        if not MODULES.AuctionManager:CanChangeAuction() then
+        if not Auction:CanChangeAuction() then
             return
         end
         local member = MODULES.GuildManager:GetMemberByName(sender)
@@ -297,6 +298,10 @@ function PDKP_OnComm_BidSync(comm, message, sender)
         GUI.AuctionGUI:CancelBidder(sender)
     elseif self.ogPrefix == 'RemoveBid' then
         GUI.AuctionGUI:CreateNewBidder(data);
+    elseif self.ogPrefix == 'AddTime' then
+        if Auction:IsAuctionInProgress() then
+            AuctionGUI:AddTimeToAuction(sender)
+        end
     end
 end
 

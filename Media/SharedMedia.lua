@@ -68,6 +68,10 @@ Media.TOTAL_ICON = 'Interface\\ICONS\\Achievement_GuildPerk_EverybodysFriend'
 Media.DKP_OFFICER_ICON = 'Interface\\ICONS\\INV_MISC_Coin_01'
 Media.STATUS_BAR_TEXTURE = "Interface\\TARGETINGFRAME\\UI-StatusBar";
 Media.STATUS_BAR_FILL = "Interface\\TARGETINGFRAME\\UI-TargetingFrame-BarFill"
+Media.STATUS_BAR_BG_FRAME = "Interface\\CastingBar\\UI-CastingBar-Border"
+Media.PLUS_BUTTON_UP = "Interface\\Buttons\\UI-PlusButton-Up"
+Media.PLUS_BUTTON_DOWN = "Interface\\Buttons\\UI-PlusButton-Down"
+
 Media.STATUS_BAR_FONT = "Fonts\\FRIZQT__.TTF"
 
 Media.addon_version_hex = '0059C5'

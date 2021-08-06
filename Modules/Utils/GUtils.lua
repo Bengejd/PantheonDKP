@@ -612,6 +612,8 @@ function GUtils:createStatusBar(opts)
     local default = opts['default'] or 0
     local min = opts['min'] or 0
     local max = opts['max'] or 100
+    local addTime = opts['addTime'] or false
+
     local onTimerFinished = opts['func'] or function()
     end
     local parent = UIParent
@@ -636,6 +638,11 @@ function GUtils:createStatusBar(opts)
     pb.value:SetTextColor(0, 1, 0)
     pb:SetMinMaxValues(min, max)
 
+    pb.bgFrame = pb:CreateTexture(nil, 'OVERLAY')
+    pb.bgFrame:SetTexture(MODULES.Media.STATUS_BAR_BG_FRAME)
+    pb.bgFrame:SetHeight(pb:GetHeight() + 20)
+    pb.bgFrame:SetWidth(pb:GetWidth())
+
     pb.isBarLocked = false
 
     if type == 'percent' then
@@ -652,6 +659,8 @@ function GUtils:createStatusBar(opts)
         pb:SetValue(default)
         pb.isBarLocked = false;
 
+        pb:SetMinMaxValues(min, max)
+
         pb:Hide()
 
         if pb.timer ~= nil then
@@ -667,6 +676,12 @@ function GUtils:createStatusBar(opts)
             pb:Hide()
         end
 
+        local currVal = pb:GetValue()
+        if type == 'timer' and amount > currVal and amount > max then
+            pb:SetMinMaxValues(min, max + (amount - currVal))
+            pb.startTimer();
+        end
+
         local extra = ''
         if type == 'percent' then
             extra = '%'
@@ -680,7 +695,6 @@ function GUtils:createStatusBar(opts)
 
         pb:SetValue(amount)
 
-        local currVal = pb:GetValue()
         if currVal < min or currVal >= max and type == 'percent' then
             pb:reset()
             pb.onTimerFinished()
@@ -696,15 +710,34 @@ function GUtils:createStatusBar(opts)
         end
         pb.isBarLocked = false
 
+        if pb.timer ~= nil then
+            pb.timer:Cancel()
+            pb:Show()
+        end
+
         local pbWidth = pb:GetWidth()
-        local reductionAmt = pbWidth / max
+        local _, timerMax = pb:GetMinMaxValues()
+        local reductionAmt = pbWidth / timerMax
 
         pb.timer = C_Timer.NewTicker(0.1, function()
             local currVal = pb:GetValue()
             pb.setAmount(currVal - 0.1)
             pb:SetWidth(pb:GetWidth() - (reductionAmt * 0.1))
-        end, (max * 10) + 0.1)
-    end,
+        end, (timerMax * 10) + 0.1)
+    end
+
+    if addTime then
+        PDKP:PrintD("Adding Time Button");
+        local addBtn = CreateFrame("Button", nil, pb)
+        addBtn:SetSize(35, 35);
+        addBtn:SetNormalTexture(MODULES.Media.PLUS_BUTTON_UP);
+        addBtn:SetPushedTexture(MODULES.Media.PLUS_BUTTON_DOWN);
+        addBtn:SetPoint("RIGHT", pb.bgFrame, "RIGHT", -10, 0);
+        addBtn:SetHeight(22);
+        addBtn:SetWidth(22);
+
+        pb.addTime = addBtn;
+    end
 
     pb:reset()
     pb.onTimerFinished = onTimerFinished
