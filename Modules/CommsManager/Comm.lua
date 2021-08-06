@@ -202,7 +202,6 @@ function PDKP_OnComm_SetDKPOfficer(_, message, _)
 end
 
 function PDKP_OnComm_GetDKPOfficer(_, message, sender)
-
     PDKP:PrintD(sender, "RequestingDKP Officer")
 
     local data = CommsManager:DataDecoder(message)
@@ -296,6 +295,8 @@ function PDKP_OnComm_BidSync(comm, message, sender)
         GUI.AuctionGUI:CreateNewBidder(data)
     elseif self.ogPrefix == 'CancelBid' then
         GUI.AuctionGUI:CancelBidder(sender)
+    elseif self.ogPrefix == 'RemoveBid' then
+        GUI.AuctionGUI:CreateNewBidder(data);
     end
 end
 

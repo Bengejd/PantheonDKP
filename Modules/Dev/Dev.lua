@@ -65,6 +65,9 @@ function Dev:HandleSlashCommands(msg)
     elseif cmd == 'registerCommTest' then
         MODULES.CommsManager:RegisterComms()
         PDKP:PrintD('Unregistering Comms');
+    elseif cmd == 'registerCommTest' then
+        MODULES.CommsManager:RegisterComms()
+        PDKP:PrintD('Unregistering Comms');
     end
 end
 

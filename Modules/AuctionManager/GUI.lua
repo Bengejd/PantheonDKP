@@ -357,6 +357,7 @@ function AuctionGUI:RefreshBidders()
             prospect_frame.name:SetText(prospect_info['name'])
 
             prospect_frame.bid:Hide()
+
             prospect_frame.bid:SetText(prospect_info['bid'])
 
             scrollContent:AddChild(prospect_frame)
@@ -367,8 +368,13 @@ end
 function AuctionGUI:_ShowBidAmounts()
     local bidders_frame = self.current_bidders_frame;
     local scrollContent = bidders_frame.scrollContent;
-    for _, val in pairs(scrollContent.children) do
-        val.bid:Show()
+
+    table.sort(MODULES.AuctionManager.CURRENT_BIDDERS, function(a, b) return tonumber(a['bid']) > tonumber(b['bid']) end)
+
+    self:RefreshBidders()
+
+    for _, child in pairs(scrollContent.children) do
+        child.bid:Show()
     end
 end
 
