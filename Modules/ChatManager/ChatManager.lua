@@ -121,7 +121,7 @@ function Chat:_HandleSlashCommands(msg)
         ['largeDataSync'] = true, ['decayTest'] = true,
         ['bossKillTest'] = true, ['testAuctionTimer'] = true,
         ['watchFramerate'] = true, ['compareDatabases'] = true,
-        ['unregisterCommTest'] = true, ['unregisterCommTest'] = true,
+        ['unregisterCommTest'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)
