@@ -678,7 +678,8 @@ function GUtils:createStatusBar(opts)
 
         local currVal = pb:GetValue()
         if type == 'timer' and amount > currVal and amount > max then
-            pb:SetMinMaxValues(min, max + (amount - currVal))
+            local _, timerMax = pb:GetMinMaxValues()
+            pb:SetMinMaxValues(min, timerMax + (amount - currVal))
             pb.startTimer();
         end
 
