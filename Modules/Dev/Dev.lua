@@ -145,7 +145,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
     for key, entry in pairs(valid_entries) do
         MODULES.LedgerManager:GenerateEntryHash(entry)
         if key == #valid_entries then
-            entry:Save(true)
+            entry:Save(false)
         else
             entry:Save(false)
         end

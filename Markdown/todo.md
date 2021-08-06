@@ -17,6 +17,11 @@ Officers can request that they join the raid group via a "request" button. The b
 - [x] Sort the bids by amount after the bidding has ended.
 - [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
 - [ ] Calculate cost based on the winner's principle.
+- [ ] Add Lockouts Tab
+- [ ] Add Options Tab
+- [ ] Fix Decay Deletion previousTotal BUG
+- [ ] Allow for the Sync Timer to be movable.
+- [ ] Sync Timer not going away for Merge/Overwrite after completion.
 
  
 
