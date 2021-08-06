@@ -200,7 +200,7 @@ function DKP:DeleteEntry(entry, sender)
     local temp_entry = {
         ['reason'] = 'Other',
         ['names'] = importEntry['names'],
-        ['officer'] = importEntry['officer'],
+        ['officer'] = sender,
         ['dkp_change'] = importEntry['dkp_change'] * -1,
         ['other_text'] = 'DKP Correction'
     }
@@ -232,9 +232,9 @@ function DKP:DeleteEntry(entry, sender)
         else
             PDKP:PrintD("Entry was found during delete")
             importEntry:MarkAsDeleted(sender)
-            --local import_sd = importEntry:GetSaveDetails()
-            --DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(import_sd)
-            --self.entries[entry.id] = importEntry
+            local import_sd = importEntry:GetSaveDetails()
+            DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(import_sd)
+            self.entries[entry.id] = importEntry
         end
     else
         PDKP:PrintD("Entry was not found during delete")

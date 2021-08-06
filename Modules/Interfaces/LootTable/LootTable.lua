@@ -484,11 +484,7 @@ function LootTable:_OnClick(frame, buttonType)
     local dataObj = parent.dataObj
     local item = dataObj.item
 
-    if not Utils:IsItemLink(item) then
-        return
-    end
-
-    if buttonType == 'LeftButton' then
+    if buttonType == 'LeftButton' and Utils:IsItemLink(item) then
         if GameTooltip:GetItem() then
             GameTooltip:SetHyperlink(item)
         else
@@ -498,22 +494,29 @@ function LootTable:_OnClick(frame, buttonType)
             GameTooltip:SetPoint("TOP", frame, "BOTTOM", 0, -20);
             GameTooltip:SetHyperlink(item)
         end
+    else
+        PDKP_Loot_OnClick(frame, buttonType)
     end
 end
 
-function PDKP_Loot_OnClick(_, _, _)
-    --if not PDKP.canEdit or not IsShiftKeyDown() then return end
-    --
-    --local label = frame.label;
-    --local dataObj = frame:GetParent()['dataObj']
-    --
-    --if label == 'Members' then
-    --    return GUI.memberTable:SelectNames(dataObj['names'])
-    --elseif label == 'Reason' and buttonType == 'RightButton' then
-    --    GUI.popup_entry = dataObj
-    --    StaticPopup_Show('PDKP_DKP_ENTRY_POPUP')
-    --    deleted_row = frame:GetParent() -- This only gets used if the deletion goes through.
-    --end
+function PDKP_Loot_OnClick(frame, buttonType)
+    if not PDKP.canEdit or not IsShiftKeyDown() then
+        return
+    end
+
+    local label = frame.label;
+    local dataObj = frame:GetParent()['dataObj']
+
+    if dataObj['deleted'] then
+        PDKP:PrintD("Entry has already been deleted")
+        return
+    end
+
+    if label == 'Members' then
+        return PDKP.memberTable:SelectNames(dataObj['names'])
+    elseif label == 'Reason' and buttonType == 'RightButton' then
+        GUI.Dialogs:Show('PDKP_DKP_ENTRY_POPUP', nil, dataObj)
+    end
 end
 
 function PDKP_Loot_EntryDeleted(_)
