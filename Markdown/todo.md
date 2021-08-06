@@ -6,11 +6,11 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Enable marking one's self as "benched".
 - [ ] Allow for different Decay Amounts.
 - [ ] Disable Comms while in non-guild party, raid or battleground.
-- [ ] Bid Windows not clearing old bids (visual artifact).
+- [x] Bid Windows not clearing old bids (visual artifact).
 - [ ] Unregister DKP WhoIsDKP after it has been set, but re-register when joining group.
 - [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
 - [ ] Tooltip hover on Bid item.
-- [ ] Add 10 seconds to bid button.
+- [x] Add 10 seconds to bid button.
 - [ ] Add "bid" chat message filters to auto-add people who didn't use addon.
 - [ ] Add ability to remove "faulty" bids.
 - [ ] Add ability to re-calculate who was the winner.

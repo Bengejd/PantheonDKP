@@ -212,6 +212,7 @@ function DKP:DeleteEntry(entry, sender)
     end
 
     if importEntry['previousTotals'] and next(importEntry['previousTotals']) ~= nil then
+        importEntry:GetPreviousTotals()
         temp_entry['previousTotals'] = importEntry['previousTotals']
     end
 
@@ -221,6 +222,7 @@ function DKP:DeleteEntry(entry, sender)
             temp_entry['decayAmounts'][name] = amt * -1
             if temp_entry['decayReversal'] == nil then
                 temp_entry['decayReversal'] = (amt * -1) > 0
+                temp_entry['previousDecayId'] = importEntry['id']
             end
         end
     end
@@ -283,15 +285,28 @@ function DKP:RecalibrateDKP()
         local decoded_entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
         local entry = MODULES.DKPEntry:new(decoded_entry)
 
+        entry:GetPreviousTotals()
+
+        if entry.reason == 'Decay' then
+            entry:CalculateDecayAmounts(true)
+        end
+
+        local previousDecayEntry = nil;
+        if entry.previousDecayId and DKP_DB[entry.previousDecayId] then
+            previousDecayEntry = MODULES.CommsManager:DatabaseDecoder(DKP_DB[entry.previousDecayId])
+        end
+
         for _, member in pairs(entry.members) do
             local dkp_change = entry.dkp_change
+
             if entry.reason == 'Decay' then
-                entry:CalculateDecayAmounts(true)
-
                 dkp_change = entry['decayAmounts'][member.name]
-
-                if entry.decayReversal and dkp_change < 0 then
-                    dkp_change = dkp_change * -1
+                if entry.decayReversal and not entry.deleted and dkp_change < 0 then
+                    if previousDecayEntry ~= nil then
+                        dkp_change = previousDecayEntry['decayAmounts'][member.name];
+                    else
+                        dkp_change = math.ceil(dkp_change * -1.1111);
+                    end
                 end
             end
 

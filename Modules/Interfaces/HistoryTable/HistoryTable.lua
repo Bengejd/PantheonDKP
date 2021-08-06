@@ -485,16 +485,6 @@ function PDKP_History_OnClick(frame, buttonType)
     end
 end
 
-function PDKP_History_EntryDeleted(_)
-    --local self = GUI.history_table;
-    --
-    --local row = self.rows[deleted_row.index]
-    --row['dataObj']['deleted'] = true
-    --
-    --GUI.history_table:RefreshData()
-    --GUI.history_table:HistoryUpdated()
-end
-
 pdkp_HistoryTableMixin = HistoryTable;
 
 GUI.HistoryGUI = HistoryTable;

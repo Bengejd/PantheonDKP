@@ -60,6 +60,7 @@ function entry:new(entry_details)
     self.decayMigrated = false
     self.decayAmounts = {}
     self.decayReversal = entry_details['decayReversal'] or false
+    self.previousDecayId = entry_details['previousDecayId'] or nil;
 
     self.members = {}
     self.sd = {} -- Save Details
@@ -138,6 +139,7 @@ function entry:GetSaveDetails()
         end
         if self.decayReversal then
             self.sd['decayReversal'] = true
+            self.sd['previousDecayId'] = self.previousDecayId;
         end
     end
 
