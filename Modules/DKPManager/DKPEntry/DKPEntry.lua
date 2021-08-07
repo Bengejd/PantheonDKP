@@ -95,6 +95,9 @@ function entry:new(entry_details)
 end
 
 function entry:Save(updateTable, exportEntry, skipLockouts)
+
+    PDKP:PrintD("entry:Save():  Update Table", updateTable, "ExportEntry", exportEntry, "skipLockouts", skipLockouts);
+
     wipe(self.sd)
 
     exportEntry = exportEntry or false
@@ -184,6 +187,9 @@ end
 
 function entry:CalculateDecayAmounts(refresh)
     refresh = refresh or false
+
+    PDKP:PrintD("entry:CalculateDecayAmounts(): Refresh: ", refresh);
+
     wipe(self.decayAmounts)
 
     if refresh then
