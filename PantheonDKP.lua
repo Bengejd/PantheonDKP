@@ -17,7 +17,8 @@ PDKP.OPTIONS = {}
 PDKP.AUTOVERSION = "@project-version@"
 
 PDKP.newVersionDetected = false
-PDKP.disableDev = true
+PDKP.disableDev = false
+PDKP.showDeleted = true
 
 local CORE = PDKP.CORE
 local MODULES = PDKP.MODULES
