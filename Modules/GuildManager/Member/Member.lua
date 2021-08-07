@@ -74,9 +74,12 @@ function Member:HasEntries()
     return self.dkp['entries'] ~= nil and #self.dkp['entries'] > 0;
 end
 
-function Member:_UpdateDKP(entry)
+function Member:_UpdateDKP(entry, decayAmount)
     local amount = entry.sd.dkp_change
-    if amount == nil then
+
+    if decayAmount ~= nil then
+        amount = decayAmount;
+    elseif amount == nil and decayAmount == nil then
         return
     end
 

@@ -265,6 +265,13 @@ function DKP:ImportBulkEntries(message, _)
     end, total_batches)
 end
 
+function DKP:GetPreviousDecayEntry(entry)
+    if entry.previousDecayId and DKP_DB[entry.previousDecayId] then
+        return MODULES.CommsManager:DatabaseDecoder(DKP_DB[entry.previousDecayId])
+    end
+    return nil;
+end
+
 function DKP:RecalibrateDKP()
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
@@ -291,10 +298,7 @@ function DKP:RecalibrateDKP()
             entry:CalculateDecayAmounts(true)
         end
 
-        local previousDecayEntry = nil;
-        if entry.previousDecayId and DKP_DB[entry.previousDecayId] then
-            previousDecayEntry = MODULES.CommsManager:DatabaseDecoder(DKP_DB[entry.previousDecayId])
-        end
+        local previousDecayEntry = self:GetPreviousDecayEntry(entry);
 
         for _, member in pairs(entry.members) do
             local dkp_change = entry.dkp_change
@@ -545,12 +549,31 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
     updateTable = updateTable or true
     skipLockouts = skipLockouts or false
 
-    if entry.reason == 'Boss Kill' and not skipLockouts then
-        MODULES.Lockouts:AddMemberLockouts(entry)
-        entry:GetMembers()
-    end
-
     if entry ~= nil then
+        local previousDecayEntry = self:GetPreviousDecayEntry(entry);
+        if entry.reason == 'Boss Kill' and not skipLockouts then
+            MODULES.Lockouts:AddMemberLockouts(entry)
+            entry:GetMembers()
+        end
+
+        local dkp_change = nil;
+        for _, member in pairs(entry.members) do
+            if entry.reason == "Decay" then
+                dkp_change = entry['decayAmounts'][member.name]
+
+                if entry.decayReversal and not entry.deleted and dkp_change < 0 then
+                    if previousDecayEntry ~= nil then
+                        dkp_change = previousDecayEntry['decayAmounts'][member.name]
+                    else
+                        dkp_change = math.ceil(dkp_change * -1.1111);
+                    end
+                end
+            end
+
+            member:_UpdateDKP(entry, dkp_change)
+            member:Save()
+        end
+
         for i = #entry.members, 1, -1 do
             local member = entry.members[i]
             if entry.reason == "Decay" then
