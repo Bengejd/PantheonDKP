@@ -2,28 +2,48 @@
 Players can set themselves as being "benched" in game, this requires them to login onto their main character, and mark themselves as "benched".
 They can then, play any other character on their account that has the PDKP addon enabled, and is in the guild. They must be online within +- 5 minutes of a boss kill in order to receive DKP for that kill.
 Officers can request that they join the raid group via a "request" button. The benched list will be accessible via the raid-tools frame.
+---
+### TODO:
 
+#### Nice To haves:
 - [ ] Enable marking one's self as "benched".
-- [ ] Allow for different Decay Amounts.
+
+## TODO:
+
+##### Comms
 - [ ] Disable Comms while in non-guild party, raid or battleground.
-- [x] Bid Windows not clearing old bids (visual artifact).
-- [ ] Unregister DKP WhoIsDKP after it has been set, but re-register when joining group.
-- [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
-- [ ] Tooltip hover on Bid item.
-- [x] Add 10 seconds to bid button.
 - [ ] Add "bid" chat message filters to auto-add people who didn't use addon.
+- [ ] Unregister DKP WhoIsDKP after it has been set, but re-register when joining group.
+
+#### Auctioning
+- [ ] Tooltip hover on Bid item.
 - [ ] Add ability to remove "faulty" bids.
 - [ ] Add ability to re-calculate who was the winner.
-- [x] Sort the bids by amount after the bidding has ended.
 - [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
 - [ ] Calculate cost based on the winner's principle.
+- [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
+
+- [ ] Fix Decay Deletion previousTotal BUG
+    - [ ] Probably need to use recalibrate after the decay deletion.
+- [ ] Fix Overwrite, so that you don't have to /reload anymore after it processes.
+    
+- [ ] Allow for different Decay Amounts.
 - [ ] Add Lockouts Tab
 - [ ] Add Options Tab
-- [ ] Fix Decay Deletion previousTotal BUG
+
 - [ ] Allow for the Sync Timer to be movable.
 - [ ] Sync Timer not going away for Merge/Overwrite after completion.
 
- 
+
+#### Complete Todo Items
+- [x] Add 10 seconds to bid button.
+- [x] Sort the bids by amount after the bidding has ended.
+- [x] Bid Windows not clearing old bids (visual artifact).
+- [ ] 
+
+---
+
+
 
 TBC UPDATES:
     
