@@ -5,34 +5,87 @@ local Utils = PDKP.Utils;
 
 local Chat = {}
 
-local trim, lower, contains = strtrim, strlower, tContains
+local trim, lower = strtrim, strlower
+local contains, tinsert = tContains, table.insert
+local C_Timer = C_Timer
+
+local chatCache = {};
+local invite_commands = nil;
+local dkp_commands = {'!bid', '!dkp', '!cap'}
+
+local CMD_COLOR = '|cffffaeae'
+
+local bidExample = CMD_COLOR .. "!bid 20|r"
+local maxExample = CMD_COLOR .. "!bid max|r"
+
+local msgPrefix = "PDKP Auto Response:"
 
 function Chat:Initialize()
     PDKP.CORE:RegisterChatCommand("pdkp", function(msg)
         Chat:_HandleSlashCommands(msg)
     end)
 
-    self.eventsFrame = CreateFrame("Frame", "PDKP_Chat_EventsFrame")
-    self.eventsFrame:SetScript("OnEvent", Chat.HandleChatEvent)
-
-    local eventNames = { 'CHAT_MSG_WHISPER', }
-
-    for _, eventName in pairs(eventNames) do
-        self:RegisterEvent(eventName)
-    end
-end
-
-function Chat:HandleChatEvent(eventName, msg, author, ...)
-    if eventName == 'CHAT_MSG_WHISPER' then
+    ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_, event, msg, author, ...)
+        local isInviteCmd, isDKPCmd, shouldProcessMessage, shouldFilterMessage = false, false, false, false;
         author = Utils:RemoveServerName(author)
         msg = lower(trim(msg))
-        local invite_commands = MODULES.RaidManager.invite_commands
-        if contains(invite_commands, msg) then
-            return Chat:_HandleInviteMsg(author)
-        elseif author == 'Lariese' then
-            SendChatMessage("inv" ,"WHISPER" ,nil ,"Lariese");
+        local cmd, arg1 = PDKP.CORE:GetArgs(msg, 2)
+
+        if invite_commands == nil then
+            invite_commands = MODULES.RaidManager.invite_commands
         end
+
+        if (PDKP.canEdit and contains(dkp_commands, cmd)) then
+            shouldProcessMessage = true;
+            isDKPCmd = true;
+        elseif contains(invite_commands, msg) then
+            shouldProcessMessage = true;
+            isInviteCmd = true;
+        end
+
+        if shouldProcessMessage then
+            shouldFilterMessage = true
+            if chatCache[author] == nil then
+                chatCache[author] = {};
+                chatCache[author]['messages'] = {}
+                chatCache[author]['timer'] = nil;
+            end
+
+            if chatCache[author]["messages"][msg] == nil then
+                local type = '';
+                if isDKPCmd then type = 'DKP' elseif isInviteCmd then type = 'Invite' end
+                chatCache[author]["messages"][msg] = {
+                    ['cmd'] = cmd,
+                    ['msg'] = msg,
+                    ['amt'] = arg1,
+                    ['type'] = type;
+                    ['author'] = author,
+                }
+            end
+
+            if chatCache[author]['timer'] ~= nil then
+                chatCache[author]['timer']:Cancel();
+                chatCache[author]['timer'] = nil;
+            end
+            chatCache[author]['timer'] = C_Timer.NewTicker(0.5, function()
+                Chat:HandleChatEvent(author)
+            end, 1)
+        end
+        return shouldFilterMessage
+    end)
+end
+
+function Chat:HandleChatEvent(author)
+    PDKP:PrintD("Handling Chat Event from", author);
+    for index, message in pairs(chatCache[author]["messages"]) do
+        if message['type'] == 'Invite' then
+            Chat:_HandleInviteMsg(author);
+        elseif message['type'] == 'DKP' then
+            Chat:_HandleDKPMsg(message);
+        end
+        chatCache[author]["messages"][index] = nil;
     end
+    wipe(chatCache[author]["messages"]);
 end
 
 -----------------------------
@@ -48,6 +101,73 @@ function Chat:_HandleInviteMsg(name)
     end
 
     MODULES.GroupManager:InvitePlayer(name)
+end
+
+function Chat:_HandleDKPMsg(msg)
+    local cmd, amt, author = msg['cmd'], msg['amt'], msg['author'];
+    local member = MODULES.GuildManager:GetMemberByName(author);
+    local memberDKP = member:GetDKP();
+
+    local chatMessage = nil;
+
+    if cmd == '!bid' then
+        if not MODULES.AuctionManager:IsAuctionInProgress() then
+            chatMessage = "There are no active auctions at this time."
+        elseif not MODULES.AuctionManager:CanChangeAuction() then
+            chatMessage = "Can't accept bid, please whisper the Raid Leader, DKP Officer or the Master Looter instead."
+        else
+            local bid = tonumber(amt)
+            -- Set their bid to their max DKP.
+            if not bid then
+                if amt == "max" then
+                    bid = memberDKP;
+                elseif amt == "cancel" then
+                    bid = 0
+                end
+            end
+
+            if bid and type(bid) == "number" then
+                if bid <= memberDKP then
+                    local bidder_info = { ['name'] = author, ['bid'] = bid, ['dkpTotal'] = memberDKP }
+                    MODULES.CommsManager:SendCommsMessage('AddBid', bidder_info)
+                    if amt == "cancel" then
+                        chatMessage = "Your bid has been canceled";
+                    else
+                        chatMessage = "Your bid was received";
+                    end
+                else
+                    chatMessage = "Your bid of " .. bid .. " exceeds your total dkp of " .. memberDKP;
+                end
+            else
+                chatMessage = "You sent an invalid bid amount. Try: '!bid 20' or '!bid max', instead."
+            end
+        end
+    elseif cmd == '!dkp' then
+        chatMessage = "You have " .. memberDKP .. " dkp";
+    elseif cmd == '!cap' then
+        local members = MODULES.GuildManager.members;
+        local _, groupMembers = MODULES.GroupManager:GetRaidMemberObjects();
+        local guildCap, groupCap = 0, 0;
+        for _, groupMember in pairs(groupMembers) do
+            local dkp = groupMember:GetDKP();
+            if dkp > groupCap then
+                groupCap = dkp;
+            end
+        end
+        for _, guildMember in pairs(members) do
+            local dkp = guildMember:GetDKP();
+            if dkp > guildCap then
+                guildCap = dkp;
+            end
+        end
+        chatMessage = "[Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap);
+    end
+
+    if chatMessage ~= nil then
+        SendChatMessage(msgPrefix .. " " .. chatMessage, "WHISPER", nil, author);
+    else
+        print(chatMessage);
+    end
 end
 
 --- Events
@@ -130,7 +250,6 @@ end
 
 function Chat:_DisplayHelp()
     local slash_addon = MODULES.Constants.SLASH_ADDON
-    local CMD_COLOR = '|cffffaeae'
 
     local helpCommands = {
         { ['cmd'] = 'show / hide', ['desc'] = 'PantheonDKP window', },

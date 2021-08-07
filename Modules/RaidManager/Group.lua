@@ -236,14 +236,15 @@ function Group:GetNumClass(class)
 end
 
 function Group:GetRaidMemberObjects()
-    local members = {}
+    local memberNames, members = {}, {}
     for i = 1, #self.memberNames do
         local member = GuildManager:GetMemberByName(self.memberNames[i])
         if member then
-            tinsert(members, member.name)
+            tinsert(memberNames, member.name)
+            tinsert(members, member)
         end
     end
-    return members
+    return memberNames, members
 end
 
 function Group:IsInInstance()

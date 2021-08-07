@@ -12,7 +12,6 @@ Officers can request that they join the raid group via a "request" button. The b
 
 ##### Comms
 - [ ] Disable Comms while in non-guild party, raid or battleground.
-- [ ] Add "bid" chat message filters to auto-add people who didn't use addon.
 - [ ] Unregister DKP WhoIsDKP after it has been set, but re-register when joining group.
 
 #### Auctioning
@@ -22,25 +21,27 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
 - [ ] Calculate cost based on the winner's principle.
 - [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
-
 - [ ] Fix Decay Deletion previousTotal BUG
     - [ ] Probably need to use recalibrate after the decay deletion.
 - [ ] Fix Overwrite, so that you don't have to /reload anymore after it processes.
-    
 - [ ] Allow for different Decay Amounts.
 - [ ] Add Lockouts Tab
 - [ ] Add Options Tab
 
-- [ ] Allow for the Sync Timer to be movable.
-- [ ] Sync Timer not going away for Merge/Overwrite after completion.
-
+#### DKP Overhaul
+- [ ] Fix DKP submissions giving the incorrect DKP totals.
 
 #### Complete Todo Items
 - [x] Add 10 seconds to bid button.
 - [x] Sort the bids by amount after the bidding has ended.
 - [x] Bid Windows not clearing old bids (visual artifact).
-- [ ] 
-
+- [x] Allow for the Sync Timer to be movable.
+- [x] Sync Timer not going away for Merge/Overwrite after completion.
+- [x] Add "bid" chat message filters to auto-add people who didn't use addon.
+  - [x] !bid # - Bid a certain amount in whispers.
+  - [x] !bid cancel - Cancel a bid after it has been submitted.
+  - [x] !dkp - Send the msg author's DKP total.
+  - [x] !cap - Send the Guild DKP Cap and the Raid DKP Cap.
 ---
 
 

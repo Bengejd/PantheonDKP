@@ -185,16 +185,6 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     return importEntry
 end
 
-function DKP:_StartRecompressTimer()
-    if self.recompressTimer ~= nil then
-        self.recompressTimer:Cancel()
-        self.recompressTimer = nil
-    end
-    self.recompressTimer = C_Timer.NewTicker(5, function()
-        self:_RecompressCurrentLoaded()
-    end, 1)
-end
-
 function DKP:DeleteEntry(entry, sender)
     local importEntry = MODULES.DKPEntry:new(entry)
     local temp_entry = {
@@ -441,6 +431,16 @@ function DKP:AddToCache(entry)
     end, 1)
 end
 
+function DKP:_StartRecompressTimer()
+    if self.recompressTimer ~= nil then
+        self.recompressTimer:Cancel()
+        self.recompressTimer = nil
+    end
+    self.recompressTimer = C_Timer.NewTicker(5, function()
+        self:_RecompressCurrentLoaded()
+    end, 1)
+end
+
 -----------------------------
 --      Boss Functions     --
 -----------------------------
@@ -518,6 +518,8 @@ function DKP:_CreateBatches(entries, total)
 end
 
 function DKP:_ProcessEntryBatch(batch)
+    if type(batch) ~= "table" then return end
+
     for key, encoded_entry in pairs(batch) do
 
         local shouldContinue = true
