@@ -107,6 +107,7 @@ end
 -----------------------------
 
 function DKP:ExportEntry(entry)
+    PDKP:PrintD("DKP:ExportEntry()")
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
     MODULES.CommsManager:SendCommsMessage('SyncSmall', save_details)
 end
@@ -148,7 +149,11 @@ function DKP:_CheckForPreviousDecay()
     return false, decayDB[self.weekNumber]
 end
 
+-- TODO: SkipLockoutCheck isn't used anymore. Probably can safely remove it?
 function DKP:ImportEntry(entry, skipLockoutCheck)
+
+    PDKP:PrintD("DKP:ImportEntry(): Importing new entry");
+
     skipLockoutCheck = skipLockoutCheck or false
     local importEntry = MODULES.DKPEntry:new(entry)
 
@@ -156,9 +161,11 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
         importEntry.lockoutsChecked = true
     end
 
+    -- Does nothing if entry.reason ~= 'Boss Kill' or entry.lockoutsChecked is true.
     local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
 
     if #no_lockout_members == 0 and not skipLockoutCheck then
+        PDKP:PrintD("DKP:ImportEntry(): No Lockout Members, Updating tables & returning")
         self:_UpdateTables()
         return
     end
@@ -166,9 +173,14 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     -- TODO: Remove lockout members from deleted boss_kill entries.
     local saved_ledger_entry = MODULES.LedgerManager:ImportEntry(importEntry)
 
+    -- Only does something if the entry isn't already imported into the ledger or we're skipping the lockout check.
     if saved_ledger_entry or skipLockoutCheck then
+
+        PDKP:PrintD("DKP:ImportEntry(): Saved_ledger_entry", saved_ledger_entry, "SkippedLockoutCheck", skipLockoutCheck);
+
         self:RollBackEntries(importEntry)
         if entry.reason == 'Decay' then
+            PDKP:PrintD("DKP:ImportEntry(): Decay entry found");
             importEntry:CalculateDecayAmounts(true)
         end
 
@@ -312,6 +324,7 @@ function DKP:RecalibrateDKP()
 end
 
 function DKP:RollBackEntries(decayEntry)
+    PDKP:PrintD("DKP:RollBackEntries()");
     local all_keys = {}
     local keys_to_rollback = {}
 
@@ -551,9 +564,12 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
     updateTable = updateTable or true
     skipLockouts = skipLockouts or false
 
+    PDKP:PrintD("DKP:AddNewEntryToDB(): updateTables: ", updateTable, "SkipLockouts", skipLockouts);
+
     if entry ~= nil then
         local previousDecayEntry = self:GetPreviousDecayEntry(entry);
         if entry.reason == 'Boss Kill' and not skipLockouts then
+            PDKP:PrintD("DKP:AddNewEntryToDB() > Lockouts:AddMemberLockouts()");
             MODULES.Lockouts:AddMemberLockouts(entry)
             entry:GetMembers()
         end
@@ -573,20 +589,6 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
             end
 
             member:_UpdateDKP(entry, dkp_change)
-            member:Save()
-        end
-
-        for i = #entry.members, 1, -1 do
-            local member = entry.members[i]
-            if entry.reason == "Decay" then
-                entry:CalculateDecayAmounts()
-                entry.sd.dkp_change = entry['decayAmounts'][member.name]
-
-                if entry.decayReversal then
-                    entry.sd.dkp_change = entry.dkp_change * -1
-                end
-            end
-            member:_UpdateDKP(entry)
             member:Save()
         end
 

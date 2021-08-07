@@ -43,17 +43,6 @@ function Lockouts:AddMemberLockouts(entry)
         end
     end
 
-    if #removedNames ~= 0 and PDKP.canEdit then
-        local removedNameText = ""
-        for i = 1, #removedNames do
-            if i ~= #removedNames and i ~= 1 then
-                removedNameText = removedNameText .. ", "
-            end
-            removedNameText = removedNameText .. removedNames[i]
-        end
-        --PDKP:PrintD('Entry members who are ineligible for DKP:', removedNameText)
-    end
-
     return no_lockout_members
 end
 

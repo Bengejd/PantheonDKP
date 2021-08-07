@@ -188,6 +188,8 @@ function Ledger:GenerateEntryHash(entry)
 end
 
 function Ledger:ImportEntry(entry)
+    local entryShouldBeImported = false;
+
     local hashMakeup = { strsplit("__", entry.hash) }
     local tbl = {}
 
@@ -199,7 +201,6 @@ function Ledger:ImportEntry(entry)
 
     local weekNumber = tonumber(tbl[1])
     local officer = tbl[2]
-    --local index = tbl[3]
 
     weekNumber = tonumber(weekNumber)
 
@@ -207,16 +208,20 @@ function Ledger:ImportEntry(entry)
     self:_GetOfficerTable(weekNumber, officer)
 
     if tContains(LEDGER[weekNumber][officer], entry.id) then
-        return false
+        entryShouldBeImported = false
+    else
+        table.insert(LEDGER[weekNumber][officer], entry.id)
+        table.sort(LEDGER[weekNumber][officer], function(a, b)
+            return a < b
+        end)
+
+        self:GetLastFourWeeks()
+
+        entryShouldBeImported = true;
     end
 
-    table.insert(LEDGER[weekNumber][officer], entry.id)
-    table.sort(LEDGER[weekNumber][officer], function(a, b)
-        return a < b
-    end)
-
-    self:GetLastFourWeeks()
-    return true
+    PDKP:PrintD("Ledger:ImportEntry(): Entry should be imported: ", entryShouldBeImported);
+    return entryShouldBeImported
 end
 
 function Ledger:GetLedgerEntryIndex(entryID, LedgerPath)

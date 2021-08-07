@@ -2,7 +2,7 @@ package-as: PantheonDKP
 enable-nolib-creation: no
 
 manual-changelog:
-    filename: CHANGELOG.txt
+    filename: Markdown/CHANGELOG.md
     markup-type: markdown
 
 license-output: LICENSE.txt
@@ -11,6 +11,6 @@ tools-used:
     - data-tools
 
 ignore:
-    - Markdown
+    - Markdown/ignore
     - PantheonDKP-bac.lua
     - Media/Unused
