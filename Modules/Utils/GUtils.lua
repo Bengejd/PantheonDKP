@@ -613,6 +613,7 @@ function GUtils:createStatusBar(opts)
     local min = opts['min'] or 0
     local max = opts['max'] or 100
     local addTime = opts['addTime'] or false
+    local movable = opts['movable'] or false
 
     local onTimerFinished = opts['func'] or function()
     end
@@ -696,6 +697,8 @@ function GUtils:createStatusBar(opts)
 
         pb:SetValue(amount)
 
+        currVal = pb:GetValue()
+
         if currVal < min or currVal >= max and type == 'percent' then
             pb:reset()
             pb.onTimerFinished()
@@ -742,6 +745,11 @@ function GUtils:createStatusBar(opts)
 
     pb:reset()
     pb.onTimerFinished = onTimerFinished
+
+    if movable then
+        self:setMovable(pb);
+        pb:SetClampedToScreen(true);
+    end
 
     return pb
 end

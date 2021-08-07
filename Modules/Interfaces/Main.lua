@@ -118,7 +118,8 @@ function Main:SetupPushProgress()
         ['type'] = 'percent',
         ['default'] = 0,
         ['min'] = 0,
-        ['max'] = 100
+        ['max'] = 100,
+        ['movable'] = true,
     }
     PDKP.PushBar = GUtils:createStatusBar(pushBarOpts)
 end
