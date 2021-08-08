@@ -127,7 +127,7 @@ function Chat:_HandleDKPMsg(msg)
             end
 
             if bid and type(bid) == "number" then
-                if bid <= memberDKP then
+                if bid <= memberDKP and bid >= 1 then
                     local bidder_info = { ['name'] = author, ['bid'] = bid, ['dkpTotal'] = memberDKP }
                     MODULES.CommsManager:SendCommsMessage('AddBid', bidder_info)
                     if amt == "cancel" then
@@ -135,6 +135,8 @@ function Chat:_HandleDKPMsg(msg)
                     else
                         chatMessage = "Your bid was received";
                     end
+                elseif bid <= 0 then
+                    chatMessage = "You cannot bid 0 or negative DKP";
                 else
                     chatMessage = "Your bid of " .. bid .. " exceeds your total dkp of " .. memberDKP;
                 end
