@@ -13,7 +13,7 @@ local setmetatable, pairs, tremove, tinsert = setmetatable, pairs, table.remove,
 local substr, type, floor = string.sub, type, math.floor
 
 local function _prefix(prefix)
-    return 'pdkp' .. substr(prefix, 0, 12)
+    return 'pdkpV2' .. substr(prefix, 0, 12)
 end
 
 function Comm:new(opts)
@@ -221,7 +221,7 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     end
 
     if pfx == 'SyncSmall' then
-        return DKPManager:ImportEntry(data)
+        return DKPManager:ImportEntry2(data, CommsManager:_Adler(message), 'Small')
     elseif pfx == 'SyncDelete' then
         return DKPManager:DeleteEntry(data, sender)
     elseif pfx == 'SyncLarge' then

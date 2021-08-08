@@ -5,7 +5,7 @@ local MODULES = PDKP.MODULES
 local Comms = {}
 
 local function _prefix(prefix)
-    return 'pdkp' .. string.sub(prefix, 0, 12)
+    return 'pdkpV2' .. string.sub(prefix, 0, 12)
 end
 
 function Comms:Initialize()
