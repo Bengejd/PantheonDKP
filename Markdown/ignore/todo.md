@@ -21,8 +21,6 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
 - [ ] Calculate cost based on the winner's principle.
 - [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
-- [ ] Fix Decay Deletion previousTotal BUG
-    - [ ] Probably need to use recalibrate after the decay deletion.
 - [ ] Fix Overwrite, so that you don't have to /reload anymore after it processes.
 - [ ] Allow for different Decay Amounts.
 - [ ] Add Lockouts Tab
@@ -32,6 +30,8 @@ Officers can request that they join the raid group via a "request" button. The b
 - [x] Fix DKP submissions giving the incorrect DKP totals.
 - [ ] Deleting a decay entry & merging does not appear to send the new entry until after /reload?
   - [ ] Entry totals are incorrect after re-calibrating as well, for the receiver.
+- [x] Fix Decay Deletion previousTotal BUG
+  - [x] Probably need to use recalibrate after the decay deletion.
 
 #### Complete Todo Items
 - [x] Add 10 seconds to bid button.
