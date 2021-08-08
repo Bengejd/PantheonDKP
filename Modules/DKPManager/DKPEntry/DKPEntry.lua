@@ -63,6 +63,7 @@ function entry:new(entry_details)
     self.previousDecayId = entry_details['previousDecayId'] or nil;
 
     self.members = {}
+    self.removedMembers = entry_details['removedMembers'] or {};
     self.sd = {} -- Save Details
 
     self.lockoutsChecked = false
@@ -95,8 +96,6 @@ function entry:new(entry_details)
 end
 
 function entry:Save(updateTable, exportEntry, skipLockouts)
-
-    PDKP:PrintD("entry:Save():  Update Table", updateTable, "ExportEntry", exportEntry, "skipLockouts", skipLockouts);
 
     wipe(self.sd)
 
@@ -155,6 +154,10 @@ function entry:GetSaveDetails()
         dependants['decayAmounts'] = self.decayAmounts
     end
 
+    if #self.removedMembers > 0 then
+        self.sd['removedMembers'] = self.removedMembers;
+    end
+
     for name, val in pairs(dependants) do
         if type(val) == "table" then
             if val and next(val) ~= nil then
@@ -188,7 +191,7 @@ end
 function entry:CalculateDecayAmounts(refresh)
     refresh = refresh or false
 
-    PDKP:PrintD("entry:CalculateDecayAmounts(): Refresh: ", refresh);
+    PDKP:PrintD("entry:CalculateDecayAmounts(): Refresh: ", refresh, self.id);
 
     wipe(self.decayAmounts)
 
@@ -227,9 +230,11 @@ function entry:RemoveMember(name)
     for i = 1, #self.names do
         if self.names[i] == name then
             memberIndex = i
+            break;
         end
     end
 
+    table.insert(self.removedMembers, name);
     table.remove(self.names, memberIndex)
 
     self:GetMembers()

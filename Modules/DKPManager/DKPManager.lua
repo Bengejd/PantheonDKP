@@ -9,11 +9,15 @@ local tinsert, tsort, pairs = table.insert, table.sort, pairs
 
 local DKP = {}
 
-local DKP_DB, _, CommsManager;
+local DKP_DB, Lockouts, CommsManager, Ledger;
+local DKP_Entry;
 
 function DKP:Initialize()
     DKP_DB = MODULES.Database:DKP()
     CommsManager = MODULES.CommsManager;
+    DKP_Entry = MODULES.DKPEntry;
+    Lockouts = MODULES.Lockouts;
+    Ledger = MODULES.LedgerManager;
 
     self.entries = {}
     self.encoded_entries = {}
@@ -99,7 +103,7 @@ function DKP:LoadPrevFourWeeks()
 end
 
 function DKP:_RecompressCurrentLoaded()
-    self.compressedCurrentWeekEntries = MODULES.CommsManager:DataEncoder({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries })
+    self.compressedCurrentWeekEntries = CommsManager:DataEncoder({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries })
 end
 
 -----------------------------
@@ -109,7 +113,7 @@ end
 function DKP:ExportEntry(entry)
     PDKP:PrintD("DKP:ExportEntry()")
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
-    MODULES.CommsManager:SendCommsMessage('SyncSmall', save_details)
+    CommsManager:SendCommsMessage('SyncSmall', save_details)
 end
 
 function DKP:PrepareOverwriteExport()
@@ -119,7 +123,7 @@ function DKP:PrepareOverwriteExport()
         ['lockouts'] = MODULES.Database:Lockouts(),
         ['guild'] = MODULES.Database:Guild(),
     }
-    MODULES.CommsManager:SendCommsMessage('SyncOver', exportDetails)
+    CommsManager:SendCommsMessage('SyncOver', exportDetails)
 end
 
 function DKP:ProcessOverwriteSync(message, sender)
@@ -149,10 +153,13 @@ function DKP:_CheckForPreviousDecay()
     return false, decayDB[self.weekNumber]
 end
 
+function DKP:_EntryAdlerExists(entryId, entryAdler)
+    local db_entry = DKP_DB[entryId]
+    return db_entry ~= nil and CommsManager:_Adler(db_entry) == entryAdler
+end
+
 -- TODO: SkipLockoutCheck isn't used anymore. Probably can safely remove it?
 function DKP:ImportEntry(entry, skipLockoutCheck)
-
-    PDKP:PrintD("DKP:ImportEntry(): Importing new entry");
 
     skipLockoutCheck = skipLockoutCheck or false
     local importEntry = MODULES.DKPEntry:new(entry)
@@ -162,7 +169,7 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     end
 
     -- Does nothing if entry.reason ~= 'Boss Kill' or entry.lockoutsChecked is true.
-    local no_lockout_members = MODULES.Lockouts:AddMemberLockouts(importEntry)
+    local no_lockout_members = Lockouts:AddMemberLockouts(importEntry)
 
     if #no_lockout_members == 0 and not skipLockoutCheck then
         PDKP:PrintD("DKP:ImportEntry(): No Lockout Members, Updating tables & returning")
@@ -181,7 +188,7 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
         self:RollBackEntries(importEntry)
         if entry.reason == 'Decay' then
             PDKP:PrintD("DKP:ImportEntry(): Decay entry found");
-            importEntry:CalculateDecayAmounts(true)
+            self:RecalibrateDKP();
         end
 
         importEntry:Save(true)
@@ -197,6 +204,83 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     return importEntry
 end
 
+function DKP:ImportEntry2(entry, entryAdler, importType)
+    if entry == nil or type(entry) ~= "table" then return end
+    local importEntry = DKP_Entry:new(entry)
+
+    -- Check to see if we already have the entry, or not, and if the entries match.
+    if self:_EntryAdlerExists(importEntry.id, entryAdler) then
+        return
+    end
+
+    -- Verify Member Lockouts and remove members who have already been locked out this week.
+    if importEntry.reason == 'Boss Kill' and importEntry.lockoutsChecked == false then
+        -- If there are no valid members, then do not import the entry.
+        if not Lockouts:VerifyMemberLockouts(importEntry) then
+            self:_UpdateTables();
+            PDKP:PrintD("Entry does not have valid members for this boss lockout");
+            if not PDKP.testRunning then
+                PDKP:PrintD("Entry does not have valid members for this boss lockout");
+            end
+            return;
+        end
+    end
+
+    local isNewLedgerEntry = Ledger:ImportEntry(importEntry);
+
+    if not isNewLedgerEntry then
+        PDKP:PrintD("Entry is not a new ledger entry");
+        if not PDKP.testRunning then
+            PDKP:PrintD("Entry is not a new ledger entry");
+        end
+        return
+    end
+
+    self:RollBackEntries(importEntry);
+
+    importEntry:Save(true)
+
+    local previousDecayEntry = self:GetPreviousDecayEntry(importEntry);
+
+    importEntry:GetMembers();
+
+    for _, member in pairs(importEntry.members) do
+        local dkp_change = 0;
+        local name = member.name;
+        if importEntry.reason == 'Decay' then
+            dkp_change = importEntry['decayAmounts'][name]
+            if importEntry.decayReversal and not importEntry.deleted and dkp_change < 0 then
+                if previousDecayEntry ~= nil then
+                    dkp_change = previousDecayEntry['decayAmounts'][name]
+                else
+                    dkp_change = math.ceil(dkp_change * -1.1111);
+                end
+            end
+        end
+        member:_UpdateDKP(importEntry, dkp_change)
+        member:Save()
+    end
+
+    local encoded_entry = CommsManager:DatabaseEncoder(importEntry:GetSaveDetails());
+    DKP_DB[importEntry.id] = encoded_entry
+    self.currentLoadedWeekEntries[importEntry.id] = encoded_entry
+
+    self.entries[importEntry.id] = importEntry;
+    self.numOfEntries = self.numOfEntries + 1
+    self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1;
+    self:_StartRecompressTimer();
+
+    if #self.rolledBackEntries then
+        self:RollForwardEntries();
+    end
+
+    self:RecalibrateDKP();
+
+    DKP:_UpdateTables();
+
+    return importEntry;
+end
+
 function DKP:DeleteEntry(entry, sender)
     local importEntry = MODULES.DKPEntry:new(entry)
     local temp_entry = {
@@ -206,8 +290,6 @@ function DKP:DeleteEntry(entry, sender)
         ['dkp_change'] = importEntry['dkp_change'] * -1,
         ['other_text'] = 'DKP Correction'
     }
-
-    PDKP:PrintD('Deleting Entry', entry.id)
 
     if importEntry.reason == 'Decay' then
         temp_entry['reason'] = 'Decay'
@@ -236,19 +318,25 @@ function DKP:DeleteEntry(entry, sender)
         else
             PDKP:PrintD("Entry was found during delete")
             importEntry:MarkAsDeleted(sender)
+            Lockouts:DeleteMemberFromLockout(entry)
             local import_sd = importEntry:GetSaveDetails()
-            DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(import_sd)
+            DKP_DB[entry.id] = CommsManager:DatabaseEncoder(import_sd)
             self.entries[entry.id] = importEntry
         end
     else
         PDKP:PrintD("Entry was not found during delete")
-        self:ImportEntry(entry, false)
+        return;
+        -- TODO: This could cause an issue...
+        --self:ImportEntry(entry, false)
     end
+
 
     if PDKP.canEdit and sender == Utils:GetMyName() then
         local corrected_entry = MODULES.DKPEntry:new(temp_entry)
         corrected_entry:Save(false, true)
     end
+
+    self:RecalibrateDKP();
 end
 
 function DKP:ImportBulkEntries(message, _)
@@ -269,7 +357,7 @@ end
 
 function DKP:GetPreviousDecayEntry(entry)
     if entry.previousDecayId and DKP_DB[entry.previousDecayId] then
-        return MODULES.CommsManager:DatabaseDecoder(DKP_DB[entry.previousDecayId])
+        return CommsManager:DatabaseDecoder(DKP_DB[entry.previousDecayId])
     end
     return nil;
 end
@@ -323,8 +411,8 @@ function DKP:RecalibrateDKP()
     self:_UpdateTables();
 end
 
+-- TODO: Refactor this.
 function DKP:RollBackEntries(decayEntry)
-    PDKP:PrintD("DKP:RollBackEntries()");
     local all_keys = {}
     local keys_to_rollback = {}
 
@@ -369,6 +457,7 @@ function DKP:RollBackEntries(decayEntry)
                     if entry.reason == 'Decay' then
                         if entry['decayAmounts'][member.name] == nil then
                             entry:CalculateDecayAmounts(true)
+                            self:RecalibrateDKP();
                         end
                         dkp_change = entry['decayAmounts'][member.name]
                     end
@@ -541,7 +630,6 @@ function DKP:_ProcessEntryBatch(batch)
             local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
             local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
             shouldContinue = dbAdler ~= eAdler
-            PDKP:PrintD('Skipping Entry')
         end
 
         -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.
@@ -564,13 +652,10 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
     updateTable = updateTable or true
     skipLockouts = skipLockouts or false
 
-    PDKP:PrintD("DKP:AddNewEntryToDB(): updateTables: ", updateTable, "SkipLockouts", skipLockouts);
-
     if entry ~= nil then
         local previousDecayEntry = self:GetPreviousDecayEntry(entry);
         if entry.reason == 'Boss Kill' and not skipLockouts then
-            PDKP:PrintD("DKP:AddNewEntryToDB() > Lockouts:AddMemberLockouts()");
-            MODULES.Lockouts:AddMemberLockouts(entry)
+            Lockouts:AddMemberLockouts(entry)
             entry:GetMembers()
         end
 
@@ -602,7 +687,7 @@ function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
             return
         end
 
-        DKP_DB[entry.id] = MODULES.CommsManager:DatabaseEncoder(entry.sd)
+        DKP_DB[entry.id] = CommsManager:DatabaseEncoder(entry.sd)
 
         self.entries[entry.id] = entry
         self.numOfEntries = self.numOfEntries + 1
@@ -648,7 +733,7 @@ function DKP:GetEntriesForSync()
 
     for id, decoded_entry in pairs(decoded_entries) do
         local save_details = decoded_entry:GetSaveDetails()
-        transmission_entries[id] = MODULES.CommsManager:DatabaseEncoder(save_details)
+        transmission_entries[id] = CommsManager:DatabaseEncoder(save_details)
         total_entries = total_entries + 1
     end
     for id, entry in pairs(encoded_entries) do

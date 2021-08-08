@@ -152,6 +152,12 @@ function HistoryTable:Initialize()
     return self
 end
 
+function HistoryTable:Reinitialize()
+    self.frame:Hide();
+    self.frame = nil;
+    self:Initialize();
+end
+
 function HistoryTable:CollapseAllRows(collapse)
     for i = 1, #self.rows do
         local row = self.rows[i]

@@ -23,16 +23,12 @@ function Dev:HandleSlashCommands(msg)
 
     if cmd == 'databasePopulate' then
         return self:PopulateDummyDatabase(arg1)
-    elseif cmd == 'whoTest' then
-        self:WhoTest(msg)
+    elseif cmd == 'TestAutomaticEntries' then
+        self:TestAutomaticEntries();
     elseif cmd == 'largeDataSync' then
         self:LargeDataSync(msg)
-    elseif cmd == 'decayTest' then
-        self:DecayTest(msg)
     elseif cmd == 'bossKillTest' then
         self:BossKillTest(msg)
-    elseif cmd == 'testAuctionTimer' then
-        PDKP.AuctionTimer.startTimer()
     elseif cmd == 'rapidDKPOfficerReq' then
         C_Timer.NewTicker(0.1, function()
             MODULES.CommsManager:SendCommsMessage('WhoIsDKP', 'request')
@@ -71,42 +67,338 @@ function Dev:HandleSlashCommands(msg)
     end
 end
 
-function Dev:DecayTest()
-    local member1 = MODULES.GuildManager:GetMemberByName('Mariku')
-    local member2 = MODULES.GuildManager:GetMemberByName('Oxford')
+function Dev:TestAutomaticEntries()
+    PDKP.testRunning = true;
 
-    local m1DKP = member1:GetDKP()
-    local m2DKP = member2:GetDKP()
+    MODULES.Database:ResetAllDatabases();
+    MODULES.GuildManager:Initialize();
+    MODULES.DKPManager:Initialize();
 
-    if m1DKP == 30 or m2DKP == 30 then
-        member1.dkp['total'] = 20000
-        member2.dkp['total'] = 19999
-    else
-        decayCount = decayCount + 1
-        local diffOffset = 0
-        local decayAmount = 0.9
+    local selectAllBtn = _G['pdkp_filter_Select_All'];
 
-        if m1DKP - m2DKP == 1 then
-            diffOffset = 1
+    local function toggleCheck(check)
+        if check then
+            if selectAllBtn:GetChecked() then
+                return
+            else
+                selectAllBtn:Click();
+            end
+        else
+            if selectAllBtn:GetChecked() then
+                selectAllBtn:Click();
+            end
         end
-
-        if decayCount % 10 == 0 then
-            decayAmount = 0.5
-            PDKP.CORE:Print('50% Decay')
-        end
-
-        member1.dkp['total'] = math.floor((m1DKP + diffOffset) * 0.9)
-        member2.dkp['total'] = math.floor((m2DKP) * 0.9)
     end
 
-    m1DKP = member1:GetDKP()
-    m2DKP = member2:GetDKP()
+    --[[ TESTS:
+        Boss Kill Deletion (110): Totals (27) reverts to 27;
+        Decay
+    --]]
 
-    if m1DKP <= m2DKP then
-        PDKP:PrintD(Utils:FormatTextColor('OXFORD CAUGHT UP TO MARIKU on week: ' .. tostring(decayCount), MODULES.Constants.WARNING))
-    end
+    local server_time = GetServerTime()
 
-    MODULES.DKPManager:_UpdateTables()
+    local tests = {
+        ['Boss Kill - Mag'] = {
+            ['expected'] = 40,
+            ['description'] = 'Single Boss Kill Entry',
+            ['reason'] = '',
+            ['entryCount'] = 1,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Boss Kill',
+                ['names'] = { 'Lilduder' },
+                ['dkp_change'] = 10,
+                ['boss'] = 'Magtheridon'
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+
+                    if importEntry == nil then
+                        test.passed = false;
+                        test.reason = 'No import Entry found';
+                    else
+                        for _, member in pairs(importEntry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No Save Details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Duplicate Boss Kill - Mag'] = {
+            ['expected'] = 40,
+            ['description'] = 'Duplicate Boss Kill Entry',
+            ['reason'] = '',
+            ['entryCount'] = 0,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Boss Kill',
+                ['names'] = { 'Lilduder' },
+                ['dkp_change'] = 10,
+                ['boss'] = 'Magtheridon'
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+                    if importEntry ~= nil then
+                        test.passed = false;
+                        test.reason = 'Import Entry found';
+                    else
+                        for _, member in pairs(entry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No save details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Item Win'] =  {
+            ['expected'] = 33,
+            ['description'] = 'Item Win for 7 DKP',
+            ['reason'] = '',
+            ['entryCount'] = 1,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Item Win',
+                ['names'] = { 'Lilduder' },
+                ['dkp_change'] = -7,
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+                    if importEntry == nil then
+                        test.passed = false;
+                        test.reason = 'No import Entry found';
+                    else
+                        for _, member in pairs(importEntry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No save details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Boss Kill Deletion'] =  {
+            ['expected'] = 23,
+            ['description'] = 'Delete Boss Kill',
+            ['reason'] = '',
+            ['async'] = true,
+            ['entryCount'] = 2,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry_to_delete = MODULES.DKPManager.entries[server_time + 1]
+                MODULES.DKPManager:DeleteEntry(entry_to_delete, Utils:GetMyName());
+                C_Timer.After(0.5, function()
+                    for _, member in pairs(entry_to_delete.members) do
+                        if member:GetDKP() ~= test.expected then
+                            test.passed = false;
+                            test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                        end
+                    end
+                    test.passed = test.passed;
+                end)
+            end,
+        },
+        ['Other'] =  {
+            ['expected'] = 101,
+            ['description'] = 'Other for 78',
+            ['reason'] = '',
+            ['entryCount'] = 1,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Other',
+                ['names'] = { 'Lilduder' },
+                ['dkp_change'] = 78,
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+                    if importEntry == nil then
+                        test.passed = false;
+                        test.reason = 'No import Entry found';
+                    else
+                        for _, member in pairs(importEntry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No save details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Decay'] =  {
+            ['expected'] = 90,
+            ['description'] = 'Decay for 10%',
+            ['reason'] = '',
+            ['entryCount'] = 2,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Decay',
+                ['names'] = { 'Lilduder' },
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+                    if importEntry == nil then
+                        test.passed = false;
+                        test.reason = 'No import Entry found';
+                    else
+                        for _, member in pairs(importEntry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No save details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Boss Kill - Gruul'] = {
+            ['expected'] = 100,
+            ['description'] = 'Single Boss Kill Entry',
+            ['reason'] = '',
+            ['entryCount'] = 1,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+                ['officer'] = Utils:GetMyName(),
+                ['reason'] = 'Boss Kill',
+                ['names'] = { 'Lilduder' },
+                ['dkp_change'] = 10,
+                ['boss'] = 'Gruul the Dragonkiller'
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry = MODULES.DKPEntry:new(test.entryDetails)
+                local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
+
+                if save_details then
+                    local importEntry = MODULES.DKPManager:ImportEntry2(save_details)
+
+                    if importEntry == nil then
+                        test.passed = false;
+                        test.reason = 'No import Entry found';
+                    else
+                        for _, member in pairs(importEntry.members) do
+                            if member:GetDKP() ~= test.expected then
+                                test.passed = false;
+                                test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                            end
+                        end
+                    end
+                else
+                    test.reason = 'No Save Details found';
+                    test.passed = false;
+                end
+                return test.passed
+            end,
+        },
+        ['Decay Deletion'] =  {
+            ['expected'] = 111,
+            ['description'] = 'Decay Deletion',
+            ['reason'] = '',
+            ['entryCount'] = 1,
+            ['entryDetails'] = {
+                ['id'] = server_time,
+            },
+            ['func'] = function(test)
+                test.passed = true;
+                local entry_to_delete = MODULES.DKPManager.entries[server_time + test.index - 2]
+                MODULES.DKPManager:DeleteEntry(entry_to_delete, Utils:GetMyName());
+                C_Timer.After(0.5, function()
+                    for _, member in pairs(entry_to_delete.members) do
+                        if member:GetDKP() ~= test.expected then
+                            test.passed = false;
+                            test.reason = member.name .. member:GetDKP() .. ' Did not match' .. test.expected;
+                        end
+                    end
+                    test.passed = test.passed;
+                end)
+            end,
+        },
+    }
+
+    local testNames = {'Boss Kill - Mag', 'Duplicate Boss Kill - Mag', 'Item Win', 'Boss Kill Deletion', 'Other',
+                       'Decay', 'Boss Kill - Gruul', 'Decay Deletion',
+    }
+
+    local tickCounter = 0;
+    local entryCount = 0;
+
+    local ticker = C_Timer.NewTicker(1.5, function()
+        tickCounter = tickCounter + 1;
+        local testName = testNames[tickCounter];
+        local test = tests[testName]
+
+        entryCount = entryCount + test.entryCount;
+
+        test.entryDetails['id'] = server_time + entryCount;
+
+        test.index = entryCount;
+        test['func'](test)
+
+        C_Timer.After(0.75, function()
+            PDKP:PrintT(test.passed, testName .. ' | ' .. test.entryDetails['id'] ..  ' | ', test.reason);
+            PDKP.GUI.MemberScrollTable:Reinitialize();
+            MODULES.DKPManager:_UpdateTables();
+        end)
+
+    end, #testNames)
 end
 
 function Dev:LargeDataSync()

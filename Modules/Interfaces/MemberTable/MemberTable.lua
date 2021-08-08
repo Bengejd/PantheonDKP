@@ -144,6 +144,14 @@ function MemberTable:Initialize()
     self._initialized = true
 end
 
+function MemberTable:Reinitialize()
+    PDKP.memberTable.frame:Hide();
+    PDKP.memberTable = nil;
+    MemberTable:Initialize();
+
+    GUI.MemberScrollTable = MemberTable;
+end
+
 function MemberTable:TableSearch()
 
     -- edit frame

@@ -200,3 +200,15 @@ function PDKP:PrintD(...)
         PDKP.CORE:Print(text)
     end
 end
+
+function PDKP:PrintT(testPassed, ...)
+    if PDKP:IsDev() and PDKP.testRunning then
+        if testPassed then
+            local text = "|cff22bb33" .. "PASSED:" .. strjoin(" ", tostringall(...)) .. "|r"
+            PDKP.CORE:Print(text)
+        else
+            local text = "|cffE71D36" .. "FAILED:" .. strjoin(" ", tostringall(...)) .. "|r"
+            PDKP.CORE:Print(text)
+        end
+    end
+end

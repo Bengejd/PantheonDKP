@@ -237,7 +237,6 @@ function Adjust:DropdownChanged()
     if not PDKP.canEdit then
         return
     end
-    --if self.entry_preview == nil then return end
 
     if Adjust.entry_details == nil then
         return
@@ -252,11 +251,19 @@ function Adjust:DropdownChanged()
 
     local amt = tonumber(amount_box:getValue())
 
-    if mainDD.selectedValue == 'Boss Kill' and amt ~= 10 then
+    if (mainDD.selectedValue == 'Boss Kill' and amt ~= 10) then
         amount_box:SetEnabled(false)
         amount_box:SetText(10)
     else
         amount_box:SetEnabled(true)
+    end
+
+    if mainDD.selectedValue == 'Decay' and amount_box:IsVisible() then
+        amount_box:SetText(0)
+        amount_box:Hide()
+        return Adjust:DropdownChanged();
+    else
+        amount_box:Show();
     end
 
     -- In case someone accidentally puts other characters in the edit box that makes it invalid.

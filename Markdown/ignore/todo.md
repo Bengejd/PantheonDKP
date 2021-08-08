@@ -29,7 +29,9 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Add Options Tab
 
 #### DKP Overhaul
-- [ ] Fix DKP submissions giving the incorrect DKP totals.
+- [x] Fix DKP submissions giving the incorrect DKP totals.
+- [ ] Deleting a decay entry & merging does not appear to send the new entry until after /reload?
+  - [ ] Entry totals are incorrect after re-calibrating as well, for the receiver.
 
 #### Complete Todo Items
 - [x] Add 10 seconds to bid button.

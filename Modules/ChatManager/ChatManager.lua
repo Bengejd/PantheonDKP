@@ -11,7 +11,7 @@ local C_Timer = C_Timer
 
 local chatCache = {};
 local invite_commands = nil;
-local dkp_commands = {'!bid', '!dkp', '!cap'}
+local dkp_commands = { '!bid', '!dkp', '!cap' }
 
 local CMD_COLOR = '|cffffaeae'
 
@@ -53,7 +53,11 @@ function Chat:Initialize()
 
             if chatCache[author]["messages"][msg] == nil then
                 local type = '';
-                if isDKPCmd then type = 'DKP' elseif isInviteCmd then type = 'Invite' end
+                if isDKPCmd then
+                    type = 'DKP'
+                elseif isInviteCmd then
+                    type = 'Invite'
+                end
                 chatCache[author]["messages"][msg] = {
                     ['cmd'] = cmd,
                     ['msg'] = msg,
@@ -191,7 +195,7 @@ function Chat:_HandleSlashCommands(msg)
     local command = PDKP.CORE:GetArgs(msg)
 
     local SLASH_COMMANDS = {
-        -- Help Handlers
+        --Help Handlers
         ['help'] = function()
             Chat:_DisplayHelp()
         end,
@@ -204,7 +208,7 @@ function Chat:_HandleSlashCommands(msg)
             MODULES.Main:HandleSlashCommands(msg)
         end,
         ['hide'] = function()
-            MODULES.Main:HandleSlashCommands(msg)
+
         end,
 
         -- Auction Handlers
@@ -240,10 +244,10 @@ function Chat:_HandleSlashCommands(msg)
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
         ['whoTest'] = true, ['databasePopulate'] = true,
-        ['largeDataSync'] = true, ['decayTest'] = true,
-        ['bossKillTest'] = true, ['testAuctionTimer'] = true,
-        ['watchFramerate'] = true, ['compareDatabases'] = true,
-        ['unregisterCommTest'] = true,
+        ['largeDataSync'] = true,
+        ['bossKillTest'] = true,
+        ['watchFramerate'] = true,
+        ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)

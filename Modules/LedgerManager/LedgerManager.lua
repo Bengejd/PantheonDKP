@@ -209,6 +209,7 @@ function Ledger:ImportEntry(entry)
 
     if tContains(LEDGER[weekNumber][officer], entry.id) then
         entryShouldBeImported = false
+        PDKP:PrintD("Entry already exists in ledger");
     else
         table.insert(LEDGER[weekNumber][officer], entry.id)
         table.sort(LEDGER[weekNumber][officer], function(a, b)
@@ -219,8 +220,6 @@ function Ledger:ImportEntry(entry)
 
         entryShouldBeImported = true;
     end
-
-    PDKP:PrintD("Ledger:ImportEntry(): Entry should be imported: ", entryShouldBeImported);
     return entryShouldBeImported
 end
 
