@@ -204,6 +204,7 @@ function DKP:ImportEntry(entry, skipLockoutCheck)
     return importEntry
 end
 
+-- Import Types: Small, Large, Ad?
 function DKP:ImportEntry2(entry, entryAdler, importType)
     if entry == nil or type(entry) ~= "table" then return end
     local importEntry = DKP_Entry:new(entry)
@@ -219,9 +220,6 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
         if not Lockouts:VerifyMemberLockouts(importEntry) then
             self:_UpdateTables();
             PDKP:PrintD("Entry does not have valid members for this boss lockout");
-            if not PDKP.testRunning then
-                PDKP:PrintD("Entry does not have valid members for this boss lockout");
-            end
             return;
         end
     end
@@ -230,9 +228,7 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
 
     if not isNewLedgerEntry then
         PDKP:PrintD("Entry is not a new ledger entry");
-        if not PDKP.testRunning then
-            PDKP:PrintD("Entry is not a new ledger entry");
-        end
+        -- TODO: We should probably figure out the differences here and apply them.
         return
     end
 
@@ -268,7 +264,10 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
     self.entries[importEntry.id] = importEntry;
     self.numOfEntries = self.numOfEntries + 1
     self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1;
-    self:_StartRecompressTimer();
+
+    if importType ~= 'Large' then
+        self:_StartRecompressTimer();
+    end
 
     if #self.rolledBackEntries then
         self:RollForwardEntries();
@@ -313,7 +312,7 @@ function DKP:DeleteEntry(entry, sender)
 
     if self:GetEntryByID(entry.id) ~= nil then
         if importEntry['deleted'] and sender ~= importEntry['deletedBy'] then
-            PDKP:PrintD("Entry has previously been deleted, skipping delete sequence")
+            PDKP:PrintD(entry['id'], "Entry has previously been deleted, skipping delete sequence")
             return
         else
             PDKP:PrintD("Entry was found during delete")
@@ -324,10 +323,10 @@ function DKP:DeleteEntry(entry, sender)
             self.entries[entry.id] = importEntry
         end
     else
-        PDKP:PrintD("Entry was not found during delete")
-        return;
-        -- TODO: This could cause an issue...
-        --self:ImportEntry(entry, false)
+        PDKP:PrintD(entry['id'], "Entry was not found during delete, importing it first...");
+        local encoded_entry = CommsManager:DatabaseEncoder(entry);
+        self:ImportEntry2(entry, CommsManager:_Adler(encoded_entry), 'Large');
+        return self:DeleteEntry(entry, sender);
     end
 
 
@@ -339,14 +338,14 @@ function DKP:DeleteEntry(entry, sender)
     self:RecalibrateDKP();
 end
 
-function DKP:ImportBulkEntries(message, _)
+function DKP:ImportBulkEntries(message, sender)
     local data = MODULES.CommsManager:DataDecoder(message)
     local total, entries = data['total'], data['entries']
     local batches, total_batches = self:_CreateBatches(entries, total)
     local currentBatch = 0
     self.importTicker = C_Timer.NewTicker(0.5, function()
         currentBatch = currentBatch + 1
-        DKP:_ProcessEntryBatch(batches[currentBatch])
+        DKP:_ProcessEntryBatch(batches[currentBatch], sender)
         if currentBatch >= total_batches then
             DKP:_UpdateTables()
             DKP.importTicker:Cancel()
@@ -409,6 +408,56 @@ function DKP:RecalibrateDKP()
         end
     end
     self:_UpdateTables();
+end
+
+function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
+    updateTable = updateTable or true
+    skipLockouts = skipLockouts or false
+
+    if entry ~= nil then
+        local previousDecayEntry = self:GetPreviousDecayEntry(entry);
+        if entry.reason == 'Boss Kill' and not skipLockouts then
+            Lockouts:AddMemberLockouts(entry)
+            entry:GetMembers()
+        end
+
+        local dkp_change = nil;
+        for _, member in pairs(entry.members) do
+            if entry.reason == "Decay" then
+                dkp_change = entry['decayAmounts'][member.name]
+
+                if entry.decayReversal and not entry.deleted and dkp_change < 0 then
+                    if previousDecayEntry ~= nil then
+                        dkp_change = previousDecayEntry['decayAmounts'][member.name]
+                    else
+                        dkp_change = math.ceil(dkp_change * -1.1111);
+                    end
+                end
+            end
+
+            member:_UpdateDKP(entry, dkp_change)
+            member:Save()
+        end
+
+        local entryMembers = entry:GetMembers()
+        entry.formattedNames = entry:_GetFormattedNames()
+        entry:GetSaveDetails()
+
+        if #entryMembers == 0 then
+            PDKP:PrintD('No members found for:', entry.reason, ' Skipping import')
+            DKP:_UpdateTables()
+            return
+        end
+
+        DKP_DB[entry.id] = CommsManager:DatabaseEncoder(entry.sd)
+
+        self.entries[entry.id] = entry
+        self.numOfEntries = self.numOfEntries + 1
+    end
+
+    if updateTable then
+        DKP:_UpdateTables()
+    end
 end
 
 -- TODO: Refactor this.
@@ -544,6 +593,87 @@ function DKP:_StartRecompressTimer()
 end
 
 -----------------------------
+--      Time Functions     --
+-----------------------------
+
+function DKP:_CreateBatches(entries, total)
+    local batches = {}
+    local index = 1
+
+    local total_batches = math.ceil(total / 50)
+    for i = 1, total_batches do
+        batches[i] = {}
+    end
+
+    for key, entry in Utils:PairByKeys(entries) do
+        if #batches[index] >= 50 then
+            index = index + 1
+        end
+        batches[index][key] = entry
+    end
+    return batches, total_batches
+end
+
+function DKP:_ProcessEntryBatch(batch, sender)
+    if type(batch) ~= "table" then return end
+
+    for key, encoded_entry in Utils:PairByKeys(batch) do
+        local shouldContinue = true;
+        local entryAdler = CommsManager:_Adler(encoded_entry)
+
+        if self:_EntryAdlerExists(key, entryAdler) then
+            shouldContinue = false;
+        end
+
+        if shouldContinue then
+            local entry = CommsManager:DatabaseDecoder(encoded_entry)
+            if entry['deleted'] then
+                self:DeleteEntry(entry, sender)
+            else
+                self:ImportEntry2(entry, entryAdler, 'Large');
+            end
+        end
+    end
+
+    --for key, encoded_entry in pairs(batch) do
+    --
+    --    local shouldContinue = true
+    --
+    --    if DKP_DB[key] ~= nil then
+    --        local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
+    --        local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
+    --        shouldContinue = dbAdler ~= eAdler
+    --    end
+    --
+    --    -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.
+    --    if shouldContinue then
+    --        local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
+    --        local importEntry = MODULES.DKPEntry:new(entry)
+    --        if importEntry ~= nil then
+    --            importEntry:Save(false)
+    --            local weekNumber = Utils:GetWeekNumber(key)
+    --            if weekNumber >= self.currentWeekNumber then
+    --                self.currentLoadedWeekEntries[key] = encoded_entry
+    --                self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
+    --            end
+    --        end
+    --    end
+    --end
+end
+
+function DKP:_UpdateTables()
+    if PDKP.memberTable._initialized then
+        PDKP.memberTable:DataChanged()
+    end
+    if GUI.HistoryGUI._initialized then
+        GUI.HistoryGUI:RefreshData()
+    end
+    if GUI.LootGUI._initialized then
+        GUI.LootGUI:RefreshData()
+    end
+end
+
+-----------------------------
 --      Boss Functions     --
 -----------------------------
 
@@ -595,118 +725,6 @@ function DKP:AwardBossKill(boss_name)
 
     if entry:IsValid() then
         entry:Save(false, true)
-    end
-end
-
------------------------------
---      Time Functions     --
------------------------------
-
-function DKP:_CreateBatches(entries, total)
-    local batches = {}
-    local index = 1
-
-    local total_batches = math.ceil(total / 50)
-    for i = 1, total_batches do
-        batches[i] = {}
-    end
-    for key, entry in pairs(entries) do
-        if #batches[index] >= 50 then
-            index = index + 1
-        end
-        batches[index][key] = entry
-    end
-    return batches, total_batches
-end
-
-function DKP:_ProcessEntryBatch(batch)
-    if type(batch) ~= "table" then return end
-
-    for key, encoded_entry in pairs(batch) do
-
-        local shouldContinue = true
-
-        if DKP_DB[key] ~= nil then
-            local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
-            local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
-            shouldContinue = dbAdler ~= eAdler
-        end
-
-        -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.
-        if shouldContinue then
-            local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
-            local importEntry = MODULES.DKPEntry:new(entry)
-            if importEntry ~= nil then
-                importEntry:Save(false)
-                local weekNumber = Utils:GetWeekNumber(key)
-                if weekNumber >= self.currentWeekNumber then
-                    self.currentLoadedWeekEntries[key] = encoded_entry
-                    self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
-                end
-            end
-        end
-    end
-end
-
-function DKP:AddNewEntryToDB(entry, updateTable, skipLockouts)
-    updateTable = updateTable or true
-    skipLockouts = skipLockouts or false
-
-    if entry ~= nil then
-        local previousDecayEntry = self:GetPreviousDecayEntry(entry);
-        if entry.reason == 'Boss Kill' and not skipLockouts then
-            Lockouts:AddMemberLockouts(entry)
-            entry:GetMembers()
-        end
-
-        local dkp_change = nil;
-        for _, member in pairs(entry.members) do
-            if entry.reason == "Decay" then
-                dkp_change = entry['decayAmounts'][member.name]
-
-                if entry.decayReversal and not entry.deleted and dkp_change < 0 then
-                    if previousDecayEntry ~= nil then
-                        dkp_change = previousDecayEntry['decayAmounts'][member.name]
-                    else
-                        dkp_change = math.ceil(dkp_change * -1.1111);
-                    end
-                end
-            end
-
-            member:_UpdateDKP(entry, dkp_change)
-            member:Save()
-        end
-
-        local entryMembers = entry:GetMembers()
-        entry.formattedNames = entry:_GetFormattedNames()
-        entry:GetSaveDetails()
-
-        if #entryMembers == 0 then
-            PDKP:PrintD('No members found for:', entry.reason, ' Skipping import')
-            DKP:_UpdateTables()
-            return
-        end
-
-        DKP_DB[entry.id] = CommsManager:DatabaseEncoder(entry.sd)
-
-        self.entries[entry.id] = entry
-        self.numOfEntries = self.numOfEntries + 1
-    end
-
-    if updateTable then
-        DKP:_UpdateTables()
-    end
-end
-
-function DKP:_UpdateTables()
-    if PDKP.memberTable._initialized then
-        PDKP.memberTable:DataChanged()
-    end
-    if GUI.HistoryGUI._initialized then
-        GUI.HistoryGUI:RefreshData()
-    end
-    if GUI.LootGUI._initialized then
-        GUI.LootGUI:RefreshData()
     end
 end
 

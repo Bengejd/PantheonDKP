@@ -187,8 +187,6 @@ function Utils:GetItemLink(itemIdentifier)
     return itemLink
 end
 
-
-
 -----------------------------
 --     Color Functions     --
 -----------------------------
@@ -286,6 +284,36 @@ end
 -----------------------------
 --     Table Functions     --
 -----------------------------
+
+function Utils:PairByKeys(t, f)
+    local a = {};
+    for n in pairs(t) do table.insert(a, n) end
+    table.sort(a, f)
+    local i = 0;
+    local iter = function()
+        i = i + 1
+        if a[i] == nil then return nil
+        else return a[i], t[a[i]]
+        end
+    end
+    return iter;
+end
+
+function Utils:SortedTable(tbl, dir)
+    dir = dir or 'asc';
+    if type(tbl) ~= "table" then
+        return tbl;
+    end
+
+    local keys = {};
+    for key, _ in pairs(tbl) do
+        table.insert(keys, key);
+    end
+
+    if dir == 'asc' then
+        tbl.sort(keys);
+    end
+end
 
 -- http://lua-users.org/wiki/CopyTable
 function Utils.ShallowCopy(orig)
