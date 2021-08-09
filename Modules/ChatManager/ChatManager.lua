@@ -97,7 +97,7 @@ end
 -----------------------------
 
 function Chat:_HandleInviteMsg(name)
-    local ignore_from = MODULES.RaidManager.ignore_from
+    local ignore_from = MODULES.RaidManager.ignore_from or {};
 
     if contains(ignore_from, lower(name)) then
         local player_name = '|cffffaeae' .. name .. '|r'

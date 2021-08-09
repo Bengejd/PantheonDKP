@@ -308,7 +308,13 @@ end
 function PDKP_OnComm_SentInv(comm, message, sender)
     local self = comm
     if self.ogPrefix ~= 'SentInv' then return end
-    AcceptGroup();
+
+    C_Timer.NewTicker(0.5, function()
+        if StaticPopup_Visible("PARTY_INVITE") then
+            AcceptGroup();
+            StaticPopup_Hide("PARTY_INVITE")
+        end
+    end, 5)
 end
 
 function PDKP_SyncLockout(_, sent, total)
