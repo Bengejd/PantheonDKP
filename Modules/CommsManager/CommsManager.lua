@@ -120,9 +120,6 @@ end
 
 function Comms:_Deserialize(string)
     local success, data = PDKP.CORE:Deserialize(string)
-
-    PDKP:PrintD("Deserialize", data);
-
     if not success then
         return nil
     end
@@ -156,9 +153,6 @@ function Comms:DataDecoder(data)
         return self:_Deserialize(detransmit) -- Return the regular deserialized messge
     end
     local deserialized = self:_Deserialize(decompressed)
-
-    PDKP:PrintD("deserialized Data", deserialized);
-
     return deserialized -- Deserialize the compressed message
 end
 

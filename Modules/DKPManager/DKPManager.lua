@@ -273,14 +273,16 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
         self:RollForwardEntries();
     end
 
-    self:RecalibrateDKP();
-
-    DKP:_UpdateTables();
+    if importType ~= 'Large' then
+        self:RecalibrateDKP();
+        DKP:_UpdateTables();
+    end
 
     return importEntry;
 end
 
-function DKP:DeleteEntry(entry, sender)
+function DKP:DeleteEntry(entry, sender, isImport)
+    isImport = isImport or false;
     local importEntry = MODULES.DKPEntry:new(entry)
     local temp_entry = {
         ['reason'] = 'Other',
@@ -326,32 +328,81 @@ function DKP:DeleteEntry(entry, sender)
         PDKP:PrintD(entry['id'], "Entry was not found during delete, importing it first...");
         local encoded_entry = CommsManager:DatabaseEncoder(entry);
         self:ImportEntry2(entry, CommsManager:_Adler(encoded_entry), 'Large');
-        return self:DeleteEntry(entry, sender);
+        return self:DeleteEntry(entry, sender, true);
     end
-
 
     if PDKP.canEdit and sender == Utils:GetMyName() then
         local corrected_entry = MODULES.DKPEntry:new(temp_entry)
         corrected_entry:Save(false, true)
     end
 
-    self:RecalibrateDKP();
+    if not isImport then
+        self:RecalibrateDKP();
+    end
 end
 
 function DKP:ImportBulkEntries(message, sender)
     local data = MODULES.CommsManager:DataDecoder(message)
     local total, entries = data['total'], data['entries']
-    local batches, total_batches = self:_CreateBatches(entries, total)
-    local currentBatch = 0
-    self.importTicker = C_Timer.NewTicker(0.5, function()
-        currentBatch = currentBatch + 1
-        DKP:_ProcessEntryBatch(batches[currentBatch], sender)
-        if currentBatch >= total_batches then
-            DKP:_UpdateTables()
-            DKP.importTicker:Cancel()
-            self:_RecompressCurrentLoaded()
+
+    local entryCounter = 0;
+
+    local decodedEntries = {};
+    local entryAdlers = {};
+
+    for key, encoded_entry in pairs(entries) do
+        local entryAdler = CommsManager:_Adler(encoded_entry)
+        if not self:_EntryAdlerExists(key, entryAdler) then
+            entryAdlers[key] = entryAdler;
+            decodedEntries[key] = CommsManager:_Decompress(encoded_entry);
+        else
+            entryCounter = entryCounter + 1;
         end
-    end, total_batches)
+    end
+
+    for key, decompressedEntry in Utils:PairByKeys(decodedEntries) do
+        local entry = CommsManager:_Deserialize(decompressedEntry);
+        if entry['deleted'] then
+            self:DeleteEntry(entry, sender, true);
+        else
+            self:ImportEntry2(entry, entryAdlers[key], 'Large');
+        end
+
+        if entryCounter >= total then
+            C_Timer.After(5, function()
+                DKP:RecalibrateDKP()
+                DKP:_UpdateTables()
+                DKP:_RecompressCurrentLoaded()
+            end)
+        end
+    end
+
+    --for key, encoded_entry in Utils:PairByKeys(entries) do
+    --    entryCounter = entryCounter + 1;
+    --
+    --    local shouldContinue = true;
+    --
+    --    if encoded_entry ~= nil then
+    --        local entryAdler = CommsManager:_Adler(encoded_entry)
+    --
+    --        if self:_EntryAdlerExists(key, entryAdler) then
+    --            shouldContinue = false;
+    --        end
+    --
+    --        if shouldContinue then
+    --            local entry = CommsManager:DatabaseDecoder(encoded_entry)
+    --            if entry['deleted'] then
+    --                self:DeleteEntry(entry, sender)
+    --            else
+    --                self:ImportEntry2(entry, entryAdler, 'Large');
+    --            end
+    --        end
+    --    else
+    --        PDKP:PrintD("Encoded entry was nil", key);
+    --    end
+    --
+    --
+    --end
 end
 
 function DKP:GetPreviousDecayEntry(entry)
@@ -641,6 +692,7 @@ function DKP:_ProcessEntryBatch(batch, sender)
             PDKP:PrintD("Encoded entry was nil", key);
         end
     end
+    return true;
 end
 
 function DKP:_UpdateTables()

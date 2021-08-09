@@ -428,7 +428,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
 
         if entry:IsValid() and valid_entries[entry.id] == nil then
             local entryDetails = MODULES.LedgerManager:GenerateEntryHash(entry)
-            valid_entries[entry.id] = MODULES.CommsManager:DataEncoder(entryDetails);
+            valid_entries[entry.id] = MODULES.CommsManager:DatabaseEncoder(entryDetails);
             valid_counter = valid_counter + 1
         else
             wipe(entry)
@@ -437,10 +437,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
         if valid_counter == numOfEntriesToCreate then
             local data = { ['total'] = valid_counter, ['entries'] = valid_entries }
             local encodedData = MODULES.CommsManager:DataEncoder(data)
-
-            print('Encoded Data', encodedData);
-
-            MODULES.DKPManager:ImportBulkEntries(encodedData, 'Lilduder');
+            MODULES.DKPManager:ImportBulkEntries(encodedData, 'Lilduder', 'Large');
 
             PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
         end
