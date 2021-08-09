@@ -153,6 +153,10 @@ function DKP:_CheckForPreviousDecay()
     return false, decayDB[self.weekNumber]
 end
 
+function DKP:_FindDifferencesInEntries()
+
+end
+
 function DKP:_EntryAdlerExists(entryId, entryAdler)
     local db_entry = DKP_DB[entryId]
     return db_entry ~= nil and CommsManager:_Adler(db_entry) == entryAdler

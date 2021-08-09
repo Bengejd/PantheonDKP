@@ -56,6 +56,7 @@ function Dialogs:Initialize()
             button1 = "Delete",
             button2 = "Cancel",
             OnAccept = function(_, data, _)
+                PDKP.CORE:Print("Deleting Entry...");
                 MODULES.CommsManager:SendCommsMessage('SyncDelete', data)
             end,
             OnCancel = function(_) end,
