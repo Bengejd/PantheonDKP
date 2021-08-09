@@ -90,7 +90,7 @@ function Lockouts:AddMemberLockouts(entry)
         end
     end
 
-    return validMembers > 0;
+    return #validMembers > 0;
 end
 
 function Lockouts:CheckForMemberLockouts(memberName, bossName)
