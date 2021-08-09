@@ -619,46 +619,28 @@ function DKP:_ProcessEntryBatch(batch, sender)
 
     for key, encoded_entry in Utils:PairByKeys(batch) do
         local shouldContinue = true;
-        local entryAdler = CommsManager:_Adler(encoded_entry)
 
-        if self:_EntryAdlerExists(key, entryAdler) then
-            shouldContinue = false;
-        end
+        if encoded_entry ~= nil then
+            local entryAdler = CommsManager:_Adler(encoded_entry)
 
-        if shouldContinue then
-            local entry = CommsManager:DatabaseDecoder(encoded_entry)
-            if entry['deleted'] then
-                self:DeleteEntry(entry, sender)
-            else
-                self:ImportEntry2(entry, entryAdler, 'Large');
+            if self:_EntryAdlerExists(key, entryAdler) then
+                shouldContinue = false;
             end
+
+            if shouldContinue then
+                PDKP:PrintD("ProcessEntryBatch", encoded_entry)
+                local entry = CommsManager:DatabaseDecoder(encoded_entry)
+
+                if entry['deleted'] then
+                    self:DeleteEntry(entry, sender)
+                else
+                    self:ImportEntry2(entry, entryAdler, 'Large');
+                end
+            end
+        else
+            PDKP:PrintD("Encoded entry was nil", key);
         end
     end
-
-    --for key, encoded_entry in pairs(batch) do
-    --
-    --    local shouldContinue = true
-    --
-    --    if DKP_DB[key] ~= nil then
-    --        local dbAdler = PDKP.LibDeflate:Adler32(DKP_DB[key])
-    --        local eAdler = PDKP.LibDeflate:Adler32(encoded_entry)
-    --        shouldContinue = dbAdler ~= eAdler
-    --    end
-    --
-    --    -- TODO: This should also include the entry in self.currentLoadedWeekEntries if it falls in it's week number range.
-    --    if shouldContinue then
-    --        local entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
-    --        local importEntry = MODULES.DKPEntry:new(entry)
-    --        if importEntry ~= nil then
-    --            importEntry:Save(false)
-    --            local weekNumber = Utils:GetWeekNumber(key)
-    --            if weekNumber >= self.currentWeekNumber then
-    --                self.currentLoadedWeekEntries[key] = encoded_entry
-    --                self.numCurrentLoadedWeek = self.numCurrentLoadedWeek + 1
-    --            end
-    --        end
-    --    end
-    --end
 end
 
 function DKP:_UpdateTables()

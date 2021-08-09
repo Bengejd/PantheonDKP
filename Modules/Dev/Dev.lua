@@ -426,24 +426,25 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
     while valid_counter <= numOfEntriesToCreate do
         local entry = self:CreateDummyEntry(numOfMembers, memberNames, officerNames)
 
-        if entry:IsValid() then
-            tinsert(valid_entries, entry)
+        if entry:IsValid() and valid_entries[entry.id] == nil then
+            local entryDetails = MODULES.LedgerManager:GenerateEntryHash(entry)
+            valid_entries[entry.id] = MODULES.CommsManager:DataEncoder(entryDetails);
             valid_counter = valid_counter + 1
         else
             wipe(entry)
         end
-    end
 
-    for key, entry in pairs(valid_entries) do
-        MODULES.LedgerManager:GenerateEntryHash(entry)
-        if key == #valid_entries then
-            entry:Save(false)
-        else
-            entry:Save(false)
+        if valid_counter == numOfEntriesToCreate then
+            local data = { ['total'] = valid_counter, ['entries'] = valid_entries }
+            local encodedData = MODULES.CommsManager:DataEncoder(data)
+
+            print('Encoded Data', encodedData);
+
+            MODULES.DKPManager:ImportBulkEntries(encodedData, 'Lilduder');
+
+            PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
         end
     end
-
-    PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
 end
 
 function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
@@ -452,8 +453,10 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     local member_index_start = random(numOfMembers)
     local member_index_end = random(member_index_start, numOfMembers)
 
-    -- Random epoch timestamp between January 1st, 2021 and now.
-    local entry_id = random(1609480800, GetServerTime())
+    -- Random epoch timestamp between July 19th, 2021 and now.
+    -- January 1st, 2021: 1609480800
+    -- July 19, 2021: 1626652800
+    local entry_id = random(1626652800, GetServerTime())
 
     local adjust_reasons = { 'Boss Kill', 'Item Win', 'Other' }
     local reason = adjust_reasons[random(3)]
