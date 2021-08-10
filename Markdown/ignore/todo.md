@@ -32,6 +32,8 @@ Officers can request that they join the raid group via a "request" button. The b
   - [x] Entry totals are incorrect after re-calibrating as well, for the receiver.
 - [x] Fix Decay Deletion previousTotal BUG
   - [x] Probably need to use recalibrate after the decay deletion.
+  
+- When checking adler, check to see if the entry is marked as deleted in the merged one and not in the current one.
 
 #### Complete Todo Items
 - [x] Add 10 seconds to bid button.

@@ -44,7 +44,7 @@ end
 function Member:Save()
     local dkp = {
         ['total'] = self.dkp['total'],
-        ['initOn'] = self.dkp['initOn'],
+        ['snapshot'] = self.dkp['snapshot'],
     }
 
     if not Utils:tEmpty(self.dkp['entries']) then
@@ -125,8 +125,6 @@ function Member:_UpdateDKP(entry, decayAmount)
     table.insert(self.dkp['entries'], entry.id)
 end
 
-
-
 function Member:_InitializeDKP()
     if Utils:tEmpty(guildDB[self.name]) then
         self:_DefaultDKP()
@@ -140,7 +138,7 @@ end
 function Member:_DefaultDKP()
     self.dkp = {
         ['total'] = 30,
-        ['initOn'] = self.server_time,
+        ['snapshot'] = 30,
         ['entries'] = {},
     }
 end
@@ -149,7 +147,7 @@ function Member:_LoadDatabaseData()
     local dbData = guildDB[self.name]
     self.dkp = {
         ['total'] = dbData['total'],
-        ['initOn'] = dbData['initOn'],
+        ['snapshot'] = dbData['snapshot'],
         ['entries'] = dbData['entries'] or {},
     }
 end

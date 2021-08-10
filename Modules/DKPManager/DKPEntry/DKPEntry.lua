@@ -3,12 +3,13 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils;
 
-local Guild;
+local Guild, DKPManager, Lockouts, Ledger, DKP_DB, CommsManager;
 
 local entry = {}
 
 local GetServerTime = GetServerTime
 local tsort, tonumber, pairs, type, tinsert = table.sort, tonumber, pairs, type, tinsert
+local ceil = math.ceil
 
 local core_details = { 'reason', 'dkp_change', 'officer', 'names' }
 
@@ -16,6 +17,16 @@ local _BOSS_KILL = 'Boss Kill'
 local _ITEM_WIN = 'Item Win'
 local _OTHER = 'Other'
 local _DECAY = 'Decay'
+local _PHASE = 'Phase'
+
+local _DECAY_AMOUNT = 0.9;
+local _DECAY_REVERSAL = 1.111;
+local _PHASE_AMOUNT = 0.5;
+local _PHASE_REVERSAL = 2.0;
+
+-- Internal: Total * 0.9;
+-- Display: Math.floor(internal)
+-- Reversal: Math.Ceil(Total * _DECAY_REVERSAL;
 
 entry.__index = entry
 
@@ -25,11 +36,11 @@ function entry:new(entry_details)
 
     if entry_details == nil or entry_details['reason'] == nil then return end
 
-    Guild = MODULES.GuildManager;
+    self:SetupModules();
 
     self.entry_initiated = false
 
-    self.RolledBack = nil;
+    self.adler = nil;
 
     --- Core Entry Details
     self.id = entry_details['id'] or GetServerTime()
@@ -40,8 +51,6 @@ function entry:new(entry_details)
     self.officer = entry_details['officer']
     self.names = entry_details['names']
     self.pugNames = entry_details['pugNames'] or {}
-
-    self.entry_type = entry_details['entry_type'] or nil
 
     -- Dependent Entry Details
     self.boss = entry_details['boss'] or nil
@@ -54,12 +63,10 @@ function entry:new(entry_details)
 
     self.item = entry_details['item'] or 'Not linked'
     self.other_text = entry_details['other_text'] or ''
-    self.edited_time = entry_details['edited_time'] or nil
 
     self.hash = entry_details['hash'] or nil
     self.previousTotals = entry_details['previousTotals'] or {}
 
-    self.decayMigrated = false
     self.decayAmounts = {}
     self.decayReversal = entry_details['decayReversal'] or false
     self.previousDecayId = entry_details['previousDecayId'] or nil;
@@ -97,6 +104,57 @@ function entry:new(entry_details)
     return self;
 end
 
+------------------------
+--- START DKP Changes --
+------------------------
+
+
+function entry:ReverseDKPChange()
+    local members, _ = self:GetMembers();
+
+    for _, member in pairs(members) do
+        local memberDKP = member:GetDKP(); --
+        local dkp_change = self.dkp_change; --
+
+        if self.reason == 'Decay' then
+            dkp_change = memberDKP - (memberDKP * _DECAY_REVERSAL)
+        end
+
+        dkp_change = dkp_change * -1;
+        member:RemoveEntry(self.id);
+        member:UpdateDKP(dkp_change);
+        member:Save();
+    end
+
+    PDKP:PrintD("Entry has been rolled back", self.id);
+end
+
+function entry:ApplyDKPChange()
+    local members, _ = self:GetMembers();
+    for _, member in pairs(members) do
+        local memberDKP = member:GetDKP();
+        local dkp_change = self.dkp_change;
+        if self.reason == 'Decay' then
+            -- Never update a decay that has been deleted already?
+            if self.decayReversal and not self.deleted then -- Normal decay entry.
+                dkp_change = Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1); -- Reversal ID;
+            else
+                dkp_change = ceil(memberDKP * _DECAY_REVERSAL)
+            end
+        end
+
+        member:AddEntry(self.id);
+        member:UpdateDKP(dkp_change);
+        member:Save();
+    end
+
+    PDKP:PrintD("Entry has been Applied", self.id);
+end
+
+-----------------------
+--- END DKP Changes ---
+-----------------------
+
 function entry:Save(updateTable, exportEntry, skipLockouts)
 
     wipe(self.sd)
@@ -112,135 +170,6 @@ function entry:Save(updateTable, exportEntry, skipLockouts)
         entry.exportedBy = Utils:GetMyName()
         MODULES.DKPManager:ExportEntry(self)
     end
-end
-
-function entry:ReverseDKPChange()
-    local members, _ = self:GetMembers();
-
-    for _, member in pairs(members) do
-        local dkpTotal = member:GetDKP();
-        local dkp_change = self.dkp_change;
-
-        if self.reason ~= 'Decay' then
-            dkp_change = self.dkp_change * -1;
-        else
-            dkp_change = 0;
-        end
-
-        member:RemoveEntry(self.id);
-        member:UpdateDKP(dkp_change);
-        member:Save();
-
-        print(member.dkp['total']);
-    end
-
-    self.RolledBack = true
-
-    PDKP:PrintD("Entry has been rolled back", self.id);
-
-end
-
-function entry:ApplyDKPChange()
-    if not self.RolledBack then
-        PDKP:PrintD("Cannot roll forward an entry that isn't rolled back", self.id);
-        return;
-    end
-
-    local members, _ = self:GetMembers();
-
-    for _, member in pairs(members) do
-        local dkp_change = self.dkp_change;
-
-        if self.reason ~= 'Decay' then
-            dkp_change = self.dkp_change;
-        else
-            dkp_change = 0;
-        end
-
-        member:AddEntry(self.id);
-        member:UpdateDKP(dkp_change);
-        member:Save();
-    end
-
-    self.RolledBack = false;
-
-    PDKP:PrintD("Entry has been Applied", self.id);
-end
-
-function entry:GetPreviousTotals()
-    for _, member in pairs(self.members) do
-        self.previousTotals[member.name] = member:GetDKP()
-    end
-end
-
-function entry:GetSaveDetails()
-    wipe(self.sd)
-
-    self.sd['id'] = self.id or GetServerTime()
-    self.sd['reason'] = self.reason or 'No Valid Reason'
-    self.sd['dkp_change'] = self.dkp_change or 0
-    self.sd['officer'] = self.officer
-    self.sd['names'] = self.names
-    self.sd['hash'] = self.hash or nil
-
-    if self.reason == _BOSS_KILL then
-        self.sd['boss'] = self.boss
-    elseif self.reason == _ITEM_WIN then
-        self.sd['item'] = self.item
-    elseif self.reason == _OTHER then
-        self.sd['other_text'] = self.other_text
-    elseif self.reason == _DECAY then
-        if self.previousTotals == nil or next(self.previousTotals) == nil then
-            self:GetPreviousTotals()
-            self:CalculateDecayAmounts()
-        end
-        if self.decayReversal then
-            self.sd['decayReversal'] = true
-            self.sd['previousDecayId'] = self.previousDecayId;
-        end
-    end
-
-    local dependants = {
-        ['previousTotals'] = self.previousTotals,
-        ['pugNames'] = self.pugNames,
-    }
-
-    if self.reason == _DECAY then
-        dependants['decayAmounts'] = self.decayAmounts
-    end
-
-    if #self.removedMembers > 0 then
-        self.sd['removedMembers'] = self.removedMembers;
-    end
-
-    for name, val in pairs(dependants) do
-        if type(val) == "table" then
-            if val and next(val) ~= nil then
-                self.sd[name] = val
-            end
-        end
-    end
-
-    if self.deleted then
-        self.sd['deleted'] = self.deleted
-        self.sd['deletedBy'] = self.deletedBy
-    end
-
-    return self.sd
-end
-
-function entry:GetMembers()
-    wipe(self.members)
-
-    for _, name in pairs(self.names) do
-        local member = Guild:GetMemberByName(name)
-        if member ~= nil then
-            tinsert(self.members, member)
-        elseif not tContains(self.pugNames, name) then
-            tinsert(self.pugNames, name)
-        end
-    end
-    return self.members, self.pugNames
 end
 
 function entry:CalculateDecayAmounts(refresh)
@@ -267,171 +196,6 @@ function entry:CalculateDecayAmounts(refresh)
             self['decayAmounts'][member.name] = member_decay_amount * -1
         end
     end
-    self.decayMigrated = true
 end
 
-function entry:MarkAsDeleted(deletedBy)
-    self.deleted = true
-    self.deletedBy = deletedBy
-
-    if self.reason == 'Decay' then
-        self.decayReversal = true
-    end
-end
-
-function entry:RemoveMember(name)
-    local memberIndex;
-
-    for i = 1, #self.names do
-        if self.names[i] == name then
-            memberIndex = i
-            break;
-        end
-    end
-
-    table.insert(self.removedMembers, name);
-    table.remove(self.names, memberIndex)
-
-    self:GetMembers()
-    self.formattedNames = self:_GetFormattedNames()
-
-    if self.previousTotals[name] ~= nil then
-        self.previousTotals[name] = nil
-    end
-end
-
-function entry:IsMemberInEntry(name)
-    return tContains(self.names, name)
-end
-
-function entry:IsValid()
-    local isValid = true
-
-    for i = 1, #core_details do
-        local detail = self[core_details[i]]
-        if type(detail) == "string" then
-            isValid = isValid and not (Utils:IsEmpty(detail))
-        elseif type(detail) == "table" then
-            isValid = isValid and not (Utils:tEmpty(detail))
-        end
-    end
-
-    if self.reason == _BOSS_KILL then
-        local hasRaid = not Utils:IsEmpty(self.raid)
-        local hasBoss = not Utils:IsEmpty(self.boss)
-        isValid = isValid and hasRaid and hasBoss
-    end
-
-    return isValid
-end
-
-function entry:_GetRaid()
-    if self.boss == nil then
-        return nil
-    end
-    self.raid = MODULES.Constants.BOSS_TO_RAID[self.boss]
-    return self.raid
-end
-
-function entry:_GetFormattedNames()
-    tsort(self.members, function(a, b)
-        if b.class == a.class then
-            return b.name > a.name
-        else
-            return b.class > a.class
-        end
-    end)
-
-    local formattedNames = ''
-    for key, member in pairs(self.members) do
-        if key ~= 1 then
-            formattedNames = formattedNames .. ', '
-        end
-        formattedNames = formattedNames .. member.formattedName
-    end
-
-    tsort(self.pugNames, function(a,b)
-        return a < b
-    end)
-
-    for _, nonMember in pairs(self.pugNames) do
-        if nonMember ~= nil then
-            formattedNames = formattedNames .. ', '
-            --formattedNames = formattedNames .. nonMember .. ' (PUG)'
-            formattedNames = formattedNames .. '|cffE71D36' .. nonMember .. ' (P)' .. "|r"
-        end
-    end
-
-    return formattedNames
-end
-
-function entry:_GetChangeText()
-    local color = Utils:ternaryAssign(self.dkp_change >= 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
-
-    if self.reason == 'Decay' then
-        if self.decayReversal then
-            return Utils:FormatTextColor('10% DKP', MODULES.Constants.SUCCESS)
-        end
-        return Utils:FormatTextColor('10% DKP', MODULES.Constants.WARNING)
-    else
-        return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
-    end
-end
-
-function entry:_GetHistoryText()
-    if self.reason == _BOSS_KILL and (self.raid == nil or self.boss == nil) then
-        return Utils:FormatTextColor('Boss Kill: None Selected', MODULES.Constants.WARNING)
-    end
-
-    local text;
-    if self.reason == _BOSS_KILL then
-        text = self.raid .. ' - ' .. self.boss
-    elseif self.reason == _ITEM_WIN then
-        text = 'Item Win - ' .. self.item
-    elseif self.reason == _OTHER then
-        text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
-    elseif self.reason == _DECAY then
-        if self.decayReversal then
-            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
-        end
-        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
-    end
-
-    local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
-    return Utils:FormatTextColor(text, color)
-end
-
-function entry:_GetCollapsedHistoryText()
-    local texts = {
-        ['On Time Bonus'] = self.reason,
-        ['Completion Bonus'] = self.reason,
-        ['Unexcused Absence'] = self.reason,
-        ['Boss Kill'] = self.boss,
-        ['Item Win'] = 'Item Win - ' .. self.item,
-        ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
-        ['Decay'] = 'Weekly Decay'
-    }
-    local text = texts[self.reason]
-
-    if self.reason == 'Decay' then
-        if self.decayReversal then
-            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
-        end
-        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
-    end
-
-    local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
-    return Utils:FormatTextColor(text, color)
-end
-
-function entry:_GetFormattedOfficer()
-    local officer = MODULES.GuildManager:GetMemberByName(self.officer)
-
-    if officer == nil then
-        return '|CFF' .. 'E71D36' .. self.officer .. '|r'
-    end
-
-    return officer.formattedName
-end
-
-MODULES.DKPEntry = entry
+MODULES.DKPEntry2 = entry

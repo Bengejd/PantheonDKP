@@ -161,6 +161,10 @@ function Utils:ternaryAssign(cond, a, b)
     return b
 end
 
+function Utils:RoundToDecimal(num, numDecimalPlaces)
+    return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
+end
+
 -----------------------------
 --     Debug Functions     --
 -----------------------------
@@ -335,7 +339,7 @@ function Utils.ShallowCopy(orig)
 end
 
 -- http://lua-users.org/wiki/CopyTable
-function Utils.DeepCopy(orig, copies)
+function Utils:DeepCopy(orig, copies)
     copies = copies or {}
     local orig_type = type(orig)
     local copy
@@ -346,9 +350,9 @@ function Utils.DeepCopy(orig, copies)
             copy = {}
             copies[orig] = copy
             for orig_key, orig_value in next, orig, nil do
-                copy[Utils.DeepCopy(orig_key, copies)] = Utils.DeepCopy(orig_value, copies)
+                copy[Utils:DeepCopy(orig_key, copies)] = Utils:DeepCopy(orig_value, copies)
             end
-            setmetatable(copy, Utils.DeepCopy(getmetatable(orig), copies))
+            setmetatable(copy, Utils:DeepCopy(getmetatable(orig), copies))
         end
     else
         -- number, string, boolean, etc
