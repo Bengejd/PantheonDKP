@@ -1,12 +1,9 @@
 local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils;
 
 local Comms = {}
-
-local function _prefix(prefix)
-    return 'pdkpV2' .. string.sub(prefix, 0, 12)
-end
 
 function Comms:Initialize()
     self.commsRegistered = false
@@ -79,7 +76,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         transmitData = self:DataEncoder(data)
     end
 
-    local comm = self.channels[_prefix(prefix)]
+    local comm = self.channels[Utils:GetCommPrefix(prefix)]
 
     if comm ~= nil and comm:IsValid() then
         if comm.requireCheck and not comm:CanSend() then
@@ -90,7 +87,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         if prefix == 'SentInv' then
             params[2] = data
         end
-        return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
+        return PDKP.CORE:SendCommMessage(comm.prefix, transmitData, unpack(params))
     else
         PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
     end

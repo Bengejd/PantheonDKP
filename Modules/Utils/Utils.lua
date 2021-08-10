@@ -11,6 +11,7 @@ local _, _, next = table.insert, table.sort, next;
 local date, type, _ = date, type, print
 local _, pairs, _ = table.getn, pairs, ipairs
 local GetServerTime, GetQuestResetTime = GetServerTime, GetQuestResetTime
+local substr = string.sub;
 
 --local daysInWeek = 7
 local daysInYear = 365
@@ -24,6 +25,10 @@ end
 function Utils:BuildEntryStartHash(officer)
     local weekNumber = self:GetWeekNumber(GetServerTime())
     return string.format("%d__%s__", weekNumber, officer)
+end
+
+function Utils:GetCommPrefix(prefix)
+    return 'pdkpV3' .. substr(prefix, 0, 12)
 end
 
 -----------------------------
@@ -311,22 +316,6 @@ function Utils:PairByReverseKeys(t, f)
         end
     end
     return iter;
-end
-
-function Utils:SortedTable(tbl, dir)
-    dir = dir or 'asc';
-    if type(tbl) ~= "table" then
-        return tbl;
-    end
-
-    local keys = {};
-    for key, _ in pairs(tbl) do
-        table.insert(keys, key);
-    end
-
-    if dir == 'asc' then
-        tbl.sort(keys);
-    end
 end
 
 -- http://lua-users.org/wiki/CopyTable
