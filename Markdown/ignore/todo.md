@@ -28,8 +28,8 @@ Officers can request that they join the raid group via a "request" button. The b
 
 #### DKP Overhaul
 - [x] Fix DKP submissions giving the incorrect DKP totals.
-- [ ] Deleting a decay entry & merging does not appear to send the new entry until after /reload?
-  - [ ] Entry totals are incorrect after re-calibrating as well, for the receiver.
+- [x] Deleting a decay entry & merging does not appear to send the new entry until after /reload?
+  - [x] Entry totals are incorrect after re-calibrating as well, for the receiver.
 - [x] Fix Decay Deletion previousTotal BUG
   - [x] Probably need to use recalibrate after the decay deletion.
 

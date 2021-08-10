@@ -2,7 +2,28 @@
 
 ## v4.3.1
 
+### Features (NEW)
+**Whisper Commands**: You can now whisper the DKP Officer a few different commands, such as:
+- `!bid 20` - To bid 20 DKP for the current item being bidded on.
+- `!bid max` - To bid your **MAX** DKP on an item
+- `!bid cancel` - To cancel a previous bid you've sent in.
+- `!cap` - To find out what the Guild DKP Cap is, as well as the raid DKP cap.
+- `!dkp` - To find out what the DKP Officer has your dkp as.
 
+**Add Auction Time**: You can now add 10 seconds to an auction if you have a designated role within the raid (DKP officer, raid leader or loot master).
+**Movable Sync Timer**: You can now move around the sync-timer, so it's no longer stuck at the top of the screen.
+
+
+### Bug Fixes
+- Fixed a visual bug where old-bids were still showing up on non-officer bid windows after a new bid was started.
+- Fixed a visual bug where bids weren't being sorted from highest to lowest after bidding window finished.
+- Fixed a bug where auto-invites would break occasionally when you deleted your saved variables file.
+- Fixed a bug where deleting a decay entry would sometimes give people the wrong DKP amount back, lowering their previous DKP by 1 (math is dumb) in certain edge-cases.
+- Fixed a bug where deleting an entry would cause those who did not have the entry to ignore the deleted entry, but accept the "corrected" version of it, resulting in a net-positive DKP-gain.
+    
+
+### Disabled (RIP)
+Auto-syncing - Due to the nature of decay syncing incorrectly, I had to disable auto-syncing for the timebeing. All this means is that you will require a merge or overwrite if you have been offline while adjustments to the DKP have been made.
 
 ---
 ## v4.0.0
