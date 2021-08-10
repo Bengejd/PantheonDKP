@@ -67,7 +67,7 @@ globals = {
     "ConvertToRaid",
     "InviteUnit",
     "GetFrameRate",
-    "StaticPopup_Visible"
+    "StaticPopup_Visible",
 
     "UIDropDownMenu_SetSelectedValue",
     "UIDropDownMenu_SetText",
