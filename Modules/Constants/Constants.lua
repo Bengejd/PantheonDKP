@@ -27,10 +27,10 @@ Constants.CLASS_COLORS = {
     ["Priest"] = "FFFFFF", ["Rogue"] = "FFF468", ["Shaman"] = "0070DD", ["Warlock"] = "8788EE", ["Warrior"] = "C69B6D"
 }
 
-Constants.RAID_NAMES = {}
-Constants.RAID_INDEXES = {}
-Constants.RAID_BOSSES = {}
-Constants.BOSS_TO_RAID = {}
+Constants.RAID_NAMES = {} -- 'Gruul's Lair', 'Tempest Keep', ...
+Constants.RAID_INDEXES = {} -- ['Gruul's Lair'] = 1
+Constants.RAID_BOSSES = {} -- ['Gruul's Lair'] = { ['id_to_name'] = ..., ['name_to_id'] = ..., ['boss_names'] = ...
+Constants.BOSS_TO_RAID = {} -- ['High King Maulgar'] = 'Gruul's Lair'
 Constants.RAIDS = {
     ["Gruul's Lair"] = {
         ["phase"] = 1,
