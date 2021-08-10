@@ -19,6 +19,7 @@ local _DECAY = 'Decay'
 
 entry.__index = entry
 
+
 function entry:new(entry_details)
     local self = {}
     setmetatable(self, entry); -- Set the metatable so we used entry's __index
