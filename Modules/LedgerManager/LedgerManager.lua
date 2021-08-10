@@ -188,7 +188,7 @@ function Ledger:GenerateEntryHash(entry)
 end
 
 function Ledger:ImportEntry(entry)
-    local entryShouldBeImported = false;
+    local entryShouldBeImported;
 
     local hashMakeup = { strsplit("__", entry.hash) }
     local tbl = {}

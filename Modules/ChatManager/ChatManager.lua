@@ -6,7 +6,7 @@ local Utils = PDKP.Utils;
 local Chat = {}
 
 local trim, lower = strtrim, strlower
-local contains, tinsert = tContains, table.insert
+local contains = tContains
 local C_Timer = C_Timer
 
 local chatCache = {};
@@ -14,9 +14,6 @@ local invite_commands = nil;
 local dkp_commands = { '!bid', '!dkp', '!cap' }
 
 local CMD_COLOR = '|cffffaeae'
-
-local bidExample = CMD_COLOR .. "!bid 20|r"
-local maxExample = CMD_COLOR .. "!bid max|r"
 
 local msgPrefix = "PDKP Auto Response:"
 
