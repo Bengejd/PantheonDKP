@@ -153,8 +153,23 @@ function DKP:_CheckForPreviousDecay()
     return false, decayDB[self.weekNumber]
 end
 
-function DKP:_FindDifferencesInEntries()
+function DKP:_FindDifferencesInEntries(importEntry)
+    local dbEntry = DKP_Entry:new(CommsManager:DatabaseDecoder(DKP_DB[importEntry['id']]));
 
+    self:RollBackEntries(dbEntry);
+
+    for _, member in pairs(dbEntry.members) do
+        if member ~= nil then
+            local dkp_change = dbEntry.dkp_change
+            if dbEntry.reason == 'Decay' then
+                dkp_change = dbEntry['decayAmounts'][member.name]
+            end
+            member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
+            member:Save()
+        end
+    end
+
+    --table.insert(self.rolledBackEntries, importEntry);
 end
 
 function DKP:_EntryAdlerExists(entryId, entryAdler)
@@ -186,11 +201,13 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
 
     if not isNewLedgerEntry then
         PDKP:PrintD("Entry is not a new ledger entry");
-        -- TODO: We should probably figure out the differences here and apply them.
         return
+        --self:_FindDifferencesInEntries(importEntry)
     end
 
-    self:RollBackEntries(importEntry);
+    if isNewLedgerEntry then
+        self:RollBackEntries(importEntry);
+    end
 
     importEntry:Save(true)
 
