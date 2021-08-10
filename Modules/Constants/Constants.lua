@@ -109,12 +109,12 @@ do
                 ['name_to_id'] = {},
                 ['boss_names'] = {}
             }
-            for index, value in pairs(raid_table) do
-                if type(index) == "number" then
-                    raidInfo['id_to_name'][index] = value
-                    raidInfo['name_to_id'][value] = index
-                    tinsert(raidInfo['boss_names'], value)
-                    Constants.BOSS_TO_RAID[value] = raid
+            for encounterID, encounterName in pairs(raid_table) do
+                if type(encounterID) == "number" then
+                    raidInfo['id_to_name'][encounterID] = encounterName
+                    raidInfo['name_to_id'][encounterName] = encounterID
+                    tinsert(raidInfo['boss_names'], encounterName)
+                    Constants.BOSS_TO_RAID[encounterName] = raid
                 end
             end
 

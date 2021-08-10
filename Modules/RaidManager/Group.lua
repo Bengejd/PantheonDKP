@@ -87,12 +87,19 @@ end
 
 function Group:_HandleEvent(event, arg1, ...)
     if not self:IsInRaid() then return end
-    if event == 'BOSS_KILL' and MODULES.Constants.BOSS_TO_RAID[arg1] == nil then return end
+    if event == 'BOSS_KILL' then
+        local boss_name = ...
+        if MODULES.Constants.BOSS_TO_RAID[boss_name] == nil then
+            PDKP:PrintD(..., "Is not a valid DKP Boss");
+            return
+        end
+    end
 
     self:Refresh()
     if not self.available then
         return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...) )
     end
+
     if event == 'BOSS_KILL' then
         local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
         local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
