@@ -253,6 +253,14 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
         DKP:_UpdateTables();
     end
 
+    importEntry:ReverseDKPChange();
+    DKP:_UpdateTables();
+
+    C_Timer.After(2, function()
+        importEntry:ApplyDKPChange();
+        DKP:_UpdateTables();
+    end)
+
     return importEntry;
 end
 

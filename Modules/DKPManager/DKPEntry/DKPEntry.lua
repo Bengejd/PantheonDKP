@@ -19,7 +19,6 @@ local _DECAY = 'Decay'
 
 entry.__index = entry
 
-
 function entry:new(entry_details)
     local self = {}
     setmetatable(self, entry); -- Set the metatable so we used entry's __index
@@ -29,6 +28,8 @@ function entry:new(entry_details)
     Guild = MODULES.GuildManager;
 
     self.entry_initiated = false
+
+    self.RolledBack = nil;
 
     --- Core Entry Details
     self.id = entry_details['id'] or GetServerTime()
@@ -111,6 +112,59 @@ function entry:Save(updateTable, exportEntry, skipLockouts)
         entry.exportedBy = Utils:GetMyName()
         MODULES.DKPManager:ExportEntry(self)
     end
+end
+
+function entry:ReverseDKPChange()
+    local members, _ = self:GetMembers();
+
+    for _, member in pairs(members) do
+        local dkpTotal = member:GetDKP();
+        local dkp_change = self.dkp_change;
+
+        if self.reason ~= 'Decay' then
+            dkp_change = self.dkp_change * -1;
+        else
+            dkp_change = 0;
+        end
+
+        member:RemoveEntry(self.id);
+        member:UpdateDKP(dkp_change);
+        member:Save();
+
+        print(member.dkp['total']);
+    end
+
+    self.RolledBack = true
+
+    PDKP:PrintD("Entry has been rolled back", self.id);
+
+end
+
+function entry:ApplyDKPChange()
+    if not self.RolledBack then
+        PDKP:PrintD("Cannot roll forward an entry that isn't rolled back", self.id);
+        return;
+    end
+
+    local members, _ = self:GetMembers();
+
+    for _, member in pairs(members) do
+        local dkp_change = self.dkp_change;
+
+        if self.reason ~= 'Decay' then
+            dkp_change = self.dkp_change;
+        else
+            dkp_change = 0;
+        end
+
+        member:AddEntry(self.id);
+        member:UpdateDKP(dkp_change);
+        member:Save();
+    end
+
+    self.RolledBack = false;
+
+    PDKP:PrintD("Entry has been Applied", self.id);
 end
 
 function entry:GetPreviousTotals()

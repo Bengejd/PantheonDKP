@@ -6,6 +6,7 @@ local Utils = PDKP.Utils
 local GetGuildRosterInfo = GetGuildRosterInfo
 local setmetatable = setmetatable
 local strsplit = strsplit
+local tinsert, tremove = table.insert, table.remove
 
 local Member = {}
 
@@ -74,6 +75,28 @@ function Member:HasEntries()
     return self.dkp['entries'] ~= nil and #self.dkp['entries'] > 0;
 end
 
+function Member:AddEntry(entryId)
+    local memberEntries = self.dkp['entries']
+    local _, entryIndex = Utils:tfind(memberEntries, entryId);
+
+    if entryIndex == nil then
+        tinsert(self.dkp['entries'], entryId);
+    end
+end
+
+function Member:RemoveEntry(entryId)
+    local memberEntries = self.dkp['entries']
+    local _, entryIndex = Utils:tfind(memberEntries, entryId);
+
+    if entryIndex ~= nil then
+        tremove(self.dkp['entries'], entryIndex);
+    end
+end
+
+function Member:UpdateDKP(dkpChange)
+    self.dkp['total'] = self.dkp['total'] + dkpChange;
+end
+
 function Member:_UpdateDKP(entry, decayAmount)
     local amount = entry.sd.dkp_change
 
@@ -101,6 +124,8 @@ function Member:_UpdateDKP(entry, decayAmount)
 
     table.insert(self.dkp['entries'], entry.id)
 end
+
+
 
 function Member:_InitializeDKP()
     if Utils:tEmpty(guildDB[self.name]) then
