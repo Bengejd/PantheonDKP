@@ -7,6 +7,7 @@ local GetGuildRosterInfo = GetGuildRosterInfo
 local setmetatable = setmetatable
 local strsplit = strsplit
 local tinsert, tremove = table.insert, table.remove
+local floor = math.floor;
 
 local Member = {}
 
@@ -67,6 +68,8 @@ end
 function Member:GetDKP(dkpVariable)
     if dkpVariable == nil then
         return self.dkp['total']
+    elseif dkpVariable == 'display' then
+        return floor(self.dkp['total']);
     end
     return self.dkp[dkpVariable]
 end
@@ -95,6 +98,7 @@ end
 
 function Member:UpdateDKP(dkpChange)
     self.dkp['total'] = self.dkp['total'] + dkpChange;
+    guildDB[self.name] = self.dkp;
 end
 
 function Member:_UpdateDKP(entry, decayAmount)

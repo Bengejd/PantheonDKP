@@ -86,7 +86,24 @@ function dbEntry:new(entry_details)
     return self;
 end
 
-function dbEntry:Save() end
+function dbEntry:Save(updateTable, exportEntry, skipLockouts)
+
+    wipe(self.sd)
+
+    exportEntry = exportEntry or false
+    skipLockouts = skipLockouts or false
+
+    self:GetSaveDetails()
+
+    if exportEntry == false then
+        self:GetSaveDetails();
+        DKP_DB[self.id] = CommsManager:DatabaseEncoder(self.sd)
+        return DKP_DB[self.id]
+    elseif PDKP.canEdit and exportEntry then
+        self.exportedBy = Utils:GetMyName()
+        MODULES.DKPManager:ExportEntry(self)
+    end
+end
 
 function dbEntry:CalculateDecayAmounts() end
 
@@ -97,7 +114,9 @@ function dbEntry:GetDecayAmounts(refresh)
     if self.reason == _DECAY and (next(self.decayAmounts) == nil or refresh) then
         for _, member in pairs(self.members) do
             if self.decayAmounts[member.name] == nil or refresh then
-                self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _DECAY_AMOUNT, 1);
+                if not self.decayReversal or self.deleted then
+                    self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _DECAY_AMOUNT, 1);
+                end
             end
         end
     end
@@ -123,23 +142,45 @@ function dbEntry:MarkAsDeleted(deletedBy)
     end
 end
 
+function dbEntry:UndoEntry()
+    local members, _ = self:GetMembers();
+    for _, member in pairs(members) do
+        local memberDKP = member:GetDKP();
+        local dkp_change = self.dkp_change * -1;
+        if self.reason == _DECAY then
+            if self.decayReversal and not self.deleted then
+                dkp_change = memberDKP - ceil(memberDKP * _DECAY_REVERSAL);
+            else
+                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
+            end
+        end
+        member:UpdateDKP(dkp_change)
+        member:Save();
+        PDKP:PrintD("Undo", self.reason, dkp_change)
+    end
+end
+
 function dbEntry:ApplyEntry()
     local members, _ = self:GetMembers();
     for _, member in pairs(members) do
         local memberDKP = member:GetDKP();
         local dkp_change = self.dkp_change;
-        if self.reason == 'Decay' then
+        if self.reason == _DECAY then
             if self.decayReversal and not self.deleted then -- Actual decay Reversal
-                dkp_change = ceil(memberDKP * _DECAY_REVERSAL)
+                dkp_change = memberDKP - ceil(memberDKP * _DECAY_REVERSAL)
+                dkp_change = dkp_change * -1;
             else
-                dkp_change = Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
+                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
+                dkp_change = dkp_change * -1;
             end
+            self.decayAmounts[member.name] = dkp_change;
         end
+
+        PDKP:PrintD("Apply", self.reason, dkp_change)
+        member:UpdateDKP(dkp_change);
+        member:Save();
     end
-end
-
-function dbEntry:ReverseEntry()
-
+    return true;
 end
 
 --- MISC Public functions ---
