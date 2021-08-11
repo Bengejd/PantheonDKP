@@ -125,7 +125,7 @@ end
 function dbEntry:GetPreviousTotals(refresh)
     refresh = refresh or false;
     if self.reason == _DECAY and (next(self.previousTotals) == nil or refresh) then
-        for _, member in pairs(self.members) do
+        for _, member in Utils:PairByKeys(self.members) do
             if self.previousTotals[member.name] == nil or refresh then
                 self.previousTotals[member.name] = member:GetDKP();
             end
