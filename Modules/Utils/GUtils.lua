@@ -731,7 +731,6 @@ function GUtils:createStatusBar(opts)
     end
 
     if addTime then
-        PDKP:PrintD("Adding Time Button");
         local addBtn = CreateFrame("Button", nil, pb)
         addBtn:SetSize(35, 35);
         addBtn:SetNormalTexture(MODULES.Media.PLUS_BUTTON_UP);

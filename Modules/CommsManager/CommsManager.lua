@@ -153,13 +153,23 @@ function Comms:DataDecoder(data)
     return deserialized -- Deserialize the compressed message
 end
 
-function Comms:DatabaseEncoder(data)
+function Comms:DatabaseEncoder(data, save)
     local serialized = self:_Serialize(data)
     local compressed = self:_Compress(serialized)
+
+        if save then
+        local db = MODULES.Database:Decay();
+        db['original'] = data
+        db['serialized'] = serialized;
+        db['compressed'] = compressed;
+        db['adler_serialized'] = self:_Adler(serialized)
+        db['adler_compressed'] = self:_Adler(compressed);
+    end
+
     return compressed
 end
 
-function Comms:DatabaseDecoder(data)
+function Comms:DatabaseDecoder(data, save)
     local decompressed = self:_Decompress(data)
     if decompressed == nil then
         -- It wasn't a message that can be decompressed.

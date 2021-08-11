@@ -303,6 +303,17 @@ function dbEntry:RemoveMember(name)
     end
 end
 
+function dbEntry:GetSerializedSelf()
+    local sd = self:GetSaveDetails();
+    local serializedSD = {};
+    local keys = {};
+    for key, val in Utils:PairByKeys(sd) do
+        serializedSD[key] = PDKP.CORE:Serialize(val)
+        table.insert(keys, key);
+    end
+    return serializedSD, keys;
+end
+
 --- Private functions ---
 
 function dbEntry:_SetupDisplayInfo()

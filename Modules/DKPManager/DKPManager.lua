@@ -73,11 +73,11 @@ function DKP:LoadPrevFourWeeks()
 
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= self.currentLoadedWeek then
-            local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
-            if decoded_entry == nil then
-                decoded_entry = encoded_entry;
-            end
-            local entry = MODULES.DKPEntry:new(decoded_entry)
+            local entry = MODULES.DKPEntry:new(encoded_entry)
+
+            --if entry.id == 1628721427 then
+            --    CommsManager:DatabaseEncoder(entry, true);
+            --end
 
             if entry ~= nil then
                 self.entries[index] = entry
@@ -111,7 +111,6 @@ end
 -----------------------------
 
 function DKP:ExportEntry(entry)
-    PDKP:PrintD("DKP:ExportEntry()")
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
     CommsManager:SendCommsMessage('SyncSmall', save_details)
 end
@@ -131,6 +130,10 @@ function DKP:ProcessOverwriteSync(message, sender)
     for dbName, db in pairs(message) do
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end
+
+    MODULES.GuildManager:Initialize();
+    self:Initialize();
+    self:_UpdateTables();
     PDKP.CORE:Print("Database overwrite has completed. Please reload for it to take effect.");
 end
 
@@ -138,35 +141,82 @@ end
 --     Import Functions    --
 -----------------------------
 
-function DKP:_CheckForPreviousDecay()
-    local decayDB = MODULES.Database:Decay()
-    local weekDecay = decayDB[self.weekNumber]
-    if weekDecay then
-        if next(weekDecay) ~= nil then
-            PDKP:Print("Error: decay already submitted for this week");
-            self.previousDecayEntry = decayDB[self.weekNumber][1]
-            return true, decayDB[self.weekNumber]
+function DKP:_FindAdlerDifference(importEntry, dbEntry)
+    local dbEntrySD, dbEntryKeys = dbEntry:GetSerializedSelf();
+    local importEntrySD, importEntryKeys = importEntry:GetSerializedSelf();
+    local keysMatch = #importEntryKeys == #dbEntryKeys
+
+    PDKP:PrintD("Keys Match:", keysMatch);
+
+    Utils:WatchVar(importEntry, 'Import');
+    Utils:WatchVar(dbEntry, 'DB');
+
+    for _, v in pairs(importEntryKeys) do
+        local importVal = importEntrySD[v]
+        local dbVal = dbEntrySD[v];
+        if type(v) ~= "table" then
+            if importVal ~= dbVal then
+                PDKP.CORE:Print("Entry mismatch found, skipping import for safety reasons");
+                return false;
+            end
         end
-    else
-        decayDB[self.weekNumber] = {}
     end
-    return false, decayDB[self.weekNumber]
+
+    if importEntry['hash'] ~= dbEntry['hash'] then
+        return true;
+    end
+    return true;
 end
 
 function DKP:_EntryAdlerExists(entryId, entryAdler)
-    local db_entry = DKP_DB[entryId]
-    return db_entry ~= nil and CommsManager:_Adler(db_entry) == entryAdler
+    local entryExists, dbEntry = self:_EntryExists(entryId)
+    local adlerMatches = false;
+    if entryExists then
+        adlerMatches = self:_AdlerMatches(dbEntry, entryAdler);
+    end
+    return entryExists, adlerMatches;
+end
+
+function DKP:_AdlerMatches(db_entry, entryAdler)
+    return CommsManager:_Adler(db_entry) == entryAdler;
+end
+
+function DKP:_EntryExists(entryId)
+    return DKP_DB[entryId] ~= nil, DKP_DB[entryId];
 end
 
 -- Import Types: Small, Large, Ad?
-function DKP:ImportEntry2(entry, entryAdler, importType)
-    if entry == nil then return end
-    local importEntry = DKP_Entry:new(entry)
-    importEntry.adler = entryAdler;
+function DKP:ImportEntry2(entryDetails, entryAdler, importType)
+    if entryDetails == nil then return end
+    local importEntry = DKP_Entry:new(entryDetails)
 
-    if self:_EntryAdlerExists(importEntry.id, entryAdler) then
-        PDKP:PrintD("EntryAdlerExists already");
-        return -- We already have the entry, and it matches.
+    if entryAdler == nil and type(entryDetails == "string") then
+        entryAdler = importEntry.adler;
+        if entryAdler == nil then
+            return;
+        end
+    end
+
+    local entryExists, adlerMatches = self:_EntryAdlerExists(importEntry.id, entryAdler)
+
+    PDKP:PrintD("ID:", importEntry.id, "EntryExists", entryExists, "AdlerMatches", adlerMatches);
+
+    if entryExists then
+        if adlerMatches then
+            PDKP:PrintD("Entry Adler Exists already, returning");
+            return;
+        end
+        PDKP:PrintD("Entry Adler does not match", importEntry.id);
+
+        local dbEntry = DKP_Entry:new(DKP_DB[importEntry.id]);
+        local shouldContinue = self:_FindAdlerDifference(importEntry, dbEntry);
+
+        if not shouldContinue then
+            return;
+        end
+
+        dbEntry:UndoEntry();
+        DKP_DB[importEntry.id] = nil;
     end
 
     if importEntry.reason == "Boss Kill" and importEntry.lockoutsChecked == false then
@@ -274,8 +324,8 @@ function DKP:ImportBulkEntries(message, sender)
     local total, entries = data['total'], data['entries']
 
     for _, encoded_entry in Utils:PairByKeys(entries) do
-        local entry = DKP_Entry:new(encoded_entry)
-        self:ImportEntry2(entry, entry.adler, 'Large');
+        local entryAdler = CommsManager:_Adler(encoded_entry)
+        self:ImportEntry2(encoded_entry, entryAdler, 'Large');
     end
 
     DKP:_UpdateTables()
@@ -454,7 +504,7 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:AddToCache(entry)
-    if (self.entrySyncCache[entry.id] ~= nil and DKP_DB[entry.id] ~= nil) or self.processedCacheEntries[entry.id] ~= nil then return end
+    if self.entrySyncCache[entry.id] ~= nil or self.processedCacheEntries[entry.id] ~= nil then return end
 
     if self.entrySyncTimer ~= nil then
         self.entrySyncTimer:Cancel();
@@ -468,19 +518,13 @@ function DKP:AddToCache(entry)
     self.entrySyncTimer = C_Timer.NewTicker(5, function()
         self.autoSyncInProgress = true
         PDKP:PrintD("Processing", self.entrySyncCacheCounter, "Cached Sync entries...")
-        local keys = {}
-        for key, _ in pairs(self.entrySyncCache) do table.insert(keys, key) end
-        table.sort(keys)
-
-        for i=1, #keys do
-            local key = keys[i]
-            local cache_entry = self.entrySyncCache[key]
-            self:ImportEntry(cache_entry)
-            self.entrySyncCache[key] = nil
+        for key, cacheEntry in Utils:PairByKeys(self.entrySyncCache) do
+            self:ImportEntry2(cacheEntry, nil, 'Large');
+            self.entrySyncCache[key] = nil;
             self.entrySyncCacheCounter = self.entrySyncCacheCounter - 1
         end
-
         self.autoSyncInProgress = false
+
     end, 1)
 end
 

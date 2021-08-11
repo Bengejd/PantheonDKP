@@ -110,8 +110,6 @@ function Group:_HandleEvent(event, arg1, ...)
 end
 
 function Group:Refresh()
-    PDKP:PrintD("Refreshing Group", self:IsInRaid());
-
     local numGroupMembers = GetNumGroupMembers()
 
     self:_RefreshClasses()
@@ -156,7 +154,6 @@ function Group:Refresh()
     if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
         self:RequestDKPOfficer()
     elseif not self:IsInRaid() then
-        PDKP:PrintD("Resetting DKP Officer");
         self.requestedDKPOfficer = false;
         self.leadership.dkpOfficer = nil
     end
