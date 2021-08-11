@@ -31,7 +31,7 @@ function dbEntry:Initialize()
     Guild = MODULES.GuildManager;
     DKPManager = MODULES.DKPManager;
     Lockouts = MODULES.Lockouts;
-    Ledger = MODULES.Ledger;
+    Ledger = MODULES.LedgerManager;
     DKP_DB = MODULES.Database:DKP();
     CommsManager = MODULES.CommsManager;
 end
@@ -82,10 +82,6 @@ function dbEntry:new(entry_details)
 
     self:GetPreviousTotals();
     self:GetDecayAmounts();
-
-    if self.id == 1628704491 then
-        print(self.deleted, self.deletedBy, self.reason);
-    end
 
     return self;
 end
@@ -197,7 +193,9 @@ function dbEntry:GetSaveDetails()
     self.sd['dkp_change'] = self.dkp_change or 0
     self.sd['officer'] = self.officer
     self.sd['names'] = self.names
-    self.sd['hash'] = self.hash or nil
+    self.sd['hash'] = self.hash or Ledger:GenerateEntryHash(self, true);
+    self.sd['deleted'] = self.deleted
+    self.sd['deletedBy'] = self.deletedBy
 
     if self.reason == _BOSS_KILL then
         self.sd['boss'] = self.boss
