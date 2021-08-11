@@ -11,7 +11,7 @@
 -- @class file
 -- @name AceSerializer-3.0
 -- @release $Id: AceSerializer-3.0.lua 1202 2019-05-15 23:11:22Z nevcairiel $
-local MAJOR,MINOR = "AceSerializer-3.0", 5
+local MAJOR,MINOR = "AceSerializer-3.0", 6
 local AceSerializer, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not AceSerializer then return end
@@ -51,6 +51,20 @@ local function SerializeStringHelper(ch)	-- Used by SerializeValue for strings
 	end
 end
 
+local function PairByKeys(t, f)
+	local a = {};
+	for n in pairs(t) do table.insert(a, n) end
+	table.sort(a, f)
+	local i = 0;
+	local iter = function()
+		i = i + 1
+		if a[i] == nil then return nil
+		else return a[i], t[a[i]]
+		end
+	end
+	return iter;
+end
+
 local function SerializeValue(v, res, nres)
 	-- We use "^" as a value separator, followed by one byte for type indicator
 	local t=type(v)
@@ -83,7 +97,7 @@ local function SerializeValue(v, res, nres)
 	elseif t=="table" then	-- ^T...^t = table (list of key,value pairs)
 		nres=nres+1
 		res[nres] = "^T"
-		for k,v in pairs(v) do
+			for k,v in PairByKeys(v) do
 			nres = SerializeValue(k, res, nres)
 			nres = SerializeValue(v, res, nres)
 		end
