@@ -160,12 +160,12 @@ end
 
 -- Import Types: Small, Large, Ad?
 function DKP:ImportEntry2(entry, entryAdler, importType)
-    PDKP:PrintD("Importing new entry");
     if entry == nil then return end
     local importEntry = DKP_Entry:new(entry)
     importEntry.adler = entryAdler;
 
     if self:_EntryAdlerExists(importEntry.id, entryAdler) then
+        PDKP:PrintD("EntryAdlerExists already");
         return -- We already have the entry, and it matches.
     end
 
@@ -178,8 +178,7 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
         end
     end
 
-    -- Roll back entries here
-
+    -- Add members to the lockout, if appropriate.
     Lockouts:AddMemberLockouts(importEntry)
     local entryMembers, _ = importEntry:GetMembers();
 
@@ -188,6 +187,11 @@ function DKP:ImportEntry2(entry, entryAdler, importType)
         DKP:_UpdateTables()
         return
     end
+
+    PDKP:PrintD("Importing new entry", importEntry.id);
+
+    -- Roll back entries here
+    self:RollBackEntries(importEntry);
 
     importEntry.formattedNames = importEntry:_GetFormattedNames()
 
@@ -269,37 +273,28 @@ function DKP:ImportBulkEntries(message, sender)
     local data = MODULES.CommsManager:DataDecoder(message)
     local total, entries = data['total'], data['entries']
 
-    local entryCounter = 0;
-
-    local decodedEntries = {};
-    local entryAdlers = {};
-
-    for key, encoded_entry in pairs(entries) do
-        local entryAdler = CommsManager:_Adler(encoded_entry)
-        if not self:_EntryAdlerExists(key, entryAdler) then
-            entryAdlers[key] = entryAdler;
-            decodedEntries[key] = CommsManager:_Decompress(encoded_entry);
-        else
-            entryCounter = entryCounter + 1;
-        end
+    for _, encoded_entry in Utils:PairByKeys(entries) do
+        local entry = DKP_Entry:new(encoded_entry)
+        self:ImportEntry2(entry, entry.adler, 'Large');
     end
 
-    for key, decompressedEntry in Utils:PairByKeys(decodedEntries) do
-        local entry = CommsManager:_Deserialize(decompressedEntry);
-        if entry['deleted'] then
-            self:DeleteEntry(entry, sender, true);
-        else
-            self:ImportEntry2(entry, entryAdlers[key], 'Large');
-        end
-
-        if entryCounter >= total then
-            C_Timer.After(5, function()
-                DKP:RecalibrateDKP()
-                DKP:_UpdateTables()
-                DKP:_RecompressCurrentLoaded()
-            end)
-        end
-    end
+    DKP:_UpdateTables()
+    --for key, decompressedEntry in Utils:PairByKeys(decodedEntries) do
+    --    local entry = CommsManager:_Deserialize(decompressedEntry);
+    --    if entry['deleted'] then
+    --        self:DeleteEntry(entry, sender, true);
+    --    else
+    --        self:ImportEntry2(entry, entryAdlers[key], 'Large');
+    --    end
+    --
+    --    if entryCounter >= total then
+    --        C_Timer.After(5, function()
+    --            DKP:RecalibrateDKP()
+    --
+    --            DKP:_RecompressCurrentLoaded()
+    --        end)
+    --    end
+    --end
 end
 
 function DKP:GetPreviousDecayEntry(entry)
@@ -365,25 +360,7 @@ function DKP:RollBackEntries(decayEntry)
         if entryId > decayEntry.id then
             local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
             local entry = MODULES.DKPEntry:new(decoded_entry)
-
-            if entry.reason == 'Decay' and (entry['decayAmounts'] == nil or next(entry['decayAmounts']) == nil) then
-                entry:CalculateDecayAmounts(true)
-            end
-
-            for _, member in pairs(entry.members) do
-                if member ~= nil then
-                    local dkp_change = entry.dkp_change
-                    if entry.reason == 'Decay' then
-                        if entry['decayAmounts'][member.name] == nil then
-                            entry:CalculateDecayAmounts(true)
-                            self:RecalibrateDKP();
-                        end
-                        dkp_change = entry['decayAmounts'][member.name]
-                    end
-                    member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
-                    member:Save()
-                end
-            end
+            entry:UndoEntry();
             table.insert(self.rolledBackEntries, entry)
         end
     end
@@ -456,16 +433,11 @@ function DKP:RollForwardEntries()
     local shouldCalibrate = #self.rolledBackEntries >= 1
     for i=#self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
-
-        for _, member in pairs(entry.members) do
-            local dkp_change = entry.dkp_change
-            if entry.reason == 'Decay' then
-                entry:CalculateDecayAmounts(true)
-                dkp_change = entry['decayAmounts'][member.name]
-            end
-            member.dkp['total'] = member.dkp['total'] + dkp_change
-            member:Save()
+        if entry.reason == 'Decay' then
+            entry:GetPreviousTotals(true);
+            entry:GetDecayAmounts(true);
         end
+        entry:ApplyEntry();
     end
     wipe(self.rolledBackEntries)
 

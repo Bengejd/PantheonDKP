@@ -431,6 +431,11 @@ function HistoryTable:_OnLoad()
 
         function row:UpdateTextValues()
             row_title:SetText(row.dataObj['formattedID'])
+
+            if PDKP:IsDev() and PDKP.showHistoryIds then
+                row_title:SetText(row.dataObj['id']);
+            end
+
             local c_raid = row.dataObj['raid'] or ''
             local c_officer = row.dataObj['formattedOfficer'] or ''
             local c_hist = row.dataObj['collapsedHistoryText'] or ''

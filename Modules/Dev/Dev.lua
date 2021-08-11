@@ -14,6 +14,10 @@ local wipe = wipe
 
 local decayCount = 0
 
+PDKP.disableDev = false
+PDKP.showInternal = false;
+PDKP.showHistoryIds = true;
+
 function Dev:HandleSlashCommands(msg)
     if not PDKP:IsDev() then
         return

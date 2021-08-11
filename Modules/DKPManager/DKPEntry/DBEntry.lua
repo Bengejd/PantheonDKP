@@ -83,6 +83,10 @@ function dbEntry:new(entry_details)
     self:GetPreviousTotals();
     self:GetDecayAmounts();
 
+    if self.id == 1628704491 then
+        print(self.deleted, self.deletedBy, self.reason);
+    end
+
     return self;
 end
 
@@ -156,7 +160,7 @@ function dbEntry:UndoEntry()
         end
         member:UpdateDKP(dkp_change)
         member:Save();
-        PDKP:PrintD("Undo", self.reason, dkp_change)
+        --PDKP:PrintD("Undo", self.reason, dkp_change)
     end
 end
 
@@ -176,7 +180,7 @@ function dbEntry:ApplyEntry()
             self.decayAmounts[member.name] = dkp_change;
         end
 
-        PDKP:PrintD("Apply", self.reason, dkp_change)
+        --PDKP:PrintD("Apply", self.reason, dkp_change)
         member:UpdateDKP(dkp_change);
         member:Save();
     end
@@ -318,7 +322,7 @@ function dbEntry:_GetSpecificDetails()
     self.item = self.ed['item'] or 'Not linked'
     self.other_text = self.ed['other_text'] or ''
     self.previousTotals = self.ed['previousTotals'] or {}
-    self.decayAmounts = {}
+    self.decayAmounts = self.ed['decayAmounts'] or {}
     self.decayReversal = self.ed['decayReversal'] or false
 end
 
