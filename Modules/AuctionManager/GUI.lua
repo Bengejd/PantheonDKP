@@ -264,11 +264,13 @@ function AuctionGUI:Initialize()
     PDKP.AuctionTimer.bgFrame:SetPoint("TOPLEFT", PDKP.AuctionTimer, "TOPLEFT", -33, 20)
     PDKP.AuctionTimer.bgFrame:SetPoint("BOTTOMRIGHT", PDKP.AuctionTimer, "BOTTOMRIGHT", 33, -20)
 
-    PDKP.AuctionTimer.addTime:SetScript("OnClick", function()
-        if MODULES.AuctionManager:CanChangeAuction() then
-            MODULES.CommsManager:SendCommsMessage('AddTime', {['addTime'] = true})
-        end
-    end)
+    if PDKP.AuctionTimer.addTime ~= nil then
+        PDKP.AuctionTimer.addTime:SetScript("OnClick", function()
+            if MODULES.AuctionManager:CanChangeAuction() then
+                MODULES.CommsManager:SendCommsMessage('AddTime', {['addTime'] = true})
+            end
+        end)
+    end
 
     f:SetScript("OnHide", function()
         if MODULES.AuctionManager:IsAuctionInProgress() then
