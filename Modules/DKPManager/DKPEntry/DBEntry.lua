@@ -3,7 +3,7 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils
 
-local Guild, DKPManager, Lockouts, Ledger, DKP_DB, CommsManager;
+local Guild, DKPManager, _, Ledger, DKP_DB, CommsManager;
 
 local dbEntry = {}
 local core_details = { 'reason', 'dkp_change', 'officer', 'names' }
@@ -17,12 +17,12 @@ local _BOSS_KILL = 'Boss Kill'
 local _ITEM_WIN = 'Item Win'
 local _OTHER = 'Other'
 local _DECAY = 'Decay'
-local _PHASE = 'Phase'
+--local _PHASE = 'Phase'
 
 local _DECAY_AMOUNT = 0.9;
 local _DECAY_REVERSAL = 1.111;
-local _PHASE_AMOUNT = 0.5;
-local _PHASE_REVERSAL = 2.0;
+--local _PHASE_AMOUNT = 0.5;
+--local _PHASE_REVERSAL = 2.0;
 
 dbEntry.__index = dbEntry
 
@@ -30,7 +30,7 @@ dbEntry.__index = dbEntry
 function dbEntry:Initialize()
     Guild = MODULES.GuildManager;
     DKPManager = MODULES.DKPManager;
-    Lockouts = MODULES.Lockouts;
+    --Lockouts = MODULES.Lockouts;
     Ledger = MODULES.LedgerManager;
     DKP_DB = MODULES.Database:DKP();
     CommsManager = MODULES.CommsManager;
@@ -91,7 +91,7 @@ function dbEntry:Save(updateTable, exportEntry, skipLockouts)
     wipe(self.sd)
 
     exportEntry = exportEntry or false
-    skipLockouts = skipLockouts or false
+    --skipLockouts = skipLockouts or false
 
     self:GetSaveDetails()
 
@@ -101,7 +101,7 @@ function dbEntry:Save(updateTable, exportEntry, skipLockouts)
         return DKP_DB[self.id]
     elseif PDKP.canEdit and exportEntry then
         self.exportedBy = Utils:GetMyName()
-        MODULES.DKPManager:ExportEntry(self)
+        DKPManager:ExportEntry(self)
     end
 end
 

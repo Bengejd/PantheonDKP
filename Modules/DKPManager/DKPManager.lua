@@ -17,7 +17,7 @@ function DKP:Initialize()
     CommsManager = MODULES.CommsManager;
     DKP_Entry = MODULES.DKPEntry;
     Lockouts = MODULES.Lockouts;
-    Ledger = MODULES.LedgerManager;
+    --Ledger = MODULES.LedgerManager;
 
     self.entries = {}
     self.encoded_entries = {}
@@ -321,7 +321,7 @@ end
 
 function DKP:ImportBulkEntries(message, sender)
     local data = MODULES.CommsManager:DataDecoder(message)
-    local total, entries = data['total'], data['entries']
+    local _, entries = data['total'], data['entries']
 
     for _, encoded_entry in Utils:PairByKeys(entries) do
         local entryAdler = CommsManager:_Adler(encoded_entry)
@@ -355,54 +355,54 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
-    if true then return end;
-
-    local members = MODULES.GuildManager.members
-    for _, member in pairs(members) do
-        member.dkp['total'] = 30
-        member:Save()
-    end
-
-    local entryIDS = {}
-
-    for entryID, _ in pairs(DKP_DB) do
-        table.insert(entryIDS, entryID)
-    end
-
-    table.sort(entryIDS)
-
-    for i=1, #entryIDS do
-        local encoded_entry = DKP_DB[entryIDS[i]]
-        local decoded_entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
-        local entry = MODULES.DKPEntry:new(decoded_entry)
-
-        entry:GetPreviousTotals()
-
-        if entry.reason == 'Decay' then
-            entry:CalculateDecayAmounts(true)
-        end
-
-        local previousDecayEntry = self:GetPreviousDecayEntry(entry);
-
-        for _, member in pairs(entry.members) do
-            local dkp_change = entry.dkp_change
-
-            if entry.reason == 'Decay' then
-                dkp_change = entry['decayAmounts'][member.name]
-                if entry.decayReversal and not entry.deleted and dkp_change < 0 then
-                    if previousDecayEntry ~= nil then
-                        dkp_change = previousDecayEntry['decayAmounts'][member.name];
-                    else
-                        dkp_change = math.ceil(dkp_change * -1.1111);
-                    end
-                end
-            end
-
-            member.dkp['total'] = member.dkp['total'] + dkp_change
-            member:Save()
-        end
-    end
-    self:_UpdateTables();
+    --if true then return end;
+    --
+    --local members = MODULES.GuildManager.members
+    --for _, member in pairs(members) do
+    --    member.dkp['total'] = 30
+    --    member:Save()
+    --end
+    --
+    --local entryIDS = {}
+    --
+    --for entryID, _ in pairs(DKP_DB) do
+    --    table.insert(entryIDS, entryID)
+    --end
+    --
+    --table.sort(entryIDS)
+    --
+    --for i=1, #entryIDS do
+    --    local encoded_entry = DKP_DB[entryIDS[i]]
+    --    local decoded_entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
+    --    local entry = MODULES.DKPEntry:new(decoded_entry)
+    --
+    --    entry:GetPreviousTotals()
+    --
+    --    if entry.reason == 'Decay' then
+    --        entry:CalculateDecayAmounts(true)
+    --    end
+    --
+    --    local previousDecayEntry = self:GetPreviousDecayEntry(entry);
+    --
+    --    for _, member in pairs(entry.members) do
+    --        local dkp_change = entry.dkp_change
+    --
+    --        if entry.reason == 'Decay' then
+    --            dkp_change = entry['decayAmounts'][member.name]
+    --            if entry.decayReversal and not entry.deleted and dkp_change < 0 then
+    --                if previousDecayEntry ~= nil then
+    --                    dkp_change = previousDecayEntry['decayAmounts'][member.name];
+    --                else
+    --                    dkp_change = math.ceil(dkp_change * -1.1111);
+    --                end
+    --            end
+    --        end
+    --
+    --        member.dkp['total'] = member.dkp['total'] + dkp_change
+    --        member:Save()
+    --    end
+    --end
+    --self:_UpdateTables();
 end
 
 function DKP:RollBackEntries(decayEntry)
