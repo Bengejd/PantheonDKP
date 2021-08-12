@@ -2,12 +2,6 @@
 
 ## v4.3.2
 
-### Bug Fixes
-- Fixed a bug where the boss-kill popup was not occurring for the DKP Officer in raids where it should have been.
-
-
-## v4.3.1
-
 ### Features (NEW)
 **Whisper Commands**: You can now whisper the DKP Officer a few different commands, such as:
 - `!bid 20` - To bid 20 DKP for the current item being bidded on.
@@ -19,10 +13,16 @@
 These whispers will be filtered out from their chat log, so they will never see the amount of DKP that you bid.
 
 **Add Auction Time**: You can now add 10 seconds to an auction if you have a designated role within the raid (DKP officer, raid leader or loot master).
+
 **Movable Sync Timer**: You can now move around the sync-timer, so it's no longer stuck at the top of the screen.
-**Auto Invite Chat Filter**: Auto-invite whispers will be automatically filtered out of your chat window.
+
+**Auto Invite Chat Filter**: Auto-invite whispers will be automatically filtered out of the receivers window.
 
 ### Bug Fixes
+- Fixed a bug where syncing deleted decays were not happening correctly.
+- Fixed a bug in Ace3:Serializer where table serialization was not happening the same across clients, resulting in the comparison hashes to be off, even when identical.
+- Fixed a bug where the boss-kill popup was not occurring for the DKP Officer in raids where it should have been.
+- Fixed a bug where the Bid window would appear when on a low-level alt.
 - Fixed a visual bug where old-bids were still showing up on non-officer bid windows after a new bid was started.
 - Fixed a visual bug where bids weren't being sorted from highest to lowest after bidding window finished.
 - Fixed a bug where auto-invites would break occasionally when you deleted your saved variables file.
@@ -33,7 +33,7 @@ These whispers will be filtered out from their chat log, so they will never see 
 - Fixed a bug where deleting a boss kill entry would not allow you to re-apply that boss kill for members in that raid group within the same week.
 
 ### Disabled (RIP)
-Auto-syncing - Due to the nature of decay syncing incorrectly, I had to disable auto-syncing for the timebeing. All this means is that you will require a merge or overwrite if you have been offline while adjustments to the DKP have been made.
+Auto-syncing - Auto Sync is currently disabled until lag spike issues can be resolved.
 
 ---
 ## v4.0.0
