@@ -10,11 +10,7 @@ local Comm = {}
 Comm.__index = Comm
 
 local setmetatable, pairs, tremove, tinsert = setmetatable, pairs, table.remove, table.insert
-local substr, type, floor = string.sub, type, math.floor
-
-local function _prefix(prefix)
-    return 'pdkpV2' .. substr(prefix, 0, 12)
-end
+local type, floor = type, math.floor
 
 function Comm:new(opts)
     local self = {}
@@ -26,7 +22,7 @@ function Comm:new(opts)
     GuildManager = MODULES.GuildManager
 
     self.ogPrefix = opts['prefix']
-    self.prefix = _prefix(self.ogPrefix)
+    self.prefix = Utils:GetCommPrefix(self.ogPrefix)
 
     self.allowed_from_self = Utils:ternaryAssign(opts['self'] ~= nil, opts['self'], false)
     self.allowed_in_combat = Utils:ternaryAssign(opts['combat'] ~= nil, opts['combat'], true)

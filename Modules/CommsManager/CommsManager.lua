@@ -1,12 +1,9 @@
 local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils;
 
 local Comms = {}
-
-local function _prefix(prefix)
-    return 'pdkpV2' .. string.sub(prefix, 0, 12)
-end
 
 function Comms:Initialize()
     self.commsRegistered = false
@@ -79,7 +76,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         transmitData = self:DataEncoder(data)
     end
 
-    local comm = self.channels[_prefix(prefix)]
+    local comm = self.channels[Utils:GetCommPrefix(prefix)]
 
     if comm ~= nil and comm:IsValid() then
         if comm.requireCheck and not comm:CanSend() then
@@ -90,7 +87,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         if prefix == 'SentInv' then
             params[2] = data
         end
-        return PDKP.CORE:SendCommMessage(_prefix(prefix), transmitData, unpack(params))
+        return PDKP.CORE:SendCommMessage(comm.prefix, transmitData, unpack(params))
     else
         PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
     end
@@ -156,13 +153,23 @@ function Comms:DataDecoder(data)
     return deserialized -- Deserialize the compressed message
 end
 
-function Comms:DatabaseEncoder(data)
+function Comms:DatabaseEncoder(data, save)
     local serialized = self:_Serialize(data)
     local compressed = self:_Compress(serialized)
+
+        if save then
+        local db = MODULES.Database:Decay();
+        db['original'] = data
+        db['serialized'] = serialized;
+        db['compressed'] = compressed;
+        db['adler_serialized'] = self:_Adler(serialized)
+        db['adler_compressed'] = self:_Adler(compressed);
+    end
+
     return compressed
 end
 
-function Comms:DatabaseDecoder(data)
+function Comms:DatabaseDecoder(data, save)
     local decompressed = self:_Decompress(data)
     if decompressed == nil then
         -- It wasn't a message that can be decompressed.

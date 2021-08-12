@@ -169,7 +169,7 @@ function Ledger:GetLastFourWeeks()
     end
 end
 
-function Ledger:GenerateEntryHash(entry)
+function Ledger:GenerateEntryHash(entry, isFromSaveDetails)
     local weekNumber = entry.weekNumber
     local officer = entry.officer
 
@@ -184,7 +184,9 @@ function Ledger:GenerateEntryHash(entry)
     local entry_index = #LEDGER[weekNumber][officer] + 1
     entry.hash = string.format("%d__%s__%d", weekNumber, officer, entry_index)
 
-    return entry:GetSaveDetails()
+    if not isFromSaveDetails then
+        return entry:GetSaveDetails()
+    end
 end
 
 function Ledger:ImportEntry(entry)

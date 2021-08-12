@@ -6,6 +6,8 @@ local Utils = PDKP.Utils
 local GetGuildRosterInfo = GetGuildRosterInfo
 local setmetatable = setmetatable
 local strsplit = strsplit
+local tinsert, tremove = table.insert, table.remove
+local floor = math.floor;
 
 local Member = {}
 
@@ -43,7 +45,7 @@ end
 function Member:Save()
     local dkp = {
         ['total'] = self.dkp['total'],
-        ['initOn'] = self.dkp['initOn'],
+        ['snapshot'] = self.dkp['snapshot'],
     }
 
     if not Utils:tEmpty(self.dkp['entries']) then
@@ -66,12 +68,40 @@ end
 function Member:GetDKP(dkpVariable)
     if dkpVariable == nil then
         return self.dkp['total']
+    elseif dkpVariable == 'display' then
+        if PDKP:IsDev() and PDKP.showInternal then
+            return self.dkp['total'];
+        end
+        return floor(self.dkp['total']);
     end
     return self.dkp[dkpVariable]
 end
 
 function Member:HasEntries()
     return self.dkp['entries'] ~= nil and #self.dkp['entries'] > 0;
+end
+
+function Member:AddEntry(entryId)
+    local memberEntries = self.dkp['entries']
+    local _, entryIndex = Utils:tfind(memberEntries, entryId);
+
+    if entryIndex == nil then
+        tinsert(self.dkp['entries'], entryId);
+    end
+end
+
+function Member:RemoveEntry(entryId)
+    local memberEntries = self.dkp['entries']
+    local _, entryIndex = Utils:tfind(memberEntries, entryId);
+
+    if entryIndex ~= nil then
+        tremove(self.dkp['entries'], entryIndex);
+    end
+end
+
+function Member:UpdateDKP(dkpChange)
+    self.dkp['total'] = self.dkp['total'] + dkpChange;
+    guildDB[self.name] = self.dkp;
 end
 
 function Member:_UpdateDKP(entry, decayAmount)
@@ -115,7 +145,7 @@ end
 function Member:_DefaultDKP()
     self.dkp = {
         ['total'] = 30,
-        ['initOn'] = self.server_time,
+        ['snapshot'] = 30,
         ['entries'] = {},
     }
 end
@@ -124,7 +154,7 @@ function Member:_LoadDatabaseData()
     local dbData = guildDB[self.name]
     self.dkp = {
         ['total'] = dbData['total'],
-        ['initOn'] = dbData['initOn'],
+        ['snapshot'] = dbData['snapshot'],
         ['entries'] = dbData['entries'] or {},
     }
 end

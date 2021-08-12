@@ -33,8 +33,8 @@ function MemberTable:Initialize()
         end
 
         if sortBy == 'dkp' then
-            local aDKP = a:GetDKP(nil, 'total')
-            local bDKP = b:GetDKP(nil, 'total')
+            local aDKP = a:GetDKP('display')
+            local bDKP = b:GetDKP('display')
             if aDKP ~= bDKP then
                 a, b = aDKP, bDKP
             elseif a['class'] ~= b['class'] then
@@ -110,7 +110,7 @@ function MemberTable:Initialize()
                 ['showSortDirection'] = true,
                 ['compareFunc'] = compare,
                 ['getValueFunc'] = function(member)
-                    return member:GetDKP(nil, 'total')
+                    return member:GetDKP('display');
                 end,
             },
         }

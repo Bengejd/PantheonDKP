@@ -17,8 +17,6 @@ PDKP.OPTIONS = {}
 PDKP.AUTOVERSION = "@project-version@"
 
 PDKP.newVersionDetected = false
-PDKP.disableDev = false
-PDKP.showDeleted = true
 
 local CORE = PDKP.CORE
 local MODULES = PDKP.MODULES
@@ -109,6 +107,7 @@ function CORE:_InitializeFeatures()
     MODULES.CommsManager:RegisterComms()
     MODULES.LedgerManager:Initialize()
     MODULES.AuctionManager:Initialize()
+    MODULES.DKPEntry:Initialize()
     MODULES.DKPManager:Initialize()
     MODULES.RaidManager:Initialize()
     MODULES.GroupManager:Initialize()
