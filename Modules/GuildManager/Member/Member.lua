@@ -171,7 +171,8 @@ function Member:_GetMemberData(index)
     self.canEdit = self.isOfficer
     self.isOfficer = self.canEdit
 
-    self.isClassLeader = self.rankIndex == self.classLeadRank
+    --self.isClassLeader = self.rankIndex == self.classLeadRank -- BUG: A bunch of people are getting this flag set. Probably a guild permission issue?
+    self.isClassLeader = false;
 
     self.isInLeadership = self.isOfficer or self.isClassLeader
 
