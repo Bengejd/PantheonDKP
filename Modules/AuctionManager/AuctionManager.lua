@@ -67,12 +67,19 @@ end
 function Auction:HookIntoLootBag()
     local numLootItems = GetNumLootItems();
     for i = 1, numLootItems do
-        local btnName = 'LootButton'
+        -- ElvUI doesn't use the default frame names... so this doesn't work with it enabled.
+        -- Check to see if ElvUI addon exists and if it does, change btn to use the ElvUI one instead.
+        local btnName = Utils:ternaryAssign(_G['ElvUI'] ~= nil, 'ElvLootSlot', 'LootButton')
+
         btnName = btnName .. tostring(i)
         local btn = _G[btnName]
-        if btn then
-            btn:SetScript("OnMouseDown", function(_, buttonType)
-                if buttonType == 'LeftButton' and IsAltKeyDown() then
+
+        if btn and not btn.oldClickEventPDKP then
+            btn.oldClickEventPDKP = btn:GetScript("OnClick");
+            btn:SetScript("OnClick", function(btnObj, ...)
+                if not IsAltKeyDown() then
+                    return btnObj.oldClickEventPDKP(btnObj, ...);
+                else
                     HandleModifiedTooltipClick()
                 end
             end)
