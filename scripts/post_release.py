@@ -53,11 +53,12 @@ def get_pretty_changelog(currTag, prevTag):
         if len(changelog) == 0:
             return "No changelog attached"
         else:
+            print(curr_tag, prev_tag)
             prev_tag = f'{prevTag}\###'.encode()
             curr_tag = f'{currTag}\###'.encode()
             prev_change = changelog.split(prev_tag)[0]
             curr_change = prev_change.split(curr_tag)[0]
-            print(curr_change)
+#             print(curr_change)
             return curr_change
 #             split_changelog = changelog.split(b'v4.3.3\n###')
 #             split_changelog = split_changelog[1].split(b'v4.3.2\n\n###')
