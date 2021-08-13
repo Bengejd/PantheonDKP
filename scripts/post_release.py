@@ -77,7 +77,7 @@ try:
         "title": name,
         "color": 14464841,
         "fields": [
-            {"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False}
+            {"name": "CHANGELOG", "value": "`" + pretty_changelog.strip() + "`", "inline": False}
         ],
         "footer": {"text": "Released by " + author}
     }
