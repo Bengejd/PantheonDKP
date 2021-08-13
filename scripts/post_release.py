@@ -58,13 +58,6 @@ def get_pretty_changelog(currTag, prevTag):
             curr_tag = f'## {currTag}'.encode()
             return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode().replace('###', '\n').replace('\n\n', '\n').strip()
 
-def generate_changelog_fields(pretty_changelog):
-#     s = pretty_changelog
-    return pretty_changelog
-
-
-
-
 try:
     author = releases[0]["author"]["login"]
     body = releases[0]["body"]
@@ -78,9 +71,6 @@ try:
     prerelease = releases[0]["prerelease"]
 
     pretty_changelog = get_pretty_changelog(tag, prev_tag)
-    changelog_fields = generate_changelog_fields(pretty_changelog.encode())
-
-    print(changelog_fields)
 
     embed = {
         "author": {"name": "PantheonDKP has been updated!"},
@@ -108,7 +98,7 @@ try:
     if prerelease:
         webhook.send(embed = Embed.from_dict(embed))
     else:
-        webhook.send(content = "", embed = Embed.from_dict(embed))
+        webhook.send(content = "@everyone", embed = Embed.from_dict(embed))
 except Exception as e:
     print(str(e))
     exit(30)
