@@ -72,12 +72,13 @@ try:
 
     pretty_changelog = get_pretty_changelog(tag, prev_tag)
 
+    print(pretty_changelog)
+
     embed = {
         "author": {"name": "PantheonDKP has been updated!"},
         "title": name,
         "color": 14464841,
         "fields": [
-            {"name": "**Version**", "value": "`" + tag  + "`", "inline": False},
             {"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False}
         ],
         "footer": {"text": "Released by " + author}
