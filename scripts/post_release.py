@@ -80,7 +80,7 @@ try:
     pretty_changelog = get_pretty_changelog(tag, prev_tag)
     changelog_fields = generate_changelog_fields(pretty_changelog.encode())
 
-    print(changelog_fields.encode())
+    print(changelog_fields)
 
     embed = {
         "author": {"name": "PantheonDKP has been updated!"},
