@@ -98,7 +98,7 @@ try:
     if prerelease:
         webhook.send(embed = Embed.from_dict(embed))
     else:
-        webhook.send(content = "<@&875630744955920404>", embed = Embed.from_dict(embed))
+        webhook.send(content = "<@everyone>", embed = Embed.from_dict(embed))
 except Exception as e:
     print(str(e))
     exit(30)
