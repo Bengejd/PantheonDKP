@@ -1,6 +1,9 @@
 # PDKP Change Log
 
 ## v4.3.3
+### Features
+- Added Github hook to notify discord of new PDKP updates!
+
 ### Bug Fixes
 
 - Fixed a bug where you could not start auctions from the boss loot bag while having ElvUI enabled.
