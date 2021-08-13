@@ -30,21 +30,17 @@ def get_newest_changelog():
     num_calls = 0
     while True:
         num_calls = num_calls + 1
-        response = curl "https://raw.githubusercontent.com/Bengejd/PantheonDKP/release/Markdown/CHANGELOG.md | \ sed -n '/## Documentation/,/##/p'"
-
-#
-
-#         response = requests.get(CHANGELOG_ENDPOINT)
-#         if response.status_code == 200:
-#             return response.json()
-#         else:
-#             print("Changelog Query failed")
-#             if num_calls >= 10:
-#                 print("exiting")
-#                 exit(10)
-#             else:
-#                 print("Sleeping and retrying")
-#                 time.sleep(num_calls)
+        response = requests.get(CHANGELOG_ENDPOINT)
+        if response.status_code == 200:
+            return response.raw
+        else:
+            print("Changelog Query failed")
+            if num_calls >= 10:
+                print("exiting")
+                exit(10)
+            else:
+                print("Sleeping and retrying")
+                time.sleep(num_calls)
 
 releases = get_newest_release()
 changelog = get_newest_changelog()
