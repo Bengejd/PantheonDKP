@@ -13,4 +13,4 @@ jobs:
       - name: announce
         run: python3 scripts/post_release.py $WEBHOOK_URL
         env:
-          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
