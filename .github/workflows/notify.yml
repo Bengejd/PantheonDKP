@@ -1,7 +1,8 @@
 name: Notify
 on:
   push:
-
+    tags:
+      - 'v*'
 jobs:
   discord_announce:
     name: Post a Discord Announcement
