@@ -56,7 +56,7 @@ def get_pretty_changelog(currTag, prevTag):
             s = changelog
             prev_tag = f'{prevTag}'.encode()
             curr_tag = f'{currTag}'.encode()
-            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode()
+            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode().replace('\n\n##', '')
 
 try:
     author = releases[0]["author"]["login"]
