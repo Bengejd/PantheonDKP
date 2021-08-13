@@ -115,6 +115,7 @@ function CORE:_InitializeFeatures()
     MODULES.Options:Initialize()
 end
 
+
 function CORE:_InitializeFrontend()
     -- No GUI / OPTIONS should be dependent on each other ever, only on the managers
     for _, module in pairs(PDKP.OPTIONS) do
