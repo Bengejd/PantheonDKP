@@ -8,6 +8,7 @@ if len(sys.argv) != 2:
     exit(1)
 
 GIT_ENDPOINT = "https://api.github.com/repos/Bengejd/PantheonDKP/releases"
+CHANGELOG_ENDPOINT = "https://api.github.com/repos/Bengejd/PantheonDKP/blob/release/Markdown/CHANGELOG.md"
 
 def get_newest_release():
     num_calls = 0
@@ -25,11 +26,34 @@ def get_newest_release():
                 print("Sleeping and retrying")
                 time.sleep(num_calls)
 
+def get_newest_changelog():
+    num_calls = 0
+    while True:
+        num_calls = num_calls + 1
+        response = requests.get(CHANGELOG_ENDPOINT)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print("Query failed")
+            if num_calls >= 10:
+                print("exiting")
+                exit(10)
+            else:
+                print("Sleeping and retrying")
+                time.sleep(num_calls)
+
 releases = get_newest_release()
+changelog = get_newest_changelog()
 
 if len(releases) == 0:
     print("No releases found")
     exit(20)
+
+if len(changelog) == 0:
+    print("No changelog found")
+    exit(20)
+else:
+    print(changelog)
 
 try:
     author = releases[0]["author"]["login"]
