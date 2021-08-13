@@ -27,4 +27,4 @@ PantheonDKP utilizes a Blind Bid (Second highest amount +1) bidding method curre
 * Raid Tools helper (see Wiki for more info).
 
 ### Wiki
-Be sure to check the [Wiki](https://github.com/Bengejd/PantheonDKP/wiki) for more information.
+Be sure to check the [Wiki](https://github.com/Bengejd/PantheonDKP/wiki) for more information (coming soon).
