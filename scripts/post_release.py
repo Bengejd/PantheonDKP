@@ -30,7 +30,7 @@ def get_newest_changelog():
     num_calls = 0
     while True:
         num_calls = num_calls + 1
-        response = curl "https://raw.githubusercontent.com/Bengejd/PantheonDKP/release/Markdown/CHANGELOG.md" | \ sed -n '/## Documentation/,/##/p'
+        response = curl("https://raw.githubusercontent.com/Bengejd/PantheonDKP/release/Markdown/CHANGELOG.md" | \ sed -n '/## Documentation/,/##/p')
 
 #
 
