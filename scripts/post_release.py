@@ -56,14 +56,7 @@ def get_pretty_changelog(currTag, prevTag):
             s = changelog
             prev_tag = f'{prevTag}'.encode()
             curr_tag = f'{currTag}'.encode()
-
-            print(s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)])
-
-#             print(curr_change)
-#             return curr_change
-#             split_changelog = changelog.split(b'v4.3.3\n###')
-#             split_changelog = split_changelog[1].split(b'v4.3.2\n\n###')
-#             print(split_changelog[0])
+            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)]
 
 try:
     author = releases[0]["author"]["login"]
@@ -79,13 +72,13 @@ try:
 
     pretty_changelog = get_pretty_changelog(tag, prev_tag)
 
-
     embed = {
         "author": {"name": "PantheonDKP has been updated!"},
         "title": name,
         "color": 14464841,
         "fields": [
-            {"name": "**Version**", "value": "`" + tag  + "`", "inline": False}
+            {"name": "**Version**", "value": "`" + tag  + "`", "inline": False},
+            {"name": "CHANGELOG", "value": pretty_changelog, "inline": False}
         ],
         "footer": {"text": "Released by " + author}
     }
