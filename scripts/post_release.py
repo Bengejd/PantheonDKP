@@ -34,7 +34,7 @@ def get_newest_changelog():
         if response.status_code == 200:
             return response.json()
         else:
-            print("Query failed")
+            print("Changelog Query failed")
             if num_calls >= 10:
                 print("exiting")
                 exit(10)
