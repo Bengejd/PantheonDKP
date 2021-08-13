@@ -8,7 +8,7 @@ if len(sys.argv) != 2:
     exit(1)
 
 GIT_ENDPOINT = "https://api.github.com/repos/Bengejd/PantheonDKP/releases"
-CHANGELOG_ENDPOINT = "https://api.github.com/repos/Bengejd/PantheonDKP/blob/release/Markdown/CHANGELOG.md"
+CHANGELOG_ENDPOINT = "https://raw.githubusercontent.com/Bengejd/PantheonDKP/release/Markdown/CHANGELOG.md"
 
 def get_newest_release():
     num_calls = 0
