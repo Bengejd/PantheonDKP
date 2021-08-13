@@ -54,8 +54,8 @@ def get_pretty_changelog(currTag, prevTag):
             return "No changelog attached"
         else:
             s = changelog
-            prev_tag = f'{prevTag}\###'.encode()
-            curr_tag = f'{currTag}\###'.encode()
+            prev_tag = f'{prevTag}'.encode()
+            curr_tag = f'{currTag}'.encode()
 
             print(s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)])
 
