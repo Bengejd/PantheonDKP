@@ -32,7 +32,7 @@ def get_newest_changelog():
         num_calls = num_calls + 1
         response = requests.get(CHANGELOG_ENDPOINT)
         if response.status_code == 200:
-            return response.raw
+            return response.content
         else:
             print("Changelog Query failed")
             if num_calls >= 10:
