@@ -56,7 +56,7 @@ def get_pretty_changelog(currTag, prevTag):
             s = changelog
             prev_tag = f'{prevTag}'.encode()
             curr_tag = f'{currTag}'.encode()
-            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)]
+            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode()
 
 try:
     author = releases[0]["author"]["login"]
@@ -78,7 +78,7 @@ try:
         "color": 14464841,
         "fields": [
             {"name": "**Version**", "value": "`" + tag  + "`", "inline": False},
-            {"name": "CHANGELOG", "value": pretty_changelog, "inline": False}
+            {"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False}
         ],
         "footer": {"text": "Released by " + author}
     }
