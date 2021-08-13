@@ -53,7 +53,8 @@ if len(changelog) == 0:
     print("No changelog found")
     exit(20)
 else:
-    print(changelog)
+    split_changelog = changelog.split('\n\n##')
+    print(split_changelog)
 
 try:
     author = releases[0]["author"]["login"]
