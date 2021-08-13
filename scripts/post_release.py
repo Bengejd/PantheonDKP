@@ -53,7 +53,7 @@ if len(changelog) == 0:
     print("No changelog found")
     exit(20)
 else:
-    split_changelog = changelog.split('\n\n##')
+    split_changelog = changelog.split(b'\n\n##')
     print(split_changelog)
 
 try:
