@@ -14,3 +14,4 @@ ignore:
     - Markdown/ignore
     - PantheonDKP-bac.lua
     - Media/Unused
+    - scripts

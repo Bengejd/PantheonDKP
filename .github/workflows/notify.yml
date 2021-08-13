@@ -1,0 +1,17 @@
+name: Notify
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  discord_announce:
+    name: Post a Discord Announcement
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install discordpy
+        run: pip3 install discord.py
+      - name: announce
+        run: python3 scripts/post_release.py $WEBHOOK_URL
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
