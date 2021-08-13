@@ -58,6 +58,7 @@ def get_pretty_changelog(currTag, prevTag):
             prev_change = changelog.decode().split(prev_tag)[0]
             curr_change = prev_change.decode().split(curr_tag)[0]
             print(curr_change)
+            return curr_change
 #             split_changelog = changelog.split(b'v4.3.3\n###')
 #             split_changelog = split_changelog[1].split(b'v4.3.2\n\n###')
 #             print(split_changelog[0])
