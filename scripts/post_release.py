@@ -49,13 +49,18 @@ if len(releases) == 0:
     print("No releases found")
     exit(20)
 
-if len(changelog) == 0:
-    print("No changelog found")
-    exit(20)
-else:
-    split_changelog = changelog.split(b'v4.3.3\n###')
-    split_changelog = split_changelog[1].split(b'v4.3.2\n\n###')
-    print(split_changelog[0])
+def get_pretty_changelog(currTag, prevTag):
+        if len(changelog) == 0:
+            return "No changelog attached"
+        else:
+            prev_tag = f'{prevTag}\###'
+            curr_tag = f'{currTag}\###'
+            prev_change = changelog.decode().split(prev_tag)[0]
+            curr_change = prev_change.decode().split(curr_tag)[0]
+            print(curr_change)
+#             split_changelog = changelog.split(b'v4.3.3\n###')
+#             split_changelog = split_changelog[1].split(b'v4.3.2\n\n###')
+#             print(split_changelog[0])
 
 try:
     author = releases[0]["author"]["login"]
@@ -65,8 +70,12 @@ try:
         multibody = body.split("\r\n\r\n")
 
     tag = releases[0]["tag_name"]
+    prev_tag = releases[1]["tag_name"]
     name = releases[0]["name"]
     prerelease = releases[0]["prerelease"]
+
+    pretty_changelog = get_pretty_changelog(tag, prev_tag)
+
 
     embed = {
         "author": {"name": "PantheonDKP has been updated!"},
