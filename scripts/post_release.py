@@ -79,7 +79,7 @@ try:
         "fields": [
             {"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False}
         ],
-        "footer": {"text": "Released by " + author}
+        "footer": {"text": "Released by " + author + " (Neekio)"}
     }
     if multibody is not None:
         first = True
