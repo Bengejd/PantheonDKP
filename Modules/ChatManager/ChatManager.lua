@@ -29,7 +29,7 @@ function Chat:Initialize()
         local cmd, arg1 = PDKP.CORE:GetArgs(msg, 2)
 
         if invite_commands == nil then
-            invite_commands = MODULES.RaidManager.invite_commands
+            invite_commands = MODULES.RaidManager.invite_commands or {};
         end
 
         if (PDKP.canEdit and contains(dkp_commands, cmd)) then
