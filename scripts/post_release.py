@@ -56,7 +56,7 @@ def get_pretty_changelog(currTag, prevTag):
             s = changelog
             prev_tag = f'{prevTag}'.encode()
             curr_tag = f'{currTag}'.encode()
-            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode().replace('###', '\n').strip()
+            return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode().replace('###', '\n').replace('\n\n', '\n').strip()
 
 def generate_changelog_fields(pretty_changelog):
 #     s = pretty_changelog
