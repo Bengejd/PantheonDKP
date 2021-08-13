@@ -1,5 +1,12 @@
 # PDKP Change Log
 
+## v4.3.3
+### Bug Fixes
+
+- Fixed a bug where you could not start auctions from the boss loot bag while having ElvUI enabled.
+- Fixed a bug where promoting leadership in the raid, would promote a bunch of people (most likely a guild permissions issue, not the addon).
+- Fixed a bug where some users would receive an error when receiving a whisper due to invite_commands not being populated.
+
 ## v4.3.2
 
 ### Features (NEW)
