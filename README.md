@@ -4,6 +4,10 @@ PantheonDKP
 [![Lint](https://github.com/Bengejd/PantheonDKP/actions/workflows/lint.yml/badge.svg)](https://github.com/Bengejd/PantheonDKP/actions/workflows/lint.yml)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Bengejd/PantheonDKP?color=important)](https://github.com/Bengejd/PantheonDKP/releases)
 [![GitHub issues](https://img.shields.io/github/issues/Bengejd/PantheonDKP?color=blue)](https://github.com/Bengejd/PantheonDKP/issues)
+[![Download Link](https://img.shields.io/badge/Download-Curseforge-red)](https://www.curseforge.com/wow/addons/PantheonDKP)
+
+### Wiki
+Be sure to check the [Wiki](https://github.com/Bengejd/PantheonDKP/wiki) for more information on the many features of PantheonDKP as well as screenshots from various interfaces within the addon.
 
 About
 --------------
@@ -25,6 +29,3 @@ PantheonDKP utilizes a Blind Bid (Second highest amount +1) bidding method curre
     - Members are marked as "Raid Ready" when they are at least LVL 68, or are an officer.
 * Automatic auction winner announcements, tie announcements or free-roll announcements.
 * Raid Tools helper (see Wiki for more info).
-
-### Wiki
-Be sure to check the [Wiki](https://github.com/Bengejd/PantheonDKP/wiki) for more information on the many features of PantheonDKP.
