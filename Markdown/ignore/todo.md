@@ -21,34 +21,12 @@ Officers can request that they join the raid group via a "request" button. The b
 - [ ] Add Bid Headers to the bidders window. Name | Bid | Cost
 - [ ] Calculate cost based on the winner's principle.
 - [ ] Tooltip when hovering over items if AuctionManager:CanChangeAuction()
-- [ ] Fix Overwrite, so that you don't have to /reload anymore after it processes.
+
 - [ ] Allow for different Decay Amounts.
 - [ ] Add Lockouts Tab
 - [ ] Add Options Tab
-
-#### DKP Overhaul
-- [x] Fix DKP submissions giving the incorrect DKP totals.
-- [x] Deleting a decay entry & merging does not appear to send the new entry until after /reload?
-  - [x] Entry totals are incorrect after re-calibrating as well, for the receiver.
-- [x] Fix Decay Deletion previousTotal BUG
-  - [x] Probably need to use recalibrate after the decay deletion.
-  
-- When checking adler, check to see if the entry is marked as deleted in the merged one and not in the current one.
-
-#### Complete Todo Items
-- [x] Add 10 seconds to bid button.
-- [x] Sort the bids by amount after the bidding has ended.
-- [x] Bid Windows not clearing old bids (visual artifact).
-- [x] Allow for the Sync Timer to be movable.
-- [x] Sync Timer not going away for Merge/Overwrite after completion.
-- [x] Add "bid" chat message filters to auto-add people who didn't use addon.
-  - [x] !bid # - Bid a certain amount in whispers.
-  - [x] !bid cancel - Cancel a bid after it has been submitted.
-  - [x] !dkp - Send the msg author's DKP total.
-  - [x] !cap - Send the Guild DKP Cap and the Raid DKP Cap.
----
-
-
+  - [ ] Auto Accept invite option
+  - [ ] Enable / Disable invite whisper filtering
 
 TBC UPDATES:
     
