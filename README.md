@@ -29,3 +29,5 @@ PantheonDKP utilizes a Blind Bid (Second highest amount +1) bidding method curre
     - Members are marked as "Raid Ready" when they are at least LVL 68, or are an officer.
 * Automatic auction winner announcements, tie announcements or free-roll announcements.
 * Raid Tools helper (see Wiki for more info).
+
+[Planned Features](https://github.com/Bengejd/PantheonDKP/wiki/Planned-Features)
