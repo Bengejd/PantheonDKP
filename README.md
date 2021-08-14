@@ -30,4 +30,4 @@ PantheonDKP utilizes a Blind Bid (Second highest amount +1) bidding method curre
 * Automatic auction winner announcements, tie announcements or free-roll announcements.
 * Raid Tools helper (see Wiki for more info).
 
-[Planned Features](https://github.com/Bengejd/PantheonDKP/wiki/Planned-Features)
+[Planned Features & Ideas](https://github.com/Bengejd/PantheonDKP/wiki/Planned-Features)
