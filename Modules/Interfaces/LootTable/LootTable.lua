@@ -81,6 +81,7 @@ function LootTable:Initialize()
 
     sb:SetScript("OnClick", function()
         MODULES.DKPManager:LoadPrevFourWeeks()
+        self:RefreshData()
         toggleSB()
     end)
 
