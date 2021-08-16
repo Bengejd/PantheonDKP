@@ -266,13 +266,17 @@ function Adjust:DropdownChanged()
         amount_box:Show();
     end
 
+    if mainDD.selectedValue == 'Item Win' and amt == 0 then
+        amount_box:SetText(1);
+    end
+
     -- In case someone accidentally puts other characters in the edit box that makes it invalid.
     if amt == nil then
         local num = Utils:RemoveAllNonNumerics(amount_box:getValue())
         amount_box:SetText(num)
     end
 
-    if mainDD.selectedValue == 'Item Win' and amt ~= nil and amt >= 0 then
+    if mainDD.selectedValue == 'Item Win' and amt ~= nil and amt > 0 then
         amount_box:SetText(amt * -1)
     end
 
