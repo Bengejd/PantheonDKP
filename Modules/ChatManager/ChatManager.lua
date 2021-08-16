@@ -41,7 +41,7 @@ function Chat:Initialize()
         end
 
         if shouldProcessMessage then
-            shouldFilterMessage = true
+            shouldFilterMessage = MODULES.GuildManager:IsGuildMember(author)
             if chatCache[author] == nil then
                 chatCache[author] = {};
                 chatCache[author]['messages'] = {}
