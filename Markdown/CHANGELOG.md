@@ -4,13 +4,14 @@
 ### Features
 - Turned on Phase 2 bosses
 - Turned on Phase Decay (50%)
+- Expose chat commands for /pdkp help
 
 ### Bug Fixes
 - Decay entries will not decay members who have less than 31 DKP.
 - The "Load More" button now visually loads the entries correctly.
 - PUG invite messages won't be filtered out by default anymore.
 - Swapping the entry reason from Decay to Item Win will no longer cause a visual freak out (negative zero)
-- Fixed some "Interface failed because of addon" issues... Small Indie company things....
+- Fixed some "Interface failed because of addon" issues... even though it's blizzard's fault, not addons...
 
 ## v4.3.3
 ### Features
