@@ -3,7 +3,7 @@
 ## v4.4.0
 ### Features
 - Turned on Phase 2 bosses
-- Turned on Phase Decay (50%)
+- Turned on Phase Decay (50%) adjustment reason
 - Expose chat commands for /pdkp help
 
 ### Bug Fixes
@@ -12,6 +12,7 @@
 - PUG invite messages won't be filtered out by default anymore.
 - Swapping the entry reason from Decay to Item Win will no longer cause a visual freak out (negative zero)
 - Fixed some "Interface failed because of addon" issues... even though it's blizzard's fault, not addons...
+- Incremented the Interface #
 
 ## v4.3.3
 ### Features
