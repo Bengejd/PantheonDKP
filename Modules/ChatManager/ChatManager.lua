@@ -261,7 +261,7 @@ function Chat:_DisplayHelp()
     }
 
     local whisperCommands = {
-        { ['cmd'] = '!bid #', ['desc'] = 'To place a bid', },
+        { ['cmd'] = '!bid #', ['desc'] = 'To place a bid of amount #', },
         { ['cmd'] = '!bid max', ['desc'] = 'To bid all of your DKP', },
         { ['cmd'] = '!cancel', ['desc'] = 'To cancel a previous bid you\'ve submitted', },
         { ['cmd'] = '!dkp', ['desc'] = 'To request your DKP total', },
@@ -279,12 +279,14 @@ function Chat:_DisplayHelp()
         print(msg)
     end
 
+    print(" ")
+
     PDKP.CORE:Print("Whisper Commands:")
 
     for i = 1, #whisperCommands do
         local helpCmd = whisperCommands[i]
         local cmd = CMD_COLOR .. helpCmd['cmd'] .. ':|r'
-        local msg = slash_addon .. ' ' .. cmd .. ' ' .. helpCmd['desc']
+        local msg = cmd .. ' ' .. helpCmd['desc']
         print(msg)
     end
 
