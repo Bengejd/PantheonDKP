@@ -296,6 +296,10 @@ function Adjust:DropdownChanged()
         end
     end
 
+    if (mainDD.selectedValue == 'Decay' or mainDD.selectedValue == 'Phase') and amount_box:IsVisible() then
+        amount_box:Hide();
+    end
+
     if next(valid_adjustments) ~= nil and tbl_len >= 2 then
         MODULES.Adjustment:Update(valid_adjustments)
     end
