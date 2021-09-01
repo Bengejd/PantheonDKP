@@ -1,6 +1,10 @@
 # PDKP Change Log
 
-## v4.3.4
+## v4.4.0
+### Features
+- Turned on Phase 2 bosses
+- Turned on Phase Decay (50%)
+
 ### Bug Fixes
 - Decay entries will not decay members who have less than 31 DKP.
 - The "Load More" button now visually loads the entries correctly.
