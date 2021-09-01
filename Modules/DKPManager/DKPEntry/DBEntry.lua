@@ -430,7 +430,7 @@ function dbEntry:_GetHistoryText()
         text = 'Item Win - ' .. self.item
     elseif self.reason == _OTHER then
         text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
-    elseif self.reason == _DECAY or self.reason == _DECAY then
+    elseif self.reason == _DECAY or self.reason == _PHASE then
         local dtext = Utils:ternaryAssign(self.reason == _DECAY, 'Weekly Decay', 'Phase Decay')
 
         if self.decayReversal then
@@ -456,7 +456,7 @@ function dbEntry:_GetCollapsedHistoryText()
     }
     local text = texts[self.reason]
 
-    if self.reason == 'Decay' then
+    if self.reason == _DECAY or self.reason == _PHASE then
         local dtext = Utils:ternaryAssign(self.reason == _DECAY, 'Weekly Decay', 'Phase Decay')
 
         if self.decayReversal then
