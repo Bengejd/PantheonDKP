@@ -1,5 +1,12 @@
 # PDKP Change Log
 
+## v4.3.4
+### Bug Fixes
+- Decay entries will not decay members who have less than 31 DKP.
+- The "Load More" button now visually loads the entries correctly.
+- PUG invite messages won't be filtered out by default anymore.
+- Swapping the entry reason from Decay to Item Win will no longer cause a visual freak out (negative zero)
+
 ## v4.3.3
 ### Features
 - Added Github hook to notify discord of new PDKP updates!
