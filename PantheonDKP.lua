@@ -124,6 +124,8 @@ function CORE:_InitializeFrontend()
     for _, module in pairs(PDKP.GUI) do
         module:Initialize()
     end
+
+    PDKP.CORE:Print("/pdkp help for additional commands");
 end
 
 function CORE:_SequentialInitialize(stage)
