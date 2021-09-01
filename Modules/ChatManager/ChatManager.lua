@@ -256,19 +256,21 @@ function Chat:_DisplayHelp()
 
     local helpCommands = {
         { ['cmd'] = 'show / hide', ['desc'] = 'PantheonDKP window', },
-        { ['cmd'] = 'bid <number>', ['desc'] = 'To place a bid', },
-        --{ ['cmd'] = 'bid <itemLink>', ['desc'] = 'To start a bid', },
         { ['cmd'] = 'databaseReset', ['desc'] = 'To wipe your database', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
-        --{ ['cmd'] = '', ['desc'] = '', },
+        { ['cmd'] = 'recalibrateTotals', ['desc'] = 'To recalibrate your DKP totals', },
+    }
+
+    local whisperCommands = {
+        { ['cmd'] = '!bid #', ['desc'] = 'To place a bid', },
+        { ['cmd'] = '!bid max', ['desc'] = 'To bid all of your DKP', },
+        { ['cmd'] = '!cancel', ['desc'] = 'To cancel a previous bid you\'ve submitted', },
+        { ['cmd'] = '!dkp', ['desc'] = 'To request your DKP total', },
+        { ['cmd'] = '!cap', ['desc'] = 'To see what the total guild & raid DKP caps are', },
     }
 
     print(" ")
+
+    PDKP.CORE:Print("Slash Commands:")
 
     for i = 1, #helpCommands do
         local helpCmd = helpCommands[i]
@@ -276,6 +278,16 @@ function Chat:_DisplayHelp()
         local msg = slash_addon .. ' ' .. cmd .. ' ' .. helpCmd['desc']
         print(msg)
     end
+
+    PDKP.CORE:Print("Whisper Commands:")
+
+    for i = 1, #whisperCommands do
+        local helpCmd = whisperCommands[i]
+        local cmd = CMD_COLOR .. helpCmd['cmd'] .. ':|r'
+        local msg = slash_addon .. ' ' .. cmd .. ' ' .. helpCmd['desc']
+        print(msg)
+    end
+
     print(" ")
 end
 
