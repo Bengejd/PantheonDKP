@@ -42,6 +42,7 @@ function DKP:Initialize()
     self.processedCacheEntries = {}
 
     self.rolledBackEntries = {}
+    self.calibratedTotals = {}
 
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
@@ -262,7 +263,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     end
 
     if importType ~= 'Large' then
-        self:RecalibrateDKP();
+        --self:RecalibrateDKP();
         DKP:_UpdateTables();
     end
 
@@ -315,7 +316,7 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 
     if not isImport then
-        self:RecalibrateDKP();
+        --self:RecalibrateDKP();
     end
 end
 
@@ -355,54 +356,30 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
-    --if true then return end;
-    --
-    --local members = MODULES.GuildManager.members
-    --for _, member in pairs(members) do
-    --    member.dkp['total'] = 30
-    --    member:Save()
-    --end
-    --
-    --local entryIDS = {}
-    --
-    --for entryID, _ in pairs(DKP_DB) do
-    --    table.insert(entryIDS, entryID)
-    --end
-    --
-    --table.sort(entryIDS)
-    --
-    --for i=1, #entryIDS do
-    --    local encoded_entry = DKP_DB[entryIDS[i]]
-    --    local decoded_entry = MODULES.CommsManager:DatabaseDecoder(encoded_entry)
-    --    local entry = MODULES.DKPEntry:new(decoded_entry)
-    --
-    --    entry:GetPreviousTotals()
-    --
-    --    if entry.reason == 'Decay' then
-    --        entry:CalculateDecayAmounts(true)
-    --    end
-    --
-    --    local previousDecayEntry = self:GetPreviousDecayEntry(entry);
-    --
-    --    for _, member in pairs(entry.members) do
-    --        local dkp_change = entry.dkp_change
-    --
-    --        if entry.reason == 'Decay' then
-    --            dkp_change = entry['decayAmounts'][member.name]
-    --            if entry.decayReversal and not entry.deleted and dkp_change < 0 then
-    --                if previousDecayEntry ~= nil then
-    --                    dkp_change = previousDecayEntry['decayAmounts'][member.name];
-    --                else
-    --                    dkp_change = math.ceil(dkp_change * -1.1111);
-    --                end
-    --            end
-    --        end
-    --
-    --        member.dkp['total'] = member.dkp['total'] + dkp_change
-    --        member:Save()
-    --    end
-    --end
-    --self:_UpdateTables();
+    PDKP.CORE:Print("Recalibrating DKP totals... this may cause some temporary lag...");
+
+    self:RollBackEntries({ ['id']  = 0 } );
+
+    local members = MODULES.GuildManager.members
+    for _, member in pairs(members) do
+        self.calibratedTotals[member.name] = member.dkp['total'];
+        member.dkp['total'] = 30
+        member:Save()
+    end
+
+    self:RollForwardEntries();
+    self:_UpdateTables();
+
+    local calibratedMembers = {};
+    for _, member in pairs(members) do
+        local memberDKP = member:GetDKP();
+        if memberDKP ~= self.calibratedTotals[member.name] then
+            table.insert(calibratedMembers, member);
+            PDKP:PrintD(member.name, memberDKP, self.calibratedTotals[member.name]);
+        end
+    end
+
+    PDKP.CORE:Print('Updated ', #calibratedMembers, 'members totals');
 end
 
 function DKP:RollBackEntries(decayEntry)
@@ -414,66 +391,6 @@ function DKP:RollBackEntries(decayEntry)
             table.insert(self.rolledBackEntries, entry)
         end
     end
-
-    --if #keys_to_rollback == 0 then return end;
-    --
-    --for i=1, #keys_to_rollback do
-    --    local encoded_entry = DKP_DB[keys_to_rollback[i]]
-    --end
-
-    --[[
-    for entryID, _ in pairs(DKP_DB) do
-        table.insert(all_keys, entryID)
-    end
-    table.sort(all_keys)
-    if #all_keys == 0 then return end
-   --]]
-    --[[
-    if all_keys[#all_keys] > decayEntry.id then
-        for i=1, #all_keys do
-            local key = all_keys[i]
-           if key > decayEntry.id then
-               table.insert(keys_to_rollback, key)
-            end
-        end
-    end
-    ---- Reverse them in order from newest to oldest.
-    table.sort(keys_to_rollback, function(a,b) return a>b end)
-    --]]
-
-    --for i=1, #keys_to_rollback do
-    --    local encoded_entry = DKP_DB[keys_to_rollback[i]]
-    --    local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
-    --    local entry = MODULES.DKPEntry:new(decoded_entry)
-    --    table.insert(entries, entry)
-    --end
-    --
-    --if #entries >= 1 then
-    --    PDKP:PrintD("Rolling back", #entries, "Entries")
-    --    for i=1, #entries do
-    --        local entry = entries[i]
-    --
-    --        if entry.reason == 'Decay' and (entry['decayAmounts'] == nil or next(entry['decayAmounts']) == nil) then
-    --            entry:CalculateDecayAmounts(true)
-    --        end
-    --
-    --        for _, member in pairs(entry.members) do
-    --            if member ~= nil then
-    --                local dkp_change = entry.dkp_change
-    --                if entry.reason == 'Decay' then
-    --                    if entry['decayAmounts'][member.name] == nil then
-    --                        entry:CalculateDecayAmounts(true)
-    --                        self:RecalibrateDKP();
-    --                    end
-    --                    dkp_change = entry['decayAmounts'][member.name]
-    --                end
-    --                member.dkp['total'] = member.dkp['total'] + (dkp_change * -1)
-    --                member:Save()
-    --            end
-    --        end
-    --        table.insert(self.rolledBackEntries, entry)
-    --    end
-    --end
 end
 
 function DKP:RollForwardEntries()
@@ -497,9 +414,9 @@ function DKP:RollForwardEntries()
         shouldCalibrate = true
     end
     if shouldCalibrate then
-        self.calibrationTimer = C_Timer.NewTicker(1, function()
-            self:RecalibrateDKP()
-        end, 1)
+        --self.calibrationTimer = C_Timer.NewTicker(1, function()
+        --    self:RecalibrateDKP()
+        --end, 1)
     end
 end
 

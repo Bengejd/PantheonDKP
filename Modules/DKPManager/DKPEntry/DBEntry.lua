@@ -156,7 +156,6 @@ function dbEntry:UndoEntry()
         end
         member:UpdateDKP(dkp_change)
         member:Save();
-        --PDKP:PrintD("Undo", self.reason, dkp_change)
     end
 end
 
@@ -172,6 +171,9 @@ function dbEntry:ApplyEntry()
             else
                 dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
                 dkp_change = dkp_change * -1;
+            end
+            if memberDKP <= 30 then
+                dkp_change = 0;
             end
             self.decayAmounts[member.name] = dkp_change;
         end
