@@ -258,7 +258,7 @@ function Adjust:DropdownChanged()
         amount_box:SetEnabled(true)
     end
 
-    if mainDD.selectedValue == 'Decay' and amount_box:IsVisible() then
+    if (mainDD.selectedValue == 'Decay' or mainDD.selectedValue == 'Phase') and amount_box:IsVisible() then
         amount_box:SetText(0)
         amount_box:Hide()
         return Adjust:DropdownChanged();

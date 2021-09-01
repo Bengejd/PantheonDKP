@@ -287,6 +287,12 @@ function DKP:DeleteEntry(entry, sender, isImport)
         temp_entry['previousDecayId'] = importEntry['id']
     end
 
+    if importEntry.reason == 'Phase' then
+        temp_entry['reason'] = 'Phase'
+        temp_entry['decayReversal'] = true
+        temp_entry['previousDecayId'] = importEntry['id']
+    end
+
     if self:GetEntryByID(entry.id) ~= nil then
         if importEntry['deleted'] and sender ~= importEntry['deletedBy'] then
             PDKP:PrintD(entry['id'], "Entry has previously been deleted, skipping delete sequence")
@@ -300,7 +306,7 @@ function DKP:DeleteEntry(entry, sender, isImport)
             self.entries[entry.id] = importEntry
         end
     else
-        if entry.reason ~= "Decay" then
+        if entry.reason ~= "Decay" and entry.reason ~= "Phase" then
             PDKP:PrintD(entry['id'], "Entry was not found during delete, importing it first...");
             local encoded_entry = CommsManager:DatabaseEncoder(entry);
             self:ImportEntry2(entry, CommsManager:_Adler(encoded_entry), 'Large');
@@ -400,7 +406,7 @@ function DKP:RollForwardEntries()
     local shouldCalibrate = #self.rolledBackEntries >= 1
     for i=#self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
-        if entry.reason == 'Decay' then
+        if entry.reason == 'Decay' or entry.reason == 'Phase' then
             entry:GetPreviousTotals(true);
             entry:GetDecayAmounts(true);
         end

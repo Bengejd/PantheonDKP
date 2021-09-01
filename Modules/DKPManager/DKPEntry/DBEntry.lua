@@ -17,12 +17,12 @@ local _BOSS_KILL = 'Boss Kill'
 local _ITEM_WIN = 'Item Win'
 local _OTHER = 'Other'
 local _DECAY = 'Decay'
---local _PHASE = 'Phase'
+local _PHASE = 'Phase'
 
 local _DECAY_AMOUNT = 0.9;
 local _DECAY_REVERSAL = 1.111;
---local _PHASE_AMOUNT = 0.5;
---local _PHASE_REVERSAL = 2.0;
+local _PHASE_AMOUNT = 0.5;
+local _PHASE_REVERSAL = 2.0;
 
 dbEntry.__index = dbEntry
 
@@ -105,7 +105,8 @@ function dbEntry:Save(updateTable, exportEntry, skipLockouts)
     end
 end
 
-function dbEntry:CalculateDecayAmounts() end
+function dbEntry:CalculateDecayAmounts()
+end
 
 --- Public Functions ---
 
@@ -116,6 +117,14 @@ function dbEntry:GetDecayAmounts(refresh)
             if self.decayAmounts[member.name] == nil or refresh then
                 if not self.decayReversal or self.deleted then
                     self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _DECAY_AMOUNT, 1);
+                end
+            end
+        end
+    elseif self.reason == _PHASE and (next(self.decayAmounts) == nil or refresh) then
+        for _, member in pairs(self.members) do
+            if self.decayAmounts[member.name] == nil or refresh then
+                if not self.decayReversal or self.deleted then
+                    self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _PHASE_AMOUNT, 1);
                 end
             end
         end
@@ -137,7 +146,7 @@ function dbEntry:MarkAsDeleted(deletedBy)
     self.deleted = true
     self.deletedBy = deletedBy
 
-    if self.reason == 'Decay' then
+    if self.reason == 'Decay' or self.reason == "Phase" then
         self.decayReversal = true
     end
 end
@@ -153,6 +162,12 @@ function dbEntry:UndoEntry()
             else
                 dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
             end
+        elseif self.reason == _PHASE then
+            if self.decayReversal and not self.deleted then
+                dkp_change = memberDKP - ceil(memberDKP * _PHASE_REVERSAL);
+            else
+                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _PHASE_AMOUNT, 1);
+            end
         end
         member:UpdateDKP(dkp_change)
         member:Save();
@@ -165,11 +180,25 @@ function dbEntry:ApplyEntry()
         local memberDKP = member:GetDKP();
         local dkp_change = self.dkp_change;
         if self.reason == _DECAY then
-            if self.decayReversal and not self.deleted then -- Actual decay Reversal
+            if self.decayReversal and not self.deleted then
+                -- Actual decay Reversal
                 dkp_change = memberDKP - ceil(memberDKP * _DECAY_REVERSAL)
                 dkp_change = dkp_change * -1;
             else
                 dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
+                dkp_change = dkp_change * -1;
+            end
+            if memberDKP <= 30 then
+                dkp_change = 0;
+            end
+            self.decayAmounts[member.name] = dkp_change;
+        elseif self.reason == _PHASE then
+            if self.decayReversal and not self.deleted then
+                -- Actual decay Reversal
+                dkp_change = memberDKP - ceil(memberDKP * _PHASE_REVERSAL)
+                dkp_change = dkp_change * -1;
+            else
+                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _PHASE_AMOUNT, 1);
                 dkp_change = dkp_change * -1;
             end
             if memberDKP <= 30 then
@@ -205,7 +234,7 @@ function dbEntry:GetSaveDetails()
         self.sd['item'] = self.item
     elseif self.reason == _OTHER then
         self.sd['other_text'] = self.other_text
-    elseif self.reason == _DECAY then
+    elseif self.reason == _DECAY or self.reason == _PHASE then
         if self.previousTotals == nil or next(self.previousTotals) == nil then
             self:GetPreviousTotals()
             self:CalculateDecayAmounts()
@@ -221,7 +250,7 @@ function dbEntry:GetSaveDetails()
         ['pugNames'] = self.pugNames,
     }
 
-    if self.reason == _DECAY then
+    if self.reason == _DECAY or self.reason == _PHASE then
         dependants['decayAmounts'] = self.decayAmounts
     end
 
@@ -290,7 +319,7 @@ function dbEntry:RemoveMember(name)
     for i = 1, #self.names do
         if self.names[i] == name then
             memberIndex = i
-            break;
+            break ;
         end
     end
 
@@ -360,7 +389,9 @@ function dbEntry:_GetFormattedNames()
         formattedNames = formattedNames .. member.formattedName
     end
 
-    tsort(self.pugNames, function(a,b) return a < b end)
+    tsort(self.pugNames, function(a, b)
+        return a < b
+    end)
 
     for _, nonMember in pairs(self.pugNames) do
         if nonMember ~= nil then
@@ -375,11 +406,13 @@ end
 function dbEntry:_GetChangeText()
     local color = Utils:ternaryAssign(self.dkp_change >= 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
 
-    if self.reason == 'Decay' then
+    if self.reason == 'Decay' or self.reason == 'Phase' then
+        local percent = Utils:ternaryAssign(self.reason == "Decay", "10% DKP", "50% DKP");
+
         if self.decayReversal then
-            return Utils:FormatTextColor('10% DKP', MODULES.Constants.SUCCESS)
+            return Utils:FormatTextColor(percent, MODULES.Constants.SUCCESS)
         end
-        return Utils:FormatTextColor('10% DKP', MODULES.Constants.WARNING)
+        return Utils:FormatTextColor(percent, MODULES.Constants.WARNING)
     else
         return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
     end
@@ -397,11 +430,13 @@ function dbEntry:_GetHistoryText()
         text = 'Item Win - ' .. self.item
     elseif self.reason == _OTHER then
         text = Utils:ternaryAssign(not (Utils:IsEmpty(self.other_text)), 'Other - ' .. self.other_text, 'Other')
-    elseif self.reason == _DECAY then
+    elseif self.reason == _DECAY or self.reason == _DECAY then
+        local dtext = Utils:ternaryAssign(self.reason == _DECAY, 'Weekly Decay', 'Phase Decay')
+
         if self.decayReversal then
-            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
+            return Utils:FormatTextColor(dtext .. ' - Reversal', MODULES.Constants.SUCCESS)
         end
-        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
+        return Utils:FormatTextColor(dtext, MODULES.Constants.WARNING)
     end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
@@ -416,15 +451,18 @@ function dbEntry:_GetCollapsedHistoryText()
         ['Boss Kill'] = self.boss,
         ['Item Win'] = 'Item Win - ' .. self.item,
         ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
-        ['Decay'] = 'Weekly Decay'
+        ['Decay'] = 'Weekly Decay',
+        ['Phase'] = 'Phase Decay',
     }
     local text = texts[self.reason]
 
     if self.reason == 'Decay' then
+        local dtext = Utils:ternaryAssign(self.reason == _DECAY, 'Weekly Decay', 'Phase Decay')
+
         if self.decayReversal then
-            return Utils:FormatTextColor('Weekly Decay - Reversal', MODULES.Constants.SUCCESS)
+            return Utils:FormatTextColor(dtext .. ' - Reversal', MODULES.Constants.SUCCESS)
         end
-        return Utils:FormatTextColor('Weekly Decay', MODULES.Constants.WARNING)
+        return Utils:FormatTextColor(dtext, MODULES.Constants.WARNING)
     end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
