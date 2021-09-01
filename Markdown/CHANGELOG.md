@@ -10,6 +10,7 @@
 - The "Load More" button now visually loads the entries correctly.
 - PUG invite messages won't be filtered out by default anymore.
 - Swapping the entry reason from Decay to Item Win will no longer cause a visual freak out (negative zero)
+- Fixed some "Interface failed because of addon" issues... Small Indie company things....
 
 ## v4.3.3
 ### Features
