@@ -1,6 +1,6 @@
 # PDKP Change Log
 
-## v4.4.0
+## v4.4.1
 ### Features
 - Turned on Phase 2 bosses
 - Turned on Phase Decay (50%) adjustment reason
