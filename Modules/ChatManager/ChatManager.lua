@@ -148,21 +148,7 @@ function Chat:_HandleDKPMsg(msg)
     elseif cmd == '!dkp' then
         chatMessage = "You have " .. memberDKP .. " dkp";
     elseif cmd == '!cap' then
-        local members = MODULES.GuildManager.members;
-        local _, groupMembers = MODULES.GroupManager:GetRaidMemberObjects();
-        local guildCap, groupCap = 0, 0;
-        for _, groupMember in pairs(groupMembers) do
-            local dkp = groupMember:GetDKP();
-            if dkp > groupCap then
-                groupCap = dkp;
-            end
-        end
-        for _, guildMember in pairs(members) do
-            local dkp = guildMember:GetDKP();
-            if dkp > guildCap then
-                guildCap = dkp;
-            end
-        end
+        local guildCap, groupCap = MODULES.DKPManager:GetCaps()
         chatMessage = "[Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap);
     end
 
@@ -245,6 +231,7 @@ function Chat:_HandleSlashCommands(msg)
         ['bossKillTest'] = true,
         ['watchFramerate'] = true,
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
+        ['testDKPCap'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)

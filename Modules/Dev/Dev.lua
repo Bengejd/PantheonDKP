@@ -68,7 +68,21 @@ function Dev:HandleSlashCommands(msg)
     elseif cmd == 'registerCommTest' then
         MODULES.CommsManager:RegisterComms()
         PDKP:PrintD('Unregistering Comms');
+    elseif cmd == 'testDKPCap' then
+        self:TestMaxDKP()
     end
+end
+
+function Dev:TestMaxDKP()
+
+    local guildCapPercent = MODULES.DKPManager:GetMaxBid();
+    local guildCap = MODULES.DKPManager:GetCaps();
+
+    local output = "[Guild Cap]: " .. tostring(guildCap)
+    local outputPercent = "90% [Guild Cap]: " .. tostring(guildCapPercent)
+
+    PDKP:PrintD(output)
+    PDKP:PrintD(outputPercent)
 end
 
 function Dev:TestAutomaticEntries()

@@ -659,4 +659,28 @@ function DKP:GetMyDKP()
     end
 end
 
+function DKP:GetCaps()
+    local members = MODULES.GuildManager.members;
+    local _, groupMembers = MODULES.GroupManager:GetRaidMemberObjects();
+    local guildCap, groupCap = 0, 0;
+    for _, groupMember in pairs(groupMembers) do
+        local dkp = groupMember:GetDKP();
+        if dkp > groupCap then
+            groupCap = dkp;
+        end
+    end
+    for _, guildMember in pairs(members) do
+        local dkp = guildMember:GetDKP();
+        if dkp > guildCap then
+            guildCap = dkp;
+        end
+    end
+    return guildCap, groupCap;
+end
+
+function DKP:GetMaxBid()
+    local guildCap = self:GetCaps()
+    return math.floor(guildCap * 0.9);
+end
+
 MODULES.DKPManager = DKP
