@@ -2,6 +2,7 @@
 ## v4.4.2
 ### Features
 - Turned on 90% Max DKP Bid restriction (See discord for more info).
+- You are now able to hide/show the minimap button.
 
 ### Bug Fixes
 - Fixed "Promote Leadership" button.

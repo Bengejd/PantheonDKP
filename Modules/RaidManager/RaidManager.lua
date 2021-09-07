@@ -19,7 +19,7 @@ function Raid:Initialize()
 
     self.ignore_from = db['ignore_from']
     self.invite_commands = db['invite_commands']
-    self.ignore_pugs = db['ignore_pugs'] or false
+    self.ignore_pugs = db['ignore_pugs']
     self.invite_spam_text = "[TIME] [RAID] invites going out. Pst for Invite"
 
     if Utils:tEmpty(self.invite_commands) then

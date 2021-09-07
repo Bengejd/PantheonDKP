@@ -117,7 +117,7 @@ function RaidTools:Initialize()
 
     -- Automatically resizes the Inv_control_group based on the editBoxes size.
     GROUPS['inv_control_group'].resize = function(diff)
-        if diff < -10 then
+        if diff and diff < -10 then
             GROUPS['inv_control_group']:SetHeight(425 - diff)
         else
             GROUPS['inv_control_group']:SetHeight(425)

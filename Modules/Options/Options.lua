@@ -20,31 +20,54 @@ function Options:SetupLDB()
         type = "group",
         childGroups = "tab",
         args = {
+            showMinimapButton = {
+                type = "toggle",
+                name = "Show the Minimap button",
+                desc = "Display a Minimap button to quickly access the addon interface or options",
+                get = function(info) return not self.db['minimap'].hide end,
+                set = function(info, val)
+                    if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
+                    self.db['minimap'].hide = not val
+                end,
+                width = 2.5,
+                order = 1,
+            },
+            ignorePUGS = {
+                type = "toggle",
+                name = "Ignore PUGS",
+                desc = "Ignore PUG auto invite requests",
+                get = function(info) return not self.db['ignore_pugs'] end,
+                set = function(info, val)
+                    GUI.RaidTools.options['ignore_PUGS']:SetChecked(val)
+                    self.db['ignore_pugs'] = not val
+                end,
+                width = 2.5,
+                order = 2,
+            },
             tab1 = {
                 type = "group",
-                name = "Settings",
+                name = "Syncing",
                 width = "full",
                 order = 1,
                 args = {
-
                     spacer1 = {
                         type = "description",
-                        name = " ",
+                        name = "...Coming soon...",
                         width = "full",
                         order = 2,
                     },
-                    showMinimapButton = {
-                        type = "toggle",
-                        name = "Show the Minimap button",
-                        desc = "Display a Minimap button to quickly access the addon interface or options",
-                        get = function(info) return not self.db['minimap'].hide end,
-                        set = function(info, val)
-                            if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
-                            self.db['minimap'].hide = not val
-                        end,
-                        width = 2.5,
-                        order = 5,
-                    },
+                    --disableSyncs = {
+                    --    type = "text",
+                    --    name = "Disable Syncing",
+                    --    desc = "Display a Minimap button to quickly access the addon interface or options",
+                    --    get = function(info) return not self.db['minimap'].hide end,
+                    --    set = function(info, val)
+                    --        if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
+                    --        self.db['minimap'].hide = not val
+                    --    end,
+                    --    width = 2.5,
+                    --    order = 5,
+                    --},
                 },
             },
         }
@@ -62,6 +85,8 @@ function Options:_InitializeDBDefaults()
     self.db['ignore_from'] = self.db['ignore_from'] or {}
     self.db['minimap'] = self.db['minimap'] or { ['pos'] = 207, ['hide'] = false }
     self.db['sync'] = self.db['sync'] or {}
+    self.db['ignore_pugs'] = self.db['ignore_pugs'] or true
+    self.db['invite_commands'] = self.db['invite_commands'] or { 'inv', 'invite' }
 end
 
 function Options:IsPlayerIgnored(playerName)
