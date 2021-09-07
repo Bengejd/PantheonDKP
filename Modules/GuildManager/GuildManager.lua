@@ -16,7 +16,6 @@ local GuildManager = {}
 
 function GuildManager:Initialize()
     self.initiated = false
-
     self.bankIndex = nil
     self.officers = {}
     self.classLeaders = {}
@@ -24,6 +23,7 @@ function GuildManager:Initialize()
     self.members = {}
     self.memberNames = {}
     self.guildies = {}
+    self.guildFrameOpened = false;
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
     PDKP.player = {}
@@ -33,13 +33,10 @@ function GuildManager:Initialize()
         return
     end
 
-    self:_GetLeadershipRanks()
-
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
 
     self:GetMembers()
-
     self.initiated = true
 end
 
@@ -57,6 +54,9 @@ end
 
 function GuildManager:GetMembers()
     GuildRoster()
+
+    self:_GetLeadershipRanks()
+
     self.classLeaders, self.officers, self.online = {}, {}, {}
 
     self.numOfMembers, self.numOnlineMembers, _ = GetNumGuildMembers()
@@ -131,14 +131,20 @@ end
 
 function GuildManager:_GetLeadershipRanks()
     local numRanks = GuildControlGetNumRanks()
-    for i = 2, numRanks do
+    for i = 1, numRanks do
         local perm = C_GuildInfo.GuildControlGetRankFlags(i)
         local listen, speak, promote, demote, invite, kick, o_note = perm[3], perm[4], perm[5], perm[6], perm[7], perm[8], perm[12]
         if listen and speak and promote and demote and invite and kick and o_note and i ~= 1 then
-            self.officerRank = i
+            self.officerRank = i -1
         elseif invite and kick and promote and demote then
-            self.classLeadRank = i
+            self.classLeadRank = i -1
         end
+
+        --local testOut = string.format("Rank %d: %s, listen: %s, speak: %s, promote: %s, demote: %s, invite: %s,
+        --kick: %s, o_note: %s", i, GuildControlGetRankName(i), tostring(listen), tostring(speak), tostring(promote),
+        --tostring(demote), tostring(invite), tostring(kick), tostring(o_note))
+        --PDKP:PrintD(testOut)
+
     end
 end
 
