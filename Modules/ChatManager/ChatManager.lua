@@ -108,6 +108,7 @@ function Chat:_HandleDKPMsg(msg)
     local cmd, amt, author = msg['cmd'], msg['amt'], msg['author'];
     local member = MODULES.GuildManager:GetMemberByName(author);
     local memberDKP = member:GetDKP();
+    local bidCap = MODULES.DKPManager:GetMaxBid()
 
     local chatMessage = nil;
 
@@ -129,6 +130,13 @@ function Chat:_HandleDKPMsg(msg)
 
             if bid and type(bid) == "number" then
                 if bid <= memberDKP and bid >= 1 then
+                    local bidAdjusted = false;
+
+                    if bid > bidCap then
+                        bid = bidCap
+                        bidAdjusted = true;
+                    end
+
                     local bidder_info = { ['name'] = author, ['bid'] = bid, ['dkpTotal'] = memberDKP }
                     MODULES.CommsManager:SendCommsMessage('AddBid', bidder_info)
                     if amt == "cancel" then

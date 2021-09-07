@@ -281,7 +281,18 @@ function PDKP_OnComm_BidSync(comm, message, sender)
             return
         end
         local member = MODULES.GuildManager:GetMemberByName(sender)
-        local bidder_info = { ['name'] = member.name, ['bid'] = data, ['dkpTotal'] = member:GetDKP('total') }
+        local maxBid = MODULES.DKPManager:GetMaxBid()
+        local memberDKP = member:GetDKP('total');
+
+        if data > maxBid then
+            data = maxBid
+        end
+
+        if data > memberDKP then
+            data = memberDKP
+        end
+
+        local bidder_info = { ['name'] = member.name, ['bid'] = data, ['dkpTotal'] = memberDKP }
         CommsManager:SendCommsMessage('AddBid', bidder_info)
     elseif self.ogPrefix == 'stopBids' then
         if Auction:IsAuctionInProgress() then

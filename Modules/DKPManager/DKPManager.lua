@@ -679,7 +679,7 @@ function DKP:GetCaps()
 end
 
 function DKP:GetMaxBid()
-    local guildCap = self:GetCaps()
+    local guildCap, _ = self:GetCaps()
     return math.floor(guildCap * 0.9);
 end
 

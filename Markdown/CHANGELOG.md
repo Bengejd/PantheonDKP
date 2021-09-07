@@ -1,4 +1,10 @@
 # PDKP Change Log
+## v4.4.2
+### Features
+- Turned on 90% Max DKP Bid restriction (See discord for more info).
+
+### Bug Fixes
+- Fixed "Promote Leadership" button.
 
 ## v4.4.1
 ### Features
