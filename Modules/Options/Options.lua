@@ -1,6 +1,7 @@
 local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
+local GUI = PDKP.GUI
 
 local Options = {}
 
@@ -9,11 +10,57 @@ local strlower = string.lower
 function Options:Initialize()
     self.db = MODULES.Database:Settings()
     self:_InitializeDBDefaults()
+    self:SetupLDB()
+end
+
+function Options:SetupLDB()
+    local pdkp_options = {
+        name = "PantheonDKP",
+        handler = PDKP,
+        type = "group",
+        childGroups = "tab",
+        args = {
+            tab1 = {
+                type = "group",
+                name = "Settings",
+                width = "full",
+                order = 1,
+                args = {
+
+                    spacer1 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 2,
+                    },
+                    showMinimapButton = {
+                        type = "toggle",
+                        name = "Show the Minimap button",
+                        desc = "Display a Minimap button to quickly access the addon interface or options",
+                        get = function(info) return not self.db['minimap'].hide end,
+                        set = function(info, val)
+                            if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
+                            self.db['minimap'].hide = not val
+                        end,
+                        width = 2.5,
+                        order = 5,
+                    },
+                },
+            },
+        }
+    }
+
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("PantheonDKP", pdkp_options, nil)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("PantheonDKP"):SetParent(InterfaceOptionsFramePanelContainer)
 end
 
 function Options:_InitializeDBDefaults()
+    if type(self.db['minimap']) ~= 'table' then
+        self.db['minimap'] = nil;
+    end
+
     self.db['ignore_from'] = self.db['ignore_from'] or {}
-    self.db['minimap'] = self.db['minimap'] or 207
+    self.db['minimap'] = self.db['minimap'] or { ['pos'] = 207, ['hide'] = false }
     self.db['sync'] = self.db['sync'] or {}
 end
 

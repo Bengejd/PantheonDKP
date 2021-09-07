@@ -14,16 +14,19 @@ local info = 'F4A460'
 
 local clickText = Utils:FormatTextColor('Click', info) .. ' to open PDKP. '
 local shiftRightClickText = Utils:FormatTextColor('Shift-Right-Click', info) .. ' to open Officer push'
---local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
+local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
+--local hideMiniMapText = Utils:FormatTextColor('Alt-Right-Click', info) .. ' to hide the map icon'
 
 local Dialogs;
 
 function map:Initialize()
-    local miniDB = MODULES.Database:Settings()
+    local settingsDB = MODULES.Database:Settings();
+    local miniDB = settingsDB['minimap'];
     Dialogs = GUI.Dialogs;
 
-    map.LDB = LibStub("LibDataBroker-1.1"):NewDataObject("PantheonDKP", {
+    self.LDB = LibStub("LibDataBroker-1.1")
+    self.broker = self.LDB:NewDataObject('PantheonDKP', {
         type = "launcher",
         text = 'PantheonDKP',
         icon = MODULES.Media.PDKP_ADDON_ICON,
@@ -37,27 +40,44 @@ function map:Initialize()
         OnClick = function(_, button)
             map:HandleIconClicks(button)
         end
-    })
-    local icon = LibStub("LibDBIcon-1.0")
-    icon:Register('PantheonDKP', map.LDB, miniDB)
+    });
+
+    self.icon = LibStub("LibDBIcon-1.0")
+    self.icon:Register('PantheonDKP', self.broker, miniDB)
+
+    if miniDB['hide'] then
+        self:Hide();
+    else
+        self:Show()
+    end
+end
+
+function map:Show()
+    self.icon:Show("PantheonDKP")
+    self.icon:Show("PantheonDKP")
+end
+
+function map:Hide()
+    self.icon:Hide("PantheonDKP")
+    self.icon:Hide("PantheonDKP")
 end
 
 function map:_GetToolTipTexts()
     local title = { "PantheonDKP " .. MODULES.Constants.COLORED_ADDON_VERSION }
     local lineBreak = { " ", 1, 1, 1, 1 }
     local leftClick = { clickText, 1, 1, 1 }
-    --local rightClick = { rightClickText, 1, 1, 1 }
+    local rightClick = { rightClickText, 1, 1, 1 }
     local shiftRightClick = { shiftRightClickText, 1, 1, 1 }
     local databaseResetClick = { resetDatabaseText, 1, 1, 1 }
 
-    local texts = { title, lineBreak, leftClick,
-        --rightClick
-    }
+    local texts = { title, lineBreak, leftClick, rightClick }
 
     if PDKP.canEdit then
         tinsert(texts, lineBreak)
         tinsert(texts, shiftRightClick)
     end
+
+    --tinsert(texts, lineBreak)
 
     tinsert(texts, lineBreak)
     tinsert(texts, databaseResetClick)
@@ -116,6 +136,9 @@ function map:HandleIconClicks(buttonType)
             [hasShift and not hasAlt and not hasCtrl] = function()
                 --print('Left, hasShift');
             end,
+            [hasAlt and not hasShift and not hasCtrl] = function()
+
+            end,
             ['default'] = function()
                 if pdkp_frame:IsVisible() then
                     pdkp_frame:Hide()
@@ -133,11 +156,8 @@ function map:HandleIconClicks(buttonType)
                 ReloadUI()
             end,
             ['default'] = function()
-                if pdkp_frame:IsVisible() then
-                    pdkp_frame:Hide()
-                else
-                    pdkp_frame:Show()
-                end
+                InterfaceOptionsFrame_Show()
+                InterfaceOptionsFrame_OpenToCategory("PantheonDKP")
             end,
         }
     }
