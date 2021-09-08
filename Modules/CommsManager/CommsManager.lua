@@ -2,6 +2,7 @@ local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils;
+local GUtils = PDKP.GUtils;
 
 local Comms = {}
 
@@ -12,6 +13,18 @@ function Comms:Initialize()
     self.allow_from_self = {}
     self.allow_in_combat = {}
     self.channels = {}
+
+    self.officerCommsRegistered = false
+
+    local opts = {
+        ['name'] = 'OFFICER_COMMS',
+        ['events'] = {'GROUP_ROSTER_UPDATE'},
+        ['tickInterval'] = 0.5,
+        ['onEventFunc'] = function()
+            self:RegisterOfficerAdComms()
+        end
+    }
+    self.eventFrame = GUtils:createThrottledEventFrame(opts)
 end
 
 function PDKP_OnCommsReceived(prefix, message, _, sender)
@@ -32,8 +45,8 @@ function Comms:RegisterComms()
         ['SyncLarge'] = { ['combat'] = false, },
         ['SyncOver'] = { ['combat'] = false, },
 
-        --['SyncAd'] = { ['combat'] = false },
-        --['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = false, },
+        ['SyncAd'] = { ['combat'] = false },
+        ['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = true, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
@@ -61,6 +74,12 @@ function Comms:RegisterComms()
         if comm.allowed_from_self then
             self.allow_from_self[comm.prefix] = true
         end
+    end
+end
+
+function Comms:RegisterOfficerAdComms()
+    for member in pairs(MODULES.GuildManager:GetOfficers()) do
+        print(member.name)
     end
 end
 

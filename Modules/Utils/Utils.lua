@@ -17,6 +17,8 @@ local substr = string.sub;
 local daysInYear = 365
 --local hoursInDay = 24
 local secondsInHour = 60 * 60
+local minutesInDay = 60 * 24
+local secondsInDay = 60 * 60 * 24
 
 function Utils:Initialize()
     self:GetResetInfo()
@@ -137,9 +139,17 @@ end
 
 -- Subtracts two timestamps from one another.
 function Utils:SubtractTime(baseTime, subTime)
-    local secondsSinceSync = (subTime - baseTime) -- the seconds since our last sync
-    local minsSinceFirstReset = floor(secondsSinceSync / 60) -- Minutes since last sync.
-    return minsSinceFirstReset
+    local diffInSeconds = (subTime - baseTime) -- the seconds since our last sync
+    local diffInMins = floor(diffInSeconds / 60) -- Minutes since last sync.
+    return diffInSeconds, diffInMins
+end
+
+function Utils:GetSecondsInDay()
+    return secondsInDay
+end
+
+function Utils:GetMinutesInDay()
+    return minutesInDay
 end
 
 -----------------------------

@@ -193,4 +193,30 @@ function Member:_GetMemberData(index)
     self.lockouts = {}
 end
 
+function Member:IsSyncReady()
+    if not self.isInLeadership then return false end
+
+    local syncSettings = MODULES.Database:Sync()
+
+    if syncSettings['autoSync'] == nil or syncSettings['autoSync'] == false then
+        return false;
+    else
+        local server_time = GetServerTime()
+        local officerSyncs = syncSettings['officerSyncs']
+        local lastSync = officerSyncs[self.name]
+        if lastSync == nil then
+            return true
+        else
+            local timeSinceSync = Utils:SubtractTime(server_time, lastSync)
+            return timeSinceSync > Utils:GetSecondsInDay()
+        end
+    end
+end
+
+function Member:MarkSyncReceived()
+    local syncSettings = MODULES.Database:Sync()
+    local server_time = GetServerTime()
+    syncSettings['officerSyncs'][self.name] = server_time
+end
+
 MODULES.Member = Member;

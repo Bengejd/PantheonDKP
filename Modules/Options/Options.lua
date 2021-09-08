@@ -86,7 +86,16 @@ function Options:_InitializeDBDefaults()
     self.db['minimap'] = self.db['minimap'] or { ['pos'] = 207, ['hide'] = false }
     self.db['sync'] = self.db['sync'] or {}
     self.db['ignore_pugs'] = self.db['ignore_pugs'] or true
-    self.db['invite_commands'] = self.db['invite_commands'] or { 'inv', 'invite' }
+    self.db['invite_commands'] = self.db['invite_commands'] or { 'inv', 'invite' };
+
+    if next(self.db['sync']) == nil then
+        self.db['sync'] = {
+            ['lastSyncSent'] = nil,
+            ['officerSyncs'] = {},
+            ['totalEntries'] = 0,
+            ['autoSync'] = true,
+        }
+    end
 end
 
 function Options:IsPlayerIgnored(playerName)

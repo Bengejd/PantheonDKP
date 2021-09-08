@@ -148,4 +148,8 @@ function GuildManager:_GetLeadershipRanks()
     end
 end
 
+function GuildManager:GetOfficers()
+    return self.officers;
+end
+
 MODULES.GuildManager = GuildManager

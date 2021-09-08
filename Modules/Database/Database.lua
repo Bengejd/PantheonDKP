@@ -88,6 +88,10 @@ function DB:Settings()
     return PDKP_DB[self.server_faction_guild]['settings']
 end
 
+function DB:Sync()
+    return PDKP_DB[self.server_faction_guild]['settings']['sync']
+end
+
 function DB:Loot()
     return PDKP_DB[self.server_faction_guild]['loot']
 end
