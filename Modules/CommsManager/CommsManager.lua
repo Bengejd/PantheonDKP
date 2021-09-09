@@ -80,7 +80,7 @@ end
 
 function Comms:RegisterOfficerAdComms()
     for member in pairs(MODULES.GuildManager:GetOfficers()) do
-        print(member.name)
+        --print(member.name)
     end
 end
 
