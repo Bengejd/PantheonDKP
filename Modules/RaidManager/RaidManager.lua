@@ -51,9 +51,11 @@ function Raid:PromoteLeadership(justDKPOfficer)
             local m = GuildManager:GetMemberByName(name)
             if m ~= nil then
                 if (m.isInLeadership or isML) and justDKPOfficer == nil then
+                    print('Promoting to assistant');
                     PromoteToAssistant('raid' .. i)
                 elseif justDKPOfficer == true and GroupManager:IsMemberDKPOfficer(name) then
                     PromoteToAssistant('raid' .. i)
+                    return
                 end
             end
         end
