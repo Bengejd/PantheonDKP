@@ -1,14 +1,15 @@
 # PDKP Change Log
 
-## v4.4.4
+## v4.4.6
 ### Features
 - Turned on 90% Max DKP Bid restriction (See discord for more info).
-- Added in the interface options (Right Click Minimap)
-    - Show/Hide Minimap
-    - Ignore PUG
+- Promoting DKP officer now automatically gives them raid assist.
+- Added in the interface options (Right Click Minimap).
+- You can hide the minimap icon (interface options).
 
 ### Bug Fixes
 - Fixed "Promote Leadership" button.
+- Fixed DKP Officer buttons showing up occasionally when an error occurs.
 
 ## v4.4.1
 ### Features
