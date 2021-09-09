@@ -1,5 +1,6 @@
 # PDKP Change Log
-## v4.4.2
+
+## v4.4.4
 ### Features
 - Turned on 90% Max DKP Bid restriction (See discord for more info).
 - Added in the interface options (Right Click Minimap)
