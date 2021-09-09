@@ -11,7 +11,11 @@ local tinsert = table.insert
 local AuctionGUI = {}
 AuctionGUI.itemLink = nil;
 
+local AuctionManager;
+
 function AuctionGUI:Initialize()
+    AuctionManager = MODULES.AuctionManager;
+
     local title_str = Utils:FormatTextColor('PDKP Active Bids', MODULES.Constants.ADDON_HEX)
 
     local f = CreateFrame("Frame", "pdkp_auction_frame", UIParent, MODULES.Media.BackdropTemplate)
@@ -26,12 +30,17 @@ function AuctionGUI:Initialize()
 
     f:SetScript("OnShow", function()
         f.dkp_title:SetText('Total DKP: ' .. MODULES.DKPManager:GetMyDKP())
-        if PDKP.canEdit and MODULES.AuctionManager:IsAuctionInProgress() then
+        if not ( PDKP.canEdit or AuctionManager:CanChangeAuction() ) then
+            stopBid:Hide();
+            stopBid:SetEnabled(false);
+            if PDKP.AuctionTimer.addTime ~= nil then
+                PDKP.AuctionTimer.addTime:Hide();
+            end
+        elseif PDKP.canEdit and AuctionManager:IsAuctionInProgress() and AuctionManager:CanChangeAuction() then
             stopBid:SetEnabled(true)
             stopBid:Show()
-
-            if MODULES.AuctionManager:CanChangeAuction() then
-                PDKP.AuctionTimer.addTime:Show()
+            if PDKP.AuctionTimer.addTime ~= nil then
+                PDKP.AuctionTimer.addTime:Show();
             end
         end
         f.reopenFrame:Hide()
@@ -80,7 +89,7 @@ function AuctionGUI:Initialize()
     sb:SetScript("OnClick", function()
         local bid_amt = f.bid_box.getValue()
         f.current_bid:SetText(bid_amt)
-        MODULES.CommsManager:SendCommsMessage('bidSubmit', bid_amt)
+        MODULES.CommsManager:SendCommsMessage('BidSubmit', bid_amt)
     end)
     sb:SetEnabled(false)
 
@@ -264,7 +273,7 @@ function AuctionGUI:Initialize()
     PDKP.AuctionTimer.bgFrame:SetPoint("TOPLEFT", PDKP.AuctionTimer, "TOPLEFT", -33, 20)
     PDKP.AuctionTimer.bgFrame:SetPoint("BOTTOMRIGHT", PDKP.AuctionTimer, "BOTTOMRIGHT", 33, -20)
 
-    if PDKP.AuctionTimer.addTime ~= nil then
+    if PDKP.AuctionTimer.addTime ~= nil and pushBarOpts['addTime'] == true then
         PDKP.AuctionTimer.addTime:SetScript("OnClick", function()
             if MODULES.AuctionManager:CanChangeAuction() then
                 MODULES.CommsManager:SendCommsMessage('AddTime', {['addTime'] = true})

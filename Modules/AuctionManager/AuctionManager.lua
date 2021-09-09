@@ -23,7 +23,7 @@ local function HandleModifiedTooltipClick()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
             local commsData = { iLink, iName, iTexture }
-            MODULES.CommsManager:SendCommsMessage('startBids', commsData)
+            MODULES.CommsManager:SendCommsMessage('StartBids', commsData)
         end
     elseif Auction:IsAuctionInProgress() then
         PDKP.CORE:Print('Another auction is in progress');
@@ -36,8 +36,10 @@ end
 
 function Auction:CanChangeAuction()
     local gm = MODULES.GroupManager;
-    local IStartedBid = self.CurrentAuctionInfo['startedBy'] == Utils:GetMyName()
-    return (gm:IsDKPOfficer() or gm:IsMasterLoot() or IStartedBid) and gm:IsInRaid()
+    local guild = MODULES.GuildManager;
+    local myName = Utils:GetMyName();
+    local IStartedBid = self.CurrentAuctionInfo['startedBy'] == myName
+    return (gm:IsDKPOfficer() or gm:IsMasterLoot() or IStartedBid) and gm:IsInRaid() and guild:IsMemberOfficer(myName)
 end
 
 function Auction:Initialize()
@@ -146,7 +148,7 @@ function Auction:HandleTimerFinished(manualEnd)
     if not PDKP.canEdit or not MODULES.AuctionManager:CanChangeAuction() then
         return
     end
-    MODULES.CommsManager:SendCommsMessage('stopBids', { ['manualEnd'] = manualEnd })
+    MODULES.CommsManager:SendCommsMessage('StopBids', { ['manualEnd'] = manualEnd })
 end
 
 function Auction:_GetWinnerInfo(itemLink)
