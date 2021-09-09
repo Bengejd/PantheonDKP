@@ -74,6 +74,8 @@ globals = {
     "UIDropDownMenu_SetWidth",
     "UIDropDownMenu_GetSelectedValue",
     "UIDROPDOWNMENU_MENU_VALUE",
+    "InterfaceOptionsFramePanelContainer",
+    "InterfaceOptionsFrame_Show",
     "RaidFrame",
 
 	-- WoW

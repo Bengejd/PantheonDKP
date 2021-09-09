@@ -130,11 +130,11 @@ function Chat:_HandleDKPMsg(msg)
 
             if bid and type(bid) == "number" then
                 if bid <= memberDKP and bid >= 1 then
-                    local bidAdjusted = false;
+                    --local bidAdjusted = false;
 
                     if bid > bidCap then
                         bid = bidCap
-                        bidAdjusted = true;
+                        --bidAdjusted = true;
                     end
 
                     local bidder_info = { ['name'] = author, ['bid'] = bid, ['dkpTotal'] = memberDKP }
