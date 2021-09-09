@@ -383,7 +383,9 @@ function AuctionGUI:RefreshBidders()
         if prospect_info ~= nil then
             prospect_frame.name:SetText(prospect_info['name'])
 
-            prospect_frame.bid:Hide()
+            if not PDKP:IsDev() then
+                prospect_frame.bid:Hide()
+            end
 
             prospect_frame.bid:SetText(prospect_info['bid'])
 
