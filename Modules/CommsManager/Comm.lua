@@ -119,16 +119,16 @@ function Comm:_Setup()
         ['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 
         -- Auction Section
-        ['startBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
-        ['stopBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+        ['StartBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+        ['StopBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
 
         -- Officer Bid Section
         ['AddBid'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['CancelBid'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
 
         -- Player Bid section
-        ['bidSubmit'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
-        ['bidCancel'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+        ['BidSubmit'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
+        ['BidCancel'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['AddTime'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
 
         -- DKP Section
@@ -268,7 +268,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     local Auction = MODULES.AuctionManager
     local AuctionGUI = GUI.AuctionGUI
 
-    if self.ogPrefix == 'startBids' then
+    if self.ogPrefix == 'StartBids' then
         local itemLink, itemName, iTexture = unpack(data)
         Auction.auctionInProgress = true
         AuctionGUI:StartAuction(itemLink, itemName, iTexture, sender)
@@ -286,7 +286,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
             SendChatMessage(text, channel, nil, nil)
         end
 
-    elseif self.ogPrefix == 'bidSubmit' then
+    elseif self.ogPrefix == 'BidSubmit' then
         if not Auction:CanChangeAuction() then
             return
         end
@@ -304,7 +304,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
 
         local bidder_info = { ['name'] = member.name, ['bid'] = data, ['dkpTotal'] = memberDKP }
         CommsManager:SendCommsMessage('AddBid', bidder_info)
-    elseif self.ogPrefix == 'stopBids' then
+    elseif self.ogPrefix == 'StopBids' then
         if Auction:IsAuctionInProgress() then
             local manualStop = data['manualEnd']
             Auction:EndAuction(manualStop, sender)

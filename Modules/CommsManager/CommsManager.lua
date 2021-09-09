@@ -52,17 +52,18 @@ function Comms:RegisterComms()
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
         ['WhoIsDKP'] = { ['channel'] = 'RAID', ['requireCheck'] = false, },
 
-        ['startBids'] = { ['channel'] = 'RAID', ['self'] = true, },
-        ['stopBids'] = { ['channel'] = 'RAID',  ['self'] = true, },
+        ['StartBids'] = { ['channel'] = 'RAID', ['self'] = true, },
+        ['StopBids'] = { ['channel'] = 'RAID',  ['self'] = true, },
 
-        ['bidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
-        ['bidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
+        ['BidSubmit'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
+        ['BidCancel'] = { ['channel'] = 'RAID', ['requireCheck'] = false, ['self'] = true, },
 
         ['AddBid'] = { ['channel'] = 'RAID', ['self'] = true, },
         ['CancelBid'] = { ['channel'] = 'RAID', ['self'] = true, },
         ['AddTime'] = { ['channel'] = 'RAID', ['self'] = true, ['requireCheck'] = false },
 
         ['SentInv'] = { ['channel'] = 'WHISPER', },
+        ['Version'] = { ['channel'] = 'WHISPER', },
     }
     for prefix, opts in pairs(commChannels) do
         opts['prefix'] = prefix
