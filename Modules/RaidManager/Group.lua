@@ -352,6 +352,10 @@ function Group:InitializePortrait()
         dkpOfficerSettings.text = Utils:ternaryAssign(self:IsMemberDKPOfficer(charName), 'Demote from DKP Officer', 'Promote to DKP Officer')
         dkpOfficerSettings.func = function(...)
             MODULES.CommsManager:SendCommsMessage('DkpOfficer', { charName, self.leadership.dkpOfficer, false })
+
+            if self.leadership.leader ~= nil and self:IsLeader() then
+                MODULES.RaidManager:PromoteLeadership(true)
+            end
         end
 
         lineSep(1)

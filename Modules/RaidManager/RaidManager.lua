@@ -40,16 +40,19 @@ function Raid:GetClassMemberNames(class)
     return names
 end
 
-function Raid:PromoteLeadership()
+function Raid:PromoteLeadership(justDKPOfficer)
     if not GroupManager:IsLeader() then
         return
     end
+
     for i = 1, 40 do
         local name, _, _, _, _, _, _, _, _, _, isML, _ = GetRaidRosterInfo(i);
         if name ~= nil then
             local m = GuildManager:GetMemberByName(name)
             if m ~= nil then
-                if m.isInLeadership or isML then
+                if (m.isInLeadership or isML) and justDKPOfficer == nil then
+                    PromoteToAssistant('raid' .. i)
+                elseif justDKPOfficer == true and GroupManager:IsMemberDKPOfficer(name) then
                     PromoteToAssistant('raid' .. i)
                 end
             end
