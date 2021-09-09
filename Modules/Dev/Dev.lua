@@ -454,8 +454,7 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
 
         if valid_counter == numOfEntriesToCreate then
             local data = { ['total'] = valid_counter, ['entries'] = valid_entries }
-            local encodedData = MODULES.CommsManager:DataEncoder(data)
-            MODULES.DKPManager:ImportBulkEntries(encodedData, 'Lilduder', 'Large');
+            MODULES.DKPManager:ImportBulkEntries(data, 'Lilduder', true);
 
             PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
         end

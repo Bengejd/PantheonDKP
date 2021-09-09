@@ -326,8 +326,16 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 end
 
-function DKP:ImportBulkEntries(message, sender)
-    local data = MODULES.CommsManager:DataDecoder(message)
+function DKP:ImportBulkEntries(message, sender, decoded)
+    local data
+    if decoded ~= true then
+        data = MODULES.CommsManager:DataDecoder(message)
+    else
+        data = message
+    end
+
+    PDKP:PrintD("Bulk Import from", sender, " Received");
+
     local _, entries = data['total'], data['entries']
 
     for _, encoded_entry in Utils:PairByKeys(entries) do
