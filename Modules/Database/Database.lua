@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'officers', 'settings', 'lockouts', 'loot', 'ledger', 'decayTracker' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phase' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -15,11 +15,6 @@ function DB:Initialize()
     UpdateGuild()
 
     local dbRef = self.server_faction_guild;
-
-    -- Database is compressed
-    if type(PDKP_DB[dbRef]) == "string" then
-        --PDKP_DB[dbRef] = MODULES.CommsManager:DataDecoder(PDKP_DB[dbRef])
-    end
 
     if type(PDKP_DB[dbRef]) ~= "table" then
         PDKP_DB[dbRef] = {}
@@ -80,20 +75,12 @@ function DB:Pug()
     return PDKP_DB[self.server_faction_guild]['pug']
 end
 
-function DB:Officers()
-    return PDKP_DB[self.server_faction_guild]['officers']
-end
-
 function DB:Settings()
     return PDKP_DB[self.server_faction_guild]['settings']
 end
 
 function DB:Sync()
     return PDKP_DB[self.server_faction_guild]['settings']['sync']
-end
-
-function DB:Loot()
-    return PDKP_DB[self.server_faction_guild]['loot']
 end
 
 function DB:Lockouts()
@@ -106,6 +93,10 @@ end
 
 function DB:Decay()
     return PDKP_DB[self.server_faction_guild]['decayTracker']
+end
+
+function DB:Phases()
+    return PDKP_DB[self.server_faction_guild]['phases']
 end
 
 function DB:ResetAllDatabases()
