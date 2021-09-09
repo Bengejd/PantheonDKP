@@ -97,6 +97,10 @@ function CORE:_InitializeCore()
     PDKP.Utils:Initialize()
     MODULES.Database:Initialize()
     MODULES.ChatManager:Initialize()
+
+    if PDKP:IsDev() then
+        MODULES.Dev:Initialize()
+    end
 end
 
 function CORE:_InitializeFeatures()
@@ -114,7 +118,6 @@ function CORE:_InitializeFeatures()
     MODULES.Lockouts:Initialize()
     MODULES.Options:Initialize()
 end
-
 
 function CORE:_InitializeFrontend()
     -- No GUI / OPTIONS should be dependent on each other ever, only on the managers
@@ -197,7 +200,7 @@ function PDKP:IsDev()
 end
 
 function PDKP:PrintD(...)
-    if PDKP:IsDev() and not PDKP.disableDev then
+    if PDKP:IsDev() and PDKP.enableConsole then
         local text = "|cffF4A460" .. strjoin(" ", tostringall(...)) .. "|r"
         PDKP.CORE:Print(text)
     end

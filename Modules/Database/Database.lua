@@ -99,6 +99,15 @@ function DB:Phases()
     return PDKP_DB[self.server_faction_guild]['phases']
 end
 
+--@do-not-package@
+function DB:Dev()
+    if PDKP_DB[self.server_faction_guild]['dev'] == nil then
+        PDKP_DB[self.server_faction_guild]['dev'] = {};
+    end
+    return PDKP_DB[self.server_faction_guild]['dev']
+end
+--@end-do-not-package@
+
 function DB:ResetAllDatabases()
     for i = 1, #database_names do
         local db = database_names[i]

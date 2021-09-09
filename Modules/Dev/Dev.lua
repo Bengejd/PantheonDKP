@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils
 --@do-not-package@
 
-local Dev = {}
+local Dev = { initialized = false }
 Dev.DEV_NAMES = { ['Neekio'] = true, ['Lariese'] = true }
 
 local tinsert = table.insert
@@ -14,9 +14,26 @@ local wipe = wipe
 
 local decayCount = 0
 
-PDKP.disableDev = false
-PDKP.showInternal = false;
+PDKP.enableConsole = true
+PDKP.showInternalDKP = false;
 PDKP.showHistoryIds = true;
+
+function Dev:Initialize()
+    if not PDKP:IsDev() then return end
+    self.db = MODULES.Database:Dev()
+    for setting, val in pairs(self.db) do
+        PDKP[setting] = val
+    end
+end
+
+function Dev:ToggleSetting(settingName, val)
+    if PDKP[settingName] ~= nil then
+        self.db[settingName] = val
+        PDKP[settingName] = val;
+    else
+        PDKP:PrintD("ToggleSetting: Could not find settingName for ", settingName)
+    end
+end
 
 function Dev:HandleSlashCommands(msg)
     if not PDKP:IsDev() then

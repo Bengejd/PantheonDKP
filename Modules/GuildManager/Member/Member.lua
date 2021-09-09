@@ -69,7 +69,7 @@ function Member:GetDKP(dkpVariable)
     if dkpVariable == nil then
         return floor(self.dkp['total']);
     elseif dkpVariable == 'display' then
-        if PDKP:IsDev() and PDKP.showInternal then
+        if PDKP:IsDev() and PDKP.showInternalDKP then
             return self.dkp['total'];
         end
         return floor(self.dkp['total']);
