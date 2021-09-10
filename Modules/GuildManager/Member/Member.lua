@@ -5,9 +5,10 @@ local Utils = PDKP.Utils
 
 local GetGuildRosterInfo = GetGuildRosterInfo
 local setmetatable = setmetatable
-local strsplit = strsplit
-local tinsert, tremove = table.insert, table.remove
+local strsplit, strlower = strsplit, strlower
+local tinsert, tremove, unpack = table.insert, table.remove, unpack
 local floor = math.floor;
+local GetServerTime = GetServerTime
 
 local Member = {}
 
@@ -123,13 +124,13 @@ function Member:_UpdateDKP(entry, decayAmount)
             entry['decayAmounts'][self.name] = entry['decayAmounts'][self.name] * -1
             self.dkp['total'] = self.dkp['total'] + entry['decayAmounts'][self.name]
         else
-            self.dkp['total'] = math.floor(self.dkp['total'] * 0.9)
+            self.dkp['total'] = floor(self.dkp['total'] * 0.9)
         end
     else
         self.dkp['total'] = self.dkp['total'] + amount
     end
 
-    table.insert(self.dkp['entries'], entry.id)
+    tinsert(self.dkp['entries'], entry.id)
 end
 
 function Member:_InitializeDKP()
@@ -195,6 +196,7 @@ end
 
 function Member:IsSyncReady()
     if not self.isInLeadership then return false end
+    if self.name == Utils:GetMyName() then return false end
 
     local syncSettings = MODULES.Database:Sync()
 

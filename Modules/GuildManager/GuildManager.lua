@@ -130,6 +130,8 @@ function GuildManager:GetOnlineNames()
 end
 
 function GuildManager:_GetLeadershipRanks()
+    if self.officerRank ~= nil then return end
+
     local numRanks = GuildControlGetNumRanks()
     for i = 1, numRanks do
         local perm = C_GuildInfo.GuildControlGetRankFlags(i)

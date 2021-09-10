@@ -13,16 +13,16 @@ function Comms:Initialize()
     self.allow_from_self = {}
     self.allow_in_combat = {}
     self.channels = {}
-
-    self.officerCommsRegistered = false
+    self.officerCommPrefixes = {}
 
     local opts = {
         ['name'] = 'OFFICER_COMMS',
-        ['events'] = {'GROUP_ROSTER_UPDATE'},
-        ['tickInterval'] = 0.5,
+        ['events'] = {'GUILD_ROSTER_UPDATE'},
+        ['tickInterval'] = 1,
         ['onEventFunc'] = function()
+            MODULES.GuildManager:GetMembers()
             self:RegisterOfficerAdComms()
-        end
+        end,
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
 end
@@ -63,7 +63,7 @@ function Comms:RegisterComms()
         ['AddTime'] = { ['channel'] = 'RAID', ['self'] = true, ['requireCheck'] = false },
 
         ['SentInv'] = { ['channel'] = 'WHISPER', },
-        ['Version'] = { ['channel'] = 'WHISPER', },
+        ['Version'] = { ['channel'] = 'GUILD', },
     }
     for prefix, opts in pairs(commChannels) do
         opts['prefix'] = prefix
@@ -79,8 +79,26 @@ function Comms:RegisterComms()
 end
 
 function Comms:RegisterOfficerAdComms()
-    for member in pairs(MODULES.GuildManager:GetOfficers()) do
-        --print(member.name)
+    for _, member in pairs(MODULES.GuildManager:GetOfficers()) do
+        local pfx = self.officerCommPrefixes[member.name]
+        local hasComm = pfx ~= nil
+        local syncReady = member:IsSyncReady()
+        if not hasComm and syncReady then
+            local opts = {
+                ['combat'] = false,
+                ['self'] = false,
+                ['requireCheck'] = false,
+                ['prefix'] = member.name,
+                ['officerComm'] = true,
+            }
+            local comm = MODULES.Comm:new(opts);
+            self.channels[comm.prefix] = comm;
+            self.officerCommPrefixes[member.name] = comm.prefix;
+        elseif hasComm and not syncReady then
+            self.channels[pfx]:UnregisterComm()
+        elseif hasComm and syncReady and member.online then
+            self:SendCommsMessage(member.name, { ['type'] = 'request' })
+        end
     end
 end
 

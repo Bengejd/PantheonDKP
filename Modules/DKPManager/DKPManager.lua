@@ -111,6 +111,11 @@ end
 --     Export Functions    --
 -----------------------------
 
+function DKP:PrepareAdRequest()
+    local lastTwoWeekNumber = Utils.weekNumber - 2
+    
+end
+
 function DKP:ExportEntry(entry)
     local save_details = MODULES.LedgerManager:GenerateEntryHash(entry)
     CommsManager:SendCommsMessage('SyncSmall', save_details)

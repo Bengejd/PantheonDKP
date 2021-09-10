@@ -760,6 +760,7 @@ function GUtils:createThrottledEventFrame(opts)
     local onEventFunc = opts['onEventFunc'] or function() end;
     local tickInterval = opts['tickInterval'] or 1
     local tickAmount = opts['tickAmount'] or 1
+    local cancelAfterCall = opts['cancelAfterCall'] or false;
 
     local f;
 
@@ -788,6 +789,9 @@ function GUtils:createThrottledEventFrame(opts)
         end
         local args = { [1] = event, [2] = arg1, [3] = ... }
         f.timers[event] = NewTicker(tickInterval, function()
+            if cancelAfterCall then
+                f:UnregisterEvent(event)
+            end
             return onEventFunc(args[1], args[2], args[3])
         end, tickAmount)
     end)

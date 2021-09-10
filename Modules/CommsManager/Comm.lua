@@ -11,6 +11,7 @@ Comm.__index = Comm
 
 local setmetatable, pairs, tremove, tinsert = setmetatable, pairs, table.remove, table.insert
 local type, floor = type, math.floor
+local GetServerTime = GetServerTime
 
 function Comm:new(opts)
     local self = {}
@@ -31,7 +32,10 @@ function Comm:new(opts)
     self.requireCheck = Utils:ternaryAssign(opts['requireCheck'] ~= nil, opts['requireCheck'], true)
     self.officerOnly = Utils:ternaryAssign(opts['officerOnly'] ~= nil, opts['officerOnly'], false)
     self.forcedCache = Utils:ternaryAssign(opts['forcedCache'] ~= nil, opts['forcedCache'], false)
+    self.isOfficerComm = Utils:ternaryAssign(opts['officerComm'] ~= nil, opts['officerComm'], false);
     self.forcedCacheTimer = nil
+
+    self.timeSinceLastRequest = nil
 
     self.officersSyncd = {}
 
@@ -115,8 +119,8 @@ function Comm:_Setup()
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
 
-        ['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
-        ['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
+        --['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
+        --['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
 
         -- Auction Section
         ['StartBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -137,6 +141,10 @@ function Comm:_Setup()
 
         ['SentInv'] = { 'WHISPER', nil, 'NORMAL', nil, PDKP_OnComm_SentInv },
     }
+
+    if self.isOfficerComm == true then
+        commParams[p] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_OfficerSync }
+    end
 
     if commParams[p] then
         return unpack(commParams[p])
@@ -205,6 +213,32 @@ function PDKP_OnComm_GetDKPOfficer(_, message, sender)
     local data = CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and GroupManager:HasDKPOfficer() then
         CommsManager:SendCommsMessage('DkpOfficer', { GroupManager.leadership.dkpOfficer, GroupManager.leadership.dkpOfficer, true })
+    end
+end
+
+function PDKP_OnComm_OfficerSync(comm, message, sender)
+    local self = comm
+    local pfx = self.ogPrefix
+    if pfx == Utils:GetMyName() then
+        local shouldContinue = true
+
+        -- Check to see how long it's been since you've been requested to send a sync.
+        if self.timeSinceLastRequest ~= nil then
+            local server_time = GetServerTime()
+            local timeSinceSync = Utils:SubtractTime(server_time, self.timeSinceLastRequest)
+            if timeSinceSync <= Utils:GetSecondsInFiveMinutes() then
+                shouldContinue = false;
+            end
+        end
+
+        if shouldContinue == true then
+            self.timeSinceLastRequest = GetServerTime()
+            -- Send the data here.
+        end
+    elseif sender == pfx then
+        local member = MODULES.GuildManager:GetMemberByName(sender)
+        member:MarkSyncReceived()
+        local data = CommsManager:DataDecoder(message)
     end
 end
 

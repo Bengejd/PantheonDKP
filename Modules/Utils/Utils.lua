@@ -16,6 +16,7 @@ local substr = string.sub;
 --local daysInWeek = 7
 local daysInYear = 365
 --local hoursInDay = 24
+local secondsInMinute = 60
 local secondsInHour = 60 * 60
 local minutesInDay = 60 * 24
 local secondsInDay = 60 * 60 * 24
@@ -150,6 +151,14 @@ end
 
 function Utils:GetMinutesInDay()
     return minutesInDay
+end
+
+function Utils:GetSecondsInMinute()
+    return secondsInMinute
+end
+
+function Utils:GetSecondsInFiveMinutes()
+    return secondsInMinute * 5
 end
 
 -----------------------------
