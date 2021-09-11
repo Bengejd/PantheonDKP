@@ -239,7 +239,7 @@ function Chat:_HandleSlashCommands(msg)
         ['bossKillTest'] = true,
         ['watchFramerate'] = true,
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
-        ['testDKPCap'] = true,
+        ['testDKPCap'] = true, ['forceOfficerComms'] = true
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)

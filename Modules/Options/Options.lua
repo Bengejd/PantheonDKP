@@ -56,24 +56,13 @@ function Options:SetupLDB()
                         width = "full",
                         order = 2,
                     },
-                    --disableSyncs = {
-                    --    type = "text",
-                    --    name = "Disable Syncing",
-                    --    desc = "Display a Minimap button to quickly access the addon interface or options",
-                    --    get = function(info) return not self.db['minimap'].hide end,
-                    --    set = function(info, val)
-                    --        if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
-                    --        self.db['minimap'].hide = not val
-                    --    end,
-                    --    width = 2.5,
-                    --    order = 5,
-                    --},
                 },
             },
         }
     }
 
     if PDKP:IsDev() then
+        PDKP.CORE:Print("Setting up dev interface");
         pdkp_options['args']['tab9'] = {
             type = "group",
             name = "Dev",

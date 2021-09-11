@@ -36,6 +36,7 @@ function DKP:Initialize()
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
     self.entrySyncCacheCounter = 0
+    self.syncReqLocked = false;
 
     self.entrySyncCache = {}
     self.entrySyncTimer = nil
@@ -112,8 +113,19 @@ end
 -----------------------------
 
 function DKP:PrepareAdRequest()
+    if self.autoSyncInProgress then return end
+
     local lastTwoWeekNumber = Utils.weekNumber - 2
-    
+    local entries = {};
+
+    for index, entry in Utils:PairByKeys(self.currentLoadedWeekEntries) do
+        local weekNumber = Utils:GetWeekNumber(index)
+        if weekNumber >= lastTwoWeekNumber then
+            entries[index] = entry;
+        end
+    end
+
+    return CommsManager:SendCommsMessage(Utils:GetMyName(), { ['total'] = 0, ['entries'] = entries });
 end
 
 function DKP:ExportEntry(entry)
@@ -162,7 +174,7 @@ function DKP:_FindAdlerDifference(importEntry, dbEntry)
         local dbVal = dbEntrySD[v];
         if type(v) ~= "table" then
             if importVal ~= dbVal then
-                PDKP.CORE:Print("Entry mismatch found, skipping import for safety reasons");
+                PDKP:PrintD("Entry mismatch found, skipping import for safety reasons");
                 return false;
             end
         end
@@ -339,6 +351,9 @@ function DKP:ImportBulkEntries(message, sender, decoded)
         data = message
     end
 
+    local member = MODULES.GuildManager:GetMemberByName(sender)
+    member:MarkSyncReceived()
+
     PDKP:PrintD("Bulk Import from", sender, " Received");
 
     local _, entries = data['total'], data['entries']
@@ -349,22 +364,10 @@ function DKP:ImportBulkEntries(message, sender, decoded)
     end
 
     DKP:_UpdateTables()
-    --for key, decompressedEntry in Utils:PairByKeys(decodedEntries) do
-    --    local entry = CommsManager:_Deserialize(decompressedEntry);
-    --    if entry['deleted'] then
-    --        self:DeleteEntry(entry, sender, true);
-    --    else
-    --        self:ImportEntry2(entry, entryAdlers[key], 'Large');
-    --    end
-    --
-    --    if entryCounter >= total then
-    --        C_Timer.After(5, function()
-    --            DKP:RecalibrateDKP()
-    --
-    --            DKP:_RecompressCurrentLoaded()
-    --        end)
-    --    end
-    --end
+
+    if self.autoSyncInProgress then
+        self.autoSyncInProgress = false
+    end
 end
 
 function DKP:GetPreviousDecayEntry(entry)

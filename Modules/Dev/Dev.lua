@@ -87,6 +87,8 @@ function Dev:HandleSlashCommands(msg)
         PDKP:PrintD('Unregistering Comms');
     elseif cmd == 'testDKPCap' then
         self:TestMaxDKP()
+    elseif cmd == 'forceOfficerComms' then
+        MODULES.CommsManager:RegisterOfficerAdComms()
     end
 end
 
@@ -444,7 +446,7 @@ function Dev:LargeDataSync()
 end
 
 function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
-    numOfEntriesToCreate = tonumber(numOfEntriesToCreate) or 500;
+    numOfEntriesToCreate = tonumber(numOfEntriesToCreate) or 100;
 
     local memberNames = MODULES.GuildManager.memberNames;
     local numOfMembers = #memberNames
@@ -487,7 +489,8 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     -- Random epoch timestamp between July 19th, 2021 and now.
     -- January 1st, 2021: 1609480800
     -- July 19, 2021: 1626652800
-    local entry_id = random(1626652800, GetServerTime())
+    -- August 3rd, 2021: 1627966800
+    local entry_id = random(1628053200, GetServerTime())
 
     local adjust_reasons = { 'Boss Kill', 'Item Win', 'Other' }
     local reason = adjust_reasons[random(3)]

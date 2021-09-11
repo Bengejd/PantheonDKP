@@ -83,7 +83,7 @@ function Comms:RegisterOfficerAdComms()
         local pfx = self.officerCommPrefixes[member.name]
         local hasComm = pfx ~= nil
         local syncReady = member:IsSyncReady()
-        if not hasComm and syncReady then
+        if not hasComm and syncReady and member.online then
             local opts = {
                 ['combat'] = false,
                 ['self'] = false,
@@ -94,9 +94,10 @@ function Comms:RegisterOfficerAdComms()
             local comm = MODULES.Comm:new(opts);
             self.channels[comm.prefix] = comm;
             self.officerCommPrefixes[member.name] = comm.prefix;
-        elseif hasComm and not syncReady then
+        elseif hasComm and (not syncReady or not member.online) then
             self.channels[pfx]:UnregisterComm()
         elseif hasComm and syncReady and member.online then
+            PDKP:PrintD("Sending Officer Comms message", member.name)
             self:SendCommsMessage(member.name, { ['type'] = 'request' })
         end
     end

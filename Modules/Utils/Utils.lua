@@ -31,7 +31,7 @@ function Utils:BuildEntryStartHash(officer)
 end
 
 function Utils:GetCommPrefix(prefix)
-    return 'pdkpV3' .. substr(prefix, 0, 12)
+    return 'pdkpV3' .. substr(prefix, 0, 10)
 end
 
 -----------------------------
@@ -314,6 +314,8 @@ end
 -----------------------------
 
 function Utils:PairByKeys(t, f)
+    if type(t) ~= "table" then return nil end
+
     local a = {};
     for n in pairs(t) do table.insert(a, n) end
     table.sort(a, f)

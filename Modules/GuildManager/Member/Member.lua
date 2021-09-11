@@ -196,7 +196,6 @@ end
 
 function Member:IsSyncReady()
     if not self.isInLeadership then return false end
-    if self.name == Utils:GetMyName() then return false end
 
     local syncSettings = MODULES.Database:Sync()
 

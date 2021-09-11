@@ -86,6 +86,7 @@ function Comm:VerifyCommSender(message, sender)
 end
 
 function Comm:RegisterComm()
+    print('Registering comm', self.prefix)
     PDKP.CORE:RegisterComm(self.prefix, PDKP_OnCommsReceived)
 end
 
@@ -197,8 +198,6 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
             comm:_ProcessCache(comm.cache)
             PDKP:PrintD('End Cached message', #comm.cache)
         end
-    elseif event == 'GROUP_ROSTER_UPDATE' and comm.ogPrefix == 'SentInv' then
-        --StaticPopup_Hide("PARTY_INVITE")
     end
 end
 
@@ -220,6 +219,7 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
     local self = comm
     local pfx = self.ogPrefix
     if pfx == Utils:GetMyName() then
+        PDKP:PrintD("Processing Sync Request from:", sender)
         local shouldContinue = true
 
         -- Check to see how long it's been since you've been requested to send a sync.
@@ -233,12 +233,11 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
 
         if shouldContinue == true then
             self.timeSinceLastRequest = GetServerTime()
-            -- Send the data here.
+            return MODULES.DKPManager:PrepareAdRequest()
         end
     elseif sender == pfx then
-        local member = MODULES.GuildManager:GetMemberByName(sender)
-        member:MarkSyncReceived()
-        local data = CommsManager:DataDecoder(message)
+        PDKP.CORE:Print("Auto-syncing DKP with: ", sender)
+        return DKPManager:ImportBulkEntries(message, sender)
     end
 end
 
