@@ -2,14 +2,17 @@
 
 ## v4.4.6
 ### Features
-- Turned on 90% Max DKP Bid restriction (See discord for more info).
-- Promoting DKP officer now automatically gives them raid assist.
-- Added in the interface options (Right Click Minimap).
+- Automatic Sync is back on. This has been revamped with previous lag problems in mind, and has been changed to help stop that from happening again. This is locked on the officers end for 5 minutes after a successful "push" has been sent out, and on the members end for 1 day after they receive a successful push. Once a user receives a push, they will unsubscribe to that officer's particular channel. This should hopefully allow us to utilize automatic syncing without the lag, like we were doing previously, making everyone's tables more up to date throughout the week (hopefully).
+- Turned on 90% max DKP Bid restriction (See discord for more info).
+- Promoting DKP Officer now automatically gives them raid assistant.
+- Added in addon Interface Options (Right click minimap icon).
 - You can hide the minimap icon (interface options).
 
 ### Bug Fixes
-- Fixed "Promote Leadership" button.
-- Fixed DKP Officer buttons showing up occasionally when an error occurs.
+- Fixed "Promote Leadership" button to only promote leadership (Weird blizzard issue).
+- Fixed DKP Officer buttons showing up occasionally when an error occurs for non-officer members (Thanks Shvou for pointing this out).
+- Fixed Bidding Issues when in Combat.
+
 
 ## v4.4.1
 ### Features
