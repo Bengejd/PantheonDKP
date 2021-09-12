@@ -14,6 +14,7 @@ function Comms:Initialize()
     self.allow_in_combat = {}
     self.channels = {}
     self.officerCommPrefixes = {}
+    self.syncInProgress = false;
 
     self.autoSyncData = self:DataEncoder({ ['type'] = 'request' });
 
@@ -135,6 +136,10 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
             return
         end
 
+        if self.syncInProgress and comm.isSelfComm then
+            return
+        end
+
         local params = comm:GetSendParams()
         if prefix == 'SentInv' then
             params[2] = data
@@ -207,17 +212,17 @@ end
 
 function Comms:ChunkedDecoder(data, sender)
     local detransmit = self:_Decode(data)
-    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true})
+    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true, yieldOnChunkSize=1024*2 })
     local processing = CreateFrame('Frame')
     PDKP:PrintD("Chunk Processing data from: ", sender)
     processing:SetScript('OnUpdate', function()
-        PDKP:PrintD("Chunk Processing continuing", sender);
+        --PDKP:PrintD("Chunk Processing continuing", sender);
         local ongoing, WoW_decompressed = WoW_decompress_co()
         if not ongoing then
             PDKP:PrintD("Chunk Processing finished", sender);
             processing:SetScript('OnUpdate', nil)
             local deserialized = self:_Deserialize(WoW_decompressed)
-            return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
+            --return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
         end
     end)
 end

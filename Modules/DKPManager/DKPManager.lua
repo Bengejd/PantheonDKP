@@ -252,8 +252,6 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         return
     end
 
-    --PDKP:PrintD("Importing new entry", importEntry.id);
-
     -- Roll back entries here
     self:RollBackEntries(importEntry);
 

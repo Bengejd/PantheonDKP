@@ -62,26 +62,19 @@ function Dev:HandleSlashCommands(msg)
         if self.frameRateTimer ~= nil then
             self.frameRateTimer:Cancel()
             self.frameRateTimer = nil
+            PDKP:PrintD("Canceling Framerate Watcher");
             return
         end
+        PDKP:PrintD("Starting Framerate Watcher");
         local averageFrameRate = 0;
         local frameRateCounter = 0;
         self.frameRateTimer = C_Timer.NewTicker(1, function()
             frameRateCounter = frameRateCounter + 1;
             local fr = GetFramerate()
             averageFrameRate = (averageFrameRate + fr) / frameRateCounter;
-            if fr < averageFrameRate then
+            if fr + 0.5 < averageFrameRate then
                 PDKP:PrintD("FrameRate Drop: ", GetFramerate())
             end
-        end)
-    elseif cmd == 'watchFramerate' then
-        if self.frameRateTimer ~= nil then
-            self.frameRateTimer:Cancel()
-            self.frameRateTimer = nil
-            return
-        end
-        self.frameRateTimer = C_Timer.NewTicker(1, function()
-            PDKP:PrintD("FrameRate", GetFramerate())
         end)
     elseif cmd == 'unregisterCommTest' then
         MODULES.CommsManager:UnregisterComms()

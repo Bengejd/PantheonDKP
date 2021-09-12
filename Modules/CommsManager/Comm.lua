@@ -416,10 +416,15 @@ function PDKP_SyncLockout(_, sent, total)
 end
 
 function PDKP_SyncProgressBar(_, sent, total)
+    PDKP:PrintD("sent", sent, "total", total);
     local percentage = floor((sent / total) * 100)
 
     if Comm.start_time == nil then
         Comm.start_time = time()
+    end
+
+    if MODULES.CommsManager.syncInProgress == false then
+        MODULES.CommsManager.syncInProgress = true;
     end
 
     if Comm.progress ~= percentage then
@@ -432,6 +437,7 @@ function PDKP_SyncProgressBar(_, sent, total)
         if Comm.progress >= 100 then
             PDKP.CORE:Print('Sync Complete')
         end
+        MODULES.CommsManager.syncInProgress = false;
         Comm.progress = 0
         Comm.start_time = nil
     end
