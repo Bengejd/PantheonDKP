@@ -114,10 +114,8 @@ end
 
 function DKP:PrepareAdRequest()
     if self.autoSyncInProgress then return end
-
     local lastTwoWeekNumber = Utils.weekNumber - 2
     local entries = {};
-
     for index, entry in Utils:PairByKeys(self.currentLoadedWeekEntries) do
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= lastTwoWeekNumber then
@@ -217,14 +215,12 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     local entryExists, adlerMatches = self:_EntryAdlerExists(importEntry.id, entryAdler)
 
-    PDKP:PrintD("ID:", importEntry.id, "EntryExists", entryExists, "AdlerMatches", adlerMatches);
-
     if entryExists then
         if adlerMatches then
             PDKP:PrintD("Entry Adler Exists already, returning");
             return;
         end
-        PDKP:PrintD("Entry Adler does not match", importEntry.id);
+        PDKP:PrintD("Entry Exists, but Adler does not match", importEntry.id);
 
         local dbEntry = DKP_Entry:new(DKP_DB[importEntry.id]);
         local shouldContinue = self:_FindAdlerDifference(importEntry, dbEntry);

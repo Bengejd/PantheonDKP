@@ -11,6 +11,7 @@ local _, _, next = table.insert, table.sort, next;
 local date, type, _ = date, type, print
 local _, pairs, _ = table.getn, pairs, ipairs
 local GetServerTime, GetQuestResetTime = GetServerTime, GetQuestResetTime
+local GetInstanceInfo = GetInstanceInfo
 local substr = string.sub;
 
 --local daysInWeek = 7
@@ -182,6 +183,20 @@ end
 
 function Utils:RoundToDecimal(num, numDecimalPlaces)
     return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
+end
+
+function Utils:GetInstanceStatus()
+    local _, instance_type, _, _, _,
+    _, _, _, _ = GetInstanceInfo()
+
+    local isInInstance = instance_type ~= 'none'
+    local dungeon = instance_type == 'party';
+    local raid = instance_type == 'raid';
+    local bg = instance_type == 'pvp';
+    local arena = instance_type == 'arena';
+
+    return isInInstance, { ['dungeon'] = dungeon, ['raid'] = raid, ['battlegrounds'] = bg, ['arena'] = arena }
+
 end
 
 -----------------------------

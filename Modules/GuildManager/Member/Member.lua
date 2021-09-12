@@ -62,6 +62,13 @@ function Member:IsRaidReady()
     return self.lvl >= 68 or self.canEdit or self.isOfficer
 end
 
+function Member:IsStrictRaidReady()
+    if PDKP:IsDev() then
+        return self.canEdit or self.isOfficer;
+    end
+    return self.lvl >= 70 and (self.canEdit or self.isOfficer)
+end
+
 function Member:CanEdit()
     return self.canEdit or self.rankIndex <= 3 or self.isOfficer
 end

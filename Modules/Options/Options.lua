@@ -6,6 +6,7 @@ local GUI = PDKP.GUI
 local Options = {}
 
 local strlower = string.lower
+local GetServerTime = GetServerTime
 
 function Options:Initialize()
     self.db = MODULES.Database:Settings()
@@ -129,6 +130,14 @@ function Options:_InitializeDBDefaults()
             ['autoSync'] = true,
         }
     end
+end
+
+function Options:GetLastSyncSent()
+    return self.db['sync']['lastSyncSent']
+end
+
+function Options:SetLastSyncSent()
+    self.db['sync']['lastSyncSent'] = GetServerTime()
 end
 
 function Options:IsPlayerIgnored(playerName)

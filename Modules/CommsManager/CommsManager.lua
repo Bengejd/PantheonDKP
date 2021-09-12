@@ -81,29 +81,32 @@ end
 function Comms:RegisterOfficerAdComms()
     local myName = Utils:GetMyName()
     for name, member in pairs(MODULES.GuildManager:GetOfficers()) do
-        local pfx = self.officerCommPrefixes[name]
-        local comm;
+        if member:IsStrictRaidReady() then
+            local pfx = self.officerCommPrefixes[name]
+            local comm;
 
-        if pfx == nil then
-            local opts = {
-                ['combat'] = false,
-                ['self'] = false,
-                ['requireCheck'] = false,
-                ['prefix'] = member.name,
-                ['officerComm'] = true,
-            }
-            comm = MODULES.Comm:new(opts)
-            self.channels[comm.prefix] = comm;
-            self.officerCommPrefixes[name] = comm.prefix;
-        else
-            comm = self.channels[pfx]
-        end
+            if pfx == nil then
+                local opts = {
+                    ['combat'] = false,
+                    ['self'] = false,
+                    ['requireCheck'] = false,
+                    ['prefix'] = member.name,
+                    ['officerComm'] = true,
+                    ['isSelfComm'] = name == myName,
+                }
+                comm = MODULES.Comm:new(opts)
+                self.channels[comm.prefix] = comm;
+                self.officerCommPrefixes[name] = comm.prefix;
+            else
+                comm = self.channels[pfx]
+            end
 
-        comm:HandleOfficerCommStatus(member, myName)
+            comm:HandleOfficerCommStatus(member, myName)
 
-        if comm.registered and name ~= myName then
-            PDKP:PrintD("Sending Officer Comms message", member.name)
-            self:SendCommsMessage(name, { ['type'] = 'request' })
+            if comm.registered and name ~= myName then
+                PDKP:PrintD("Sending Officer Comms message", member.name)
+                self:SendCommsMessage(name, { ['type'] = 'request' })
+            end
         end
     end
 end

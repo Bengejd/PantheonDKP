@@ -39,6 +39,10 @@ function Comm:new(opts)
 
     self.timeSinceLastRequest = nil
 
+    if opts['isSelfComm'] then
+        self.timeSinceLastRequest = MODULES.Options:GetLastSyncSent()
+    end
+
     self.officersSyncd = {}
 
     self.channel, self.sendTo, self.priority, self.callbackFunc, self.onCommReceivedFunc = self:_Setup()
@@ -112,6 +116,15 @@ function Comm:GetSendParams()
 end
 
 function Comm:HandleOfficerCommStatus(member, myName)
+    local instanceStatus, _ = Utils:GetInstanceStatus()
+
+    if instanceStatus then
+        if self.registered then
+            return self:UnregisterComm()
+        end
+        return
+    end
+
     if member.online and member:IsSyncReady() and not self.registered then
         self:RegisterComm()
     elseif self.registered and member.name ~= myName and not (member.online and member:IsSyncReady()) then
@@ -232,8 +245,12 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
     local self = comm
     local pfx = self.ogPrefix
     if pfx == Utils:GetMyName() then
+        local options = MODULES.Options
+
         PDKP:PrintD("Processing Sync Request from:", sender)
         local shouldContinue = true
+
+        self.timeSinceLastRequest = options:GetLastSyncSent()
 
         -- Check to see how long it's been since you've been requested to send a sync.
         if self.timeSinceLastRequest ~= nil then
@@ -245,7 +262,7 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
         end
 
         if shouldContinue == true then
-            self.timeSinceLastRequest = GetServerTime()
+            options:SetLastSyncSent()
             return MODULES.DKPManager:PrepareAdRequest()
         end
     elseif sender == pfx then
@@ -383,6 +400,9 @@ end
 function PDKP_SyncLockout(_, sent, total)
     local DKP = DKPManager
     local percentage = floor( (sent / total) * 100)
+
+    PDKP:PrintD("Sync Percentage: ", percentage);
+
     if percentage < 100 then
         DKP.autoSyncInProgress = true
     elseif percentage >= 100 then

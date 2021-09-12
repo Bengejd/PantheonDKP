@@ -257,6 +257,7 @@ end
 
 function Group:IsInInstance()
     local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
+    PDKP:PrintD("IsInInstance type:", type)
     return type ~= "none" and type ~= nil
 end
 

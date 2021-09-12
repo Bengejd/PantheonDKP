@@ -489,8 +489,8 @@ function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)
     -- Random epoch timestamp between July 19th, 2021 and now.
     -- January 1st, 2021: 1609480800
     -- July 19, 2021: 1626652800
-    -- August 3rd, 2021: 1627966800
-    local entry_id = random(1628053200, GetServerTime())
+    -- August 29th, 2021: 1630299600
+    local entry_id = random(1630299600, GetServerTime())
 
     local adjust_reasons = { 'Boss Kill', 'Item Win', 'Other' }
     local reason = adjust_reasons[random(3)]
