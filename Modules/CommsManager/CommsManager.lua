@@ -19,7 +19,7 @@ function Comms:Initialize()
 
     local opts = {
         ['name'] = 'OFFICER_COMMS',
-        ['events'] = {'GUILD_ROSTER_UPDATE'},
+        ['events'] = {'GUILD_ROSTER_UPDATE', 'ZONE_CHANGED_NEW_AREA'},
         ['tickInterval'] = 1,
         ['onEventFunc'] = function()
             MODULES.GuildManager:GetMembers()

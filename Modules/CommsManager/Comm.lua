@@ -119,8 +119,8 @@ function Comm:HandleOfficerCommStatus(member, myName, syncStatus)
     local instanceStatus, _ = Utils:GetInstanceStatus()
 
     if instanceStatus or syncStatus == false then
-        PDKP:PrintD('isInInstance', instanceStatus, 'syncStatus', syncStatus);
         if self.registered then
+            PDKP:PrintD('isInInstance', instanceStatus, 'syncStatus', syncStatus);
             return self:UnregisterComm()
         end
         return
