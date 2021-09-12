@@ -270,7 +270,8 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
         end
     elseif sender == pfx then
         PDKP.CORE:Print("Auto-syncing DKP with: ", sender)
-        return DKPManager:ImportBulkEntries(message, sender)
+        MODULES.CommsManager:ChunkedDecoder(message, sender)
+        --return DKPManager:ImportBulkEntries(message, sender)
     end
 end
 
@@ -288,7 +289,8 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     elseif pfx == 'SyncDelete' then
         return DKPManager:DeleteEntry(data, sender)
     elseif pfx == 'SyncLarge' then
-        return DKPManager:ImportBulkEntries(message, sender)
+        return MODULES.CommsManager:ChunkedDecoder(message, sender)
+        --return DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncOver' then
         data = CommsManager:DataDecoder(message)
         DKPManager:ProcessOverwriteSync(data, sender)

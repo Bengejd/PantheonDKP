@@ -64,8 +64,15 @@ function Dev:HandleSlashCommands(msg)
             self.frameRateTimer = nil
             return
         end
+        local averageFrameRate = 0;
+        local frameRateCounter = 0;
         self.frameRateTimer = C_Timer.NewTicker(1, function()
-            PDKP:PrintD("FrameRate", GetFramerate())
+            frameRateCounter = frameRateCounter + 1;
+            local fr = GetFramerate()
+            averageFrameRate = (averageFrameRate + fr) / frameRateCounter;
+            if fr < averageFrameRate then
+                PDKP:PrintD("FrameRate Drop: ", GetFramerate())
+            end
         end)
     elseif cmd == 'watchFramerate' then
         if self.frameRateTimer ~= nil then

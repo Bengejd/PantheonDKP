@@ -252,7 +252,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         return
     end
 
-    PDKP:PrintD("Importing new entry", importEntry.id);
+    --PDKP:PrintD("Importing new entry", importEntry.id);
 
     -- Roll back entries here
     self:RollBackEntries(importEntry);
@@ -342,7 +342,7 @@ end
 function DKP:ImportBulkEntries(message, sender, decoded)
     local data
     if decoded ~= true then
-        data = MODULES.CommsManager:DataDecoder(message)
+        data = MODULES.CommsManager:DataDecoder(message, true)
     else
         data = message
     end

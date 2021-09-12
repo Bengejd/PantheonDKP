@@ -27,8 +27,6 @@ function Comms:Initialize()
         end,
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
-
-    self.processing = CreateFrame('Frame')
 end
 
 function PDKP_OnCommsReceived(prefix, message, _, sender)
@@ -177,15 +175,8 @@ function Comms:_Deserialize(string)
     return data;
 end
 
-function Comms:_Decompress(decoded)
-    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(decoded, {chunksMode=true})
-    self.processing:SetScript('OnUpdate', function()
-        local ongoing, WoW_decompressed = WoW_decompress_co()
-        if not ongoing then
-            self.processing:SetScript('OnUpdate', nil)
-            return WoW_decompressed
-        end
-    end)
+function Comms:_Decompress(decoded, chunksMode)
+    return PDKP.LibDeflate:DecompressDeflate(decoded)
 end
 
 function Comms:_Decode(transmitData)
@@ -203,9 +194,9 @@ function Comms:DataEncoder(data)
     return encoded
 end
 
-function Comms:DataDecoder(data)
+function Comms:DataDecoder(data, chunksMode)
     local detransmit = self:_Decode(data)
-    local decompressed = self:_Decompress(detransmit)
+    local decompressed = self:_Decompress(detransmit, chunksMode)
     if decompressed == nil then
         -- It wasn't a message that can be decompressed.
         return self:_Deserialize(detransmit) -- Return the regular deserialized messge
@@ -214,11 +205,28 @@ function Comms:DataDecoder(data)
     return deserialized -- Deserialize the compressed message
 end
 
+function Comms:ChunkedDecoder(data, sender)
+    local detransmit = self:_Decode(data)
+    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true})
+    local processing = CreateFrame('Frame')
+    PDKP:PrintD("Chunk Processing data from: ", sender)
+    processing:SetScript('OnUpdate', function()
+        PDKP:PrintD("Chunk Processing continuing", sender);
+        local ongoing, WoW_decompressed = WoW_decompress_co()
+        if not ongoing then
+            PDKP:PrintD("Chunk Processing finished", sender);
+            processing:SetScript('OnUpdate', nil)
+            local deserialized = self:_Deserialize(WoW_decompressed)
+            return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
+        end
+    end)
+end
+
 function Comms:DatabaseEncoder(data, save)
     local serialized = self:_Serialize(data)
     local compressed = self:_Compress(serialized)
 
-        if save then
+    if save then
         local db = MODULES.Database:Decay();
         db['original'] = data
         db['serialized'] = serialized;
