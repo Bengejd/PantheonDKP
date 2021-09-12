@@ -4,7 +4,7 @@ local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local Utils = PDKP.Utils;
 
-local CommsManager, GroupManager, DKPManager, GuildManager, SettingsDB;
+local CommsManager, GroupManager, DKPManager, GuildManager, _;
 local Comm = {}
 
 Comm.__index = Comm
@@ -21,7 +21,7 @@ function Comm:new(opts)
     GroupManager = MODULES.GroupManager
     DKPManager = MODULES.DKPManager
     GuildManager = MODULES.GuildManager
-    SettingsDB = MODULES.Database:Settings()
+    --SettingsDB = MODULES.Database:Settings()
 
     self.ogPrefix = opts['prefix']
     self.prefix = Utils:GetCommPrefix(self.ogPrefix)
@@ -34,6 +34,8 @@ function Comm:new(opts)
     self.forcedCache = Utils:ternaryAssign(opts['forcedCache'] ~= nil, opts['forcedCache'], false)
     self.isOfficerComm = Utils:ternaryAssign(opts['officerComm'] ~= nil, opts['officerComm'], false);
     self.forcedCacheTimer = nil
+
+    self.registered = false;
 
     self.timeSinceLastRequest = nil
 
@@ -86,11 +88,14 @@ function Comm:VerifyCommSender(message, sender)
 end
 
 function Comm:RegisterComm()
-    print('Registering comm', self.prefix)
+    --PDKP:PrintD('Registering comm', self.prefix)
+    self.registered = true;
     PDKP.CORE:RegisterComm(self.prefix, PDKP_OnCommsReceived)
 end
 
 function Comm:UnregisterComm()
+    PDKP:PrintD("Unregistering Comm", self.ogPrefix);
+    self.registered = false;
     PDKP.CORE:UnregisterComm(self.prefix);
 end
 
@@ -104,6 +109,14 @@ end
 
 function Comm:GetSendParams()
     return { self.channel, self.sendTo, self.priority, self.callbackFunc }
+end
+
+function Comm:HandleOfficerCommStatus(member, myName)
+    if member.online and member:IsSyncReady() and not self.registered then
+        self:RegisterComm()
+    elseif self.registered and member.name ~= myName and not (member.online and member:IsSyncReady()) then
+        self:UnregisterComm()
+    end
 end
 
 -----------------------------
@@ -261,22 +274,22 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         DKPManager:ProcessOverwriteSync(data, sender)
         self:UnregisterComm()
     elseif pfx == 'SyncAd' then
-        if GroupManager:IsInInstance() then return end
-
-        -- Ignore SyncAds when you're not in the group with the player, but are in a raid.
-        --if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
-        --    return
-        --end
-
-        local officers = GuildManager:GetOfficers()
-        local syncOfficer = officers[sender]
-
-        if syncOfficer == nil then return end
-        if not syncOfficer:IsSyncReady() then return end
-
-        syncOfficer:MarkSyncReceived()
-
-        data = CommsManager:DataDecoder(message)
+        --if GroupManager:IsInInstance() then return end
+        --
+        ---- Ignore SyncAds when you're not in the group with the player, but are in a raid.
+        ----if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
+        ----    return
+        ----end
+        --
+        --local officers = GuildManager:GetOfficers()
+        --local syncOfficer = officers[sender]
+        --
+        --if syncOfficer == nil then return end
+        --if not syncOfficer:IsSyncReady() then return end
+        --
+        --syncOfficer:MarkSyncReceived()
+        --
+        --data = CommsManager:DataDecoder(message)
 
 
 

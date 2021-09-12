@@ -45,8 +45,8 @@ function Comms:RegisterComms()
         ['SyncLarge'] = { ['combat'] = false, },
         ['SyncOver'] = { ['combat'] = false, },
 
-        ['SyncAd'] = { ['combat'] = false },
-        ['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = true, },
+        --['SyncAd'] = { ['combat'] = false },
+        --['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = true, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
@@ -63,7 +63,7 @@ function Comms:RegisterComms()
         ['AddTime'] = { ['channel'] = 'RAID', ['self'] = true, ['requireCheck'] = false },
 
         ['SentInv'] = { ['channel'] = 'WHISPER', },
-        ['Version'] = { ['channel'] = 'GUILD', },
+        --['Version'] = { ['channel'] = 'GUILD', },
     }
     for prefix, opts in pairs(commChannels) do
         opts['prefix'] = prefix
@@ -79,11 +79,12 @@ function Comms:RegisterComms()
 end
 
 function Comms:RegisterOfficerAdComms()
-    for _, member in pairs(MODULES.GuildManager:GetOfficers()) do
-        local pfx = self.officerCommPrefixes[member.name]
-        local hasComm = pfx ~= nil
-        local syncReady = member:IsSyncReady()
-        if not hasComm and syncReady and member.online then
+    local myName = Utils:GetMyName()
+    for name, member in pairs(MODULES.GuildManager:GetOfficers()) do
+        local pfx = self.officerCommPrefixes[name]
+        local comm;
+
+        if pfx == nil then
             local opts = {
                 ['combat'] = false,
                 ['self'] = false,
@@ -91,14 +92,18 @@ function Comms:RegisterOfficerAdComms()
                 ['prefix'] = member.name,
                 ['officerComm'] = true,
             }
-            local comm = MODULES.Comm:new(opts);
+            comm = MODULES.Comm:new(opts)
             self.channels[comm.prefix] = comm;
-            self.officerCommPrefixes[member.name] = comm.prefix;
-        elseif hasComm and (not syncReady or not member.online) then
-            self.channels[pfx]:UnregisterComm()
-        elseif hasComm and syncReady and member.online then
+            self.officerCommPrefixes[name] = comm.prefix;
+        else
+            comm = self.channels[pfx]
+        end
+
+        comm:HandleOfficerCommStatus(member, myName)
+
+        if comm.registered and name ~= myName then
             PDKP:PrintD("Sending Officer Comms message", member.name)
-            self:SendCommsMessage(member.name, { ['type'] = 'request' })
+            self:SendCommsMessage(name, { ['type'] = 'request' })
         end
     end
 end

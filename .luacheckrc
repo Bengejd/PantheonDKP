@@ -53,6 +53,7 @@ globals = {
     "PDKP_Loot_EntryDeleted",
     "pdkp_LootTableMixin",
     "PDKP_RaidTools_TextValidFunc",
+    "PDKP_OnComm_OfficerSync",
     "PDKP__wait",
 
     -- Scroll Table Globals

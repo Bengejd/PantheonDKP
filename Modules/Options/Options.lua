@@ -48,7 +48,7 @@ function Options:SetupLDB()
                 type = "group",
                 name = "Syncing",
                 width = "full",
-                order = 1,
+                order = 3,
                 args = {
                     spacer1 = {
                         type = "description",
@@ -61,49 +61,49 @@ function Options:SetupLDB()
         }
     }
 
-    if PDKP:IsDev() then
+    if true then
         PDKP.CORE:Print("Setting up dev interface");
-        pdkp_options['args']['tab9'] = {
-            type = "group",
-            name = "Dev",
-            width = "full",
-            order = 9,
-            args = {
-                devConsole = {
-                    type = "toggle",
-                    name = "Enable Console",
-                    desc = "Toggle the dev console",
-                    get = function(info) return PDKP.enableConsole end,
-                    set = function(info, val)
-                        return MODULES.Dev:ToggleSetting('enableConsole', val)
-                    end,
-                    width = 2.5,
-                    order = 1,
-                },
-                showInternalDKP = {
-                    type = "toggle",
-                    name = "Show Internal DKP",
-                    desc = "Show the true DKP values (not rounded)",
-                    get = function(info) return PDKP.showInternalDKP end,
-                    set = function(info, val)
-                        return MODULES.Dev:ToggleSetting('showInternalDKP', val)
-                    end,
-                    width = 2.5,
-                    order = 2,
-                },
-                showHistoryIds = {
-                    type = "toggle",
-                    name = "Show History IDS",
-                    desc = "Show entry history IDs",
-                    get = function(info) return PDKP.showHistoryIds end,
-                    set = function(info, val)
-                        return MODULES.Dev:ToggleSetting('showHistoryIds', val)
-                    end,
-                    width = 2.5,
-                    order = 3,
-                },
-            }
-        }
+        --pdkp_options['args']['tab9'] = {
+        --    type = "group",
+        --    name = "Dev",
+        --    width = "full",
+        --    order = 9,
+        --    args = {
+        --        devConsole = {
+        --            type = "toggle",
+        --            name = "Enable Console",
+        --            desc = "Toggle the dev console",
+        --            get = function(info) return PDKP.enableConsole end,
+        --            set = function(info, val)
+        --                return MODULES.Dev:ToggleSetting('enableConsole', val)
+        --            end,
+        --            width = 2.5,
+        --            order = 1,
+        --        },
+        --        showInternalDKP = {
+        --            type = "toggle",
+        --            name = "Show Internal DKP",
+        --            desc = "Show the true DKP values (not rounded)",
+        --            get = function(info) return PDKP.showInternalDKP end,
+        --            set = function(info, val)
+        --                return MODULES.Dev:ToggleSetting('showInternalDKP', val)
+        --            end,
+        --            width = 2.5,
+        --            order = 2,
+        --        },
+        --        showHistoryIds = {
+        --            type = "toggle",
+        --            name = "Show History IDS",
+        --            desc = "Show entry history IDs",
+        --            get = function(info) return PDKP.showHistoryIds end,
+        --            set = function(info, val)
+        --                return MODULES.Dev:ToggleSetting('showHistoryIds', val)
+        --            end,
+        --            width = 2.5,
+        --            order = 3,
+        --        },
+        --    }
+        --}
     end
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("PantheonDKP", pdkp_options, nil)
