@@ -20,13 +20,15 @@ function Comms:Initialize()
     local opts = {
         ['name'] = 'OFFICER_COMMS',
         ['events'] = {'GUILD_ROSTER_UPDATE', 'ZONE_CHANGED_NEW_AREA'},
-        ['tickInterval'] = 1,
+        ['tickInterval'] = 5,
         ['onEventFunc'] = function()
             MODULES.GuildManager:GetMembers()
             self:RegisterOfficerAdComms()
         end,
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
+
+    self.processing = CreateFrame('Frame')
 end
 
 function PDKP_OnCommsReceived(prefix, message, _, sender)
@@ -176,7 +178,14 @@ function Comms:_Deserialize(string)
 end
 
 function Comms:_Decompress(decoded)
-    return PDKP.LibDeflate:DecompressDeflate(decoded)
+    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(decoded, {chunksMode=true})
+    self.processing:SetScript('OnUpdate', function()
+        local ongoing, WoW_decompressed = WoW_decompress_co()
+        if not ongoing then
+            self.processing:SetScript('OnUpdate', nil)
+            return WoW_decompressed
+        end
+    end)
 end
 
 function Comms:_Decode(transmitData)
