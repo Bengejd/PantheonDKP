@@ -15,6 +15,8 @@ function Comms:Initialize()
     self.channels = {}
     self.officerCommPrefixes = {}
 
+    self.autoSyncData = self:DataEncoder({ ['type'] = 'request' });
+
     local opts = {
         ['name'] = 'OFFICER_COMMS',
         ['events'] = {'GUILD_ROSTER_UPDATE'},
@@ -80,6 +82,9 @@ end
 
 function Comms:RegisterOfficerAdComms()
     local myName = Utils:GetMyName()
+
+    local syncStatus = MODULES.Options:GetAutoSyncStatus()
+
     for name, member in pairs(MODULES.GuildManager:GetOfficers()) do
         if member:IsStrictRaidReady() then
             local pfx = self.officerCommPrefixes[name]
@@ -101,11 +106,11 @@ function Comms:RegisterOfficerAdComms()
                 comm = self.channels[pfx]
             end
 
-            comm:HandleOfficerCommStatus(member, myName)
+            comm:HandleOfficerCommStatus(member, myName, syncStatus)
 
             if comm.registered and name ~= myName then
                 PDKP:PrintD("Sending Officer Comms message", member.name)
-                self:SendCommsMessage(name, { ['type'] = 'request' })
+                self:SendCommsMessage(name, self.autoSyncData, true);
             end
         end
     end

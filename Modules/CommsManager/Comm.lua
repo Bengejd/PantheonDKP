@@ -115,10 +115,11 @@ function Comm:GetSendParams()
     return { self.channel, self.sendTo, self.priority, self.callbackFunc }
 end
 
-function Comm:HandleOfficerCommStatus(member, myName)
+function Comm:HandleOfficerCommStatus(member, myName, syncStatus)
     local instanceStatus, _ = Utils:GetInstanceStatus()
 
-    if instanceStatus then
+    if instanceStatus or syncStatus == false then
+        PDKP:PrintD('isInInstance', instanceStatus, 'syncStatus', syncStatus);
         if self.registered then
             return self:UnregisterComm()
         end
@@ -246,7 +247,6 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
     local pfx = self.ogPrefix
     if pfx == Utils:GetMyName() then
         local options = MODULES.Options
-
         PDKP:PrintD("Processing Sync Request from:", sender)
         local shouldContinue = true
 
@@ -255,11 +255,14 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
         -- Check to see how long it's been since you've been requested to send a sync.
         if self.timeSinceLastRequest ~= nil then
             local server_time = GetServerTime()
-            local timeSinceSync = Utils:SubtractTime(server_time, self.timeSinceLastRequest)
+            local timeSinceSync = Utils:SubtractTime(self.timeSinceLastRequest, server_time)
             if timeSinceSync <= Utils:GetSecondsInFiveMinutes() then
                 shouldContinue = false;
+                PDKP:PrintD("TimeSinceSync", timeSinceSync);
             end
         end
+
+        PDKP:PrintD("Should Continue:", shouldContinue)
 
         if shouldContinue == true then
             options:SetLastSyncSent()

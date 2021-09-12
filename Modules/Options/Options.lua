@@ -51,12 +51,23 @@ function Options:SetupLDB()
                 width = "full",
                 order = 3,
                 args = {
+                    autoSync = {
+                        type = "toggle",
+                        name = "Auto Sync",
+                        desc = "Synchronize DKP entries with officers automatically, once per day.",
+                        get = function(info) return self.db['sync']['autoSync'] end,
+                        set = function(info, val)
+                            self.db['sync']['autoSync'] = val
+                        end,
+                        width = 2.5,
+                        order = 1,
+                    },
                     spacer1 = {
                         type = "description",
-                        name = "...Coming soon...",
+                        name = "Once per day, per officer, your addon will automatically sync the last two weeks worth of data. Auto sync will not work while in a dungeon, raid, battleground or arena.",
                         width = "full",
                         order = 2,
-                    },
+                    }
                 },
             },
         }
@@ -138,6 +149,10 @@ end
 
 function Options:SetLastSyncSent()
     self.db['sync']['lastSyncSent'] = GetServerTime()
+end
+
+function Options:GetAutoSyncStatus()
+    return self.db['sync']['autoSync'];
 end
 
 function Options:IsPlayerIgnored(playerName)
