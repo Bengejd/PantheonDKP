@@ -9,7 +9,7 @@
 # LibDeflate
 ## Pure Lua compressor and decompressor with high compression ratio using DEFLATE/zlib format.
 
-Copyright (C) 2018-2020 Haoqian He
+Copyright (C) 2018-2019 Haoqian He
 
 ## Introduction
 LibDeflate is pure Lua compressor and decompressor with high compression ratio,
@@ -21,11 +21,11 @@ need to have a working Lua interpreter.
 
 LibDeflate uses the following compression formats:
 1. *DEFLATE*, as defined by the specification
-   [RFC1951](https://tools.ietf.org/html/rfc1951). DEFLATE is the default compression method of ZIP.
+[RFC1951](https://tools.ietf.org/html/rfc1951). DEFLATE is the default compression method of ZIP.
 2.  *zlib*, as defined by the specification
-    [RFC1950](https://tools.ietf.org/html/rfc1950).
-    zlib format uses DEFLATE formats to compress data and adds several bytes as
-    headers and checksum.
+[RFC1950](https://tools.ietf.org/html/rfc1950).
+zlib format uses DEFLATE formats to compress data and adds several bytes as
+headers and checksum.
 
 A simple C program utilizing [zlib](https://github.com/madler/zlib) should be
 compatible with LibDeflate. If you are not sure how to write this program,
@@ -37,6 +37,8 @@ LibDeflate supports and is fully tested under Lua 5.1/5.2/5.3/5.4, LuaJIT 2.0/2.
 for Linux, MaxOS and Windows. Click the Travis CI(Linux/MaxOS) and
 Appveyor(Windows) badge on the top of this README for the test results. Click
 the CodeCov badge to see the test coverage (should be 100%).
+Note at the time of this release, Lua 5.4 final is not released yet.
+For Lua 5.4, This library is tested with its first beta version.
 
 ## Documentation
 [Documentation](https://safeteewow.github.io/LibDeflate/source/LibDeflate.lua.html) is hosted on Github.
@@ -91,30 +93,30 @@ More benchmarks can be viewed in the [documentation](https://safeteewow.github.i
 </tr>
 <tr>
 <td>compress time(ms)</td>
-<td>68</td>
-<td>116</td>
-<td>189</td>
-<td>111</td>
-<td>52</td>
-<td>50</td>
+<td>70</td>
+<td>120</td>
+<td>200</td>
+<td>127</td>
+<td>58</td>
+<td>64</td>
 </tr>
 <tr>
 <td>decompress time(ms)</td>
-<td>48</td>
-<td>30</td>
-<td>27</td>
-<td>55</td>
-<td>26</td>
-<td>59</td>
+<td>35</td>
+<td>32</td>
+<td>32</td>
+<td>62</td>
+<td>36</td>
+<td>62</td>
 </tr>
 <tr>
 <td>compress+decompress time(ms)</td>
-<td>116</td>
-<td>145</td>
-<td>216</td>
-<td>166</td>
-<td>78</td>
-<td>109</td>
+<td>105</td>
+<td>152</td>
+<td>232</td>
+<td>189</td>
+<td>94</td>
+<td>126</td>
 </tr>
 </tbody>
 </table>
@@ -125,21 +127,19 @@ LibDeflate with compression level 1 compresses as fast as LibCompress, but alrea
 ## Download And Install
 
 + The [official repository](https://github.com/SafeteeWoW/LibDeflate) locates on Github.
-  [LibDeflate.lua](https://github.com/SafeteeWoW/LibDeflate/blob/master/LibDeflate.lua) is the only file of LibDeflate. Copy the file
-  to your LUA_PATH to install it.
+[LibDeflate.lua](https://github.com/SafeteeWoW/LibDeflate/blob/master/LibDeflate.lua) is the only file of LibDeflate. Copy the file
+to your LUA_PATH to install it.
 
-+ To download as a World of Warcraft library, goto [LibDeflate Curseforge Page](https://wow.curseforge.com/projects/libdeflate) or [LibDeflate WoWInterface Page](https://www.wowinterface.com/downloads/info25453-LibDeflate.html)
++ To download as a World of Warcraft library, goto [LibDeflate Curseforge Page](https://wow.curseforge.com/projects/libdeflate)
 
 + You can also install via Luarocks using the command "luarocks install libdeflate"
 
-+ All packages files can also in downloaded in the [Github Release Page](https://github.com/SafeteeWoW/LibDeflate/releases)
-
 + To use after installation, ```require("LibDeflate")``` (case sensitive) in your Lua interpreter,
-  or ```LibStub:GetLibrary("LibDeflate")``` (case sensitive) for World of Warcraft.
+or ```LibStub:GetLibrary("LibDeflate")``` (case sensitive) for World of Warcraft.
 
 
 ## Usage
-```lua
+```
 local LibDeflate
 if LibStub then -- You are using LibDeflate as WoW addon
 	LibDeflate = LibStub:GetLibrary("LibDeflate")
@@ -163,46 +163,6 @@ else
 	-- Decompression succeeds.
 	assert(example_input == decompress_deflate)
 end
-
--- Can also compress and decompress in chunks mode
-local compress_co = LibDeflate:CompressDeflate(example_input, {level=9, chunksMode=true})
-local ongoing, compressed_chunks = true
-repeat 
-  ongoing, compressed_chunks = compress_co()
-until not ongoing
-
-local decompress_co = LibDeflate:DecompressDeflate(compressed_chunks, {chunksMode=true})
-local ongoing, decompressed_chunks = true
-repeat 
-  ongoing, decompressed_chunks = decompress_co()
-until not ongoing
-if decompressed_chunks == nil then
-	error("Decompression fails.")
-else
-	-- Decompression succeeds.
-	assert(example_input == decompressed_chunks)
-end
-
--- In WoW, coroutine processing can be handled on frame updates to reduce loss of framerate.
-local processing = CreateFrame('Frame')
-local WoW_compress_co = LibDeflate:CompressDeflate(example_input, {level=9, chunksMode=true})
-processing:SetScript('OnUpdate', function()
-  local ongoing, WoW_compressed = WoW_compress_co()
-  if not ongoing then
-    -- do something with `WoW_compressed`
-    processing:SetScript('OnUpdate', nil)
-  end
-end)
-
-local WoW_decompress_co = LibDeflate:DecompressDeflate(compress_deflate, {chunksMode=true})
-processing:SetScript('OnUpdate', function()
-  local ongoing, WoW_decompressed = WoW_decompress_co()
-  if not ongoing then
-    -- do something with `WoW_decompressed`
-	  assert(example_input == WoW_decompressed)
-    processing:SetScript('OnUpdate', nil)
-  end
-end)
 
 
 -- To transmit through WoW addon channel, data must be encoded so NULL ("\000")
@@ -230,17 +190,14 @@ assert(LibDeflate:DecodeForPrint(printable_compressed) == compress_deflate)
 See Full examples in [examples/example.lua](https://github.com/SafeteeWoW/LibDeflate/blob/master/examples/example.lua)
 
 ## License
-
-LibDeflate is licensed under the zlib license. See LICENSE.txt.
-The "tests" folder in the repository contains some third party code and data.
-Their original licenses shall be complied when used.
+LibDeflate is licensed under GNU Lesser General Public License Version 3 or later.
 
 ## Credits and Disclaimer
 
-This library rewrites the code from the algorithm and the ideas of the following projects,
-and uses their code to help to test the correctness of this library,
-but their code is not included directly in the library itself.
-Their original licenses shall be complied when used.
+The following projects are used to the help to test the correctness
+of this program. The code of the main program (LibDeflate.lua) does not
+use their code directly, but uses their ideas and algorithms. Their original
+licenses shall be comply when used.
 
 1. [zlib](http://www.zlib.net), by Jean-loup Gailly (compression) and Mark Adler (decompression). Licensed under [zlib License](http://www.zlib.net/zlib_license.html).
 2. [puff](https://github.com/madler/zlib/tree/master/contrib/puff), by Mark Adler. Licensed under zlib License.
