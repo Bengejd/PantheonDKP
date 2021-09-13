@@ -337,13 +337,10 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 end
 
+-- LAG IS BEING CAUSED HERE. Potentially, don't roll forward or backwards until the end, and the just recalibrate?
 function DKP:ImportBulkEntries(message, sender, decoded)
-    local data
-    if decoded ~= true then
-        data = MODULES.CommsManager:DataDecoder(message, true)
-    else
-        data = message
-    end
+    local data = Utils:ternaryAssign(decoded ~= true, MODULES.CommsManager:DataDecoder(message, true), message)
+    
 
     local member = MODULES.GuildManager:GetMemberByName(sender)
     member:MarkSyncReceived()

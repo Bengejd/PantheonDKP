@@ -216,13 +216,12 @@ function Comms:ChunkedDecoder(data, sender)
     local processing = CreateFrame('Frame')
     PDKP:PrintD("Chunk Processing data from: ", sender)
     processing:SetScript('OnUpdate', function()
-        --PDKP:PrintD("Chunk Processing continuing", sender);
         local ongoing, WoW_decompressed = WoW_decompress_co()
         if not ongoing then
             PDKP:PrintD("Chunk Processing finished", sender);
             processing:SetScript('OnUpdate', nil)
             local deserialized = self:_Deserialize(WoW_decompressed)
-            --return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
+            return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
         end
     end)
 end
