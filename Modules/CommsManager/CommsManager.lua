@@ -212,9 +212,10 @@ end
 
 function Comms:ChunkedDecoder(data, sender)
     local detransmit = self:_Decode(data)
-    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true, yieldOnChunkSize=1024*2 })
+    local chunkSize = 1024 * 4;
+    local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true, yieldOnChunkSize=chunkSize })
     local processing = CreateFrame('Frame')
-    PDKP:PrintD("Chunk Processing data from: ", sender)
+    PDKP.CORE:Print("Processing large import from", sender .. "...")
     processing:SetScript('OnUpdate', function()
         local ongoing, WoW_decompressed = WoW_decompress_co()
         if not ongoing then

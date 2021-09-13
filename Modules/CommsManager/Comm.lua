@@ -11,6 +11,7 @@ Comm.__index = Comm
 
 local setmetatable, pairs, tremove, tinsert = setmetatable, pairs, table.remove, table.insert
 local type, floor = type, math.floor
+local format = string.format
 local GetServerTime = GetServerTime
 
 function Comm:new(opts)
@@ -262,6 +263,10 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
             end
         end
 
+        if MODULES.CommsManager.syncInProgress then
+            shouldContinue = false;
+        end
+
         PDKP:PrintD("Should Continue:", shouldContinue)
 
         if shouldContinue == true then
@@ -447,11 +452,11 @@ function PDKP_UpdatePushBar(percent, elapsed)
     local remaining = 100 - percent
     -- Percent per second
     local eta = (elapsed / percent) * remaining
-    eta = math.floor(eta)
+    eta = floor(eta)
 
-    local hours = string.format("%02.f", math.floor(eta / 3600));
-    local mins = string.format("%02.f", math.floor(eta / 60 - (hours * 60)));
-    local secs = string.format("%02.f", math.floor(eta - hours * 3600 - mins * 60));
+    local hours = format("%02.f", floor(eta / 3600));
+    local mins = format("%02.f", floor(eta / 60 - (hours * 60)));
+    local secs = format("%02.f", floor(eta - hours * 3600 - mins * 60));
 
     local etatext = mins .. ':' .. secs
     local statusText = 'PDKP Push: ' .. percent .. '%' .. ' ETA: ' .. etatext
