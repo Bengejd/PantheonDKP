@@ -89,6 +89,8 @@ function Dev:HandleSlashCommands(msg)
         self:TestMaxDKP()
     elseif cmd == 'forceOfficerComms' then
         MODULES.CommsManager:RegisterOfficerAdComms()
+    elseif cmd == 'GetTheoreticalCap' then
+        MODULES.DKPManager:GetTheoreticalCap()
     end
 end
 

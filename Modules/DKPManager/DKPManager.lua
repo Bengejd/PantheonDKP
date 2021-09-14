@@ -849,6 +849,40 @@ function DKP:GetMaxBid()
     end
 end
 
+function DKP:GetTheoreticalCap()
+    local previousCap, _ = self:GetCaps();
+    local newCap, _ = self:GetCaps();
+    newCap = newCap + 0.1;
+
+    local raids = MODULES.Constants.RAID_BOSSES
+    local boss_count = 0;
+    for _, raid in pairs(raids) do
+        boss_count = boss_count + #raid['boss_names']
+    end
+
+    local weekCount = 0;
+    local capReached = false;
+
+    while newCap >= previousCap do
+        weekCount = weekCount + 1;
+        newCap = math.floor(newCap);
+        newCap = newCap + (10 * boss_count);
+        newCap = math.floor((newCap * 0.9));
+        if newCap > previousCap then
+            previousCap = newCap
+        else
+            capReached = true;
+            break;
+        end
+
+        if weekCount >= 666 then
+            break
+        end
+    end
+    PDKP.CORE:Print(previousCap, " DKP cap will be reached in", weekCount, "weeks")
+    return previousCap, weekCount;
+end
+
 function DKP:CheckForNegatives()
     local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
     if shouldCalibrate then

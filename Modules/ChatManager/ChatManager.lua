@@ -154,7 +154,8 @@ function Chat:_HandleDKPMsg(msg)
         chatMessage = "You have " .. memberDKP .. " dkp";
     elseif cmd == '!cap' then
         local guildCap, groupCap = MODULES.DKPManager:GetCaps()
-        chatMessage = "[Bid Cap]: " .. tostring(bidCap) .. " [Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap);
+        local phaseCap, weekNumber = MODULES.DKPManager:GetTheoreticalCap()
+        chatMessage = "[Bid Cap]: " .. tostring(bidCap) .. " [Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap) .. " [Phase Cap]: " .. tostring(phaseCap);
     end
 
     if chatMessage ~= nil then
@@ -236,7 +237,8 @@ function Chat:_HandleSlashCommands(msg)
         ['bossKillTest'] = true,
         ['watchFramerate'] = true,
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
-        ['testDKPCap'] = true, ['forceOfficerComms'] = true
+        ['testDKPCap'] = true, ['forceOfficerComms'] = true,
+        ['GetTheoreticalCap'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)
