@@ -130,11 +130,8 @@ function Chat:_HandleDKPMsg(msg)
 
             if bid and type(bid) == "number" then
                 if bid <= memberDKP and bid >= 1 then
-                    --local bidAdjusted = false;
-
                     if bid > bidCap then
                         bid = bidCap
-                        --bidAdjusted = true;
                     end
 
                     local bidder_info = { ['name'] = author, ['bid'] = bid, ['dkpTotal'] = memberDKP }
@@ -157,7 +154,7 @@ function Chat:_HandleDKPMsg(msg)
         chatMessage = "You have " .. memberDKP .. " dkp";
     elseif cmd == '!cap' then
         local guildCap, groupCap = MODULES.DKPManager:GetCaps()
-        chatMessage = "[Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap);
+        chatMessage = "[Bid Cap]: " .. tostring(bidCap) .. " [Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap);
     end
 
     if chatMessage ~= nil then

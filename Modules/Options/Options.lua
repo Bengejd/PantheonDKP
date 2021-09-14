@@ -87,7 +87,6 @@ function Options:SetupLDB()
                         get = function(info) return self.db['sync']['processingChunkSize'] or 2 end,
                         set = function(info, val)
                             self.db['sync']['processingChunkSize'] = val
-                            print('processingChunkSize', val);
                         end,
                         style = "dropdown",
                         width = 1,
@@ -108,7 +107,6 @@ function Options:SetupLDB()
                         get = function(info) return self.db['sync']['decompressChunkSize'] or 4 end,
                         set = function(info, val)
                             self.db['sync']['decompressChunkSize'] = val
-                            print('decompressChunkSize', val);
                         end,
                         width = 1,
                         order = 5,
@@ -216,7 +214,7 @@ function Options:processingChunkSize()
 end
 
 function Options:decompressChunkSize()
-    return self.db['sync']['processingChunkSize'] or 4
+    return self.db['sync']['decompressChunkSize'] or 32
 end
 
 function Options:GetInviteCommands()
