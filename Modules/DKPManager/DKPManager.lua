@@ -171,6 +171,10 @@ function DKP:ProcessOverwriteSync(message, sender)
     PDKP.CORE:Print("Database overwrite has completed. Please reload for it to take effect.");
 end
 
+function DKP:ProcessSquish()
+
+end
+
 -----------------------------
 --     Import Functions    --
 -----------------------------
@@ -364,6 +368,8 @@ function DKP:ImportBulkEntries(message, sender, decoded)
         self.syncProcessing = true;
     end
 
+    maxProcessCount = MODULES.Options:processingChunkSize()
+
     local data
     if decoded ~= true then
         data = MODULES.CommsManager:DataDecoder(message, true)
@@ -391,7 +397,9 @@ function DKP:ImportBulkEntries(message, sender, decoded)
             local entryAdler = CommsManager:_Adler(encoded_entry)
             self:ImportEntry2(encoded_entry, entryAdler, 'Large');
             processCount = processCount + 1;
-            coroutine_yield()
+            if processCount >= (maxProcessCount -1) and processCount % (maxProcessCount -1) == 0 then
+                coroutine_yield()
+            end
         end
     end)
 

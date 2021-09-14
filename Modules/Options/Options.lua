@@ -51,6 +51,12 @@ function Options:SetupLDB()
                 width = "full",
                 order = 3,
                 args = {
+                    spacer1 = {
+                        type = "description",
+                        name = "Once per day, per officer, your addon will automatically sync the last two weeks worth of data. Auto sync will not work while in a dungeon, raid, battleground or arena.",
+                        width = "full",
+                        order = 1,
+                    },
                     autoSync = {
                         type = "toggle",
                         name = "Auto Sync",
@@ -60,14 +66,53 @@ function Options:SetupLDB()
                             self.db['sync']['autoSync'] = val
                         end,
                         width = 2.5,
-                        order = 1,
-                    },
-                    spacer1 = {
-                        type = "description",
-                        name = "Once per day, per officer, your addon will automatically sync the last two weeks worth of data. Auto sync will not work while in a dungeon, raid, battleground or arena.",
-                        width = "full",
                         order = 2,
-                    }
+                    },
+                    spacer2 = {
+                        type = "description",
+                        name = "These values decide how many entries you want to process at a time when receiving a push (auto or manual) from an officer. Higher values result in faster processing, but may cause lag.",
+                        width = "full",
+                        order = 3,
+                    },
+                    processingChunkSize = {
+                        type = "select",
+                        name = "Processing Chunk Size",
+                        values = {
+                            [2] = "2x",
+                            [3] = "3x",
+                            [4] = "4x",
+                            [5] = "5x",
+                        },
+                        desc = "The amount of items you want to process in one frame update.",
+                        get = function(info) return self.db['sync']['processingChunkSize'] or 2 end,
+                        set = function(info, val)
+                            self.db['sync']['processingChunkSize'] = val
+                            print('processingChunkSize', val);
+                        end,
+                        style = "dropdown",
+                        width = 1,
+                        order = 4,
+                    },
+                    decompressChunkSize = {
+                        type = "select",
+                        name = "Decompression Chunk Size",
+                        desc = "The amount of items you want to decompress in one frame update.",
+                        values = {
+                            [2] = "2x",
+                            [4] = "4x",
+                            [8] = "8x",
+                            [16] = "16x",
+                            [32] = "32x",
+                        },
+                        style = "dropdown",
+                        get = function(info) return self.db['sync']['decompressChunkSize'] or 4 end,
+                        set = function(info, val)
+                            self.db['sync']['decompressChunkSize'] = val
+                            print('decompressChunkSize', val);
+                        end,
+                        width = 1,
+                        order = 5,
+                    },
                 },
             },
         }
@@ -139,6 +184,8 @@ function Options:_InitializeDBDefaults()
             ['officerSyncs'] = {},
             ['totalEntries'] = 0,
             ['autoSync'] = true,
+            ['processingChunkSize'] = 2,
+            ['decompressChunkSize'] = 4,
         }
     end
 end
@@ -162,6 +209,14 @@ function Options:IsPlayerIgnored(playerName)
         end
     end
     return false
+end
+
+function Options:processingChunkSize()
+    return self.db['sync']['processingChunkSize'] or 2
+end
+
+function Options:decompressChunkSize()
+    return self.db['sync']['processingChunkSize'] or 4
 end
 
 function Options:GetInviteCommands()

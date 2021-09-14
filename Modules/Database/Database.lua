@@ -1,10 +1,11 @@
 local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
+local Utils = PDKP.Utils;
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phase' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phase', 'snapshot' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -99,6 +100,10 @@ function DB:Phases()
     return PDKP_DB[self.server_faction_guild]['phases']
 end
 
+function DB:Snapshot()
+    return PDKP_DB[self.server_faction_guild]['snapshot']
+end
+
 --@do-not-package@
 function DB:Dev()
     if PDKP_DB[self.server_faction_guild]['dev'] == nil then
@@ -107,6 +112,32 @@ function DB:Dev()
     return PDKP_DB[self.server_faction_guild]['dev']
 end
 --@end-do-not-package@
+
+function DB:CreateSnapshot()
+    PDKP_DB[self.server_faction_guild]['snapshot'] = {
+        ['guild'] = Utils:DeepCopy(self:Guild()),
+        ['dkp'] = Utils:DeepCopy(self:DKP()),
+        ['phases'] = Utils:DeepCopy(self:Phases()),
+        ['decay'] = Utils:DeepCopy(self:Decay()),
+        ['Ledger'] = Utils:DeepCopy(self:Ledger()),
+        ['sync'] = Utils:DeepCopy(self:Sync()),
+    }
+end
+
+function DB:ApplySnapshot()
+    local snap = self:Snapshot()
+    PDKP_DB[self.server_faction_guild]['guild'] = Utils:DeepCopy(snap['guild'])
+    PDKP_DB[self.server_faction_guild]['dkp'] = Utils:DeepCopy(snap['dkp'])
+    PDKP_DB[self.server_faction_guild]['phases'] = Utils:DeepCopy(snap['phases'])
+    PDKP_DB[self.server_faction_guild]['decay'] = Utils:DeepCopy(snap['decay'])
+    PDKP_DB[self.server_faction_guild]['Ledger'] = Utils:DeepCopy(snap['Ledger'])
+    PDKP_DB[self.server_faction_guild]['sync'] = Utils:DeepCopy(snap['sync'])
+end
+
+function DB:ResetSnapshot()
+    PDKP_DB[self.server_faction_guild]['snapshot'] = nil;
+    PDKP_DB[self.server_faction_guild]['snapshot'] = {};
+end
 
 function DB:ResetAllDatabases()
     for i = 1, #database_names do
