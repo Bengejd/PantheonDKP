@@ -143,6 +143,23 @@ function CORE:_SequentialInitialize(stage)
     C_Timer.After(0.1, function() CORE:_SequentialInitialize(stage + 1) end)
 end
 
+function CORE:_Reinitialize()
+    MODULES.Database:Initialize()
+
+    MODULES.CommsManager:RegisterComms()
+    MODULES.LedgerManager:Initialize()
+    MODULES.AuctionManager:Initialize()
+    MODULES.DKPEntry:Initialize()
+    MODULES.DKPManager:Initialize()
+    MODULES.RaidManager:Initialize()
+    MODULES.GroupManager:Initialize()
+    MODULES.Lockouts:Initialize()
+
+    C_Timer.After(3, function()
+        MODULES.DKPManager:_UpdateTables();
+    end)
+end
+
 function CORE:_ExecuteInitialize()
     if self._initialize_fired then return end
 

@@ -68,6 +68,7 @@ function DKP:Initialize()
 
     C_Timer.After(5, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
+        self:_UpdateTables();
     end)
 end
 
@@ -165,14 +166,31 @@ function DKP:ProcessOverwriteSync(message, sender)
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end
 
-    MODULES.GuildManager:Initialize();
-    self:Initialize();
-    self:_UpdateTables();
-    PDKP.CORE:Print("Database overwrite has completed. Please reload for it to take effect.");
+    PDKP.CORE:_Reinitialize()
+    self:RecalibrateDKP();
+    PDKP.CORE:Print("Database overwrite has completed");
 end
 
-function DKP:ProcessSquish()
+function DKP:ProcessSquish(entry)
+    PDKP.CORE:Print("Processing Phase DKP Entry Consolidation");
 
+    local newer_entries = {}
+    local olderEntryCounter = 0;
+    for id, encoded_entry in pairs(DKP_DB) do
+        if id >= entry.id then
+            newer_entries[id] = encoded_entry
+        elseif id < entry.id then
+            olderEntryCounter = olderEntryCounter + 1;
+        end
+    end
+    if olderEntryCounter >= 1 then
+        MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
+
+        C_Timer.After(2, function()
+            PDKP.CORE:_Reinitialize();
+            --self:RecalibrateDKP();
+        end)
+    end
 end
 
 -----------------------------
@@ -425,13 +443,12 @@ function DKP:RecalibrateDKP()
 
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
-        local dkp = Utils:ShallowCopy(member.dkp);
-        self.calibratedTotals[member.name] = dkp['total'];
+        self.calibratedTotals[member.name] = Utils:ShallowCopy(member:GetDKP());
     end
 
     self:RollBackEntries({ ['id']  = 0 } );
     for _, member in pairs(members) do
-        member.dkp['total'] = 30
+        member.dkp['total'] = member.dkp['snapshot']
         member:Save()
     end
 
@@ -484,7 +501,7 @@ function DKP:RollBackEntriesBulk(sender, ttl)
             local members = MODULES.GuildManager.members
             for _, member in pairs(members) do
                 self.calibratedTotals[member.name] = member.dkp['total'];
-                member.dkp['total'] = 30
+                member.dkp['total'] = member.dkp['snapshot']
                 member:Save()
             end
             self:RollForwardEntriesBulk(sender, total);

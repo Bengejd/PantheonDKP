@@ -69,6 +69,16 @@ function dbEntry:new(entry_details)
     self.lockoutsChecked = false
     self.adEntry = self.ed['adEntry'] or false
 
+    self.isNewPhaseEntry = false;
+
+    if self.reason == _PHASE then
+        local phaseDB = MODULES.Database:Phases()
+        if not tContains(phaseDB, self.id) then
+            self.isNewPhaseEntry = true;
+            tinsert(phaseDB, self.id);
+        end
+    end
+
     -- Grab the members, and non-members in the entry for later use.
     self:GetMembers()
 
@@ -125,6 +135,7 @@ function dbEntry:GetDecayAmounts(refresh)
             if self.decayAmounts[member.name] == nil or refresh then
                 if not self.decayReversal or self.deleted then
                     self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _PHASE_AMOUNT, 1);
+                    self.previousTotals[member.name] = member:GetDKP();
                 end
             end
         end
@@ -204,13 +215,25 @@ function dbEntry:ApplyEntry()
             if memberDKP <= 30 then
                 dkp_change = 0;
             end
+
+            if self.isNewPhaseEntry then
+                dkp_change = self.decayAmounts[member.name] * -1;
+            end
+
             self.decayAmounts[member.name] = dkp_change;
         end
-
-        --PDKP:PrintD("Apply", self.reason, dkp_change)
         member:UpdateDKP(dkp_change);
+
+        if self.isNewPhaseEntry then
+            member['dkp']['snapshot'] = self.previousTotals[member.name];
+        end
         member:Save();
     end
+
+    if self.reason == _PHASE then
+        MODULES.DKPManager:ProcessSquish(self)
+    end
+
     return true;
 end
 
