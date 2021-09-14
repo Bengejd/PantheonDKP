@@ -213,11 +213,22 @@ end
 function Comms:ChunkedDecoder(data, sender)
     local detransmit = self:_Decode(data)
     local chunkSize = 1024 * MODULES.Options:decompressChunkSize();
+
+    local total = 0;
+    local bytes = (string.len(detransmit) + 17) * 10 * 10;
+
     local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true, yieldOnChunkSize=chunkSize })
     local processing = CreateFrame('Frame')
     PDKP.CORE:Print("Processing large import from", sender .. "...")
     processing:SetScript('OnUpdate', function()
         local ongoing, WoW_decompressed = WoW_decompress_co()
+        total = chunkSize + total;
+
+        if total > bytes then
+            total = bytes;
+        end
+
+        MODULES.DKPManager:UpdateSyncProgress(sender, '1/4', total, bytes);
         if not ongoing then
             PDKP:PrintD("Chunk Processing finished", sender);
             processing:SetScript('OnUpdate', nil)

@@ -76,6 +76,18 @@ function dbEntry:new(entry_details)
         if not tContains(phaseDB, self.id) then
             self.isNewPhaseEntry = true;
             tinsert(phaseDB, self.id);
+
+            if type(self.previousTotals) == "table" then
+                for name, dkp in pairs(self.previousTotals) do
+                    print('previousTotals',name, dkp)
+                end
+            end
+
+            if type(self.decayAmounts) == "table" then
+                for name, dkp in pairs(self.decayAmounts) do
+                    print('decay', name, dkp)
+                end
+            end
         end
     end
 

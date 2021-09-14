@@ -1,17 +1,23 @@
 # PDKP Change Log
 
-## v4.4.6
+## v4.5.0
 ### Features
-- Automatic Sync is back on. This has been revamped with previous lag problems in mind, and has been changed to help stop that from happening again. This is locked on the officers end for 5 minutes after a successful "push" has been sent out, and on the members end for 1 day after they receive a successful push. Once a user receives a push, they will unsubscribe to that officer's particular channel. This should hopefully allow us to utilize automatic syncing without the lag, like we were doing previously, making everyone's tables more up to date throughout the week (hopefully).
+- Automatic Data Sync: This has been completely revamped to fix the previous lag problems. This will allow for everyone to have their tables up to date, automatically throughout the week.
+- Sync Lag Prevention: This is one of the biggest features in this version, and I'm super excited for it. Syncing (merge and automatic) will take a little longer than usual, but the benefit of this, is a lag-free-sync.
 - Turned on 90% max DKP Bid restriction (See discord for more info).
 - Promoting DKP Officer now automatically gives them raid assistant.
-- Added in addon Interface Options (Right click minimap icon).
+- Added in Addon Interface Options (lots of cool options, check it out).
 - You can hide the minimap icon (interface options).
+- Sync Processing Speed Interface Option added.
+- Decompression Speed Interface Option Added.
+- Automatic Sync Interface Toggle Added.
+- Phase DKP entries (50%) will now "Squish" your database, to conserve sync disk space for future phases (faster loads, syncs, etc...).
 
 ### Bug Fixes
 - Fixed "Promote Leadership" button to only promote leadership (Weird blizzard issue).
 - Fixed DKP Officer buttons showing up occasionally when an error occurs for non-officer members (Thanks Shvou for pointing this out).
 - Fixed Bidding Issues when in Combat.
+- Overwrites no longer require a reload. (Fuck Yeah Buddy)
 
 
 ## v4.4.1

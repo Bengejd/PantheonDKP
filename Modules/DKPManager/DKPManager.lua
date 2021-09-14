@@ -64,6 +64,8 @@ function DKP:Initialize()
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 
+    self:CheckForNegatives()
+
     C_Timer.After(5, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
         self:_UpdateTables();
@@ -154,6 +156,7 @@ function DKP:PrepareOverwriteExport()
         ['ledger'] = MODULES.Database:Ledger(),
         ['lockouts'] = MODULES.Database:Lockouts(),
         ['guild'] = MODULES.Database:Guild(),
+        ['phases'] = MODULES.Database:Phases(),
     }
     CommsManager:SendCommsMessage('SyncOver', exportDetails)
 end
@@ -186,7 +189,6 @@ function DKP:ProcessSquish(entry)
 
         C_Timer.After(2, function()
             PDKP.CORE:_Reinitialize();
-            --self:RecalibrateDKP();
         end)
     end
 end
@@ -424,7 +426,7 @@ function DKP:ImportBulkEntries(message, sender, decoded)
     end)
 
     processing:SetScript('OnUpdate', function()
-        self:UpdateSyncProgress(sender, '1/3', processCount, total);
+        self:UpdateSyncProgress(sender, '2/4', processCount, total);
         local ongoing = coroutine_resume(co)
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
@@ -441,7 +443,7 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
-    PDKP.CORE:Print("Recalibrating DKP totals... this may cause some temporary lag...");
+    PDKP.CORE:Print("Recalibrating DKP totals...");
 
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
@@ -496,7 +498,7 @@ function DKP:RollBackEntriesBulk(sender, ttl)
     end)
 
     rollBackProcessing:SetScript('OnUpdate', function()
-        self:UpdateSyncProgress(sender, '2/3', processCount, total);
+        self:UpdateSyncProgress(sender, '3/4', processCount, total);
         local ongoing  = coroutine_resume(rollBackCo)
         if not ongoing then
             rollBackProcessing:SetScript('OnUpdate', nil)
@@ -521,9 +523,11 @@ function DKP:RollForwardEntriesBulk(sender)
     local co = coroutine_create(function()
         for i=#self.rolledBackEntries, 1, -1 do
             local entry = self.rolledBackEntries[i]
+
             if entry.reason == 'Decay' or entry.reason == 'Phase' then
-                entry:GetPreviousTotals(true);
-                entry:GetDecayAmounts(true);
+                local refresh = entry.reason == "Decay";
+                entry:GetPreviousTotals(refresh);
+                entry:GetDecayAmounts(refresh);
             end
             entry:ApplyEntry();
             processCount = processCount + 1;
@@ -534,7 +538,7 @@ function DKP:RollForwardEntriesBulk(sender)
     end)
 
     processing:SetScript('OnUpdate', function()
-        self:UpdateSyncProgress(sender, '3/3', processCount, total);
+        self:UpdateSyncProgress(sender, '4/4', processCount, total);
         local ongoing  = coroutine_resume(co)
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
@@ -567,8 +571,9 @@ function DKP:RollForwardEntries()
     for i=#self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
         if entry.reason == 'Decay' or entry.reason == 'Phase' then
-            entry:GetPreviousTotals(true);
-            entry:GetDecayAmounts(true);
+            local refresh = entry.reason == "Decay";
+            entry:GetPreviousTotals(refresh);
+            entry:GetDecayAmounts(refresh);
         end
         entry:ApplyEntry();
     end
@@ -820,7 +825,19 @@ end
 
 function DKP:GetMaxBid()
     local guildCap, _ = self:GetCaps()
-    return math.floor(guildCap * 0.9);
+
+    if self:_HasPhaseEntries() then
+        return math.floor(guildCap * 0.9);
+    else
+        return guildCap
+    end
+end
+
+function DKP:CheckForNegatives()
+    local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
+    if shouldCalibrate then
+        self:RecalibrateDKP();
+    end
 end
 
 -----------------------------
@@ -902,8 +919,8 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
             if next(self.syncStatuses) == nil and self.syncFrame ~= nil and self.syncFrame:IsVisible() and not self.syncProcessing then
                 self.syncFrame:Hide()
                 scrollContent:WipeChildren() -- Wipe previous children frames.
+                self.syncFrame.forceClosed = false;
             end
-            self.syncFrame.forceClosed = false;
         end)
     end
 end
@@ -916,6 +933,14 @@ function DKP:_ShouldImportNewEntry(id)
         end
     end
     return shouldImport;
+end
+
+function DKP:_HasPhaseEntries()
+    local total = 0;
+    for _, p in Utils:PairByKeys(MODULES.Database:Phases()) do
+        total = total + 1;
+    end
+    return total > 0;
 end
 
 MODULES.DKPManager = DKP
