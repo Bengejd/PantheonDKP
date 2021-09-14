@@ -29,7 +29,6 @@ function DKP:Initialize()
     CommsManager = MODULES.CommsManager;
     DKP_Entry = MODULES.DKPEntry;
     Lockouts = MODULES.Lockouts;
-    --Ledger = MODULES.LedgerManager;
 
     self.entries = {}
     self.encoded_entries = {}
@@ -245,6 +244,10 @@ end
 function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if entryDetails == nil then return end
     local importEntry = DKP_Entry:new(entryDetails)
+
+    if not self:_ShouldImportNewEntry(importEntry.id) then
+        return
+    end
 
     if entryAdler == nil and type(entryDetails == "string") then
         entryAdler = importEntry.adler;
@@ -840,6 +843,12 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
         local scrollContent = scrollFrame.content;
         GUtils:setMovable(f)
 
+        local close_btn = GUtils:createCloseButton(f, true);
+        close_btn:SetSize(24, 22)
+        close_btn:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 5)
+
+        f.closeBtn = close_btn;
+
         f.scrollContent = scrollContent;
         f.scrollContent:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT");
         f.scroll = scroll;
@@ -856,7 +865,9 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
     local scrollContent = self.syncFrame.scrollContent;
     scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
 
-    self.syncFrame:Show()
+    if not self.syncFrame.forceClosed then
+        self.syncFrame:Show()
+    end
 
     local createProgressFrame = function()
         local f = CreateFrame("Frame", nil, scrollContent, nil)
@@ -868,7 +879,7 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
         f.stage:SetHeight(18)
         f.progress:SetHeight(18)
         f.name:SetPoint("LEFT")
-        f.stage:SetPoint("CENTER")
+        f.stage:SetPoint("CENTER", 15, 0)
         f.progress:SetPoint("RIGHT")
         return f
     end
@@ -889,22 +900,23 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
         self.syncProcessing = false;
 
         C_Timer.After(1, function()
-            if next(self.syncStatuses) == nil and self.syncFrame:IsVisible() and not self.syncProcessing then
+            if next(self.syncStatuses) == nil and self.syncFrame ~= nil and self.syncFrame:IsVisible() and not self.syncProcessing then
                 self.syncFrame:Hide()
                 scrollContent:WipeChildren() -- Wipe previous children frames.
             end
+            self.syncFrame.forceClosed = false;
         end)
     end
 end
 
-function DKP:_GetTotalConcurrentSyncs()
-    local t = 0;
-    for name, _ in pairs(self.syncStatuses) do t = t + 1; end
-    return t
-end
-
-function DKP:_ShouldUseConsole()
-    return self:_GetTotalConcurrentSyncs() <= 1;
+function DKP:_ShouldImportNewEntry(id)
+    local shouldImport = true;
+    for _, p in Utils:PairByKeys(MODULES.Database:Phases()) do
+        if p > id then
+            shouldImport = false;
+        end
+    end
+    return shouldImport;
 end
 
 MODULES.DKPManager = DKP

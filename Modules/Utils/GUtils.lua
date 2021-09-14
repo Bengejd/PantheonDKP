@@ -29,8 +29,10 @@ function GUtils:createCloseButton(f, mini)
     local b = CreateFrame("Button", '$parentCloseButton', f, template)
     b:SetText(MODULES.Media.CLOSE_BUTTON_TEXT)
     b:SetParent(f)
+    f.forceClosed = false;
     b:SetScript("OnClick", function(self)
         self:GetParent():Hide()
+        self:GetParent().forceClosed = true;
     end)
     return b
 end
