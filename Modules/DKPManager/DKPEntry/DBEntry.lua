@@ -95,12 +95,9 @@ function dbEntry:new(entry_details)
     return self;
 end
 
-function dbEntry:Save(updateTable, exportEntry, skipLockouts)
-
+function dbEntry:Save(exportEntry)
     wipe(self.sd)
-
     exportEntry = exportEntry or false
-
     self:GetSaveDetails()
 
     if exportEntry == false then

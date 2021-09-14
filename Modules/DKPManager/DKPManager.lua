@@ -390,7 +390,7 @@ function DKP:DeleteEntry(entry, sender, isImport)
 
     if PDKP.canEdit and sender == Utils:GetMyName() then
         local corrected_entry = MODULES.DKPEntry:new(temp_entry)
-        corrected_entry:Save(false, true)
+        corrected_entry:Save(true)
     end
 
     if not isImport then
@@ -737,7 +737,7 @@ function DKP:AwardBossKill(boss_name)
     local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
 
     if entry:IsValid() then
-        entry:Save(false, true)
+        entry:Save(true)
     end
 end
 

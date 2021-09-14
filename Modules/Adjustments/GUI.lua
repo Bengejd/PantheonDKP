@@ -136,7 +136,7 @@ function Adjust:Initialize()
     sb:SetPoint("BOTTOMRIGHT", tf, "BOTTOMRIGHT", 4, -22)
     sb:SetScript("OnClick", function()
         if not Utils:tEmpty(MODULES.Adjustment.entry) then
-            MODULES.Adjustment.entry:Save(nil, true)
+            MODULES.Adjustment.entry:Save(true)
         end
         raidDD.resetVals()
         wipe(MODULES.Adjustment.entry)
