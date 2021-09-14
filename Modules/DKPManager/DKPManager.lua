@@ -47,6 +47,8 @@ function DKP:Initialize()
     self.syncProcessing = false;
     self.syncCache = MODULES.Database:Cache();
 
+    self.leftoverSync = #self.syncCache > 0;
+
     self.compressedCurrentWeekEntries = ''
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
@@ -449,8 +451,9 @@ function DKP:ImportBulkEntries(message, sender, decoded)
             local entryAdler = CommsManager:_Adler(encoded_entry)
             local importEntry = self:ImportEntry2(encoded_entry, entryAdler, 'Large');
             if importEntry ~= nil and importEntry.reason == "Phase" and importEntry.isNewPhaseEntry then
+                PDKP:PrintD("New Phase Entry Found", importEntry.id);
                 self.syncStatuses[sender] = nil;
-                self:AddToCache(message, sender, decoded);
+                self:AddToCache({['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
                 self.syncProcessing = false;
                 self:ProcessSquish(importEntry);
                 break;
@@ -587,7 +590,10 @@ function DKP:RollForwardEntriesBulk(sender)
                 self:_UpdateTables();
                 self.syncProcessing = false;
                 self:UpdateSyncProgress(sender, 'complete', 100, 100);
-                self:ProcessCache();
+
+                if not self.leftoverSync then
+                    self:ProcessCache();
+                end
             end, 1);
         end
     end)
@@ -625,7 +631,10 @@ function DKP:ProcessCache()
     if #self.syncCache > 0 then
         local d = self.syncCache[1];
         self:ImportBulkEntries(d['message'], d['sender'], d['decoded'])
-        table.remove(self.syncCache, 1);
+        if self.consolidationEntry == nil then
+            print('Removing cache item');
+            table.remove(self.syncCache, 1);
+        end
     end
 end
 
