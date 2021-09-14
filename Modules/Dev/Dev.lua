@@ -91,6 +91,12 @@ function Dev:HandleSlashCommands(msg)
         MODULES.CommsManager:RegisterOfficerAdComms()
     elseif cmd == 'GetTheoreticalCap' then
         MODULES.DKPManager:GetTheoreticalCap()
+    elseif cmd == 'CreateSnapshot' then
+        MODULES.Database:CreateSnapshot()
+    elseif cmd == 'ApplySnapshot' then
+        MODULES.Database:ApplySnapshot()
+    elseif cmd == 'ResetSnapshot' then
+        MODULES.Database:ResetSnapshot()
     end
 end
 
@@ -476,9 +482,10 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
         if valid_counter >= numOfEntriesToCreate then
             local data = { ['total'] = valid_counter, ['entries'] = valid_entries }
             MODULES.DKPManager:ImportBulkEntries(data, 'Lilduder', true);
-            PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
+            break;
         end
     end
+    PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
 end
 
 function Dev:CreateDummyEntry(numOfMembers, memberNames, officerNames)

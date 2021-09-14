@@ -224,7 +224,7 @@ function dbEntry:ApplyEntry()
     end
 
     if self.reason == _PHASE then
-        MODULES.DKPManager:ProcessSquish(self)
+        --MODULES.DKPManager:ProcessSquish(self)
     end
 
     return true;
@@ -500,8 +500,16 @@ function dbEntry:_GetFormattedOfficer()
 end
 
 function dbEntry:_UpdateSnapshots()
-    for name, member in pairs(self.members) do
-        member:UpdateSnapshot(self.previousTotals[name])
+    self:GetSaveDetails();
+    for _, member in pairs(self.members) do
+        local pt = self.previousTotals[member.name];
+
+        if pt == nil then
+            local dv = self.decayAmounts[member.name];
+            member:UpdateSnapshot(dv * 2);
+        else
+            member:UpdateSnapshot(pt)
+        end
     end
 end
 

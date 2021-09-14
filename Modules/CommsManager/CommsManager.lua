@@ -230,8 +230,8 @@ function Comms:ChunkedDecoder(data, sender)
 
         MODULES.DKPManager:UpdateSyncProgress(sender, '1/4', total, bytes);
         if not ongoing then
-            PDKP:PrintD("Chunk Processing finished", sender);
             processing:SetScript('OnUpdate', nil)
+            PDKP:PrintD("Chunk Processing finished", sender);
             local deserialized = self:_Deserialize(WoW_decompressed)
             return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
         end

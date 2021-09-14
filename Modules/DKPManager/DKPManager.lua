@@ -45,7 +45,7 @@ function DKP:Initialize()
     self.syncStatuses = {};
     self.syncFrame = nil;
     self.syncProcessing = false;
-    self.syncCache = {};
+    self.syncCache = MODULES.Database:Cache();
 
     self.compressedCurrentWeekEntries = ''
     self.lastAutoSync = GetServerTime()
@@ -58,6 +58,8 @@ function DKP:Initialize()
     self.entrySyncTimer = nil
     self.processedCacheEntries = {}
 
+    self.consolidationEntry = nil;
+
     self.rolledBackEntries = {}
     self.calibratedTotals = {}
 
@@ -65,6 +67,8 @@ function DKP:Initialize()
     self:LoadPrevFourWeeks()
 
     self:CheckForNegatives()
+
+    self:ProcessCache();
 
     C_Timer.After(5, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
@@ -165,7 +169,7 @@ function DKP:ProcessOverwriteSync(message, sender)
     PDKP.CORE:Print("Processing database overwrite from", sender)
 
     for dbName, db in pairs(message) do
-        Utils:WatchVar(db, dbName);
+        --Utils:WatchVar(db, dbName);
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end
 
@@ -176,6 +180,13 @@ function DKP:ProcessOverwriteSync(message, sender)
 end
 
 function DKP:ProcessSquish(entry)
+    PDKP:PrintD("ProcessSquish Called");
+    if self.syncProcessing then
+        PDKP:PrintD("Skipping Squish Processing");
+        self.consolidationEntry = entry;
+        return;
+    end
+
     PDKP.CORE:Print("Processing Phase DKP Entry Consolidation");
     local newer_entries = {}
     local olderEntryCounter = 0;
@@ -190,6 +201,8 @@ function DKP:ProcessSquish(entry)
     if newer_entries[entry.id] == nil then
         newer_entries[entry.id] = CommsManager:DatabaseEncoder(entry:GetSaveDetails());
     end
+
+    self.consolidationEntry = nil;
 
     if olderEntryCounter >= 1 then
         PDKP:PrintD("Overwriting dkp db after squish");
@@ -212,8 +225,8 @@ function DKP:_FindAdlerDifference(importEntry, dbEntry)
 
     PDKP:PrintD("Keys Match:", keysMatch);
 
-    Utils:WatchVar(importEntry, 'Import');
-    Utils:WatchVar(dbEntry, 'DB');
+    --Utils:WatchVar(importEntry, 'Import');
+    --Utils:WatchVar(dbEntry, 'DB');
 
     for _, v in pairs(importEntryKeys) do
         local importVal = importEntrySD[v]
@@ -251,17 +264,17 @@ end
 
 -- Import Types: Small, Large, Ad?
 function DKP:ImportEntry2(entryDetails, entryAdler, importType)
-    if entryDetails == nil then return end
+    if entryDetails == nil then return nil end
     local importEntry = DKP_Entry:new(entryDetails)
 
     if not self:_ShouldImportNewEntry(importEntry.id) then
-        return
+        return nil
     end
 
     if entryAdler == nil and type(entryDetails == "string") then
         entryAdler = importEntry.adler;
         if entryAdler == nil then
-            return;
+            return nil
         end
     end
 
@@ -270,7 +283,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if entryExists then
         if adlerMatches then
             PDKP:PrintD("Entry Adler Exists already, returning");
-            return;
+            return nil
         end
         PDKP:PrintD("Entry Exists, but Adler does not match", importEntry.id);
 
@@ -278,7 +291,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         local shouldContinue = self:_FindAdlerDifference(importEntry, dbEntry);
 
         if not shouldContinue then
-            return;
+            return nil
         end
 
         dbEntry:UndoEntry();
@@ -290,7 +303,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         if not Lockouts:VerifyMemberLockouts(importEntry) then
             self:_UpdateTables();
             PDKP:PrintD("Entry does not have valid members for this boss lockout");
-            return;
+            return nil
         end
     end
 
@@ -301,7 +314,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if #entryMembers == 0 then
         PDKP:PrintD('No members found for:', importEntry.reason, ' Skipping import')
         DKP:_UpdateTables()
-        return
+        return nil
     end
 
     -- Roll back entries here
@@ -312,6 +325,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     importEntry.formattedNames = importEntry:_GetFormattedNames()
 
     importEntry:ApplyEntry();
+
     local encoded_entry = importEntry:Save();
 
     self.entries[importEntry.id] = importEntry
@@ -433,7 +447,15 @@ function DKP:ImportBulkEntries(message, sender, decoded)
     local co = coroutine_create(function()
         for _, encoded_entry in Utils:PairByKeys(entries) do
             local entryAdler = CommsManager:_Adler(encoded_entry)
-            self:ImportEntry2(encoded_entry, entryAdler, 'Large');
+            local importEntry = self:ImportEntry2(encoded_entry, entryAdler, 'Large');
+            if importEntry ~= nil and importEntry.reason == "Phase" and importEntry.isNewPhaseEntry then
+                self.syncStatuses[sender] = nil;
+                self:AddToCache(message, sender, decoded);
+                self.syncProcessing = false;
+                self:ProcessSquish(importEntry);
+                break;
+            end
+
             processCount = processCount + 1;
             if processCount >= (maxProcessCount -1) and processCount % (maxProcessCount -1) == 0 then
                 coroutine_yield()
@@ -446,7 +468,9 @@ function DKP:ImportBulkEntries(message, sender, decoded)
         local ongoing = coroutine_resume(co)
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
-            self:RecalibrateDKPBulk(sender, total)
+            if self.consolidationEntry == nil then
+                self:RecalibrateDKPBulk(sender, total)
+            end
         end
     end)
 end
@@ -597,6 +621,7 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:ProcessCache()
+    PDKP:PrintD("Processing Cache: ", #self.syncCache)
     if #self.syncCache > 0 then
         local d = self.syncCache[1];
         self:ImportBulkEntries(d['message'], d['sender'], d['decoded'])

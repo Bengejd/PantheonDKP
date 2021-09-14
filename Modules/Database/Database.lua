@@ -5,7 +5,7 @@ local Utils = PDKP.Utils;
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phases', 'snapshot' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phases', 'snapshot', 'cache' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -104,6 +104,10 @@ function DB:Snapshot()
     return PDKP_DB[self.server_faction_guild]['snapshot']
 end
 
+function DB:Cache()
+    return PDKP_DB[self.server_faction_guild]['cache']
+end
+
 --@do-not-package@
 function DB:Dev()
     if PDKP_DB[self.server_faction_guild]['dev'] == nil then
@@ -114,6 +118,7 @@ end
 --@end-do-not-package@
 
 function DB:CreateSnapshot()
+    PDKP.CORE:Print("Creating Snapshot");
     PDKP_DB[self.server_faction_guild]['snapshot'] = {
         ['guild'] = Utils:DeepCopy(self:Guild()),
         ['dkp'] = Utils:DeepCopy(self:DKP()),
@@ -125,6 +130,7 @@ function DB:CreateSnapshot()
 end
 
 function DB:ApplySnapshot()
+    PDKP.CORE:Print("Applying Snapshot");
     local snap = self:Snapshot()
     PDKP_DB[self.server_faction_guild]['guild'] = Utils:DeepCopy(snap['guild'])
     PDKP_DB[self.server_faction_guild]['dkp'] = Utils:DeepCopy(snap['dkp'])
@@ -135,6 +141,7 @@ function DB:ApplySnapshot()
 end
 
 function DB:ResetSnapshot()
+    PDKP.CORE:Print("Resetting Snapshot");
     PDKP_DB[self.server_faction_guild]['snapshot'] = nil;
     PDKP_DB[self.server_faction_guild]['snapshot'] = {};
 end

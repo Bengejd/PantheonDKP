@@ -284,10 +284,6 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     local pfx = self.ogPrefix
     local data
 
-    if Utils:GetMyName() == 'Karenbaskins' then
-        return;
-    end
-
     if pfx == 'SyncSmall' or pfx == 'SyncDelete' then
         data = CommsManager:DataDecoder(message)
     end

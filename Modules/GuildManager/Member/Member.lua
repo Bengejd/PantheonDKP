@@ -114,12 +114,12 @@ end
 
 function Member:UpdateSnapshot(previousTotal)
     if previousTotal == nil then
-        --PDKP:PrintD("Previous total was nil");
-        previousTotal = self.dkp['total'] * 2;
-    end
+        PDKP:PrintD(self.name, "PreviousTotal was nil still");
+        return;
+    end;
 
     self.dkp['snapshot'] = previousTotal
-    PDKP:PrintD("Updating snapshot", self.name, self.dkp['snapshot']);
+    --PDKP:PrintD("Updating snapshot", self.name, self.dkp['snapshot']);
 end
 
 function Member:_UpdateDKP(entry, decayAmount)
