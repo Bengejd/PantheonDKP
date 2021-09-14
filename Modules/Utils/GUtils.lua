@@ -196,7 +196,7 @@ function GUtils:createDropdown(opts)
     --- it into the dd_title font string, calculate the width with some padding, and set that as our dropdown width.
 
     -- ShallowCopy the menu_items so we don't accidentally sort the original table.
-    local itemsCopy = PDKP.Utils.ShallowCopy(menu_items)
+    local itemsCopy = PDKP.Utils:ShallowCopy(menu_items)
 
     -- Sort the items table by length
     table.sort(itemsCopy, function(a, b)
@@ -305,7 +305,7 @@ function GUtils:createNestedDropdown(opts)
     --- it into the dd_title font string, calculate the width with some padding, and set that as our dropdown width.
 
     -- ShallowCopy the menu_items so we don't accidentally sort the original table.
-    local itemsCopy = PDKP.Utils.ShallowCopy(menu_items)
+    local itemsCopy = PDKP.Utils:ShallowCopy(menu_items)
 
     local table_keys = {} -- We use a header vs button for separation.
     for key, _ in pairs(itemsCopy) do
@@ -752,7 +752,6 @@ function GUtils:createStatusBar(opts)
 
     return pb
 end
-
 
 function GUtils:createThrottledEventFrame(opts)
     local name = 'PDKP_' .. opts['name'] .. '_EventFrame'

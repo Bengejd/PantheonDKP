@@ -471,10 +471,18 @@ function Dev:PopulateDummyDatabase(numOfEntriesToCreate)
             wipe(entry)
         end
 
-        if valid_counter == numOfEntriesToCreate then
+        if valid_counter >= numOfEntriesToCreate then
             local data = { ['total'] = valid_counter, ['entries'] = valid_entries }
             MODULES.DKPManager:ImportBulkEntries(data, 'Lilduder', true);
-
+            C_Timer.After(1.5, function()
+                MODULES.DKPManager:ImportBulkEntries(data, 'Rektin', true);
+            end)
+            C_Timer.After(3.72, function()
+                MODULES.DKPManager:ImportBulkEntries(data, 'Neekio', true);
+            end)
+            C_Timer.After(5.21, function()
+                MODULES.DKPManager:ImportBulkEntries(data, 'Zeltrix', true);
+            end)
             PDKP.CORE:Print('Dummy database has been created with ' .. tostring(MODULES.DKPManager.numOfEntries) .. ' Entries');
         end
     end

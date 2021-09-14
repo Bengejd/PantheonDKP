@@ -3,9 +3,21 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local Utils = PDKP.Utils;
+local GUtils = PDKP.GUtils;
 
 local GetServerTime = GetServerTime
 local tinsert, tsort, pairs = table.insert, table.sort, pairs
+local floor = math.floor
+
+local coroutine_create = coroutine.create
+local coroutine_status = coroutine.status
+local coroutine_resume = coroutine.resume
+local coroutine_yield = coroutine.yield
+
+local UIParent = UIParent
+local C_Timer = C_Timer;
+
+local maxProcessCount = 2;
 
 local DKP = {}
 
@@ -32,9 +44,15 @@ function DKP:Initialize()
     self.currentLoadedSet = false
     self.numCurrentLoadedWeek = 0
 
+    self.syncStatuses = {};
+    self.syncFrame = nil;
+    self.syncProcessing = false;
+    self.syncCache = {};
+
     self.compressedCurrentWeekEntries = ''
     self.lastAutoSync = GetServerTime()
     self.autoSyncInProgress = false
+
     self.entrySyncCacheCounter = 0
     self.syncReqLocked = false;
 
@@ -253,7 +271,9 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     end
 
     -- Roll back entries here
-    self:RollBackEntries(importEntry);
+    if importType ~= "Large" then
+        self:RollBackEntries(importEntry);
+    end
 
     importEntry.formattedNames = importEntry:_GetFormattedNames()
 
@@ -274,7 +294,6 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     end
 
     if importType ~= 'Large' then
-        --self:RecalibrateDKP();
         DKP:_UpdateTables();
     end
 
@@ -337,28 +356,53 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 end
 
--- LAG IS BEING CAUSED HERE. Potentially, don't roll forward or backwards until the end, and the just recalibrate?
 function DKP:ImportBulkEntries(message, sender, decoded)
-    local data = Utils:ternaryAssign(decoded ~= true, MODULES.CommsManager:DataDecoder(message, true), message)
-    
+    if self.syncProcessing then
+        self:AddToCache(message, sender, decoded);
+        return self:UpdateSyncProgress(sender, 'queued', 1, 100);
+    else
+        self.syncProcessing = true;
+    end
+
+    local data
+    if decoded ~= true then
+        data = MODULES.CommsManager:DataDecoder(message, true)
+    else
+        data = message
+    end
 
     local member = MODULES.GuildManager:GetMemberByName(sender)
-    member:MarkSyncReceived()
 
-    PDKP:PrintD("Bulk Import from", sender, " Received");
+    if member ~= nil then
+        member:MarkSyncReceived()
+    end
 
     local _, entries = data['total'], data['entries']
-
-    for _, encoded_entry in Utils:PairByKeys(entries) do
-        local entryAdler = CommsManager:_Adler(encoded_entry)
-        self:ImportEntry2(encoded_entry, entryAdler, 'Large');
+    local total = 0;
+    for _, _ in pairs(entries) do
+        total = total + 1
     end
 
-    DKP:_UpdateTables()
+    local processing = CreateFrame('Frame')
+    local processCount = 0;
 
-    if self.autoSyncInProgress then
-        self.autoSyncInProgress = false
-    end
+    local co = coroutine_create(function()
+        for _, encoded_entry in Utils:PairByKeys(entries) do
+            local entryAdler = CommsManager:_Adler(encoded_entry)
+            self:ImportEntry2(encoded_entry, entryAdler, 'Large');
+            processCount = processCount + 1;
+            coroutine_yield()
+        end
+    end)
+
+    processing:SetScript('OnUpdate', function()
+        self:UpdateSyncProgress(sender, '1/3', processCount, total);
+        local ongoing = coroutine_resume(co)
+        if not ongoing then
+            processing:SetScript('OnUpdate', nil)
+            self:RecalibrateDKPBulk(sender, total)
+        end
+    end)
 end
 
 function DKP:GetPreviousDecayEntry(entry)
@@ -371,11 +415,14 @@ end
 function DKP:RecalibrateDKP()
     PDKP.CORE:Print("Recalibrating DKP totals... this may cause some temporary lag...");
 
-    self:RollBackEntries({ ['id']  = 0 } );
-
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
-        self.calibratedTotals[member.name] = member.dkp['total'];
+        local dkp = Utils:ShallowCopy(member.dkp);
+        self.calibratedTotals[member.name] = dkp['total'];
+    end
+
+    self:RollBackEntries({ ['id']  = 0 } );
+    for _, member in pairs(members) do
         member.dkp['total'] = 30
         member:Save()
     end
@@ -392,10 +439,90 @@ function DKP:RecalibrateDKP()
         end
     end
 
-    PDKP.CORE:Print('Updated ', #calibratedMembers, 'members totals');
+    PDKP.CORE:Print('Updated', #calibratedMembers, 'members DKP totals');
 end
 
-function DKP:RollBackEntries(decayEntry)
+function DKP:RecalibrateDKPBulk(sender, total)
+    self:RollBackEntriesBulk(sender, total)
+end
+
+function DKP:RollBackEntriesBulk(sender, ttl)
+    local rollBackProcessing = CreateFrame('Frame')
+    local processCount = 0;
+
+    local total = 0;
+    for _, _ in pairs(DKP_DB) do
+        total = total + 1;
+    end
+
+    local rollBackCo = coroutine_create(function()
+        for _, encoded_entry in Utils:PairByReverseKeys(DKP_DB) do
+            local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
+            local entry = MODULES.DKPEntry:new(decoded_entry)
+            entry:UndoEntry();
+            tinsert(self.rolledBackEntries, entry)
+            processCount = processCount + 1;
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
+
+    rollBackProcessing:SetScript('OnUpdate', function()
+        self:UpdateSyncProgress(sender, '2/3', processCount, total);
+        local ongoing  = coroutine_resume(rollBackCo)
+        if not ongoing then
+            rollBackProcessing:SetScript('OnUpdate', nil)
+            local members = MODULES.GuildManager.members
+            for _, member in pairs(members) do
+                self.calibratedTotals[member.name] = member.dkp['total'];
+                member.dkp['total'] = 30
+                member:Save()
+            end
+            self:RollForwardEntriesBulk(sender, total);
+        end
+    end)
+end
+
+function DKP:RollForwardEntriesBulk(sender)
+    --- Since they are sorted in reverse, just start at the oldest entry (end)
+    --- and work you way to the newest entry (start).
+
+    local total = #self.rolledBackEntries
+    local processing = CreateFrame('Frame')
+    local processCount = 0;
+    local co = coroutine_create(function()
+        for i=#self.rolledBackEntries, 1, -1 do
+            local entry = self.rolledBackEntries[i]
+            if entry.reason == 'Decay' or entry.reason == 'Phase' then
+                entry:GetPreviousTotals(true);
+                entry:GetDecayAmounts(true);
+            end
+            entry:ApplyEntry();
+            processCount = processCount + 1;
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
+
+    processing:SetScript('OnUpdate', function()
+        self:UpdateSyncProgress(sender, '3/3', processCount, total);
+        local ongoing  = coroutine_resume(co)
+        if not ongoing then
+            processing:SetScript('OnUpdate', nil)
+            C_Timer.NewTicker(1, function()
+                wipe(self.rolledBackEntries)
+                self:_UpdateTables();
+                self.syncProcessing = false;
+                self:UpdateSyncProgress(sender, 'complete', 100, 100);
+                self:ProcessCache();
+            end, 1);
+        end
+    end)
+end
+
+function DKP:RollBackEntries(decayEntry, fullReset)
     for entryId, encoded_entry in Utils:PairByReverseKeys(DKP_DB) do
         if entryId > decayEntry.id then
             local decoded_entry = CommsManager:DatabaseDecoder(encoded_entry)
@@ -410,7 +537,6 @@ function DKP:RollForwardEntries()
     --- Since they are sorted in reverse, just start at the oldest entry (end)
     --- and work you way to the newest entry (start).
 
-    local shouldCalibrate = #self.rolledBackEntries >= 1
     for i=#self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
         if entry.reason == 'Decay' or entry.reason == 'Phase' then
@@ -420,42 +546,22 @@ function DKP:RollForwardEntries()
         entry:ApplyEntry();
     end
     wipe(self.rolledBackEntries)
+end
 
-    if self.calibrationTimer ~= nil then
-        self.calibrationTimer:Cancel()
-        self.calibrationTimer = nil
-        shouldCalibrate = true
-    end
-    if shouldCalibrate then
-        --self.calibrationTimer = C_Timer.NewTicker(1, function()
-        --    self:RecalibrateDKP()
-        --end, 1)
+function DKP:ProcessCache()
+    if #self.syncCache > 0 then
+        local d = self.syncCache[1];
+        self:ImportBulkEntries(d['message'], d['sender'], d['decoded'])
+        table.remove(self.syncCache, 1);
     end
 end
 
-function DKP:AddToCache(entry)
-    if self.entrySyncCache[entry.id] ~= nil or self.processedCacheEntries[entry.id] ~= nil then return end
-
-    if self.entrySyncTimer ~= nil then
-        self.entrySyncTimer:Cancel();
-        self.entrySyncTimer = nil
+function DKP:AddToCache(message, sender, decoded)
+    if self.syncStatuses[sender] == nil then
+        table.insert(self.syncCache, { ['message'] = message, ['sender'] = sender, ['decoded'] = decoded });
+    else
+        PDKP:PrintD("Skipping cache for", sender);
     end
-
-    self.entrySyncCacheCounter = self.entrySyncCacheCounter + 1
-    self.entrySyncCache[entry.id] = entry
-    self.processedCacheEntries[entry.id] = true
-
-    self.entrySyncTimer = C_Timer.NewTicker(5, function()
-        self.autoSyncInProgress = true
-        PDKP:PrintD("Processing", self.entrySyncCacheCounter, "Cached Sync entries...")
-        for key, cacheEntry in Utils:PairByKeys(self.entrySyncCache) do
-            self:ImportEntry2(cacheEntry, nil, 'Large');
-            self.entrySyncCache[key] = nil;
-            self.entrySyncCacheCounter = self.entrySyncCacheCounter - 1
-        end
-        self.autoSyncInProgress = false
-
-    end, 1)
 end
 
 function DKP:_StartRecompressTimer()
@@ -688,6 +794,92 @@ end
 function DKP:GetMaxBid()
     local guildCap, _ = self:GetCaps()
     return math.floor(guildCap * 0.9);
+end
+
+-----------------------------
+-- Visual Sync Functions   --
+-----------------------------
+
+function DKP:UpdateSyncProgress(sender, stage, processed, total)
+    if processed == 0 then processed = 1 end
+    if total == 0 then total = 1 end
+    self.syncStatuses[sender] = { ['stage'] = stage, ['progress'] = floor((processed / total) * 100) }
+
+    if self.syncFrame == nil then
+        local f = GUtils:createBackdropFrame('pdkp_DKPSync_frame', UIParent, 'PDKP Sync Progress');
+        f:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
+        f:SetSize(200, 150)
+        f.border:SetBackdropColor(unpack({ 0, 0, 0, 0.85 }))
+        local scroll = PDKP.SimpleScrollFrame:new(f.content)
+        local scrollFrame = scroll.scrollFrame
+        local scrollContent = scrollFrame.content;
+        GUtils:setMovable(f)
+
+        f.scrollContent = scrollContent;
+        f.scrollContent:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT");
+        f.scroll = scroll;
+        f.scrollFrame = scrollFrame;
+        f:Hide()
+
+        f:SetScript("OnHide", function()
+            PDKP.CORE:Print("Sync complete");
+        end)
+
+        self.syncFrame = f;
+    end
+
+    local scrollContent = self.syncFrame.scrollContent;
+    scrollContent:WipeChildren() -- Wipe previous shrouding children frames.
+
+    self.syncFrame:Show()
+
+    local createProgressFrame = function()
+        local f = CreateFrame("Frame", nil, scrollContent, nil)
+        f:SetSize(scrollContent:GetWidth(), 18)
+        f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
+        f.stage = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
+        f.progress = f:CreateFontString(f, 'OVERLAY', 'GameFontNormalRight')
+        f.name:SetHeight(18)
+        f.stage:SetHeight(18)
+        f.progress:SetHeight(18)
+        f.name:SetPoint("LEFT")
+        f.stage:SetPoint("CENTER")
+        f.progress:SetPoint("RIGHT")
+        return f
+    end
+
+    self.syncFrame:SetHeight(50);
+
+    for name, status in pairs(self.syncStatuses) do
+        local pf = createProgressFrame()
+        pf.name:SetText(string.sub(name, 0, 8) .. '...');
+        pf.progress:SetText(tostring(status['progress']) .. "%");
+        pf.stage:SetText(status['stage'])
+        scrollContent:AddChild(pf)
+        self.syncFrame:SetHeight(self.syncFrame:GetHeight() + 20);
+    end
+
+    if self.syncStatuses[sender]['progress'] >= 100 and stage == 'complete' then
+        self.syncStatuses[sender] = nil
+        self.syncProcessing = false;
+
+        C_Timer.After(1, function()
+            if next(self.syncStatuses) == nil and self.syncFrame:IsVisible() and not self.syncProcessing then
+                self.syncFrame:Hide()
+                scrollContent:WipeChildren() -- Wipe previous children frames.
+            end
+        end)
+    end
+end
+
+function DKP:_GetTotalConcurrentSyncs()
+    local t = 0;
+    for name, _ in pairs(self.syncStatuses) do t = t + 1; end
+    return t
+end
+
+function DKP:_ShouldUseConsole()
+    return self:_GetTotalConcurrentSyncs() <= 1;
 end
 
 MODULES.DKPManager = DKP

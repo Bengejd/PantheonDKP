@@ -359,7 +359,7 @@ function Utils:PairByReverseKeys(t, f)
 end
 
 -- http://lua-users.org/wiki/CopyTable
-function Utils.ShallowCopy(orig)
+function Utils:ShallowCopy(orig)
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
