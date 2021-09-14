@@ -10,7 +10,6 @@ local tinsert, tsort, pairs = table.insert, table.sort, pairs
 local floor = math.floor
 
 local coroutine_create = coroutine.create
-local coroutine_status = coroutine.status
 local coroutine_resume = coroutine.resume
 local coroutine_yield = coroutine.yield
 
