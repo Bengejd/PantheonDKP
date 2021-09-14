@@ -163,18 +163,20 @@ end
 
 function DKP:ProcessOverwriteSync(message, sender)
     PDKP.CORE:Print("Processing database overwrite from", sender)
+
     for dbName, db in pairs(message) do
+        Utils:WatchVar(db, dbName);
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end
 
-    PDKP.CORE:_Reinitialize()
-    self:RecalibrateDKP();
-    PDKP.CORE:Print("Database overwrite has completed");
+    C_Timer.After(3, function()
+        PDKP.CORE:_Reinitialize()
+        PDKP.CORE:Print("Database overwrite has completed");
+    end)
 end
 
 function DKP:ProcessSquish(entry)
     PDKP.CORE:Print("Processing Phase DKP Entry Consolidation");
-
     local newer_entries = {}
     local olderEntryCounter = 0;
     for id, encoded_entry in pairs(DKP_DB) do
@@ -184,7 +186,13 @@ function DKP:ProcessSquish(entry)
             olderEntryCounter = olderEntryCounter + 1;
         end
     end
+
+    if newer_entries[entry.id] == nil then
+        newer_entries[entry.id] = CommsManager:DatabaseEncoder(entry:GetSaveDetails());
+    end
+
     if olderEntryCounter >= 1 then
+        PDKP:PrintD("Overwriting dkp db after squish");
         MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
 
         C_Timer.After(2, function()
@@ -323,6 +331,14 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         DKP:_UpdateTables();
     end
 
+    if importEntry.isNewPhaseEntry == true and importEntry.reason == "Phase" then
+        local phaseDB = MODULES.Database:Phases()
+        tinsert(phaseDB, importEntry.id);
+        Utils:WatchVar(importEntry, 'phase');
+        importEntry:_UpdateSnapshots();
+        self:ProcessSquish(importEntry);
+    end
+
     return importEntry;
 end
 
@@ -443,7 +459,7 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
-    PDKP.CORE:Print("Recalibrating DKP totals...");
+    --PDKP.CORE:Print("Recalibrating DKP totals...");
 
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
@@ -468,7 +484,7 @@ function DKP:RecalibrateDKP()
         end
     end
 
-    PDKP.CORE:Print('Updated', #calibratedMembers, 'members DKP totals');
+    PDKP.CORE:Print('Calibrated', #calibratedMembers, 'members DKP totals');
 end
 
 function DKP:RecalibrateDKPBulk(sender, total)
@@ -659,13 +675,13 @@ function DKP:_ProcessEntryBatch(batch, sender)
 end
 
 function DKP:_UpdateTables()
-    if PDKP.memberTable._initialized then
+    if PDKP.memberTable ~= nil and PDKP.memberTable._initialized then
         PDKP.memberTable:DataChanged()
     end
-    if GUI.HistoryGUI._initialized then
+    if GUI.HistoryGUI ~= nil and GUI.HistoryGUI._initialized then
         GUI.HistoryGUI:RefreshData()
     end
-    if GUI.LootGUI._initialized then
+    if GUI.HistoryGUI ~= nil and GUI.LootGUI._initialized then
         GUI.LootGUI:RefreshData()
     end
 end

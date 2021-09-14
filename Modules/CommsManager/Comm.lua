@@ -121,7 +121,6 @@ function Comm:HandleOfficerCommStatus(member, myName, syncStatus)
 
     if instanceStatus or syncStatus == false then
         if self.registered then
-            PDKP:PrintD('isInInstance', instanceStatus, 'syncStatus', syncStatus);
             return self:UnregisterComm()
         end
         return
@@ -285,6 +284,10 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     local pfx = self.ogPrefix
     local data
 
+    if Utils:GetMyName() == 'Karenbaskins' then
+        return;
+    end
+
     if pfx == 'SyncSmall' or pfx == 'SyncDelete' then
         data = CommsManager:DataDecoder(message)
     end
@@ -295,7 +298,6 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return DKPManager:DeleteEntry(data, sender)
     elseif pfx == 'SyncLarge' then
         return MODULES.CommsManager:ChunkedDecoder(message, sender)
-        --return DKPManager:ImportBulkEntries(message, sender)
     elseif pfx == 'SyncOver' then
         data = CommsManager:DataDecoder(message)
         DKPManager:ProcessOverwriteSync(data, sender)

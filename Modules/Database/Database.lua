@@ -151,6 +151,7 @@ function DB:ProcessDBOverwrite(db, data)
     for k, v in pairs(data) do
         PDKP_DB[self.server_faction_guild][db][k] = v
     end
+    PDKP_DB[self.server_faction_guild][db] = Utils:DeepCopy(data);
 end
 
 function DB:ResetLockouts()

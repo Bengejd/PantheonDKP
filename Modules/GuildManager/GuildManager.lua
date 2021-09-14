@@ -36,6 +36,10 @@ function GuildManager:Initialize()
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
 
+    if PDKP:IsDev() then
+        Utils:WatchVar(self.members, 'Guild Members');
+    end
+
     self:GetMembers()
     self.initiated = true
 end

@@ -75,19 +75,6 @@ function dbEntry:new(entry_details)
         local phaseDB = MODULES.Database:Phases()
         if not tContains(phaseDB, self.id) then
             self.isNewPhaseEntry = true;
-            tinsert(phaseDB, self.id);
-
-            if type(self.previousTotals) == "table" then
-                for name, dkp in pairs(self.previousTotals) do
-                    print('previousTotals',name, dkp)
-                end
-            end
-
-            if type(self.decayAmounts) == "table" then
-                for name, dkp in pairs(self.decayAmounts) do
-                    print('decay', name, dkp)
-                end
-            end
         end
     end
 
@@ -113,7 +100,6 @@ function dbEntry:Save(updateTable, exportEntry, skipLockouts)
     wipe(self.sd)
 
     exportEntry = exportEntry or false
-    --skipLockouts = skipLockouts or false
 
     self:GetSaveDetails()
 
@@ -147,7 +133,9 @@ function dbEntry:GetDecayAmounts(refresh)
             if self.decayAmounts[member.name] == nil or refresh then
                 if not self.decayReversal or self.deleted then
                     self.decayAmounts[member.name] = Utils:RoundToDecimal(member:GetDKP() * _PHASE_AMOUNT, 1);
-                    self.previousTotals[member.name] = member:GetDKP();
+                    if self.officer == Utils:GetMyName() then
+                        self.previousTotals[member.name] = member:GetDKP();
+                    end
                 end
             end
         end
@@ -235,10 +223,6 @@ function dbEntry:ApplyEntry()
             self.decayAmounts[member.name] = dkp_change;
         end
         member:UpdateDKP(dkp_change);
-
-        if self.isNewPhaseEntry then
-            member['dkp']['snapshot'] = self.previousTotals[member.name];
-        end
         member:Save();
     end
 
@@ -287,6 +271,10 @@ function dbEntry:GetSaveDetails()
 
     if self.reason == _DECAY or self.reason == _PHASE then
         dependants['decayAmounts'] = self.decayAmounts
+    end
+
+    if self.reason == _PHASE then
+        dependants['previousTotals'] = self.previousTotals;
     end
 
     if #self.removedMembers > 0 then
@@ -512,6 +500,12 @@ function dbEntry:_GetFormattedOfficer()
     end
 
     return officer.formattedName
+end
+
+function dbEntry:_UpdateSnapshots()
+    for name, member in pairs(self.members) do
+        member:UpdateSnapshot(self.previousTotals[name])
+    end
 end
 
 MODULES.DKPEntry = dbEntry
