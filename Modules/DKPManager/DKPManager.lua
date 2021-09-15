@@ -912,7 +912,6 @@ function DKP:GetTheoreticalCap()
     end
 
     local weekCount = 0;
-    local capReached = false;
 
     while newCap >= previousCap do
         weekCount = weekCount + 1;
@@ -922,7 +921,6 @@ function DKP:GetTheoreticalCap()
         if newCap > previousCap then
             previousCap = newCap
         else
-            capReached = true;
             break;
         end
 
@@ -1039,7 +1037,7 @@ end
 
 function DKP:_HasPhaseEntries()
     local total = 0;
-    for _, p in Utils:PairByKeys(MODULES.Database:Phases()) do
+    for _, _ in Utils:PairByKeys(MODULES.Database:Phases()) do
         total = total + 1;
     end
     return total > 0;

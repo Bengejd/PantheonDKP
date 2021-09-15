@@ -155,7 +155,7 @@ function GuildManager:_GetLeadershipRanks()
 end
 
 function GuildManager:CheckForNegatives()
-    for name, member in pairs(self.members) do
+    for _, member in pairs(self.members) do
         if member:GetDKP() < 0 then
             return true;
         end

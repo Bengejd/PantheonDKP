@@ -154,7 +154,7 @@ function Chat:_HandleDKPMsg(msg)
         chatMessage = "You have " .. memberDKP .. " dkp";
     elseif cmd == '!cap' then
         local guildCap, groupCap = MODULES.DKPManager:GetCaps()
-        local phaseCap, weekNumber = MODULES.DKPManager:GetTheoreticalCap()
+        local phaseCap, _ = MODULES.DKPManager:GetTheoreticalCap()
         chatMessage = "[Bid Cap]: " .. tostring(bidCap) .. " [Guild Cap]: " .. tostring(guildCap) .. " [Raid Cap]: " .. tostring(groupCap) .. " [Phase Cap]: " .. tostring(phaseCap);
     end
 
