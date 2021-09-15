@@ -71,10 +71,11 @@ function DKP:Initialize()
 
     self:CheckForNegatives()
 
-    --self:ProcessCache();
-
-    C_Timer.After(5, function()
+    C_Timer.After(3, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
+        if PDKP.syncFrame ~= nil then
+            PDKP.syncFrame:Hide();
+        end
         self:_UpdateTables();
     end)
 end
@@ -189,7 +190,7 @@ function DKP:ProcessSquish(entry)
     local newer_entries = {}
     local olderEntryCounter = 0;
 
-    for index, db in Utils:PairByKeys({ DKP_DB, self.syncCacheEntries }) do
+    for _, db in Utils:PairByKeys({ DKP_DB, self.syncCacheEntries }) do
         for id, encoded_entry in pairs(db) do
             if id >= entry.id then
                 newer_entries[id] = encoded_entry
@@ -205,7 +206,7 @@ function DKP:ProcessSquish(entry)
         PDKP:PrintD("Overwriting dkp db after squish");
         MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
 
-        for id, encoded_entry in pairs(newer_entries) do
+        for _, encoded_entry in pairs(newer_entries) do
             local entryAdler = CommsManager:_Adler(encoded_entry)
             self:ImportEntry2(encoded_entry, entryAdler, 'Small');
         end

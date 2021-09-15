@@ -92,12 +92,6 @@ function dbEntry:new(entry_details)
     self:GetPreviousTotals();
     self:GetDecayAmounts();
 
-    if self.id == 1631716992 then
-        for key, val in pairs(self.decayAmounts) do
-            --print(key, val);
-        end
-    end
-
     return self;
 end
 
