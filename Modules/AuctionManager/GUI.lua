@@ -279,6 +279,10 @@ function AuctionGUI:Initialize()
                 MODULES.CommsManager:SendCommsMessage('AddTime', {['addTime'] = true})
             end
         end)
+
+        if not MODULES.AuctionManager:CanChangeAuction() then
+            PDKP.AuctionTimer.addTime:Hide();
+        end
     end
 
     f:SetScript("OnHide", function()
@@ -392,8 +396,10 @@ function AuctionGUI:RefreshBidders()
         if prospect_info ~= nil then
             prospect_frame.name:SetText(prospect_info['name'])
 
-            if not PDKP:IsDev() then
-                prospect_frame.bid:Hide()
+            prospect_frame.bid:Hide()
+
+            if PDKP:IsDev() and PDKP.showBidAmounts then
+                prospect_frame.bid:Show()
             end
 
             prospect_frame.bid:SetText(prospect_info['bid'])
