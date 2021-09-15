@@ -11,13 +11,17 @@
 - Sync Processing Speed Interface Option added.
 - Decompression Speed Interface Option Added.
 - Automatic Sync Interface Toggle Added.
+- Database backup Interface Option Added.
+- Database restore Interface Option Added.
+- Database wipe Interface Option Added.
 - Phase DKP entries (50%) will now "Squish" your database, to conserve sync disk space for future phases (faster loads, syncs, etc...).
 
 ### Bug Fixes
 - Fixed "Promote Leadership" button to only promote leadership (Weird blizzard issue).
 - Fixed DKP Officer buttons showing up occasionally when an error occurs for non-officer members (Thanks Shvou for pointing this out).
 - Fixed Bidding Issues when in Combat.
-- Overwrites no longer require a reload. (Fuck Yeah Buddy)
+- Fixed the "add time" button showing for officers who could not edit the auction.
+- Overwrites no longer require a reload.
 
 
 ## v4.4.1
