@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.5.1
+### Bug Fixes
+- Fixed an occasional error with compression_co LibDeflate library.
+
 ## v4.5.0
 ### Features
 - Automatic Data Sync: This has been completely revamped to fix the previous lag problems. This will allow for everyone to have their tables up to date, automatically throughout the week.
