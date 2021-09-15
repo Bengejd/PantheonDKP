@@ -146,10 +146,17 @@ function DB:ResetSnapshot()
     PDKP_DB[self.server_faction_guild]['snapshot'] = {};
 end
 
+function DB:HasSnapshot()
+    local snap = self:Snapshot();
+    return snap['guild'] ~= nil;
+end
+
 function DB:ResetAllDatabases()
     for i = 1, #database_names do
         local db = database_names[i]
-        PDKP_DB[self.server_faction_guild][db] = {}
+        if db ~= 'snapshot' then
+            PDKP_DB[self.server_faction_guild][db] = {}
+        end
     end
 end
 

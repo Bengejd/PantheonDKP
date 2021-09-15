@@ -147,9 +147,6 @@ function Comm:_Setup()
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
 
-        --['SyncAd'] = { 'GUILD', nil, 'BULK', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
-        --['SyncReq'] = { 'GUILD', nil, 'ALERT', PDKP_SyncLockout, PDKP_OnComm_EntrySync }, -- Auto Sync feature
-
         -- Auction Section
         ['StartBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
         ['StopBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -275,7 +272,6 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
     elseif sender == pfx then
         PDKP.CORE:Print("Auto-syncing DKP with: ", sender)
         MODULES.CommsManager:ChunkedDecoder(message, sender)
-        --return DKPManager:ImportBulkEntries(message, sender)
     end
 end
 
@@ -298,37 +294,6 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         data = CommsManager:DataDecoder(message)
         DKPManager:ProcessOverwriteSync(data, sender)
         self:UnregisterComm()
-    elseif pfx == 'SyncAd' then
-        --if GroupManager:IsInInstance() then return end
-        --
-        ---- Ignore SyncAds when you're not in the group with the player, but are in a raid.
-        ----if GroupManager:IsInInstance() and not GroupManager:IsMemberInRaid(sender) then
-        ----    return
-        ----end
-        --
-        --local officers = GuildManager:GetOfficers()
-        --local syncOfficer = officers[sender]
-        --
-        --if syncOfficer == nil then return end
-        --if not syncOfficer:IsSyncReady() then return end
-        --
-        --syncOfficer:MarkSyncReceived()
-        --
-        --data = CommsManager:DataDecoder(message)
-
-
-
-        --if data ~= nil then
-        --    for _, entry in pairs(data) do
-        --        entry.adEntry = true
-        --        DKPManager:AddToCache(entry)
-        --    end
-        --end
-        --
-        --self.officersSyncd[sender] = true
-    elseif pfx == 'SyncReq' and PDKP.canEdit then
-
-        --MODULES.LedgerManager:CheckRequestKeys(message, sender)
     end
 end
 
@@ -419,7 +384,6 @@ function PDKP_SyncLockout(_, sent, total)
 end
 
 function PDKP_SyncProgressBar(_, sent, total)
-    PDKP:PrintD("sent", sent, "total", total);
     local percentage = floor((sent / total) * 100)
 
     if Comm.start_time == nil then

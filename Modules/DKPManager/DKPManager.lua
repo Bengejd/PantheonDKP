@@ -215,10 +215,6 @@ function DKP:ProcessSquish(entry)
 
         C_Timer.After(3, function()
             PDKP.CORE:_Reinitialize();
-
-            C_Timer.After(2, function()
-                self:RecalibrateDKP();
-            end)
         end)
     end
 end

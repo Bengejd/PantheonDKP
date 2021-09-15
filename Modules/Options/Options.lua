@@ -113,9 +113,95 @@ function Options:SetupLDB()
                     },
                 },
             },
+            tab2 = {
+                type = "group",
+                name = "Database",
+                width = "full",
+                order = 4,
+                args = {
+                    spacer0Tab2 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 1,
+                    },
+                    createBackup = {
+                        type = "execute",
+                        name = "Create DB Backup",
+                        desc = "Create a database snapshot for use in the future",
+                        func = function()
+                            MODULES.Database:CreateSnapshot()
+                        end,
+                        width = 1,
+                        order = 1,
+                    },
+                    spacer1Tab2 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 2,
+                    },
+                    ApplyBackup = {
+                        type = "execute",
+                        name = "Restore DB Backup",
+                        desc = "Restore your database to it's previously backed up state",
+                        disabled = function()
+                            return not MODULES.Database:HasSnapshot()
+                        end,
+                        func = function()
+                            MODULES.Database:ApplySnapshot()
+                        end,
+                        width = 1,
+                        order = 3,
+                    },
+                    spacer2Tab2 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 4,
+                    },
+                    ResetBackup = {
+                        type = "execute",
+                        name = "Wipe DB Backup",
+                        desc = "Wipe your database backup",
+                        func = function()
+                            MODULES.Database:ResetSnapshot()
+                        end,
+                        disabled = function()
+                            return not MODULES.Database:HasSnapshot()
+                        end,
+                        width = 1,
+                        order = 5,
+                    },
+                    spacer3Tab2 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 6,
+                    },
+                    ResetAllDB = {
+                        type = "execute",
+                        name = "Purge All Databases",
+                        desc = "This is irreversible. All database tables will be reset along with all settings. Backups will not be affected.",
+                        func = function()
+                            MODULES.Database:ResetAllDatabases()
+                            ReloadUI()
+                        end,
+                        width = 1,
+                        order = 7,
+                    },
+                    spacer4Tab2 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 8,
+                    },
+                },
+            },
         }
     }
 
+    --@do-not-package@
     if PDKP:IsDev() then
         PDKP.CORE:Print("Setting up dev interface");
         pdkp_options['args']['tab9'] = {
@@ -157,9 +243,21 @@ function Options:SetupLDB()
                     width = 2.5,
                     order = 3,
                 },
+                showBidAmounts = {
+                    type = "toggle",
+                    name = "Show Bid amounts",
+                    desc = "Show active bid amounts",
+                    get = function(info) return PDKP.showBidAmounts end,
+                    set = function(info, val)
+                        return MODULES.Dev:ToggleSetting('showBidAmounts', val)
+                    end,
+                    width = 2.5,
+                    order = 4,
+                },
             }
         }
     end
+    --@end-do-not-package@
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("PantheonDKP", pdkp_options, nil)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("PantheonDKP"):SetParent(InterfaceOptionsFramePanelContainer)

@@ -162,6 +162,10 @@ function CORE:_Reinitialize()
     MODULES.Lockouts:Initialize()
 
     PDKP.GUI.MemberScrollTable:Reinitialize();
+
+    C_Timer.After(3, function()
+        --MODULES.DKPManager:RecalibrateDKP()
+    end)
 end
 
 function CORE:_ExecuteInitialize()

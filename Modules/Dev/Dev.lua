@@ -17,6 +17,7 @@ local decayCount = 0
 PDKP.enableConsole = true
 PDKP.showInternalDKP = false;
 PDKP.showHistoryIds = true;
+PDKP.showBidAmounts = false;
 
 function Dev:Initialize()
     if not PDKP:IsDev() then return end

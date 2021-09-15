@@ -56,6 +56,10 @@ function Dialogs:Initialize()
             button1 = "Delete",
             button2 = "Cancel",
             OnAccept = function(_, data, _)
+                if data['reason'] == "Phase" then
+                    PDKP.CORE:Print("Phase entries cannot be deleted, for safety concerns. Please use the database backup restore feature in the interface options, instead.");
+                    return
+                end
                 PDKP.CORE:Print("Deleting Entry...");
                 MODULES.CommsManager:SendCommsMessage('SyncDelete', data)
             end,

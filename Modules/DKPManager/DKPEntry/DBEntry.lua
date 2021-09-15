@@ -203,11 +203,11 @@ function dbEntry:ApplyEntry()
                 dkp_change = dkp_change * -1;
             end
 
-            if memberDKP <= 30 then
+            if memberDKP <= 30 and not self.decayReversal then
                 dkp_change = 0;
             end
 
-            if self.isNewPhaseEntry then
+            if self.isNewPhaseEntry and not self.decayReversal and not self.delete then
                 dkp_change = self.decayAmounts[member.name]
             end
 
