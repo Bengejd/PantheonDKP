@@ -6,7 +6,7 @@
 - Sync Lag Prevention: This is one of the biggest features in this version, and I'm super excited for it. Syncing (merge and automatic) will take a little longer than usual, but the benefit of this, is a lag-free-sync.
 - Turned on 90% max DKP Bid restriction (See discord for more info).
 - Promoting DKP Officer now automatically gives them raid assistant.
-- Added a "Max Bid" button to the bidding interface.
+- Added a "Max Bid" button to the bidding interface. The "pending bid" text will not update when you do this, but you will show up in the bid list.
 - Added in Addon Interface Options (lots of cool options, check it out).
 - You can hide the minimap icon (interface options).
 - Sync Processing Speed Interface Option added.
