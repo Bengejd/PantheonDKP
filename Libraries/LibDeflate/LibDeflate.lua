@@ -95,7 +95,7 @@ do
 	-- 3. _MINOR
 
 	-- version to store the official version of LibDeflate
-	local _VERSION = "1.0.2-release"
+	local _VERSION = "2.0.1-release"
 
 	-- When MAJOR is changed, I should name it as LibDeflate2
 	local _MAJOR = "LibDeflate"

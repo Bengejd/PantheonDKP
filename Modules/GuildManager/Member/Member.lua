@@ -74,6 +74,9 @@ function Member:CanEdit()
 end
 
 function Member:GetDKP(dkpVariable)
+    if self.dkp['total'] == nil then
+        return 0;
+    end
     if dkpVariable == nil then
         return floor(self.dkp['total']);
     elseif dkpVariable == 'display' then

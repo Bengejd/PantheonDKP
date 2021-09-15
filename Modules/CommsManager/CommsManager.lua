@@ -221,7 +221,16 @@ function Comms:ChunkedDecoder(data, sender)
     local processing = CreateFrame('Frame')
     PDKP.CORE:Print("Processing large import from", sender .. "...")
     processing:SetScript('OnUpdate', function()
-        local ongoing, WoW_decompressed = WoW_decompress_co()
+        local ongoing, WoW_decompressed;
+
+        if type(WoW_decompress_co) ~= "string" then
+            ongoing, WoW_decompressed = WoW_decompress_co()
+        else
+            --print("WoW_decompress_co is a string bitch");
+            ongoing = false
+            WoW_decompressed = WoW_decompress_co;
+        end
+
         total = chunkSize + total;
 
         if total > bytes then
