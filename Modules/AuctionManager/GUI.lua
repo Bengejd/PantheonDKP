@@ -101,7 +101,14 @@ function AuctionGUI:Initialize()
     maxBid:SetEnabled(true);
     maxBid:SetScript("OnClick", function()
         f.current_bid:SetText("MAX");
-        SendChatMessage("!bid max", "WHISPER", nil, MODULES.GroupManager.leadership.dkpOfficer);
+
+        local leadership = MODULES.GroupManager.leadership;
+        local sendTo = leadership.dkpOfficer;
+        if sendTo == nil then
+            sendTo = leadership.masterLoot;
+        end
+
+        SendChatMessage("!bid max", "WHISPER", nil, sendTo);
         f.maxBid:Hide()
 
         f.submit_btn:SetText("Update Bid");
