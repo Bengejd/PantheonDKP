@@ -58,6 +58,11 @@ def get_pretty_changelog(currTag, prevTag):
             curr_tag = f'## {currTag}'.encode()
             return s[s.find(curr_tag)+len(curr_tag):s.rfind(prev_tag)].decode().replace('### ', '\n').replace('\n\n', '\n').strip()
 
+def split_longer_embed(changelog):
+    line = changelog
+    n = 1000
+    return [line[i:i+n] for i in range(0, len(line), n)]
+
 try:
     author = releases[0]["author"]["login"]
     body = releases[0]["body"]
@@ -76,11 +81,13 @@ try:
         "author": {"name": "PantheonDKP has been updated!"},
         "title": name,
         "color": 14464841,
-        "fields": [
-            {"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False}
-        ],
+        "fields": [],
         "footer": {"text": "Released by " + author + " (Neekio)"}
     }
+
+    if len(pretty_changelog) > 1000:
+        multibody = split_longer_embed(pretty_changelog)
+
     if multibody is not None:
         first = True
         for body in multibody:
@@ -90,9 +97,9 @@ try:
                 first = False
     else:
         if len(body) > 0:
-            if len(body) > 1000:
-                body = body[0:1000] + "..."
             embed["fields"].append({"name": "**CHANGELOG**", "value": "```" + body + "```", "inline": False})
+        else:
+            embed["fields"].append({"name": "CHANGELOG", "value": "`" + pretty_changelog + "`", "inline": False})
     if prerelease:
         embed["description"] = "_This is a beta version and may still contain bugs_"
 
