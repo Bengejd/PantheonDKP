@@ -90,6 +90,8 @@ try:
                 first = False
     else:
         if len(body) > 0:
+            if len(body) > 1000:
+                body = body[0:1000] + "..."
             embed["fields"].append({"name": "**CHANGELOG**", "value": "```" + body + "```", "inline": False})
     if prerelease:
         embed["description"] = "_This is a beta version and may still contain bugs_"
