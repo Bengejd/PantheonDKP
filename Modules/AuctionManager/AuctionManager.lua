@@ -198,7 +198,7 @@ function Auction:_GetWinnerInfo(itemLink)
                 end
             end
             winningAmt = winners[1].bid
-            winningText = string.format('%s TIED, Please /roll 100', names)
+            winningText = string.format('%s TIED with %d DKP, Please /roll 100', names, winningAmt)
         end
 
         return winners, winningText, winningAmt * -1
