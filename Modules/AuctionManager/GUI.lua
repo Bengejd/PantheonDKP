@@ -43,6 +43,7 @@ function AuctionGUI:Initialize()
                 PDKP.AuctionTimer.addTime:Show();
             end
         end
+        f.maxBid:Show();
         f.reopenFrame:Hide()
     end)
 
@@ -92,6 +93,32 @@ function AuctionGUI:Initialize()
         MODULES.CommsManager:SendCommsMessage('BidSubmit', bid_amt)
     end)
     sb:SetEnabled(false)
+
+    local maxBid = CreateFrame("Button", "$parent_maxBid", f, "UIPanelButtonTemplate")
+    maxBid:SetSize(80, 22) -- width, height
+    maxBid:SetText("Max Bid")
+    maxBid:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
+    maxBid:SetEnabled(true);
+    maxBid:SetScript("OnClick", function()
+        f.current_bid:SetText("MAX");
+        SendChatMessage("!bid max", "WHISPER", nil, MODULES.GroupManager.leadership.dkpOfficer);
+        f.maxBid:Hide()
+
+        f.submit_btn:SetText("Update Bid");
+        f.cancel_btn:Show();
+        f.cancel_btn:SetEnabled(true);
+    end)
+    maxBid:SetScript("OnShow", function()
+        maxBid:SetEnabled(true);
+        if f.current_bid.getValue() > 0 then
+            f.submit_btn:SetText("Update Bid")
+        else
+            f.submit_btn:SetText("Submit Bid")
+        end
+    end)
+    maxBid:SetScript("OnHide", function()
+        maxBid:SetEnabled(false);
+    end)
 
     local cb = CreateFrame("Button", "$parent_cancelBid", f, "UIPanelButtonTemplate")
     cb:SetSize(80, 22) -- width, height
@@ -241,6 +268,7 @@ function AuctionGUI:Initialize()
     f.stopBid = stopBid
     f.bids_open_btn = bids_open_btn
     f.reopenFrame = reopenFrame
+    f.maxBid = maxBid;
 
     AuctionGUI.frame = f
 
