@@ -262,6 +262,10 @@ function Chat:_DisplayHelp()
         { ['cmd'] = 'show / hide', ['desc'] = 'PantheonDKP window', },
         { ['cmd'] = 'databaseReset', ['desc'] = 'To wipe your database', },
         { ['cmd'] = 'recalibrateTotals', ['desc'] = 'To recalibrate your DKP totals', },
+
+        { ['cmd'] = 'CreateSnapshot', ['desc'] = 'Creates a backup of your database', },
+        { ['cmd'] = 'ApplySnapshot', ['desc'] = 'Overwrites your current database with your backup database', },
+        { ['cmd'] = 'ResetSnapshot', ['desc'] = 'Deletes your backup database', },
     }
 
     local whisperCommands = {
