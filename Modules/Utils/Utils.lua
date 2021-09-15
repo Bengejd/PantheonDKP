@@ -32,7 +32,7 @@ function Utils:BuildEntryStartHash(officer)
 end
 
 function Utils:GetCommPrefix(prefix)
-    return 'pdkpV3' .. substr(prefix, 0, 10)
+    return 'pdkpV4' .. substr(prefix, 0, 10)
 end
 
 -----------------------------
