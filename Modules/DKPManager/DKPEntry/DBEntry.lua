@@ -92,6 +92,12 @@ function dbEntry:new(entry_details)
     self:GetPreviousTotals();
     self:GetDecayAmounts();
 
+    if self.id == 1631716992 then
+        for key, val in pairs(self.decayAmounts) do
+            --print(key, val);
+        end
+    end
+
     return self;
 end
 
@@ -185,36 +191,34 @@ end
 function dbEntry:ApplyEntry()
     local members, _ = self:GetMembers();
     for _, member in pairs(members) do
+
+        member:AddEntry(self.id);
+
         local memberDKP = member:GetDKP();
         local dkp_change = self.dkp_change;
-        if self.reason == _DECAY then
-            if self.decayReversal and not self.deleted then
-                -- Actual decay Reversal
-                dkp_change = memberDKP - ceil(memberDKP * _DECAY_REVERSAL)
+
+        if self.reason == _DECAY or self.reason == _PHASE then
+            if self.decayReversal and not self.delete then
+                -- Actual Reversal
+                local reversalAmount = Utils:ternaryAssign(self.reason == _DECAY, _DECAY_REVERSAL, _PHASE_REVERSAL)
+                dkp_change = memberDKP - ceil(memberDKP * reversalAmount)
                 dkp_change = dkp_change * -1;
             else
-                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
+                local decayAmount = Utils:ternaryAssign(self.reason == _DECAY, _DECAY_AMOUNT, _PHASE_AMOUNT)
+                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * decayAmount, 1);
                 dkp_change = dkp_change * -1;
             end
-            if memberDKP <= 30 then
-                dkp_change = 0;
-            end
-            self.decayAmounts[member.name] = dkp_change;
-        elseif self.reason == _PHASE then
-            if self.decayReversal and not self.deleted then
-                -- Actual decay Reversal
-                dkp_change = memberDKP - ceil(memberDKP * _PHASE_REVERSAL)
-                dkp_change = dkp_change * -1;
-            else
-                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _PHASE_AMOUNT, 1);
-                dkp_change = dkp_change * -1;
-            end
+
             if memberDKP <= 30 then
                 dkp_change = 0;
             end
 
             if self.isNewPhaseEntry then
-                dkp_change = self.decayAmounts[member.name] * -1;
+                dkp_change = self.decayAmounts[member.name]
+            end
+
+            if (self.reason == _PHASE or self.reason == _DECAY) and dkp_change > 0 then
+                dkp_change = dkp_change * -1;
             end
 
             self.decayAmounts[member.name] = dkp_change;
@@ -222,11 +226,6 @@ function dbEntry:ApplyEntry()
         member:UpdateDKP(dkp_change);
         member:Save();
     end
-
-    if self.reason == _PHASE then
-        --MODULES.DKPManager:ProcessSquish(self)
-    end
-
     return true;
 end
 
@@ -506,9 +505,11 @@ function dbEntry:_UpdateSnapshots()
 
         if pt == nil then
             local dv = self.decayAmounts[member.name];
+            --PDKP:PrintD("Updating snapshot with DecayValue", member:GetDKP(), dv * 2);
             member:UpdateSnapshot(dv * 2);
         else
             member:UpdateSnapshot(pt)
+            --PDKP:PrintD("Updating snapshot with PreviousTotal", member:GetDKP(), pt);
         end
     end
 end

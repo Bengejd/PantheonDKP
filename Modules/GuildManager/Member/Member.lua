@@ -119,35 +119,6 @@ function Member:UpdateSnapshot(previousTotal)
     end;
 
     self.dkp['snapshot'] = previousTotal
-    --PDKP:PrintD("Updating snapshot", self.name, self.dkp['snapshot']);
-end
-
-function Member:_UpdateDKP(entry, decayAmount)
-    local amount = entry.sd.dkp_change
-
-    if decayAmount ~= nil then
-        amount = decayAmount;
-    elseif amount == nil and decayAmount == nil then
-        return
-    end
-
-    if entry.reason == 'Decay' or entry.reason == 'Phase' then
-        if (not self:HasEntries() or self.dkp['total'] <= 30 or not self:IsRaidReady()) and not entry['decayReversal'] and not entry['adEntry'] then
-            entry:RemoveMember(self.name)
-            return
-        end -- Do not decay non-active members or members without at least 31 DKP.
-
-        if entry['decayReversal'] and entry['decayAmounts'][self.name] ~= nil and entry['decayAmounts'][self.name] < 0 then
-            entry['decayAmounts'][self.name] = entry['decayAmounts'][self.name] * -1
-            self.dkp['total'] = self.dkp['total'] + entry['decayAmounts'][self.name]
-        else
-            self.dkp['total'] = floor(self.dkp['total'] * 0.9)
-        end
-    else
-        self.dkp['total'] = self.dkp['total'] + amount
-    end
-
-    tinsert(self.dkp['entries'], entry.id)
 end
 
 function Member:_InitializeDKP()

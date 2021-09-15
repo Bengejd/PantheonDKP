@@ -225,6 +225,16 @@ function Chat:_HandleSlashCommands(msg)
             PDKP.CORE:Print("Calibrating DKP Totals")
             MODULES.DKPManager:RecalibrateDKP()
         end,
+
+        ['CreateSnapshot'] = function()
+            MODULES.Database:CreateSnapshot()
+        end,
+        ['ApplySnapshot'] = function()
+            MODULES.Database:ApplySnapshot()
+        end,
+        ['ResetSnapshot'] = function()
+            MODULES.Database:ResetSnapshot()
+        end,
     }
     if SLASH_COMMANDS[command] then
         return SLASH_COMMANDS[command]()
@@ -238,8 +248,7 @@ function Chat:_HandleSlashCommands(msg)
         ['watchFramerate'] = true,
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
         ['testDKPCap'] = true, ['forceOfficerComms'] = true,
-        ['GetTheoreticalCap'] = true, ['CreateSnapshot'] = true,
-        ['ApplySnapshot'] = true, ['ResetSnapshot'] = true,
+        ['GetTheoreticalCap'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)

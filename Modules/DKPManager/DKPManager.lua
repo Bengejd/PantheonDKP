@@ -46,6 +46,7 @@ function DKP:Initialize()
     self.syncFrame = nil;
     self.syncProcessing = false;
     self.syncCache = MODULES.Database:Cache();
+    self.syncCacheEntries = {};
 
     self.leftoverSync = #self.syncCache > 0;
 
@@ -70,7 +71,7 @@ function DKP:Initialize()
 
     self:CheckForNegatives()
 
-    self:ProcessCache();
+    --self:ProcessCache();
 
     C_Timer.After(5, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')
@@ -183,25 +184,19 @@ end
 
 function DKP:ProcessSquish(entry)
     PDKP:PrintD("ProcessSquish Called");
-    if self.syncProcessing then
-        PDKP:PrintD("Skipping Squish Processing");
-        self.consolidationEntry = entry;
-        return;
-    end
 
     PDKP.CORE:Print("Processing Phase DKP Entry Consolidation");
     local newer_entries = {}
     local olderEntryCounter = 0;
-    for id, encoded_entry in pairs(DKP_DB) do
-        if id >= entry.id then
-            newer_entries[id] = encoded_entry
-        elseif id < entry.id then
-            olderEntryCounter = olderEntryCounter + 1;
-        end
-    end
 
-    if newer_entries[entry.id] == nil then
-        newer_entries[entry.id] = CommsManager:DatabaseEncoder(entry:GetSaveDetails());
+    for index, db in Utils:PairByKeys({ DKP_DB, self.syncCacheEntries }) do
+        for id, encoded_entry in pairs(db) do
+            if id >= entry.id then
+                newer_entries[id] = encoded_entry
+            elseif id < entry.id then
+                olderEntryCounter = olderEntryCounter + 1;
+            end
+        end
     end
 
     self.consolidationEntry = nil;
@@ -210,8 +205,19 @@ function DKP:ProcessSquish(entry)
         PDKP:PrintD("Overwriting dkp db after squish");
         MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
 
-        C_Timer.After(2, function()
+        for id, encoded_entry in pairs(newer_entries) do
+            local entryAdler = CommsManager:_Adler(encoded_entry)
+            self:ImportEntry2(encoded_entry, entryAdler, 'Small');
+        end
+
+        wipe(self.syncCacheEntries)
+
+        C_Timer.After(3, function()
             PDKP.CORE:_Reinitialize();
+
+            C_Timer.After(2, function()
+                self:RecalibrateDKP();
+            end)
         end)
     end
 end
@@ -352,7 +358,10 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         tinsert(phaseDB, importEntry.id);
         Utils:WatchVar(importEntry, 'phase');
         importEntry:_UpdateSnapshots();
-        self:ProcessSquish(importEntry);
+
+        if importType ~= "Large" then
+            self:ProcessSquish(importEntry);
+        end
     end
 
     return importEntry;
@@ -454,8 +463,9 @@ function DKP:ImportBulkEntries(message, sender, decoded)
                 PDKP:PrintD("New Phase Entry Found", importEntry.id);
                 self.syncStatuses[sender] = nil;
                 self:AddToCache({['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
-                self.syncProcessing = false;
-                self:ProcessSquish(importEntry);
+                self.consolidationEntry = importEntry;
+                --self.syncProcessing = false;
+                --self:ProcessSquish(importEntry);
                 break;
             end
 
@@ -473,6 +483,8 @@ function DKP:ImportBulkEntries(message, sender, decoded)
             processing:SetScript('OnUpdate', nil)
             if self.consolidationEntry == nil then
                 self:RecalibrateDKPBulk(sender, total)
+            else
+                self:ProcessSquish(self.consolidationEntry);
             end
         end
     end)
@@ -632,7 +644,7 @@ function DKP:ProcessCache()
         local d = self.syncCache[1];
         self:ImportBulkEntries(d['message'], d['sender'], d['decoded'])
         if self.consolidationEntry == nil then
-            print('Removing cache item');
+            wipe(self.syncCache);
             table.remove(self.syncCache, 1);
         end
     end
@@ -640,6 +652,14 @@ end
 
 function DKP:AddToCache(message, sender, decoded)
     if self.syncStatuses[sender] == nil then
+
+        if decoded then
+            for key, entry in pairs(message['entries']) do
+
+                self.syncCacheEntries[key] = entry;
+            end
+        end
+
         table.insert(self.syncCache, { ['message'] = message, ['sender'] = sender, ['decoded'] = decoded });
     else
         PDKP:PrintD("Skipping cache for", sender);
@@ -960,6 +980,7 @@ function DKP:UpdateSyncProgress(sender, stage, processed, total)
         end)
 
         self.syncFrame = f;
+        PDKP.syncFrame = f;
     end
 
     local scrollContent = self.syncFrame.scrollContent;

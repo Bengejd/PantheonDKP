@@ -9,7 +9,7 @@ local strlower = string.lower
 local GetServerTime = GetServerTime
 
 function Options:Initialize()
-    self.db = MODULES.Database:Settings()
+    self.db = MODULES.Database:Settings() or {};
     self:_InitializeDBDefaults()
     self:SetupLDB()
 end

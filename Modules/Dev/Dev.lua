@@ -91,12 +91,6 @@ function Dev:HandleSlashCommands(msg)
         MODULES.CommsManager:RegisterOfficerAdComms()
     elseif cmd == 'GetTheoreticalCap' then
         MODULES.DKPManager:GetTheoreticalCap()
-    elseif cmd == 'CreateSnapshot' then
-        MODULES.Database:CreateSnapshot()
-    elseif cmd == 'ApplySnapshot' then
-        MODULES.Database:ApplySnapshot()
-    elseif cmd == 'ResetSnapshot' then
-        MODULES.Database:ResetSnapshot()
     end
 end
 

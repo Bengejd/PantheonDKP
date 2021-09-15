@@ -160,6 +160,8 @@ function CORE:_Reinitialize()
     MODULES.RaidManager:Initialize()
     MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
+
+    PDKP.GUI.MemberScrollTable:Reinitialize();
 end
 
 function CORE:_ExecuteInitialize()
