@@ -45,6 +45,16 @@ local function Initialize_SavedVariables()
             }
         }
     end
+
+    if PDKP_DB['global']['phases'] == nil then
+        PDKP_DB['global']['phases'] = {
+            [1] = true,
+            [2] = false,
+            [3] = false,
+            [4] = false,
+            [5] = false,
+        }
+    end
 end
 
 local function IsNewVersion(old, new)

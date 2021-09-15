@@ -354,8 +354,8 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         local phaseDB = MODULES.Database:Phases()
         tinsert(phaseDB, importEntry.id);
         Utils:WatchVar(importEntry, 'phase');
+        MODULES.Database:MarkPhaseStart()
         importEntry:_UpdateSnapshots();
-
         if importType ~= "Large" then
             self:ProcessSquish(importEntry);
         end

@@ -44,10 +44,14 @@ function Adjust:Initialize()
         ['name'] = 'reason',
         ['parent'] = entry_details.content,
         ['title'] = 'Reason',
-        ['items'] = { 'Boss Kill', 'Item Win', 'Other', 'Decay', 'Phase' },
+        ['items'] = { 'Boss Kill', 'Item Win', 'Other', 'Decay'},
         ['defaultVal'] = 'Boss Kill',
         ['changeFunc'] = self.DropdownChanged
     }
+
+    if not MODULES.Database:HasPhaseStarted() then
+        table.insert(reason_opts['items'], 'Phase');
+    end
 
     mainDD = GUtils:createDropdown(reason_opts)
     mainDD:SetPoint("TOPLEFT", entry_details, "TOPLEFT", -3, -50)

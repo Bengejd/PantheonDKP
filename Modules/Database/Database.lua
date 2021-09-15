@@ -183,4 +183,14 @@ function DB:UpdateSetting(settingName, value)
     end
 end
 
+function DB:MarkPhaseStart(phaseNumber)
+    phaseNumber = phaseNumber or MODULES.Constants.PHASE
+    PDKP_DB['global']['phases'][phaseNumber] = true;
+end
+
+function DB:HasPhaseStarted()
+    local phase = MODULES.Constants.PHASE;
+    return PDKP_DB['global']['phases'][phase]
+end
+
 MODULES.Database = DB
