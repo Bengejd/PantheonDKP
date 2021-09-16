@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.5.2
+### Bug Fixes
+- Fixed a multi-addon issue with LibDeflate, idk if it'll post in time.
+
 ## v4.5.1
 ### Bug Fixes
 - Fixed an occasional error with compression_co LibDeflate library.
