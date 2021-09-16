@@ -146,7 +146,11 @@ function DKP:PrepareAdRequest()
     for index, entry in Utils:PairByKeys(self.currentLoadedWeekEntries) do
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= lastTwoWeekNumber then
-            entries[index] = entry;
+            if index ~= 1631731345 then
+                entries[index] = entry;
+            else
+                PDKP:PrintD("Skipping that bad import, boss");
+            end
         end
     end
 
