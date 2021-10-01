@@ -84,6 +84,8 @@ function Member:GetDKP(dkpVariable)
             return self.dkp['total'];
         end
         return floor(self.dkp['total']);
+    elseif dkpVariable == 'Decimal' then
+        return self.dkp['total'];
     end
     return self.dkp[dkpVariable]
 end
@@ -111,7 +113,7 @@ function Member:RemoveEntry(entryId)
 end
 
 function Member:UpdateDKP(dkpChange)
-    self.dkp['total'] = self.dkp['total'] + dkpChange;
+    self.dkp['total'] = self:GetDKP('Decimal') + dkpChange;
     guildDB[self.name] = self.dkp;
 end
 
