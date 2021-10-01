@@ -226,7 +226,6 @@ function Comms:ChunkedDecoder(data, sender)
         if type(WoW_decompress_co) ~= "string" then
             ongoing, WoW_decompressed = WoW_decompress_co()
         else
-            --print("WoW_decompress_co is a string bitch");
             ongoing = false
             WoW_decompressed = WoW_decompress_co;
         end
