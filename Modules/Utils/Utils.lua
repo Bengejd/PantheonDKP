@@ -274,7 +274,6 @@ end
 function Utils:IsEmpty(string)
     return string == nil or string == '';
 end
-
 -- Utility function to help tell if the baseString contains the searchString
 function Utils:StringsMatch(baseString, searchString)
     return not Utils:IsEmpty(strmatch(strlower(baseString), strlower(searchString), nil, true));

@@ -361,4 +361,9 @@ function MemberTable:Filters()
     return f;
 end
 
+function MemberTable:GetDisplayedRows()
+    if self.displayedRows == nil then return 0 end;
+    return #self.displayedRows
+end
+
 GUI.MemberScrollTable = MemberTable;

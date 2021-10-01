@@ -264,6 +264,45 @@ function RaidTools:Initialize()
     disallow_edit:SetScript("OnSizeChanged", editBoxResized)
     invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
 
+    local roster_frame = GUtils:createBackdropFrame('raid_roster', f, 'Roster', nil);
+    roster_frame:SetPoint("TOPLEFT", f, "TOPRIGHT");
+    roster_frame:SetPoint("BOTTOMLEFT", f, "BOTTOMRIGHT");
+    roster_frame:SetWidth(200);
+    roster_frame:Hide();
+
+    local roster_opts = {
+        ['name'] = 'Roster_Edit_Box',
+        ['parent'] = roster_frame,
+        ['title'] = '',
+        ['multi'] = true,
+        ['max_chars'] = 1000,
+    }
+    local roster_edit_box = GUtils:createEditBox(roster_opts)
+    roster_edit_box:SetPoint("TOPLEFT", roster_frame.content, "TOPLEFT", 0, 0)
+    roster_edit_box:SetPoint("TOPRIGHT", roster_frame.content, "TOPRIGHT", 0, 0);
+    roster_edit_box.frame:SetFrameLevel(roster_edit_box:GetFrameLevel() -2);
+    roster_edit_box:SetHeight(200);
+
+    local process_btn = CreateFrame("Button", nil, roster_edit_box.frame, "UIPanelButtonTemplate")
+    process_btn:SetPoint("TOPRIGHT", roster_edit_box.frame, "BOTTOMRIGHT", 0, 0);
+    process_btn:SetWidth(100);
+    process_btn:SetText("Process Roster");
+    process_btn:SetScript("OnClick", function()
+        RaidManager:ProcessRosterEditBox(roster_edit_box:GetText())
+    end)
+
+    local open_roster = CreateFrame("Button", nil, GROUPS['class_group'].content, 'UIPanelButtonTemplate')
+    open_roster:SetPoint("TOPRIGHT", 8, 8)
+    open_roster:SetNormalTexture(Media.EXPAND_OUT)
+    open_roster:SetSize(25, 25);
+    open_roster:SetScript("OnClick", function()
+        if roster_frame:IsVisible() then
+            roster_frame:Hide()
+        else
+            roster_frame:Show();
+        end
+    end)
+
     f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button
     f.GROUPS = GROUPS;

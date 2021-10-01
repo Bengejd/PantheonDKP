@@ -71,6 +71,7 @@ Media.STATUS_BAR_FILL = "Interface\\TARGETINGFRAME\\UI-TargetingFrame-BarFill"
 Media.STATUS_BAR_BG_FRAME = "Interface\\CastingBar\\UI-CastingBar-Border"
 Media.PLUS_BUTTON_UP = "Interface\\Buttons\\UI-PlusButton-Up"
 Media.PLUS_BUTTON_DOWN = "Interface\\Buttons\\UI-PlusButton-Down"
+Media.EXPAND_OUT = "Interface\\Buttons\\UI-Panel-BiggerButton-Up"
 
 Media.STATUS_BAR_FONT = "Fonts\\FRIZQT__.TTF"
 

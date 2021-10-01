@@ -92,7 +92,17 @@ function Dev:HandleSlashCommands(msg)
         MODULES.CommsManager:RegisterOfficerAdComms()
     elseif cmd == 'GetTheoreticalCap' then
         MODULES.DKPManager:GetTheoreticalCap()
+    elseif cmd == 'TestRoster' then
+        self:TestRoster()
     end
+end
+
+function Dev:TestRoster()
+    PDKP:PrintD("Testing Roster Function");
+    local inputText = 'Tanks: wuggs, insano, zeon\nPriest: puff, shvou, aqua, retkin, jeff\nWarriors: cheese\nMage: veriandra\nPaladin: web, advanty\nRogue: mariku, iszell\nWarlock: calixta, thepurple, edgy\nDruid: goob, flat\nHunters: woop, ugro\nShamans: zeltrix, snail, terb';
+    --MODULES.RaidManager:ProcessRosterEditBox(inputText)
+
+    Utils:ReplaceSpecialChars('á')
 end
 
 function Dev:TestMaxDKP()

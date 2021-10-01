@@ -230,6 +230,24 @@ function ScrollTable:GetDisplayRows()
     end
 end
 
+function ScrollTable:GetDisplayCount()
+    return #self.displayedRows;
+end
+
+function ScrollTable:IsMemberShown(name, class)
+    for _, row in pairs(self.displayedRows) do
+        local data = row['dataObj'];
+        local matchForwards = Utils:StringsMatch(data['name'], name);
+        local matchBackwards = Utils:StringsMatch(name, data['name']);
+        if Utils:StringsMatch(data['name'], name) and strlower(class) == strlower(data['class']) then
+            return true, data['name'];
+        elseif matchForwards and matchBackwards then
+            return true, data['name'];
+        end
+    end
+    return false, nil;
+end
+
 function ScrollTable:DataChanged()
     for i = 1, #self.displayData do
         self.rows[i]:UpdateRowValues();
@@ -292,6 +310,8 @@ function ScrollTable:UpdateLabelTotals()
 
     self.entryLabel:SetText(entry_label_text)
 end
+
+
 
 ----- FILTER FUNCTIONS -----
 
