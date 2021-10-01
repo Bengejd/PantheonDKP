@@ -177,7 +177,6 @@ function DKP:ProcessOverwriteSync(message, sender)
     PDKP.CORE:Print("Processing database overwrite from", sender)
 
     for dbName, db in pairs(message) do
-        --Utils:WatchVar(db, dbName);
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end
 
@@ -499,14 +498,15 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
-    --PDKP.CORE:Print("Recalibrating DKP totals...");
-
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
         self.calibratedTotals[member.name] = Utils:ShallowCopy(member:GetDKP());
     end
 
     self:RollBackEntries({ ['id']  = 0 } );
+
+
+
     for _, member in pairs(members) do
         member.dkp['total'] = member.dkp['snapshot']
         member:Save()

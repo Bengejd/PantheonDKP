@@ -40,6 +40,11 @@ function Member:new(guildIndex, server_time, leadershipRanks)
         PDKP.char = self;
     end
 
+    if self:IsRaidReady() then
+        Utils:WatchVar(guildDB, 'GuildDB');
+        --Utils:WatchVar(self, self.name);
+    end
+
     return self
 end
 
@@ -114,7 +119,8 @@ end
 
 function Member:UpdateDKP(dkpChange)
     self.dkp['total'] = self:GetDKP('Decimal') + dkpChange;
-    guildDB[self.name] = self.dkp;
+    --guildDB[self.name] = self.dkp;
+    self:Save();
 end
 
 function Member:UpdateSnapshot(previousTotal)
@@ -123,11 +129,16 @@ function Member:UpdateSnapshot(previousTotal)
         return;
     end;
 
+    if previousTotal < 0 then
+        previousTotal = previousTotal * -1;
+    end
+
     self.dkp['snapshot'] = previousTotal
 end
 
 function Member:_InitializeDKP()
     if Utils:tEmpty(guildDB[self.name]) then
+        PDKP:PrintD("Initializing Default DKP For", self.name);
         self:_DefaultDKP()
     else
         self:_LoadDatabaseData()

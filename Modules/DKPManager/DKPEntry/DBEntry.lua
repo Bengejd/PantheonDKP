@@ -171,11 +171,8 @@ function dbEntry:UndoEntry()
                 dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _DECAY_AMOUNT, 1);
             end
         elseif self.reason == _PHASE then
-            if self.decayReversal and not self.deleted then
-                dkp_change = memberDKP - ceil(memberDKP * _PHASE_REVERSAL);
-            else
-                dkp_change = memberDKP - Utils:RoundToDecimal(memberDKP * _PHASE_AMOUNT, 1);
-            end
+            dkp_change = self.decayAmounts[member.name] * -1;
+            self:_UpdateSnapshots();
         end
         member:UpdateDKP(dkp_change)
         member:Save();
@@ -496,14 +493,13 @@ function dbEntry:_UpdateSnapshots()
     self:GetSaveDetails();
     for _, member in pairs(self.members) do
         local pt = self.previousTotals[member.name];
-
         if pt == nil then
             local dv = self.decayAmounts[member.name];
-            --PDKP:PrintD("Updating snapshot with DecayValue", member:GetDKP(), dv * 2);
+            PDKP:PrintD("Updating snapshot with DecayValue", member:GetDKP(), dv * 2);
             member:UpdateSnapshot(dv * 2);
         else
+            PDKP:PrintD("Updating snapshot with PreviousTotal", member:GetDKP(), pt);
             member:UpdateSnapshot(pt)
-            --PDKP:PrintD("Updating snapshot with PreviousTotal", member:GetDKP(), pt);
         end
     end
 end
