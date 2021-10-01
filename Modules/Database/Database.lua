@@ -154,7 +154,7 @@ end
 function DB:ResetAllDatabases()
     for i = 1, #database_names do
         local db = database_names[i]
-        if db ~= 'snapshot' then
+        if db ~= 'snapshot' and db ~= 'settings' then
             PDKP_DB[self.server_faction_guild][db] = {}
         end
     end
