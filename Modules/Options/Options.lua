@@ -132,6 +132,9 @@ function Options:SetupLDB()
                         func = function()
                             MODULES.Database:CreateSnapshot()
                         end,
+                        disabled = function()
+                            return MODULES.Database:HasSnapshot()
+                        end,
                         width = 1,
                         order = 1,
                     },
