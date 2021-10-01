@@ -4,7 +4,7 @@ local _G = _G
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils
 local GUtils = PDKP.GUtils
-local Group = {}
+local Group = { _initialized = false }
 local GuildManager
 
 local IsInRaid = IsInRaid
@@ -41,6 +41,8 @@ function Group:Initialize()
         dkpOfficer = nil,
         leader = nil,
     }
+
+    self._initialized = true;
 
     self:RegisterEvents()
 
@@ -308,7 +310,7 @@ function Group:_RefreshMembers()
 end
 
 function Group:InitializePortrait()
-    if (not PDKP.canEdit) and (not self:IsLeader()) then
+    if ( (not PDKP.canEdit) and (not self:IsLeader()) ) or self._initialized then
         return
     end
 
