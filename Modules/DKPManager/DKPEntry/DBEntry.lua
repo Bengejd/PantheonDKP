@@ -495,10 +495,8 @@ function dbEntry:_UpdateSnapshots()
         local pt = self.previousTotals[member.name];
         if pt == nil then
             local dv = self.decayAmounts[member.name];
-            PDKP:PrintD("Updating snapshot with DecayValue", member:GetDKP(), dv * 2);
             member:UpdateSnapshot(dv * 2);
         else
-            PDKP:PrintD("Updating snapshot with PreviousTotal", member:GetDKP(), pt);
             member:UpdateSnapshot(pt)
         end
     end

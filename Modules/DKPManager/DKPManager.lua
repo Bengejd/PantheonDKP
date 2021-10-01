@@ -220,6 +220,7 @@ function DKP:ProcessSquish(entry)
             PDKP.CORE:_Reinitialize();
         end)
     end
+    return olderEntryCounter >= 1
 end
 
 -----------------------------
@@ -464,9 +465,6 @@ function DKP:ImportBulkEntries(message, sender, decoded)
                 self.syncStatuses[sender] = nil;
                 self:AddToCache({['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
                 self.consolidationEntry = importEntry;
-                --self.syncProcessing = false;
-                --self:ProcessSquish(importEntry);
-                break;
             end
 
             processCount = processCount + 1;
@@ -484,7 +482,11 @@ function DKP:ImportBulkEntries(message, sender, decoded)
             if self.consolidationEntry == nil then
                 self:RecalibrateDKPBulk(sender, total)
             else
-                self:ProcessSquish(self.consolidationEntry);
+                local isRestarting = self:ProcessSquish(self.consolidationEntry);
+
+                if not isRestarting then
+                    self:RecalibrateDKPBulk(sender, total)
+                end
             end
         end
     end)
@@ -504,8 +506,6 @@ function DKP:RecalibrateDKP()
     end
 
     self:RollBackEntries({ ['id']  = 0 } );
-
-
 
     for _, member in pairs(members) do
         member.dkp['total'] = member.dkp['snapshot']
@@ -939,7 +939,7 @@ end
 function DKP:CheckForNegatives()
     local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
     if shouldCalibrate then
-        self:RecalibrateDKP();
+        --self:RecalibrateDKP();
     end
 end
 
