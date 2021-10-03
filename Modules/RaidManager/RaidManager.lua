@@ -146,13 +146,13 @@ function Raid:ProcessRosterEditBox(inputText)
         clear_btn:Click();
     end
 
-    for name, _ in pairs(missing_names) do
-        print(name, 'Was not able to be located in game');
-    end
-
-    for name, _ in pairs(unknown_matches) do
-        print('Was not able to find a distinct match for', name);
-    end
+    --for name, _ in pairs(missing_names) do
+    --    print(name, 'Was not able to be located in game');
+    --end
+    --
+    --for name, _ in pairs(unknown_matches) do
+    --    print('Was not able to find a distinct match for', name);
+    --end
 
     --PDKP.CORE:Print(missing_counter, "Members missing from the raid");
 

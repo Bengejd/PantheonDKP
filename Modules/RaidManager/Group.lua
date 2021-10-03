@@ -71,6 +71,14 @@ function Group:CanInvite(name)
     return not self:IsInRaid() or self:IsLeader() or self:IsAssist()
 end
 
+function Group:Reinitialize()
+    if self.eventFrame ~= nil then
+        self.eventFrame:SetScript("OnEvent", nil);
+        self.eventFrame = nil;
+    end
+    self:Initialize();
+end
+
 -----------------------------
 --     Event Functions     --
 -----------------------------

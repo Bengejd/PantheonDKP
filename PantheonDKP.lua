@@ -166,7 +166,7 @@ function CORE:Reinitialize()
 
     -- Not sure if I need these two or not...
     MODULES.RaidManager:Initialize()
-    MODULES.GroupManager:Initialize()
+    MODULES.GroupManager:Reinitialize()
     MODULES.Lockouts:Initialize()
 
     PDKP.memberTable:Reinitialize();
