@@ -108,13 +108,15 @@ do
             local raidInfo = {
                 ['id_to_name'] = {},
                 ['name_to_id'] = {},
-                ['boss_names'] = {}
+                ['boss_names'] = {},
+                ['encounterIds'] = {};
             }
             for encounterID, encounterName in pairs(raid_table) do
                 if type(encounterID) == "number" then
                     raidInfo['id_to_name'][encounterID] = encounterName
                     raidInfo['name_to_id'][encounterName] = encounterID
                     tinsert(raidInfo['boss_names'], encounterName)
+                    tinsert(raidInfo['encounterIds'], encounterID)
                     Constants.BOSS_TO_RAID[encounterName] = raid
                     Constants.ID_TO_BOSS_NAME[encounterID] = encounterName
                 end
