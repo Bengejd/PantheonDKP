@@ -360,7 +360,6 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     end
 
     if importEntry.isNewPhaseEntry == true and importEntry.reason == "Phase" then
-        local phaseDB = MODULES.Database:Phases()
         tinsert(phaseDB, importEntry.id);
         Utils:WatchVar(importEntry, 'phase');
         MODULES.Database:MarkPhaseStart()

@@ -2,7 +2,7 @@ local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils;
-local GUI = PDKP.GUI;
+--local GUI = PDKP.GUI;
 
 local Raid = {}
 
@@ -91,7 +91,7 @@ function Raid:ProcessRosterEditBox(inputText)
 
     local text_classes = { strsplit("\n", inputText) }
     local classes = {};
-    for i, c in pairs(text_classes) do
+    for _, c in pairs(text_classes) do
         local names = { strsplit(":", c)};
         local class_name = names[1];
         if class_name ~= "Bench" and class_name ~= "bench" then
@@ -113,7 +113,7 @@ function Raid:ProcessRosterEditBox(inputText)
     local missing_names = {};
     local missing_counter = 0;
     local unknown_matches = {};
-    local distinct_names = {};
+    --local distinct_names = {};
 
     for class_name, class in pairs(classes) do
         for _, name in pairs(class) do
@@ -133,7 +133,7 @@ function Raid:ProcessRosterEditBox(inputText)
                     if matched_name == nil then
                         unknown_matches[name] = true;
                     else
-                        distinct_names[name] = true;
+                        --distinct_names[name] = true;
                     end
                 end
             end
