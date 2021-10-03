@@ -97,23 +97,22 @@ function AuctionGUI:Initialize()
     local maxBid = CreateFrame("Button", "$parent_maxBid", f, "UIPanelButtonTemplate")
     maxBid:SetSize(80, 22) -- width, height
     maxBid:SetText("Max Bid")
-    maxBid:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 28, 10)
+    maxBid:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 33)
     maxBid:SetEnabled(true);
     maxBid:SetScript("OnClick", function()
-        f.current_bid:SetText("MAX");
-
         local leadership = MODULES.GroupManager.leadership;
         local sendTo = leadership.dkpOfficer;
         if sendTo == nil then
             sendTo = leadership.masterLoot;
         end
-
-        SendChatMessage("!bid max", "WHISPER", nil, sendTo);
-        f.maxBid:Hide()
-
-        f.submit_btn:SetText("Update Bid");
-        f.cancel_btn:Show();
-        f.cancel_btn:SetEnabled(true);
+        if sendTo == nil then
+            PDKP.CORE:Print("Could not find the DKP Officer to send the bid to");
+            return;
+        end
+        GUI.Dialogs:Show('PDKP_BID_MAX_CONFIRM', nil, {
+            ['sendTo'] = sendTo,
+            ['frame'] = f,
+        });
     end)
     maxBid:SetScript("OnShow", function()
         maxBid:SetEnabled(true);
@@ -137,6 +136,8 @@ function AuctionGUI:Initialize()
         f.current_bid:SetText("")
         f.cancel_btn:SetEnabled(false)
         f.cancel_btn:Hide()
+        maxBid:Show();
+        maxBid:SetEnabled(true);
         MODULES.CommsManager:SendCommsMessage('CancelBid', { ['cancelBid'] = true })
     end)
     cb:SetScript("OnShow", function()
