@@ -1,5 +1,22 @@
 # PDKP Change Log
 
+## v4.5.5
+### Features
+- Added confirmation dialog popup when max bidding through the bid interface (not whispers).
+- Moved the max bid button, so that it doesn't overlap the cancel bid button anymore.
+- Added an error message for when the auto-award popup fails to populate.
+- Added an error message for when the boss-kill includes more people than are in the raid group.
+
+### Bug Fixes
+- Fixed a UI issue where frames duplicated when you received a DKP Overwrite causing odd behaviors during bids.
+- Fixed an issue with DKP Overwrites not properly reinitializing the addon to reflect the new data.
+- Fixed an issue where the "Promote to DKP Officer" portrait text reinitialized when it shouldn't during an overwrite.
+- Fixed an issue with Phase Squish entries ending a merge prematurely, resulting in everyone's DKP being 0 or 30.
+- Fixed an issue where Phase Squish Entries were not properly updating DKP snapshots.
+- Fixed an issue with merges where Phase Entries could be sent when they shouldn't have been.
+- Fixed an issue where auto-sync would be checked after a database-reset.
+- Fixed an issue where boss-kill award popup wouldn't let you know it failed.
+
 ## v4.5.2
 ### Bug Fixes
 - Fixed a multi-addon issue with LibDeflate, idk if it'll post in time.

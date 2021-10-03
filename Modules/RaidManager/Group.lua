@@ -102,7 +102,7 @@ function Group:_HandleEvent(event, arg1, ...)
         return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...) )
     end
 
-    if event == 'BOSS_KILL' then
+    if event == 'BOSS_KILL' and PDKP.canEdit then
         local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
         local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
         if isDKP or isMLNoDKP then

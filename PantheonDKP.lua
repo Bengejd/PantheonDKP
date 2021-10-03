@@ -237,6 +237,11 @@ function PDKP:PrintD(...)
     end
 end
 
+function PDKP:PrintError(...)
+    local text = "|cffE71D36" .. strjoin(" ", tostringall(...)) .. "|r";
+    PDKP.CORE:Print(text);
+end
+
 function PDKP:PrintT(testPassed, ...)
     if PDKP:IsDev() and PDKP.testRunning then
         if testPassed then

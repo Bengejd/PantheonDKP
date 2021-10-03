@@ -22,6 +22,8 @@ local secondsInHour = 60 * 60
 local minutesInDay = 60 * 24
 local secondsInDay = 60 * 60 * 24
 
+Utils.CommPrefixNumber = "4"
+
 function Utils:Initialize()
     self:GetResetInfo()
 end
@@ -32,7 +34,7 @@ function Utils:BuildEntryStartHash(officer)
 end
 
 function Utils:GetCommPrefix(prefix)
-    return 'pdkpV4' .. substr(prefix, 0, 10)
+    return 'pdkpV' .. self.CommPrefixNumber .. substr(prefix, 0, 10)
 end
 
 -----------------------------

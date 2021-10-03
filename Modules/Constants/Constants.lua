@@ -31,6 +31,7 @@ Constants.RAID_NAMES = {} -- 'Gruul's Lair', 'Tempest Keep', ...
 Constants.RAID_INDEXES = {} -- ['Gruul's Lair'] = 1
 Constants.RAID_BOSSES = {} -- ['Gruul's Lair'] = { ['id_to_name'] = ..., ['name_to_id'] = ..., ['boss_names'] = ...
 Constants.BOSS_TO_RAID = {} -- ['High King Maulgar'] = 'Gruul's Lair'
+Constants.ID_TO_BOSS_NAME = {};
 Constants.RAIDS = {
     ["Gruul's Lair"] = {
         ["phase"] = 1,
@@ -115,6 +116,7 @@ do
                     raidInfo['name_to_id'][encounterName] = encounterID
                     tinsert(raidInfo['boss_names'], encounterName)
                     Constants.BOSS_TO_RAID[encounterName] = raid
+                    Constants.ID_TO_BOSS_NAME[encounterID] = encounterName
                 end
             end
 

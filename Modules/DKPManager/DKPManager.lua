@@ -750,14 +750,26 @@ end
 --      Boss Functions     --
 -----------------------------
 
-function DKP:BossKillDetected(_, bossName)
+function DKP:BossKillDetected(originalBossId, bossName)
     if not PDKP.canEdit then
         return
     end
+    local bossId = originalBossId;
+    if type(bossId) ~= 'number' then
+        bossId = -1;
+    end
     local dkpAwardAmount = 10
 
-    if MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil then
+    local foundBossName = MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil;
+    local foundEncounterName = MODULES.Constants.ID_TO_BOSS_NAME[bossId] ~= nil;
+
+    if foundBossName then
         GUI.Dialogs:Show('PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
+    elseif foundEncounterName then
+        PDKP.CORE:Print("Could not locate", bossName, "by name. Please send a screenshot to Neekio.")
+        GUI.Dialogs:Show('PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
+    else
+        PDKP:PrintError("Award Popup Failed. Could not find", bossName, "with EncounterID", originalBossId, "please send a screenshot to Neekio");
     end
 end
 
@@ -770,9 +782,7 @@ function DKP:AwardBossKill(boss_name)
     MODULES.GroupManager:Refresh()
 
     local GuildManager = MODULES.GuildManager
-
     local memberNames = MODULES.GroupManager.memberNames;
-
     local myName, _ = Utils:GetMyName()
 
     local dummy_entry = {
@@ -792,6 +802,11 @@ function DKP:AwardBossKill(boss_name)
         else
             tinsert(dummy_entry['pugNames'], memberName)
         end
+    end
+
+    if #memberNames > 30 then
+        PDKP:PrintError("Too many members were selected for this boss kill, please award DKP manually for ", boss_name);
+        return;
     end
 
     local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
