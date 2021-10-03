@@ -153,29 +153,25 @@ function CORE:_SequentialInitialize(stage)
     C_Timer.After(0.1, function() CORE:_SequentialInitialize(stage + 1) end)
 end
 
-function CORE:_Reinitialize()
+function CORE:Reinitialize()
     PDKP.CORE:Print("Reinitializing PDKP");
 
-    MODULES.Database:Initialize()
-    MODULES.CommsManager:RegisterComms()
-
-    MODULES.GuildManager:Initialize()
+    MODULES.GuildManager:Reinitialize();
 
     MODULES.LedgerManager:Initialize()
     MODULES.AuctionManager:Initialize()
     MODULES.DKPEntry:Initialize()
     MODULES.DKPManager:Initialize()
+    MODULES.GuildManager:Reinitialize();
 
     -- Not sure if I need these two or not...
     MODULES.RaidManager:Initialize()
     MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
 
-    PDKP.GUI.MemberScrollTable:Reinitialize();
+    PDKP.memberTable:Reinitialize();
 
-    C_Timer.After(3, function()
-        --MODULES.DKPManager:RecalibrateDKP()
-    end)
+    collectgarbage('collect');
 end
 
 function CORE:_ExecuteInitialize()

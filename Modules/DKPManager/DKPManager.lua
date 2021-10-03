@@ -20,7 +20,7 @@ local maxProcessCount = 2;
 
 local DKP = {}
 
-local DKP_DB, Lockouts, CommsManager, _;
+local DKP_DB, Lockouts, CommsManager, phaseDB;
 local DKP_Entry;
 
 function DKP:Initialize()
@@ -28,6 +28,7 @@ function DKP:Initialize()
     CommsManager = MODULES.CommsManager;
     DKP_Entry = MODULES.DKPEntry;
     Lockouts = MODULES.Lockouts;
+    phaseDB = MODULES.Database:Phases()
 
     self.entries = {}
     self.encoded_entries = {}
@@ -42,8 +43,11 @@ function DKP:Initialize()
     self.currentLoadedSet = false
     self.numCurrentLoadedWeek = 0
 
+    if self.syncFrame == nil then
+        self.syncFrame = nil;
+    end
+
     self.syncStatuses = {};
-    self.syncFrame = nil;
     self.syncProcessing = false;
     self.syncCache = MODULES.Database:Cache();
     self.syncCacheEntries = {};
@@ -104,9 +108,9 @@ function DKP:LoadPrevFourWeeks()
         if weekNumber >= self.currentLoadedWeek then
             local entry = MODULES.DKPEntry:new(encoded_entry)
 
-            --if entry.id == 1628721427 then
-            --    CommsManager:DatabaseEncoder(entry, true);
-            --end
+            if entry.id == 1633101791 then
+                Utils:WatchVar(entry, 'Phase');
+            end
 
             if entry ~= nil then
                 self.entries[index] = entry
@@ -143,10 +147,11 @@ function DKP:PrepareAdRequest()
     if self.autoSyncInProgress then return end
     local lastTwoWeekNumber = Utils.weekNumber - 2
     local entries = {};
+
     for index, entry in Utils:PairByKeys(self.currentLoadedWeekEntries) do
         local weekNumber = Utils:GetWeekNumber(index)
         if weekNumber >= lastTwoWeekNumber then
-            if index ~= 1631731345 then
+            if not tContains(phaseDB, index) then
                 entries[index] = entry;
             else
                 PDKP:PrintD("Skipping that bad import, boss");
@@ -181,8 +186,8 @@ function DKP:ProcessOverwriteSync(message, sender)
     end
 
     C_Timer.After(3, function()
-        PDKP.CORE:_Reinitialize()
         PDKP.CORE:Print("Database overwrite has completed");
+        PDKP.CORE:Reinitialize()
     end)
 end
 
@@ -217,7 +222,7 @@ function DKP:ProcessSquish(entry)
         wipe(self.syncCacheEntries)
 
         C_Timer.After(3, function()
-            PDKP.CORE:_Reinitialize();
+            PDKP.CORE:Reinitialize();
         end)
     end
     return olderEntryCounter >= 1
@@ -869,8 +874,9 @@ end
 function DKP:GetMyDKP()
     local myMember = MODULES.GuildManager:GetMemberByName(Utils:GetMyName())
     if myMember ~= nil then
-        return myMember:GetDKP('total')
+        return myMember:GetDKP('display');
     else
+        PDKP.CORE:Print("Your DKP tables may be having an issue. Try whispering the DKP Officer your bid instead.");
         return 0
     end
 end
@@ -939,7 +945,7 @@ end
 function DKP:CheckForNegatives()
     local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
     if shouldCalibrate then
-        --self:RecalibrateDKP();
+        self:RecalibrateDKP();
     end
 end
 

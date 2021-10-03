@@ -202,6 +202,7 @@ end
 
 -- Refreshes the data that we are utilizing.
 function ScrollTable:RefreshData()
+    PDKP:PrintD("Refreshing ScrollTable Data");
     self.data = self.retrieveDataFunc();
     self.displayData = {};
 
@@ -246,6 +247,12 @@ function ScrollTable:IsMemberShown(name, class)
         end
     end
     return false, nil;
+end
+
+function ScrollTable:Reinitialize()
+    self:RefreshData();
+    self:DataChanged();
+    self:RefreshLayout();
 end
 
 function ScrollTable:DataChanged()

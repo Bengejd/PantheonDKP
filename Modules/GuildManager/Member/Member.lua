@@ -155,6 +155,11 @@ function Member:_DefaultDKP()
     }
 end
 
+function Member:Reinitialize()
+    guildDB = MODULES.Database:Guild()
+    self:_LoadDatabaseData();
+end
+
 function Member:_LoadDatabaseData()
     local dbData = guildDB[self.name]
     self.dkp = {

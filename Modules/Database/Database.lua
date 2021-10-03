@@ -30,7 +30,7 @@ function DB:Initialize()
 
     self:Personal()[UnitName("PLAYER")] = true
 
-    self:_Migrations()
+    --self:_Migrations()
 end
 
 function DB:_Migrations()

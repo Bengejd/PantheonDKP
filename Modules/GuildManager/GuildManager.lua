@@ -44,6 +44,12 @@ function GuildManager:Initialize()
     self.initiated = true
 end
 
+function GuildManager:Reinitialize()
+    for _, member in pairs(self.members) do
+        member:Reinitialize();
+    end
+end
+
 function GuildManager:IsNewMemberObject(name)
     return not tContains(self.memberNames, name)
 end

@@ -7,15 +7,7 @@ local GUtils = PDKP.GUtils;
 local Comms = {}
 
 function Comms:Initialize()
-    self.commsRegistered = false
-    self.cache = {}
-    self.commsOpen = true
-    self.allow_from_self = {}
-    self.allow_in_combat = {}
-    self.channels = {}
-    self.officerCommPrefixes = {}
-    self.syncInProgress = false;
-
+    self:_InitializeVariables()
     self.autoSyncData = self:DataEncoder({ ['type'] = 'request' });
 
     local opts = {
@@ -37,6 +29,23 @@ function PDKP_OnCommsReceived(prefix, message, _, sender)
     else
         PDKP:PrintD("Could not find comm channel", prefix)
     end
+end
+
+function Comms:_InitializeVariables()
+    self.commsRegistered = false
+    self.cache = {}
+    self.commsOpen = true
+    self.allow_from_self = {}
+    self.allow_in_combat = {}
+    self.channels = {}
+    self.officerCommPrefixes = {}
+    self.syncInProgress = false;
+end
+
+function Comms:Reinitialize()
+    self:UnregisterComms()
+    self:_InitializeVariables();
+    self:RegisterComms();
 end
 
 function Comms:RegisterComms()

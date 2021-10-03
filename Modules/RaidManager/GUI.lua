@@ -302,6 +302,7 @@ function RaidTools:Initialize()
             roster_frame:Show();
         end
     end)
+    open_roster:Hide();
 
     f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button

@@ -69,6 +69,29 @@ function Dialogs:Initialize()
             hideOnEscape = false,
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
+        ['PDKP_BID_MAX_CONFIRM'] = {
+            text = "Are you sure you want to submit a MAX BID?",
+            button1 = "Submit",
+            button2 = 'Cancel',
+            OnAccept = function(_, data, _)
+                local f = data['frame'];
+                f.current_bid:SetText("MAX");
+                SendChatMessage("!bid max", "WHISPER", nil, data['sendTo']);
+                f.maxBid:Hide()
+                f.submit_btn:SetText("Update Bid");
+                f.cancel_btn:Show();
+                f.cancel_btn:SetEnabled(true);
+                Dialogs.Hide('PDKP_BID_MAX_CONFIRM')
+            end,
+            OnCancel = function(...)
+                PDKP.CORE:Print("Max Bid Canceled");
+                Dialogs.Hide('PDKP_BID_MAX_CONFIRM')
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = false,
+            preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+        },
         ['PDKP_CONFIRM_DKP_ENTRY_DELETE'] = {
 
         },

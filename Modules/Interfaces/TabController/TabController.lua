@@ -103,7 +103,7 @@ function Tab:Initialize()
         Tab.tabs[i] = b
         Tab.tab_btns[i] = b
 
-        if name == 'view_lockouts_button' or name == 'view_options_button' then
+        if name == 'view_lockouts_button' then
             b:SetEnabled(false)
         end
 
