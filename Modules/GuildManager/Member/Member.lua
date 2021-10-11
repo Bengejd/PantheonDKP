@@ -113,7 +113,6 @@ end
 
 function Member:UpdateDKP(dkpChange)
     self.dkp['total'] = self:GetDKP('Decimal') + dkpChange;
-    --guildDB[self.name] = self.dkp;
     self:Save();
 end
 

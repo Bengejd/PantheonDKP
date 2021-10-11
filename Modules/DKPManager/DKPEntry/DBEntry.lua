@@ -163,7 +163,7 @@ end
 function dbEntry:UndoEntry()
     local members, _ = self:GetMembers();
     for _, member in pairs(members) do
-        local memberDKP = member:GetDKP();
+        local memberDKP = member:GetDKP('Decimal');
         local dkp_change = self.dkp_change * -1;
         if self.reason == _DECAY then
             if self.decayReversal and not self.deleted then
@@ -175,6 +175,7 @@ function dbEntry:UndoEntry()
             dkp_change = self.decayAmounts[member.name] * -1;
             self:_UpdateSnapshots();
         end
+
         member:UpdateDKP(dkp_change)
         member:Save();
     end
@@ -190,7 +191,7 @@ function dbEntry:ApplyEntry()
         local dkp_change = self.dkp_change;
 
         if self.reason == _DECAY or self.reason == _PHASE then
-            if self.decayReversal and not self.delete then
+            if self.decayReversal and not self.deleted then
                 -- Actual Reversal
                 local reversalAmount = Utils:ternaryAssign(self.reason == _DECAY, _DECAY_REVERSAL, _PHASE_REVERSAL)
                 dkp_change = memberDKP - ceil(memberDKP * reversalAmount)
@@ -205,11 +206,15 @@ function dbEntry:ApplyEntry()
                 dkp_change = 0;
             end
 
-            if self.isNewPhaseEntry and not self.decayReversal and not self.delete then
+            if self.isNewPhaseEntry and not self.decayReversal and not self.deleted then
                 dkp_change = self.decayAmounts[member.name]
             end
 
             if (self.reason == _PHASE or self.reason == _DECAY) and dkp_change > 0 then
+                dkp_change = dkp_change * -1;
+            end
+
+            if dkp_change < 0 and self.decayReversal and not self.deleted then
                 dkp_change = dkp_change * -1;
             end
 
