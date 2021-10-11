@@ -108,8 +108,8 @@ function DKP:LoadPrevFourWeeks()
         if weekNumber >= self.currentLoadedWeek then
             local entry = MODULES.DKPEntry:new(encoded_entry)
 
-            if entry.id == 1633101791 then
-                Utils:WatchVar(entry, 'Phase');
+            if entry.id == 1633479988 then
+                Utils:WatchVar(entry, 'Bad Entry');
             end
 
             if entry ~= nil then
@@ -361,7 +361,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     if importEntry.isNewPhaseEntry == true and importEntry.reason == "Phase" then
         tinsert(phaseDB, importEntry.id);
-        Utils:WatchVar(importEntry, 'phase');
+        --Utils:WatchVar(importEntry, 'phase');
         MODULES.Database:MarkPhaseStart()
         importEntry:_UpdateSnapshots();
         if importType ~= "Large" then
@@ -419,12 +419,13 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 
     if PDKP.canEdit and sender == Utils:GetMyName() then
+        PDKP:PrintD("Saving corrected Entry");
         local corrected_entry = MODULES.DKPEntry:new(temp_entry)
         corrected_entry:Save(true)
     end
 
     if not isImport then
-        --self:RecalibrateDKP();
+        self:RecalibrateDKP();
     end
 end
 

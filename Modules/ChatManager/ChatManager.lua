@@ -240,6 +240,7 @@ function Chat:_HandleSlashCommands(msg)
         return SLASH_COMMANDS[command]()
     end
 
+    --@do-not-package@
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
         ['whoTest'] = true, ['databasePopulate'] = true,
@@ -249,10 +250,12 @@ function Chat:_HandleSlashCommands(msg)
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
         ['testDKPCap'] = true, ['forceOfficerComms'] = true,
         ['GetTheoreticalCap'] = true, ['TestRoster'] = true,
+        ['FixWrongfulDecay'] = true, ['testPet'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)
     end
+    --@end-do-not-package@
 end
 
 function Chat:_DisplayHelp()
