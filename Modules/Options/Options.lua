@@ -154,6 +154,7 @@ function Options:SetupLDB()
                         end,
                         func = function()
                             MODULES.Database:ApplySnapshot()
+                            ReloadUI()
                         end,
                         width = 1,
                         order = 3,
