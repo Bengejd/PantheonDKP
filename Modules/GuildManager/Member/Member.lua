@@ -3,7 +3,7 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils
 
-local GetGuildRosterInfo = GetGuildRosterInfo
+local GetGuildRosterInfo, GetGuildRosterLastOnline = GetGuildRosterInfo, GetGuildRosterLastOnline
 local setmetatable = setmetatable
 local strsplit, strlower = strsplit, strlower
 local tinsert, tremove, unpack = table.insert, table.remove, unpack
@@ -39,12 +39,6 @@ function Member:new(guildIndex, server_time, leadershipRanks)
     if strlower(self.name) == strlower(playerName) then
         PDKP.char = self;
     end
-
-    if self:IsRaidReady() then
-        Utils:WatchVar(guildDB, 'GuildDB');
-        --Utils:WatchVar(self, self.name);
-    end
-
     return self
 end
 
@@ -137,6 +131,10 @@ function Member:UpdateSnapshot(previousTotal)
 end
 
 function Member:_InitializeDKP()
+    if Utils:tEmpty(guildDB[self.name]) and self.dkp['total'] == nil then
+        --print('Shit was nil', self.name);
+    end
+
     if Utils:tEmpty(guildDB[self.name]) then
         PDKP:PrintD("Initializing Default DKP For", self.name);
         self:_DefaultDKP()
@@ -163,8 +161,8 @@ end
 function Member:_LoadDatabaseData()
     local dbData = guildDB[self.name]
     self.dkp = {
-        ['total'] = dbData['total'],
-        ['snapshot'] = dbData['snapshot'],
+        ['total'] = dbData['total'] or 0,
+        ['snapshot'] = dbData['snapshot'] or 30,
         ['entries'] = dbData['entries'] or {},
     }
 end
@@ -174,6 +172,10 @@ function Member:_GetMemberData(index)
 
     self.name, self.rank, self.rankIndex, self.lvl, self.class, self.zone,
     self.note, self.officerNote, self.online, self.status, self.classFileName = GetGuildRosterInfo(index)
+
+    if self.name == nil then
+        self.name = '';
+    end
 
     self.name, self.server = strsplit('-', self.name) -- Remove the server name from their name.
 
@@ -185,6 +187,9 @@ function Member:_GetMemberData(index)
     self.isClassLeader = false;
 
     self.isInLeadership = self.isOfficer or self.isClassLeader
+
+    self.lastOnline = {}
+    self.lastOnline['years'], self.lastOnline['months'], self.lastOnline['days'], self.lastOnline['hours'] = GetGuildRosterLastOnline(index);
 
     self.formattedName, self.coloredClass = Utils:FormatTextByClass(self.name, self.class) -- Color their name & class.
     self.isBank = self.name == MODULES.Constants.BANK_NAME
@@ -201,6 +206,35 @@ function Member:_GetMemberData(index)
 
     self.dkp = {};
     self.lockouts = {}
+end
+
+function Member:RecentlyPlayed()
+    local years = self.lastOnline['years']
+    local months = self.lastOnline['months']
+    local days = self.lastOnline['days']
+    if years ~= nil and years > 0 then
+        return false;
+    elseif months ~= nil and months > 0 then
+        return false
+    elseif days ~= nil and days > 21 then
+        return false
+    end
+    return true
+end
+
+function Member:HasSub30DKP()
+    return self.dkp['total'] ~= nil and self.dkp['total'] < 30;
+end
+
+function Member:GetEntries()
+    if self:HasEntries() then
+        return true, self.dkp['entries'];
+    end
+    return false, {};
+end
+
+function Member:CheckForWrongfulDecay()
+    return self:CheckForEmptyEntries() and self.dkp['total'] < 30;
 end
 
 function Member:IsSyncReady()
