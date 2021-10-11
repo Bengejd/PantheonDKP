@@ -294,6 +294,11 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     elseif pfx == 'SyncLarge' or pfx == 'RaidMerge' then
         return MODULES.CommsManager:ChunkedDecoder(message, sender)
     elseif pfx == 'SyncOver' or pfx == 'RaidOver' then
+
+        if MODULES.Database:HasAutoBackupEnabled() then
+            MODULES.Database:CreateSnapshot();
+        end
+
         data = CommsManager:DataDecoder(message)
         local group = MODULES.GroupManager;
         if PDKP.canEdit and group:IsInRaid() and group:HasDKPOfficer() then

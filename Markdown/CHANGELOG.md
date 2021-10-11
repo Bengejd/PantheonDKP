@@ -5,6 +5,8 @@
 - Added SyncManager to help break up where syncs are going (raid vs guild) and prevent data loss.
 - Added Auto Combat Logging when entering a Raid Instance with the DKP officer set.
 - Added a confirmation popup for Officers when receiving an overwrite from another officer who is not in your raid.
+- Removed settings overwrite when wiping your database.
+- Added automatic DB backup when receiving an overwrite.
 
 ### Bug Fixes
 - Fixed a bug with decay entries not being properly marked as deleted in the database if the deletion was interrupted.

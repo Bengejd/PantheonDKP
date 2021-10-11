@@ -69,6 +69,18 @@ function Options:SetupLDB()
                         width = 2.5,
                         order = 2,
                     },
+                    autoDBBackup = {
+                        type = "toggle",
+                        name = "Automatic Database Backup",
+                        desc = "Automatically backup your database when an overwrite is detected",
+                        get = function(info) return self.db['sync']['autoBackup'] end,
+                        set = function(info, val)
+                            self.db['sync']['autoBackup'] = val
+                        end,
+                        width = 2.5,
+                        order = 2,
+                    },
+
                     spacer2 = {
                         type = "description",
                         name = "These values decide how many entries you want to process at a time when receiving a push (auto or manual) from an officer. Higher values result in faster processing, but may cause lag.",
@@ -187,7 +199,7 @@ function Options:SetupLDB()
                     ResetAllDB = {
                         type = "execute",
                         name = "Purge All Databases",
-                        desc = "This is irreversible. All database tables will be reset along with all settings. Backups will not be affected.",
+                        desc = "This is irreversible. All database tables will be reset. Backups & settings will not be affected.",
                         func = function()
                             MODULES.Database:ResetAllDatabases()
                             ReloadUI()
@@ -288,6 +300,13 @@ function Options:_InitializeDBDefaults()
             ['processingChunkSize'] = 2,
             ['decompressChunkSize'] = 4,
         }
+    end
+    if self.db['sync']['autoBackup'] == nil then
+        self.db['sync']['autoBackup'] = false;
+    end
+    -- Disable this until it's tested to be stable.
+    if self.db['sync']['autoSync'] ~= nil then
+        self.db['sync']['autoSync'] = false;
     end
 end
 

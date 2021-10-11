@@ -10,6 +10,8 @@ local UIParent, unpack, CreateFrame = UIParent, unpack, CreateFrame;
 local SyncGUI = {};
 
 function SyncGUI:Initialize()
+    if not PDKP.canEdit then return end;
+
     self.checkButtons = {};
 
     local f = CreateFrame("Frame", 'pdkp_sync_frame', UIParent, 'BasicFrameTemplateWithInset')
@@ -27,6 +29,8 @@ function SyncGUI:Initialize()
     f.content:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -28)
     f.content:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -8, 8)
     f.content:SetSize(f:GetWidth(), f:GetHeight());
+
+    f:Hide();
 
     GUtils:setMovable(f);
     GUtils:addToSpecialFrames(f);

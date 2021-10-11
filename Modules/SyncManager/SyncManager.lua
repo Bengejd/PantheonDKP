@@ -8,6 +8,8 @@ local Utils = PDKP.Utils;
 local Sync = {};
 
 function Sync:Initialize()
+    if not PDKP.canEdit then return end;
+
     self.settings = {
         ['type'] = nil,
         ['group'] = nil,

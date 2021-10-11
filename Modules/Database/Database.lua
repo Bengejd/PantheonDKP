@@ -118,7 +118,7 @@ end
 --@end-do-not-package@
 
 function DB:CreateSnapshot()
-    PDKP.CORE:Print("Creating Snapshot");
+    PDKP.CORE:Print("Creating Database Backup");
     PDKP_DB[self.server_faction_guild]['snapshot'] = {
         ['guild'] = Utils:DeepCopy(self:Guild()),
         ['dkp'] = Utils:DeepCopy(self:DKP()),
@@ -191,6 +191,11 @@ end
 function DB:HasPhaseStarted()
     local phase = MODULES.Constants.PHASE;
     return PDKP_DB['global']['phases'][phase]
+end
+
+function DB:HasAutoBackupEnabled()
+    local settings = self:Settings();
+    return settings['sync']['autoBackup'] == true
 end
 
 MODULES.Database = DB
