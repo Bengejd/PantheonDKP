@@ -282,11 +282,6 @@ function dbEntry:GetSaveDetails()
         end
     end
 
-    if self.deleted then
-        self.sd['deleted'] = self.deleted
-        self.sd['deletedBy'] = self.deletedBy
-    end
-
     return self.sd
 end
 

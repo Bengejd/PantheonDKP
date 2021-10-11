@@ -235,11 +235,22 @@ function DKP:_FindAdlerDifference(importEntry, dbEntry)
     local dbEntrySD, dbEntryKeys = dbEntry:GetSerializedSelf();
     local importEntrySD, importEntryKeys = importEntry:GetSerializedSelf();
     local keysMatch = #importEntryKeys == #dbEntryKeys
+    local isDecayEntry = importEntry.reason == 'Decay' and importEntry.reason == 'Decay';
+    if not keysMatch and isDecayEntry then
+        local dbReversal = tContains(dbEntryKeys, 'decayReversal')
+        local importReversal = tContains(importEntryKeys, 'decayReversal')
+        if dbReversal and not importReversal then
+            return false
+        elseif importReversal and not dbReversal then
+            return true;
+        end
+    end
 
-    PDKP:PrintD("Keys Match:", keysMatch);
-
-    --Utils:WatchVar(importEntry, 'Import');
-    --Utils:WatchVar(dbEntry, 'DB');
+    if keysMatch then
+        if importEntry.deleted ~= dbEntry.deleted then
+            return true;
+        end
+    end
 
     for _, v in pairs(importEntryKeys) do
         local importVal = importEntrySD[v]
