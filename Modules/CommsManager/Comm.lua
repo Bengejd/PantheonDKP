@@ -99,7 +99,7 @@ function Comm:RegisterComm()
 end
 
 function Comm:UnregisterComm()
-    PDKP:PrintD("Unregistering Comm", self.ogPrefix);
+    --PDKP:PrintD("Unregistering Comm", self.ogPrefix);
     self.registered = false;
     PDKP.CORE:UnregisterComm(self.prefix);
 end
@@ -146,6 +146,9 @@ function Comm:_Setup()
         ['SyncDelete'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
         ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
         ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
+
+        ['overRaid'] = { ['combat'] = true, }, -- Large Overwrites for the raid group.
+        ['overDirect'] = { ['combat'] = true, }, -- Large overwrites directly to players.
 
         -- Auction Section
         ['StartBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },

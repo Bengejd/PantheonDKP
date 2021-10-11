@@ -57,8 +57,8 @@ function Comms:RegisterComms()
         ['SyncLarge'] = { ['combat'] = false, },
         ['SyncOver'] = { ['combat'] = false, },
 
-        --['SyncAd'] = { ['combat'] = false },
-        --['SyncReq'] = { ['self'] = false, ['requireCheck'] = false, ['combat'] = true, },
+        ['overRaid'] = { ['combat'] = true, },
+        ['overDirect'] = { ['combat'] = true, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
