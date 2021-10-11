@@ -86,7 +86,7 @@ end
 function Group:RegisterEvents()
     local opts = {
         ['name'] = 'GROUP',
-        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL'},
+        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL', 'ZONE_CHANGED_NEW_AREA'},
         ['tickInterval'] = 0.5,
         ['onEventFunc'] = function(arg1, arg2, arg3)
             self:_HandleEvent(arg1, arg2, arg3)
@@ -97,12 +97,11 @@ end
 
 function Group:_HandleEvent(event, arg1, ...)
     if not self:IsInRaid() then return end
-    if event == 'BOSS_KILL' then
-        local boss_name = ...
-        if MODULES.Constants.BOSS_TO_RAID[boss_name] == nil then
-            PDKP:PrintD(..., "Is not a valid DKP Boss");
-            return
-        end
+
+    if event == 'ZONE_CHANGED_NEW_AREA' then
+        C_Timer.After(10, function()
+            PDKP:PrintD('ZONE CHANGED YO, 10 second delay.', self:IsInInstance());
+        end);
     end
 
     self:Refresh()
