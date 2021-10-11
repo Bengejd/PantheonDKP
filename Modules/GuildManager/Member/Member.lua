@@ -160,11 +160,13 @@ end
 
 function Member:_LoadDatabaseData()
     local dbData = guildDB[self.name]
-    self.dkp = {
-        ['total'] = dbData['total'] or 0,
-        ['snapshot'] = dbData['snapshot'] or 30,
-        ['entries'] = dbData['entries'] or {},
-    }
+    if dbData ~= nil then
+        self.dkp = {
+            ['total'] = dbData['total'] or 0,
+            ['snapshot'] = dbData['snapshot'] or 30,
+            ['entries'] = dbData['entries'] or {},
+        }
+    end
 end
 
 function Member:_GetMemberData(index)
