@@ -1,5 +1,16 @@
 # PDKP Change Log
 
+## v4.6.0
+### Features
+- Added SyncManager to help break up where syncs are going (raid vs guild) and prevent data loss.
+- Added Auto Combat Logging when entering a Raid Instance with the DKP officer set.
+- Added a confirmation popup for Officers when receiving an overwrite from another officer who is not in your raid.
+
+### Bug Fixes
+- Fixed a bug with decay entries not being properly marked as deleted in the database if the deletion was interrupted.
+- Fixed a bug with overwrites hitting a null database error during decay entries with members who have not raided.
+- Fixed a bug where I forgot to give entries the D in deleteD. Causing deleted entries to not always be marked as such.
+
 ## v4.5.5
 ### Features
 - Added confirmation dialog popup when max bidding through the bid interface (not whispers).
