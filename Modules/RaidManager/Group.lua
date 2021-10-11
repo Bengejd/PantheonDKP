@@ -15,6 +15,7 @@ local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
 local strtrim = strtrim
 local wipe = wipe
 local C_Timer = C_Timer
+local LoggingCombat = LoggingCombat
 
 function Group:Initialize()
     setmetatable(self, Group) -- Set the metatable so we used Group's __index
@@ -25,6 +26,8 @@ function Group:Initialize()
     self.available = true
     self.requestedDKPOfficer = false
     self.portraitInitialized = false
+
+    self.combatLoggingEnabled = false;
 
     self.myName = Utils:GetMyName()
 
@@ -99,8 +102,13 @@ function Group:_HandleEvent(event, arg1, ...)
     if not self:IsInRaid() then return end
 
     if event == 'ZONE_CHANGED_NEW_AREA' then
-        C_Timer.After(10, function()
-            PDKP:PrintD('ZONE CHANGED YO, 10 second delay.', self:IsInInstance());
+        return C_Timer.After(2, function()
+            if self:IsInInstance() and self:IsInRaid() and not self.combatLoggingEnabled then
+                LoggingCombat(true);
+                PDKP.CORE:Print("Combat Logging has been enabled");
+                self.eventFrame:UnregisterEvent("ZONE_CHANGED_NEW_AREA");
+                self.combatLoggingEnabled = true;
+            end
         end);
     end
 
