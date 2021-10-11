@@ -94,6 +94,68 @@ function Dev:HandleSlashCommands(msg)
         MODULES.DKPManager:GetTheoreticalCap()
     elseif cmd == 'TestRoster' then
         self:TestRoster()
+    elseif cmd == 'FixWrongfulDecay' then
+        self:FixWrongfulDecay();
+    elseif cmd == 'testPet' then
+        local happiness, damagePercentage, loyaltyRate = GetPetHappiness();
+        local currXP, nextXP = GetPetExperience();
+        local remaining = GetPetTimeRemaining();
+
+        print('Hapiness', happiness, 'LoyaltyRate', loyaltyRate, 'currXP', currXP, 'nextXP', nextXP, 'Remaining', remaining);
+        --print('Pet Specs', GetNumSpecializations(false, true));
+
+        Utils:WatchVar(_G, 'Global');
+
+    end
+end
+
+function Dev:FixWrongfulDecay()
+    print('Fixing wrongful decay');
+    local total_encoded = MODULES.DKPManager:LoadPrevFourWeeks()
+    if total_encoded > 0 then
+        PDKP:PrintD("Total Encoded", total_encoded);
+        return self:FixWrongfulDecay();
+    end
+    local _, members = MODULES.GuildManager:GetMembers();
+
+    local decodedEntries = MODULES.DKPManager.entries;
+
+    local entryTypes = {
+        ['Phase'] = {
+            ['counter'] = 0,
+        },
+        ['Item Win'] = {
+            ['counter'] = 0,
+        },
+        ['Decay'] = {
+            ['counter'] = 0,
+        },
+        ['Boss Kill'] = {
+            ['counter'] = 0,
+        },
+        ['Other'] = {
+            ['counter'] = 0,
+        },
+    }
+    for id, entry in pairs(decodedEntries) do
+        entryTypes[entry.reason][id] = entry;
+        entryTypes[entry.reason]['counter'] = entryTypes[entry.reason]['counter'] + 1;
+    end
+
+    for name, member in Utils:PairByKeys(members) do
+        if member:HasSub30DKP() then
+            local hasEntries, entries = member:GetEntries();
+            local hasWonItem = false;
+            for _, entryId in pairs(entries) do
+                if entryTypes['Item Win'][entryId] ~= nil then
+                    hasWonItem = true
+                end
+
+                if not hasWonItem then
+                    print(name);
+                end
+            end
+        end
     end
 end
 
