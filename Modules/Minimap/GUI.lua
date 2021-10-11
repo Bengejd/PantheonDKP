@@ -18,12 +18,9 @@ local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open s
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
 --local hideMiniMapText = Utils:FormatTextColor('Alt-Right-Click', info) .. ' to hide the map icon'
 
-local Dialogs;
-
 function map:Initialize()
     local settingsDB = MODULES.Database:Settings();
     local miniDB = settingsDB['minimap'];
-    Dialogs = GUI.Dialogs;
 
     self.LDB = LibStub("LibDataBroker-1.1")
     self.broker = self.LDB:NewDataObject('PantheonDKP', {

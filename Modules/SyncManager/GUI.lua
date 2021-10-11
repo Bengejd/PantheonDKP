@@ -3,9 +3,9 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local GUtils = PDKP.GUtils;
-local Utils = PDKP.Utils;
+--local Utils = PDKP.Utils;
 
-local UIParent, unpack, CreateFrame = UIParent, unpack, CreateFrame;
+local UIParent, CreateFrame = UIParent, CreateFrame;
 
 local SyncGUI = {};
 
@@ -82,7 +82,6 @@ function SyncGUI:Initialize()
           },
         },
     }
-    local GROUPS = {}
 
     for i = 1, #GROUP_OPTS do
         local opts = GROUP_OPTS[i]
@@ -93,7 +92,6 @@ function SyncGUI:Initialize()
             frame.desc:SetText(opts['description'])
         end
         scrollContent:AddChild(frame)
-        GROUPS[opts['name']] = frame
         frame.syncSetting = opts['setting']
 
         for _, checkOpts in pairs(opts['checkChildren']) do
