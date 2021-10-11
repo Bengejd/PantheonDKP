@@ -127,6 +127,7 @@ function CORE:_InitializeFeatures()
     MODULES.GroupManager:Initialize()
     MODULES.Lockouts:Initialize()
     MODULES.Options:Initialize()
+    MODULES.SyncManager:Initialize()
 end
 
 function CORE:_InitializeFrontend()

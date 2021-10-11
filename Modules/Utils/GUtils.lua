@@ -5,6 +5,8 @@ local unpack, CreateFrame = unpack, CreateFrame
 local GameFontHighlightSmall = GameFontHighlightSmall
 local UIParent = UIParent
 local NewTicker = C_Timer.NewTicker
+local UISpecialFrames = UISpecialFrames
+local tinsert = tinsert
 
 local MODULES = PDKP.MODULES
 local GUtils = PDKP.GUtils
@@ -78,6 +80,7 @@ function GUtils:createCheckButton(opts)
     cb.text = cbText
     cb.displayText = displayText
     cb.filterOn = uniqueName
+    cb.uniqueName = uniqueName;
     cb.desc = cbd
     return cb;
 end
@@ -797,4 +800,8 @@ function GUtils:createThrottledEventFrame(opts)
         end, tickAmount)
     end)
     return f;
+end
+
+function GUtils:addToSpecialFrames(f)
+    tinsert(UISpecialFrames, f:GetName())
 end

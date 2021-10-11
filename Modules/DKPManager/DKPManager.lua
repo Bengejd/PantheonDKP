@@ -175,12 +175,11 @@ function DKP:PrepareOverwriteExport()
         ['guild'] = MODULES.Database:Guild(),
         ['phases'] = MODULES.Database:Phases(),
     }
-    CommsManager:SendCommsMessage('SyncOver', exportDetails)
+    return exportDetails;
 end
 
 function DKP:ProcessOverwriteSync(message, sender)
     PDKP.CORE:Print("Processing database overwrite from", sender)
-
     for dbName, db in pairs(message) do
         MODULES.Database:ProcessDBOverwrite(dbName, db)
     end

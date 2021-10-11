@@ -23,29 +23,14 @@ function Dialogs:Initialize()
             hideOnEscape = false,
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
-        ['PDKP_OFFICER_PUSH_CONFIRM'] = {
-            text = "MANUAL DKP Merge / Overwrite \n This will broadcast all of your entries to the guild. May cause brief lag spikes.",
-            button1 = "Merge",
-            button2 = 'Overwrite',
-            button3 = "Cancel",
-            OnAccept = function(...)
-                -- First (Merge)
-                local DKP = MODULES.DKPManager
-                local entries, total = DKP.currentLoadedWeekEntries, DKP.numCurrentLoadedWeek
-                local transmission_data = { ['total'] = total, ['entries'] = entries }
-                MODULES.CommsManager:SendCommsMessage('SyncLarge', transmission_data)
+        ['PDKP_OFFICER_OVERWRITE_CONFIRM'] = {
+            text = "You have received an Overwrite from an officer that is not in your raid group. \n If you have not merged recently, skip this overwrite to prevent DKP loss.",
+            button2 = 'Skip',
+            button1 = 'Accept',
+            OnAccept = function(_, data, _)
+                return MODULES.DKPManager:ProcessOverwriteSync(data['data'], data['sender'])
             end,
-            OnCancel = function(...)
-                -- Second (Overwrite)
-                local _, _, clickType = ...
-                if clickType == 'clicked' then
-                    PDKP:PrintD("Preparing Overwrite")
-                    MODULES.DKPManager:PrepareOverwriteExport()
-                end
-            end,
-            OnAlt = function(...)
-                -- Third (Cancel)
-            end,
+            OnCancel = function(...) end,
             timeout = 0,
             whileDead = true,
             hideOnEscape = false,

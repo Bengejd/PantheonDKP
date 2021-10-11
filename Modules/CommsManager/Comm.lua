@@ -144,11 +144,11 @@ function Comm:_Setup()
         -- Sync Section
         ['SyncSmall'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Adds
         ['SyncDelete'] = { 'GUILD', nil, 'NORMAL', nil, PDKP_OnComm_EntrySync }, -- Single Deletes
-        ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
-        ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges / overwrites
+        ['SyncLarge'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large merges to the guild
+        ['SyncOver'] = { 'GUILD', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large overwrites to the guild
 
-        ['overRaid'] = { ['combat'] = true, }, -- Large Overwrites for the raid group.
-        ['overDirect'] = { ['combat'] = true, }, -- Large overwrites directly to players.
+        ['RaidOver'] = { 'RAID', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large Overwrites for the raid group.
+        ['RaidMerge'] = { 'RAID', nil, 'BULK', PDKP_SyncProgressBar, PDKP_OnComm_EntrySync }, -- Large overwrites directly to players.
 
         -- Auction Section
         ['StartBids'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_BidSync },
@@ -291,10 +291,17 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
         return DKPManager:ImportEntry2(data, CommsManager:_Adler(message), 'Small')
     elseif pfx == 'SyncDelete' then
         return DKPManager:DeleteEntry(data, sender)
-    elseif pfx == 'SyncLarge' then
+    elseif pfx == 'SyncLarge' or pfx == 'RaidMerge' then
         return MODULES.CommsManager:ChunkedDecoder(message, sender)
-    elseif pfx == 'SyncOver' then
+    elseif pfx == 'SyncOver' or pfx == 'RaidOver' then
         data = CommsManager:DataDecoder(message)
+        local group = MODULES.GroupManager;
+        if PDKP.canEdit and group:IsInRaid() and group:HasDKPOfficer() then
+            if not group:IsMemberInRaid(sender) then
+               return GUI.Dialogs:Show('PDKP_OFFICER_OVERWRITE_CONFIRM', nil, {['data'] = data, ['sender'] = sender})
+            end
+        end
+
         DKPManager:ProcessOverwriteSync(data, sender)
         self:UnregisterComm()
     end

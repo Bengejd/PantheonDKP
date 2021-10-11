@@ -149,7 +149,9 @@ function map:HandleIconClicks(buttonType)
         },
         ['RightButton'] = {
             [hasShift and PDKP.canEdit and not hasAlt and not hasCtrl] = function()
-                Dialogs:Show('PDKP_OFFICER_PUSH_CONFIRM', nil, nil)
+                if PDKP.OfficerSyncFrame ~= nil then
+                    PDKP.OfficerSyncFrame:Show();
+                end
             end,
             [hasShift and hasAlt and hasCtrl] = function()
                 MODULES.Database:ResetAllDatabases()
