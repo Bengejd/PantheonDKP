@@ -157,6 +157,7 @@ function dbEntry:MarkAsDeleted(deletedBy)
     if self.reason == 'Decay' or self.reason == "Phase" then
         self.decayReversal = true
     end
+    self:Save();
 end
 
 function dbEntry:UndoEntry()
