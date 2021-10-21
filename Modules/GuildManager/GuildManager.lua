@@ -26,6 +26,8 @@ function GuildManager:Initialize()
     self.guildFrameOpened = false;
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
+    self.lastMembersUpdate = 0;
+
     PDKP.player = {}
     self.playerName = Utils:GetMyName()
 
@@ -63,6 +65,11 @@ function GuildManager:IsGuildMember(name)
 end
 
 function GuildManager:GetMembers()
+    if not self:AllowMemberUpdate() then
+        PDKP:PrintD("Stopping Member Update Request");
+        return self.online, self.members
+    end;
+
     GuildRoster()
 
     self:_GetLeadershipRanks()
@@ -72,6 +79,7 @@ function GuildManager:GetMembers()
     self.numOfMembers, self.numOnlineMembers, _ = GetNumGuildMembers()
 
     local server_time = GetServerTime()
+    self.lastMembersUpdate = server_time;
 
     for i = 1, self.numOfMembers do
         local member = Member:new(i, server_time, { self.officerRank, self.classLeadRank })
@@ -118,6 +126,17 @@ function GuildManager:GetMemberByName(name)
     return nil
 end
 
+function GuildManager:AllowMemberUpdate()
+    local currentTime = GetServerTime();
+    local _, minutes = Utils:SubtractTime(currentTime, self.lastMembersUpdate);
+    local hasMembers, hasOnline = next(self.members) ~= nil, next(self.online) ~= nil;
+
+    if hasMembers and hasOnline then
+        return minutes > 1;
+    end
+    return true;
+end
+
 function GuildManager:IsMemberOfficer(name)
     local member = self:GetMemberByName(name)
 
@@ -156,7 +175,6 @@ function GuildManager:_GetLeadershipRanks()
         --kick: %s, o_note: %s", i, GuildControlGetRankName(i), tostring(listen), tostring(speak), tostring(promote),
         --tostring(demote), tostring(invite), tostring(kick), tostring(o_note))
         --PDKP:PrintD(testOut)
-
     end
 end
 
