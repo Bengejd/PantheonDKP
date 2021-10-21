@@ -2,7 +2,7 @@ local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
-
+local Utils = PDKP.Utils;
 
 local Options = {}
 
@@ -26,9 +26,15 @@ function Options:SetupLDB()
                 type = "toggle",
                 name = "Show the Minimap button",
                 desc = "Display a Minimap button to quickly access the addon interface or options",
-                get = function(info) return not self.db['minimap'].hide end,
+                get = function(info)
+                    return not self.db['minimap'].hide
+                end,
                 set = function(info, val)
-                    if val then GUI.Minimap:Show() else GUI.Minimap:Hide() end
+                    if val then
+                        GUI.Minimap:Show()
+                    else
+                        GUI.Minimap:Hide()
+                    end
                     self.db['minimap'].hide = not val
                 end,
                 width = 2.5,
@@ -38,7 +44,9 @@ function Options:SetupLDB()
                 type = "toggle",
                 name = "Ignore PUGS",
                 desc = "Ignore PUG auto invite requests",
-                get = function(info) return not self.db['ignore_pugs'] end,
+                get = function(info)
+                    return not self.db['ignore_pugs']
+                end,
                 set = function(info, val)
                     GUI.RaidTools.options['ignore_PUGS']:SetChecked(val)
                     self.db['ignore_pugs'] = not val
@@ -62,7 +70,9 @@ function Options:SetupLDB()
                         type = "toggle",
                         name = "Auto Sync",
                         desc = "Synchronize DKP entries with officers automatically, once per day.",
-                        get = function(info) return self.db['sync']['autoSync'] end,
+                        get = function(info)
+                            return self.db['sync']['autoSync']
+                        end,
                         set = function(info, val)
                             self.db['sync']['autoSync'] = val
                         end,
@@ -73,19 +83,33 @@ function Options:SetupLDB()
                         type = "toggle",
                         name = "Automatic Database Backup",
                         desc = "Automatically backup your database when an overwrite is detected",
-                        get = function(info) return self.db['sync']['autoBackup'] end,
+                        get = function(info)
+                            return self.db['sync']['autoBackup']
+                        end,
                         set = function(info, val)
                             self.db['sync']['autoBackup'] = val
                         end,
                         width = 2.5,
                         order = 2,
                     },
-
+                    syncInCombat = {
+                        type = "toggle",
+                        name = "Sync In Combat (Reload Required)",
+                        desc = "Allows overwrite syncs to occur while in combat. Disable this if you experience lag spikes during the overwrite.",
+                        get = function(info)
+                            return self.db['sync']['syncInCombat']
+                        end,
+                        set = function(info, val)
+                            self.db['sync']['syncInCombat'] = val
+                        end,
+                        width = 2.5,
+                        order = 3,
+                    },
                     spacer2 = {
                         type = "description",
                         name = "These values decide how many entries you want to process at a time when receiving a push (auto or manual) from an officer. Higher values result in faster processing, but may cause lag.",
                         width = "full",
-                        order = 3,
+                        order = 4,
                     },
                     processingChunkSize = {
                         type = "select",
@@ -97,13 +121,15 @@ function Options:SetupLDB()
                             [5] = "5x",
                         },
                         desc = "The amount of items you want to process in one frame update.",
-                        get = function(info) return self.db['sync']['processingChunkSize'] or 2 end,
+                        get = function(info)
+                            return self.db['sync']['processingChunkSize'] or 2
+                        end,
                         set = function(info, val)
                             self.db['sync']['processingChunkSize'] = val
                         end,
                         style = "dropdown",
                         width = 1,
-                        order = 4,
+                        order = 5,
                     },
                     decompressChunkSize = {
                         type = "select",
@@ -117,12 +143,14 @@ function Options:SetupLDB()
                             [32] = "32x",
                         },
                         style = "dropdown",
-                        get = function(info) return self.db['sync']['decompressChunkSize'] or 4 end,
+                        get = function(info)
+                            return self.db['sync']['decompressChunkSize'] or 4
+                        end,
                         set = function(info, val)
                             self.db['sync']['decompressChunkSize'] = val
                         end,
                         width = 1,
-                        order = 5,
+                        order = 6,
                     },
                 },
             },
@@ -231,7 +259,9 @@ function Options:SetupLDB()
                     type = "toggle",
                     name = "Enable Console",
                     desc = "Toggle the dev console",
-                    get = function(info) return PDKP.enableConsole end,
+                    get = function(info)
+                        return PDKP.enableConsole
+                    end,
                     set = function(info, val)
                         return MODULES.Dev:ToggleSetting('enableConsole', val)
                     end,
@@ -242,7 +272,9 @@ function Options:SetupLDB()
                     type = "toggle",
                     name = "Show Internal DKP",
                     desc = "Show the true DKP values (not rounded)",
-                    get = function(info) return PDKP.showInternalDKP end,
+                    get = function(info)
+                        return PDKP.showInternalDKP
+                    end,
                     set = function(info, val)
                         return MODULES.Dev:ToggleSetting('showInternalDKP', val)
                     end,
@@ -253,7 +285,9 @@ function Options:SetupLDB()
                     type = "toggle",
                     name = "Show History IDS",
                     desc = "Show entry history IDs",
-                    get = function(info) return PDKP.showHistoryIds end,
+                    get = function(info)
+                        return PDKP.showHistoryIds
+                    end,
                     set = function(info, val)
                         return MODULES.Dev:ToggleSetting('showHistoryIds', val)
                     end,
@@ -264,12 +298,26 @@ function Options:SetupLDB()
                     type = "toggle",
                     name = "Show Bid amounts",
                     desc = "Show active bid amounts",
-                    get = function(info) return PDKP.showBidAmounts end,
+                    get = function(info)
+                        return PDKP.showBidAmounts
+                    end,
                     set = function(info, val)
                         return MODULES.Dev:ToggleSetting('showBidAmounts', val)
                     end,
                     width = 2.5,
                     order = 4,
+                },
+                debugDatabase = {
+                    type = "execute",
+                    name = "Open Database",
+                    desc = "Opens the database in VDT",
+                    func = function()
+                        local db = MODULES.Database:Server();
+                        Utils:WatchVar(db, 'PDKP Database');
+                        ViragDevTool:ToggleUI();
+                    end,
+                    width = 1,
+                    order = 5,
                 },
             }
         }
@@ -285,25 +333,33 @@ function Options:_InitializeDBDefaults()
         self.db['minimap'] = nil;
     end
 
-    self.db['ignore_from'] = self.db['ignore_from'] or {}
-    self.db['minimap'] = self.db['minimap'] or { ['pos'] = 207, ['hide'] = false }
-    self.db['sync'] = self.db['sync'] or {}
-    self.db['ignore_pugs'] = self.db['ignore_pugs'] or true
-    self.db['invite_commands'] = self.db['invite_commands'] or { 'inv', 'invite' };
+    local dbTopLevelKeys = {
+        ['ignore_from'] = { ['value'] = self.db['ignore_from'], ['default'] = {}, },
+        ['minimap'] = { ['value'] = self.db['minimap'], ['default'] = { ['pos'] = 207, ['hide'] = false }, },
+        ['sync'] = { ['value'] = self.db['sync'], ['default'] = {}, },
+        ['ignore_pugs'] = { ['value'] = self.db['ignore_pugs'], ['default'] = true, },
+        ['invite_commands'] = { ['value'] = self.db['invite_commands'], ['default'] = { 'inv', 'invite' }, },
+    }
 
-    if next(self.db['sync']) == nil then
-        self.db['sync'] = {
-            ['lastSyncSent'] = nil,
-            ['officerSyncs'] = {},
-            ['totalEntries'] = 0,
-            ['autoSync'] = true,
-            ['processingChunkSize'] = 2,
-            ['decompressChunkSize'] = 4,
-        }
+    for key, obj in pairs(dbTopLevelKeys) do
+        self.db[key] = Utils:ternaryAssign(obj['value'] ~= nil, obj['value'], obj['default']);
     end
-    if self.db['sync']['autoBackup'] == nil then
-        self.db['sync']['autoBackup'] = false;
+
+    local syncTableKeys = {
+        ['lastSyncSent'] = { ['default'] = nil, },
+        ['officerSyncs'] = { ['default'] = {}, },
+        ['totalEntries'] = { ['default'] = 0, },
+        ['autoSync'] = { ['default'] = false, },
+        ['processingChunkSize'] = { ['default'] = 2, },
+        ['decompressChunkSize'] = { ['default'] = 4, },
+        ['autoBackup'] = { ['default'] = false },
+        ['syncInCombat'] = { ['default'] = true, },
+    }
+
+    for key, obj in pairs(syncTableKeys) do
+        self.db['sync'][key] = Utils:ternaryAssign(self.db['sync'][key] ~= nil, self.db['sync'][key], obj['default']);
     end
+
     -- Disable this until it's tested to be stable.
     if self.db['sync']['autoSync'] ~= nil then
         self.db['sync']['autoSync'] = false;
@@ -319,7 +375,15 @@ function Options:SetLastSyncSent()
 end
 
 function Options:GetAutoSyncStatus()
-    return self.db['sync']['autoSync'];
+    if self.db == nil then
+        return false
+    else
+        return self.db['sync']['autoSync'];
+    end
+end
+
+function Options:GetSyncInCombat()
+    return MODULES.Database:GetSyncInCombat();
 end
 
 function Options:IsPlayerIgnored(playerName)

@@ -198,4 +198,9 @@ function DB:HasAutoBackupEnabled()
     return settings['sync']['autoBackup'] == true
 end
 
+function DB:GetSyncInCombat()
+    local settings = self:Settings()
+    return settings['sync']['syncInCombat'] == true
+end
+
 MODULES.Database = DB

@@ -77,6 +77,13 @@ function Comms:RegisterComms()
         ['SentInv'] = { ['channel'] = 'WHISPER', },
         --['Version'] = { ['channel'] = 'GUILD', },
     }
+
+    local syncInCombat = MODULES.Options:GetSyncInCombat();
+    if syncInCombat ~= nil then
+        commChannels['SyncOver']['combat'] = syncInCombat
+        commChannels['RaidOver']['combat'] = syncInCombat
+    end
+
     for prefix, opts in pairs(commChannels) do
         opts['prefix'] = prefix
         local comm = MODULES.Comm:new(opts)
