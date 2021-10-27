@@ -89,13 +89,18 @@ end
 function Group:RegisterEvents()
     local opts = {
         ['name'] = 'GROUP',
-        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL', 'ZONE_CHANGED_NEW_AREA'},
+        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL'},
         ['tickInterval'] = 0.5,
         ['onEventFunc'] = function(arg1, arg2, arg3)
             self:_HandleEvent(arg1, arg2, arg3)
         end
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
+end
+
+function Group:WatchLogging()
+    --local f = CreateFrame("Frame", nil, nil);
+    --f:RegisterEvents('ZONE_CHANGED_NEW_AREA')
 end
 
 function Group:_HandleEvent(event, arg1, ...)
@@ -118,6 +123,8 @@ function Group:_HandleEvent(event, arg1, ...)
     end
 
     if event == 'BOSS_KILL' and PDKP.canEdit then
+        PDKP:PrintD('BOSS KILL DETECTED', event, arg1, ...)
+
         local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
         local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
         if isDKP or isMLNoDKP then
@@ -276,6 +283,10 @@ function Group:IsInInstance()
     local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
     PDKP:PrintD("IsInInstance type:", type)
     return type ~= "none" and type ~= nil
+end
+
+function Group:IsInRaidInstance()
+
 end
 
 function Group:IsMemberInRaid(name)

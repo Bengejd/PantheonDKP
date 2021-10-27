@@ -1,5 +1,14 @@
 # PDKP Change Log
 
+## v4.6.5
+### Features
+- Added interface setting to allow Sync in Combat (overwrites).
+- Added Lockout interface to show who is locked to a boss (and to remove them from lockouts).
+
+### Bug Fixes
+- Fixed a bug with new entries causing slight frame drops.
+- Fixed a bug with "new" members being reinitialized in a loop.
+
 ## v4.6.0
 ### Features
 - Added SyncManager to help break up where syncs are going (raid vs guild) and prevent data loss.

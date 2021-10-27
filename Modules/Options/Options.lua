@@ -319,6 +319,25 @@ function Options:SetupLDB()
                     width = 1,
                     order = 5,
                 },
+                changeCommPrefix = {
+                    type = "select",
+                    name = "Change the Comm Channel",
+                    desc = "Changes your comm channel, so that you can swap between channels easier.",
+                    values = {
+                        ["1"] = "1",
+                        ["4"] = "4",
+                    },
+                    get = function(info)
+                        return Utils.CommPrefixNumber
+                    end,
+                    set = function(info, val)
+                        MODULES.CommsManager:UnregisterComms()
+                        Utils.CommPrefixNumber = val;
+                        MODULES.CommsManager:Reinitialize()
+                    end,
+                    width = 1,
+                    order = 6,
+                },
             }
         }
     end
