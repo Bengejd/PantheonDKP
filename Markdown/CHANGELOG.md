@@ -3,11 +3,13 @@
 ## v4.6.5
 ### Features
 - Added interface setting to allow Sync in Combat (overwrites).
-- Added Lockout interface to show who is locked to a boss (and to remove them from lockouts).
+- Added WagoAnalytics Library.
 
 ### Bug Fixes
 - Fixed a bug with new entries causing slight frame drops.
 - Fixed a bug with "new" members being reinitialized in a loop.
+- Fixed a bug with single entry additions causing lag spikes.
+- Fixed a bug with tables updating when the addon was closed.
 
 ## v4.6.0
 ### Features
