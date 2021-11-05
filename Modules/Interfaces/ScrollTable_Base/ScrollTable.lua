@@ -16,6 +16,12 @@ local strupper, substr, strsplit = strupper, string.match, strsplit
 local tinsert, tremove, tContains, unpack, wipe, setmetatable, rawset, tsort = tinsert, tremove, tContains, unpack, wipe, setmetatable, rawset, table.sort
 local pairs = pairs
 
+local coroutine_create = coroutine.create
+local coroutine_resume = coroutine.resume
+local coroutine_yield = coroutine.yield
+
+local maxProcessCount = 2;
+
 local IsControlKeyDown, IsShiftKeyDown = IsControlKeyDown, IsShiftKeyDown
 local HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar = HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar
 local CreateFrame = CreateFrame
@@ -202,13 +208,29 @@ end
 
 -- Refreshes the data that we are utilizing.
 function ScrollTable:RefreshData()
-    PDKP:PrintD("Refreshing ScrollTable Data");
+    PDKP.Wago:IncrementCounter(self.name .. 'RefreshData');
     self.data = self.retrieveDataFunc();
     self.displayData = {};
 
-    for i = 1, #self.data do
-        self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
-    end
+    local processCount = 0;
+
+    local refreshCallback = coroutine_create(function()
+        for i = 1, #self.data do
+            processCount = processCount + 1;
+            self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
+
+    self.RefreshDataFrame:SetScript("OnUpdate", function()
+        local ongoing  = coroutine_resume(refreshCallback)
+        if not ongoing then
+            self.RefreshDataFrame:SetScript('OnUpdate', nil)
+        end
+    end)
+
 end
 
 function ScrollTable:GetDisplayRows()
@@ -256,17 +278,33 @@ function ScrollTable:Reinitialize()
 end
 
 function ScrollTable:DataChanged()
-    for i = 1, #self.displayData do
-        self.rows[i]:UpdateRowValues();
-    end
+    PDKP.Wago:IncrementCounter(self.name .. 'DataChanged');
 
-    if self.sortCol then
-        -- resort the column
-        self.sortCol:Click()
-        self.sortCol:Click()
-    end
+    local processCount = 0;
 
-    self:ApplyFilter('Select_All', false)
+    local dataChangedCallback = coroutine_create(function()
+        for i = 1, #self.displayData do
+            processCount = processCount + 1;
+            self.rows[i]:UpdateRowValues();
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
+
+    self.DataChangedFrame:SetScript("OnUpdate", function()
+        local ongoing  = coroutine_resume(dataChangedCallback)
+        if not ongoing then
+            self.DataChangedFrame:SetScript('OnUpdate', nil)
+            if self.sortCol then
+                -- resort the column
+                self.sortCol:Click()
+                self.sortCol:Click()
+            end
+
+            self:ApplyFilter('Select_All', false)
+        end
+    end)
 end
 
 function ScrollTable:RefreshTableSize()
@@ -284,6 +322,8 @@ function ScrollTable:RefreshTableSize()
 end
 
 function ScrollTable:RefreshLayout()
+    PDKP.Wago:IncrementCounter(self.name .. 'RefreshLayout');
+
     local offset = HybridScrollFrame_GetOffset(self.ListScrollFrame);
 
     self:GetDisplayRows();
@@ -393,6 +433,9 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
         ['rel_point_x'] = 0,
         ['rel_point_y'] = 0
     }
+
+    self.RefreshDataFrame = CreateFrame("Frame");
+    self.DataChangedFrame = CreateFrame("Frame");
 
     self.ROW_HEIGHT = row_settings['height'] or 20
     self.ROW_WIDTH = row_settings['width'] or 300

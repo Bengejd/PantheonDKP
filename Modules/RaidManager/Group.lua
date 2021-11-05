@@ -27,6 +27,9 @@ function Group:Initialize()
     self.requestedDKPOfficer = false
     self.portraitInitialized = false
 
+    self.awardOnTimeAutomatically = false;
+    self.onTimeAwarded = false;
+
     self.combatLoggingEnabled = false;
 
     self.myName = Utils:GetMyName()
@@ -89,7 +92,7 @@ end
 function Group:RegisterEvents()
     local opts = {
         ['name'] = 'GROUP',
-        ['events'] = {'GROUP_ROSTER_UPDATE', 'BOSS_KILL'},
+        ['events'] = { 'GROUP_ROSTER_UPDATE', 'BOSS_KILL' },
         ['tickInterval'] = 0.5,
         ['onEventFunc'] = function(arg1, arg2, arg3)
             self:_HandleEvent(arg1, arg2, arg3)
@@ -104,7 +107,9 @@ function Group:WatchLogging()
 end
 
 function Group:_HandleEvent(event, arg1, ...)
-    if not self:IsInRaid() then return end
+    if not self:IsInRaid() then
+        return
+    end
 
     if event == 'ZONE_CHANGED_NEW_AREA' then
         return C_Timer.After(2, function()
@@ -119,7 +124,7 @@ function Group:_HandleEvent(event, arg1, ...)
 
     self:Refresh()
     if not self.available then
-        return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...) )
+        return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...))
     end
 
     if event == 'BOSS_KILL' and PDKP.canEdit then
@@ -182,6 +187,17 @@ function Group:Refresh()
         self.leadership.dkpOfficer = nil
     end
     self.available = true
+
+    self:AutoAward();
+end
+
+function Group:AutoAward()
+    if not PDKP.canEdit then return end;
+    if not self:IsInRaid() then return end;
+    if not self.awardOnTimeAutomatically then return end;
+    if self.onTimeAwarded then return end;
+
+    print('Got here, time to check award status');
 end
 
 -----------------------------
@@ -336,7 +352,7 @@ function Group:_RefreshMembers()
 end
 
 function Group:InitializePortrait()
-    if ( (not PDKP.canEdit) and (not self:IsLeader()) ) or self._initialized then
+    if ((not PDKP.canEdit) and (not self:IsLeader())) or self._initialized then
         return
     end
 

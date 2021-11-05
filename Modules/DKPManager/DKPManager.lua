@@ -82,6 +82,10 @@ function DKP:Initialize()
         end
         self:_UpdateTables();
     end)
+
+    --C_Timer.After(5, function()
+        --self:_StartRecompressTimer();
+    --end)
 end
 
 -----------------------------
@@ -136,7 +140,7 @@ function DKP:LoadPrevFourWeeks()
 end
 
 function DKP:_RecompressCurrentLoaded()
-    self.compressedCurrentWeekEntries = CommsManager:DataEncoder({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries })
+    self.compressedCurrentWeekEntries = CommsManager:ChunkedEncoder( { ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries} );
 end
 
 -----------------------------
@@ -286,6 +290,24 @@ function DKP:_EntryExists(entryId)
     return DKP_DB[entryId] ~= nil, DKP_DB[entryId];
 end
 
+function DKP:_ShouldRollBackEntries(importId)
+    local shouldRollBack = false;
+    local shouldCalibrate = false;
+    for entryId, _ in Utils:PairByKeys(DKP_DB) do
+        if entryId > importId then
+            shouldRollBack = true;
+            local entry = self:GetEntryByID(entryId);
+            if entry.reason == 'Phase' or entry.reason == 'Decay' then
+                shouldCalibrate = true;
+            end
+        elseif entryId < importId then
+            break;
+        end
+    end
+    PDKP:PrintD("Should Roll Back Entries", shouldRollBack, 'shouldCalibrate', shouldCalibrate);
+    return shouldRollBack, shouldCalibrate;
+end
+
 -- Import Types: Small, Large, Ad?
 function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if entryDetails == nil then return nil end
@@ -341,8 +363,12 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         return nil
     end
 
+    --- coroutine should start here?
+
+    local shouldRollBackEntries, _ = self:_ShouldRollBackEntries(importEntry.id)
+
     -- Roll back entries here
-    if importType ~= "Large" then
+    if importType ~= "Large" and shouldRollBackEntries then
         self:RollBackEntries(importEntry);
     end
 
@@ -359,9 +385,9 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     if importType ~= 'Large' then
         self:_StartRecompressTimer();
-    end
+end
 
-    if #self.rolledBackEntries then
+    if #self.rolledBackEntries > 0 then
         self:RollForwardEntries();
     end
 
@@ -434,7 +460,9 @@ function DKP:DeleteEntry(entry, sender, isImport)
         corrected_entry:Save(true)
     end
 
-    if not isImport then
+    local _, shouldCalibrate = self:_ShouldRollBackEntries(importEntry.id)
+
+    if not isImport and shouldCalibrate then
         self:RecalibrateDKP();
     end
 end
@@ -495,12 +523,12 @@ function DKP:ImportBulkEntries(message, sender, decoded)
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
             if self.consolidationEntry == nil then
-                self:RecalibrateDKPBulk(sender, total)
+                self:RecalibrateDKPBulk(sender)
             else
                 local isRestarting = self:ProcessSquish(self.consolidationEntry);
 
                 if not isRestarting then
-                    self:RecalibrateDKPBulk(sender, total)
+                    self:RecalibrateDKPBulk(sender)
                 end
             end
         end
@@ -515,6 +543,8 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
+    PDKP:PrintD("Recalibrating DKP");
+
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
         self.calibratedTotals[member.name] = Utils:ShallowCopy(member:GetDKP());
@@ -527,7 +557,10 @@ function DKP:RecalibrateDKP()
         member:Save()
     end
 
-    self:RollForwardEntries();
+    if #self.rolledBackEntries > 0 then
+        self:RollForwardEntries();
+    end
+
     self:_UpdateTables();
 
     local calibratedMembers = {};
@@ -542,11 +575,11 @@ function DKP:RecalibrateDKP()
     PDKP.CORE:Print('Calibrated', #calibratedMembers, 'members DKP totals');
 end
 
-function DKP:RecalibrateDKPBulk(sender, total)
-    self:RollBackEntriesBulk(sender, total)
+function DKP:RecalibrateDKPBulk(sender)
+    self:RollBackEntriesBulk(sender)
 end
 
-function DKP:RollBackEntriesBulk(sender, ttl)
+function DKP:RollBackEntriesBulk(sender)
     local rollBackProcessing = CreateFrame('Frame')
     local processCount = 0;
 
@@ -683,13 +716,14 @@ function DKP:AddToCache(message, sender, decoded)
 end
 
 function DKP:_StartRecompressTimer()
-    if self.recompressTimer ~= nil then
-        self.recompressTimer:Cancel()
-        self.recompressTimer = nil
-    end
-    self.recompressTimer = C_Timer.NewTicker(5, function()
-        self:_RecompressCurrentLoaded()
-    end, 1)
+    --self:_RecompressCurrentLoaded()
+    --if self.recompressTimer ~= nil then
+    --    self.recompressTimer:Cancel()
+    --    self.recompressTimer = nil
+    --end
+    --self.recompressTimer = C_Timer.NewTicker(5, function()
+    --    self:_RecompressCurrentLoaded()
+    --end, 1)
 end
 
 -----------------------------

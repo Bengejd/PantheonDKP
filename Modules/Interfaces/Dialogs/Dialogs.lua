@@ -77,6 +77,20 @@ function Dialogs:Initialize()
             hideOnEscape = false,
             preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
         },
+        ['PDKP_CONFIRM_AUTO_AWARD_DKP'] = {
+            text = "Would you like to automatically award on time DKP, 10 minutes before raid starts?",
+            button2 = 'Skip',
+            button1 = 'Accept',
+            OnAccept = function(_, data, _)
+                MODULES.GroupManager.awardOnTimeAutomatically = true;
+                return;
+            end,
+            OnCancel = function(...) end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = false,
+            preferredIndex = 3, -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+        },
         ['PDKP_CONFIRM_DKP_ENTRY_DELETE'] = {
 
         },
