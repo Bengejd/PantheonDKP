@@ -105,7 +105,7 @@ do
 	-- 1 : v1.0.0
 	-- 2 : v1.0.1
 	-- 3 : v1.0.2
-	local _MINOR = 3
+	local _MINOR = 4
 
 	local _COPYRIGHT =
 	"LibDeflate ".._VERSION
@@ -645,6 +645,7 @@ local function IsValidArguments(str,
 				if k ~= "level" and k ~= "strategy"
 						and k ~= "chunksMode" and k ~= "yieldOnChunkSize"
 						and k ~= "yieldOnChunkTime" and k ~= "timeFn" then
+					print('Error with', k);
 					return false,
 					("'configs' - unsupported table key in the configs: '%s'.")
 							:format(k)

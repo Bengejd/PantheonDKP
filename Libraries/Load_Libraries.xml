@@ -17,4 +17,6 @@
 	<Include file="Ace3\AceHook-3.0\AceHook-3.0.xml" />
 	<Include file="Ace3\AceSerializer-3.0\AceSerializer-3.0.xml" />
 	<Include file="Ace3\AceTimer-3.0\AceTimer-3.0.xml" />
+
+	<Script file="WagoAnalytics\Shim.lua" />
 </Ui>

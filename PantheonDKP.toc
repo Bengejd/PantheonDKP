@@ -6,6 +6,7 @@
 ## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
 ## SavedVariables: PDKP_DB
+## OptionalDependencies: WagoAnalytics
 ## LoadOnDemand: 0
 ## X-Interface: 20501
 ## X-Curse-Project-ID: 367232
