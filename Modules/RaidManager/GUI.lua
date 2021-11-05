@@ -20,6 +20,7 @@ function RaidTools:Initialize()
     Constants = MODULES.Constants
 
     RaidTools.SpamRunning = false
+    RaidTools.isDKPRaid = false;
 
     self.options = {}
 
@@ -216,6 +217,7 @@ function RaidTools:Initialize()
 
         if RaidTools.SpamRunning then
             b_text = 'Stop Raid Inv Spam'
+            --GUI.Dialogs:Show('PDKP_CONFIRM_AUTO_AWARD_DKP', nil, nil);
         else
             b_text = 'Start Raid Inv Spam'
         end

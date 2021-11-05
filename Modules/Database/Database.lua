@@ -30,25 +30,15 @@ function DB:Initialize()
 
     self:Personal()[UnitName("PLAYER")] = true
 
-    --self:_Migrations()
+    self:_Migrations()
 end
 
 function DB:_Migrations()
-    local ldb = self:Ledger()
-    local dkp = self:DKP()
 
-    -- entry 1625706965
-
-    if dkp[1625706965] == nil then
-        if ldb[2689] ~= nil then
-            if ldb[2689]['Huntswomann'] then
-                for k, v in pairs(ldb[2689]['Huntswomann']) do
-                    if v == 1625706965 then
-                        table.remove(ldb[2689]['Huntswomann'], k)
-                    end
-                end
-            end
-        end
+    -- Remove incorrect ledger
+    local db = self:Server()
+    if db['Ledger'] and db['ledger'] then
+        db['Ledger'] = nil;
     end
 end
 
@@ -124,7 +114,7 @@ function DB:CreateSnapshot()
         ['dkp'] = Utils:DeepCopy(self:DKP()),
         ['phases'] = Utils:DeepCopy(self:Phases()),
         ['decay'] = Utils:DeepCopy(self:Decay()),
-        ['Ledger'] = Utils:DeepCopy(self:Ledger()),
+        ['ledger'] = Utils:DeepCopy(self:Ledger()),
         ['sync'] = Utils:DeepCopy(self:Sync()),
     }
 end

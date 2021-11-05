@@ -3,6 +3,7 @@ local addonName, PDKP = ...;
 local LibStub = LibStub
 
 PDKP.CORE = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0", "AceEvent-3.0")
+PDKP.Wago = LibStub("WagoAnalytics"):Register("ZQ6arYKW")
 
 PDKP.ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 PDKP.cbh = LibStub("CallbackHandler-1.0"):New(PDKP.CORE)

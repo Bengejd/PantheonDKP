@@ -102,7 +102,6 @@ function Dev:HandleSlashCommands(msg)
         local remaining = GetPetTimeRemaining();
 
         print('Hapiness', happiness, 'LoyaltyRate', loyaltyRate, 'currXP', currXP, 'nextXP', nextXP, 'Remaining', remaining);
-        --print('Pet Specs', GetNumSpecializations(false, true));
 
         Utils:WatchVar(_G, 'Global');
 
@@ -110,7 +109,6 @@ function Dev:HandleSlashCommands(msg)
 end
 
 function Dev:FixWrongfulDecay()
-    print('Fixing wrongful decay');
     local total_encoded = MODULES.DKPManager:LoadPrevFourWeeks()
     if total_encoded > 0 then
         PDKP:PrintD("Total Encoded", total_encoded);
@@ -152,7 +150,7 @@ function Dev:FixWrongfulDecay()
                 end
 
                 if not hasWonItem then
-                    print(name);
+
                 end
             end
         end

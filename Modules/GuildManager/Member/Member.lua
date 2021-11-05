@@ -131,7 +131,6 @@ end
 
 function Member:_InitializeDKP()
     if Utils:tEmpty(guildDB[self.name]) and self.dkp['total'] == nil then
-        --print('Shit was nil', self.name);
     end
 
     if Utils:tEmpty(guildDB[self.name]) then

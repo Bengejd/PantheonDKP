@@ -50,8 +50,11 @@ function Ledger:Initialize()
             end
         end
     end)
+    f:SetScript("OnEvent", nil);
 
-    self:CheckSyncStatus()
+    --self:CheckSyncStatus()
+
+    self._initialized = true;
 end
 
 function Ledger:CheckSyncStatus()

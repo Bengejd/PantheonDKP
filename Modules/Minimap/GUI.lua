@@ -125,13 +125,10 @@ function map:HandleIconClicks(buttonType)
     local clickTypes = {
         ['LeftButton'] = {
             [hasShift and hasAlt and hasCtrl] = function()
-                --print('Left, hasShift, hasAlt, hasCtrl')
             end,
             [hasShift and hasAlt and not hasCtrl] = function()
-                --print('Left, hasShift, hasAlt');
             end,
             [hasShift and not hasAlt and not hasCtrl] = function()
-                --print('Left, hasShift');
             end,
             [hasAlt and not hasShift and not hasCtrl] = function()
 
