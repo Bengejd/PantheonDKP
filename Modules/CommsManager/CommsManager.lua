@@ -226,6 +226,37 @@ function Comms:DataDecoder(data, chunksMode)
     return deserialized -- Deserialize the compressed message
 end
 
+function Comms:ChunkedEncoder(data)
+    local serialized = self:_Serialize(data);
+    local chunkSize = 1024 * MODULES.Options:decompressChunkSize();
+    local total = 0;
+    local bytes = ((string.len(serialized) + 17 ) * 10 * 10) * 2.3;
+
+    local Wow_compress_co = PDKP.LibDeflate:CompressDeflate(serialized, {chunksMode=true, yieldOnChunkSize=chunkSize })
+
+    local processing = CreateFrame("Frame");
+    processing:SetScript("OnUpdate", function()
+        PDKP:PrintD('Compression Progress', total / bytes);
+        local ongoing, compressed_data;
+
+        if type(Wow_compress_co) ~= "string" then
+            ongoing, compressed_data = Wow_compress_co()
+        else
+            ongoing = false;
+            compressed_data = Wow_compress_co;
+        end
+
+        total = chunkSize + total;
+
+        if not ongoing then
+            processing:SetScript('OnUpdate', nil)
+            PDKP:PrintD("Chunked Encoding Finished")
+            local encoded = self:_Encode(compressed_data);
+            return encoded;
+        end
+    end)
+end
+
 function Comms:ChunkedDecoder(data, sender)
     local detransmit = self:_Decode(data)
     local chunkSize = 1024 * MODULES.Options:decompressChunkSize();
