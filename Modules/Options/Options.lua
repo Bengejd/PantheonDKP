@@ -314,7 +314,7 @@ function Options:SetupLDB()
                     func = function()
                         local db = MODULES.Database:Server();
                         Utils:WatchVar(db, 'PDKP Database');
-                        ViragDevTool:ToggleUI();
+                        --ViragDevTool:ToggleUI();
                     end,
                     width = 1,
                     order = 5,
