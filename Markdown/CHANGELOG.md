@@ -8,7 +8,7 @@
 
 ### Bug Fixes
 - Republishing v4.6.5 fixes.
-- Fixed DKP Award Popup for Hydross
+- Fixed DKP Award Popup for Hydross the Unstable
 - Fixed a bug where GUI tables were being updated when PDKP was closed. They will now update on next open.
 
 ## v4.6.5
