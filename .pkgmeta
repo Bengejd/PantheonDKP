@@ -1,6 +1,11 @@
 package-as: PantheonDKP
 enable-nolib-creation: no
 
+externals:
+    libs/WagoAnalytics:
+        url: https://github.com/methodgg/WagoAnalytics.git
+        branch: main
+
 manual-changelog:
     filename: Markdown/CHANGELOG.md
     markup-type: markdown
