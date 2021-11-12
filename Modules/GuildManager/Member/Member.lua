@@ -126,7 +126,8 @@ function Member:UpdateSnapshot(previousTotal)
         previousTotal = previousTotal * -1;
     end
 
-    self.dkp['snapshot'] = previousTotal
+    self.dkp['snapshot'] = previousTotal;
+    self:Save();
 end
 
 function Member:_InitializeDKP()

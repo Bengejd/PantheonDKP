@@ -179,7 +179,7 @@ function LootTable:RefreshData(justData)
     wipe(self.entry_keys)
     wipe(self.entries)
 
-    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Boss Kill', 'Other', 'Decay', 'Phase' });
+    self.entry_keys = DKPManager:GetEntryKeys(true, { 'Boss Kill', 'Other', 'Decay', 'Phase', 'Consolidation' });
 
     for i = 1, #self.entry_keys do
         self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])

@@ -152,6 +152,32 @@ function Options:SetupLDB()
                         width = 1,
                         order = 6,
                     },
+                    spacer3 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 7,
+                    },
+                    changeCommPrefix = {
+                        type = "select",
+                        name = "Comm Channel Prefix",
+                        desc = "Changes your comm channel prefix, so that you can sync without affecting the whole guild.",
+                        values = {
+                            ["1"] = "1",
+                            ["4"] = "4",
+                            ["5"] = "5",
+                        },
+                        get = function(info)
+                            return Utils.CommPrefixNumber
+                        end,
+                        set = function(info, val)
+                            MODULES.CommsManager:UnregisterComms()
+                            Utils.CommPrefixNumber = val;
+                            MODULES.CommsManager:Reinitialize()
+                        end,
+                        width = 1,
+                        order = 8,
+                    },
                 },
             },
             tab2 = {
@@ -237,9 +263,19 @@ function Options:SetupLDB()
                     },
                     spacer4Tab2 = {
                         type = "description",
-                        name = " ",
+                        name = "This will consolidate (Reduce the size) of your Database. You should only execute this command if you're an officer, who has been told to do so.",
                         width = "full",
                         order = 8,
+                    },
+                    ConsolidateDB = {
+                        type = "execute",
+                        name = "Consolidate Database",
+                        desc = "This is irreversible. Use at your own risk.",
+                        func = function()
+                            MODULES.DKPManager:ConsolidateEntries(false);
+                        end,
+                        width = 1,
+                        order = 9,
                     },
                 },
             },
@@ -318,25 +354,6 @@ function Options:SetupLDB()
                     end,
                     width = 1,
                     order = 5,
-                },
-                changeCommPrefix = {
-                    type = "select",
-                    name = "Change the Comm Channel",
-                    desc = "Changes your comm channel, so that you can swap between channels easier.",
-                    values = {
-                        ["1"] = "1",
-                        ["4"] = "4",
-                    },
-                    get = function(info)
-                        return Utils.CommPrefixNumber
-                    end,
-                    set = function(info, val)
-                        MODULES.CommsManager:UnregisterComms()
-                        Utils.CommPrefixNumber = val;
-                        MODULES.CommsManager:Reinitialize()
-                    end,
-                    width = 1,
-                    order = 6,
                 },
             }
         }

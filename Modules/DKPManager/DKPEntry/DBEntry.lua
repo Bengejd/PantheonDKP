@@ -18,6 +18,7 @@ local _ITEM_WIN = 'Item Win'
 local _OTHER = 'Other'
 local _DECAY = 'Decay'
 local _PHASE = 'Phase'
+local _CONSOLIDATION = "Consolidation";
 
 local _DECAY_AMOUNT = 0.9;
 local _DECAY_REVERSAL = 1.111;
@@ -141,10 +142,10 @@ end
 
 function dbEntry:GetPreviousTotals(refresh)
     refresh = refresh or false;
-    if self.reason == _DECAY and (next(self.previousTotals) == nil or refresh) then
+    if (self.reason == _DECAY or self.reason == _PHASE or self.reason == _CONSOLIDATION) and (next(self.previousTotals) == nil or refresh) then
         for _, member in Utils:PairByKeys(self.members) do
             if self.previousTotals[member.name] == nil or refresh then
-                self.previousTotals[member.name] = member:GetDKP();
+                self.previousTotals[member.name] = member:GetDKP('Decimal');
             end
         end
     end
@@ -246,7 +247,7 @@ function dbEntry:GetSaveDetails()
         self.sd['item'] = self.item
     elseif self.reason == _OTHER then
         self.sd['other_text'] = self.other_text
-    elseif self.reason == _DECAY or self.reason == _PHASE then
+    elseif self.reason == _DECAY or self.reason == _PHASE or self.reason == _CONSOLIDATION then
         if self.previousTotals == nil or next(self.previousTotals) == nil then
             self:GetPreviousTotals()
             self:CalculateDecayAmounts()
@@ -417,13 +418,15 @@ end
 function dbEntry:_GetChangeText()
     local color = Utils:ternaryAssign(self.dkp_change >= 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
 
-    if self.reason == 'Decay' or self.reason == 'Phase' then
-        local percent = Utils:ternaryAssign(self.reason == "Decay", "10% DKP", "50% DKP");
+    if self.reason == _DECAY or self.reason == _PHASE then
+        local percent = Utils:ternaryAssign(self.reason == _DECAY, "10% DKP", "50% DKP");
 
         if self.decayReversal then
             return Utils:FormatTextColor(percent, MODULES.Constants.SUCCESS)
         end
         return Utils:FormatTextColor(percent, MODULES.Constants.WARNING)
+    elseif self.reason == _CONSOLIDATION then
+
     else
         return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
     end
@@ -448,6 +451,8 @@ function dbEntry:_GetHistoryText()
             return Utils:FormatTextColor(dtext .. ' - Reversal', MODULES.Constants.SUCCESS)
         end
         return Utils:FormatTextColor(dtext, MODULES.Constants.WARNING)
+    elseif self.reason == _CONSOLIDATION then
+        return Utils:FormatTextColor('DKP Consolidation', MODULES.Constants.SUCCESS);
     end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
@@ -464,6 +469,7 @@ function dbEntry:_GetCollapsedHistoryText()
         ['Other'] = Utils:ternaryAssign(self.other_text ~= '', 'Other - ' .. self.other_text, 'Other'),
         ['Decay'] = 'Weekly Decay',
         ['Phase'] = 'Phase Decay',
+        ['Consolidation'] = 'Database Consolidation',
     }
     local text = texts[self.reason]
 
@@ -474,6 +480,8 @@ function dbEntry:_GetCollapsedHistoryText()
             return Utils:FormatTextColor(dtext .. ' - Reversal', MODULES.Constants.SUCCESS)
         end
         return Utils:FormatTextColor(dtext, MODULES.Constants.WARNING)
+    elseif self.reason == _CONSOLIDATION then
+        return Utils:FormatTextColor('DKP Consolidation', MODULES.Constants.SUCCESS);
     end
 
     local color = Utils:ternaryAssign(self.dkp_change > 0, MODULES.Constants.SUCCESS, MODULES.Constants.WARNING)
