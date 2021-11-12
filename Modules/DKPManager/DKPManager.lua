@@ -84,7 +84,7 @@ function DKP:Initialize()
     end)
 
     --C_Timer.After(5, function()
-        --self:_StartRecompressTimer();
+    --self:_StartRecompressTimer();
     --end)
 end
 
@@ -140,15 +140,33 @@ function DKP:LoadPrevFourWeeks()
 end
 
 function DKP:_RecompressCurrentLoaded()
-    self.compressedCurrentWeekEntries = CommsManager:ChunkedEncoder( { ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries} );
+    self.compressedCurrentWeekEntries = CommsManager:ChunkedEncoder({ ['total'] = self.numCurrentLoadedWeek, ['entries'] = self.currentLoadedWeekEntries });
 end
 
 -----------------------------
 --     Export Functions    --
 -----------------------------
 
+function DKP:ConsolidateEntries(isImport)
+    isImport = isImport or false;
+    if not isImport then
+        local temp_entry = {
+            ['reason'] = 'Consolidation',
+            ['dkp_change'] = 0,
+            ['names'] = MODULES.GuildManager.memberNames,
+            ['officer'] = PDKP.char.name,
+            ['previousTotals'] = {},
+        }
+        local entry = DKP_Entry:new(temp_entry)
+        entry:GetPreviousTotals();
+        self:ExportEntry(entry);
+    end
+end
+
 function DKP:PrepareAdRequest()
-    if self.autoSyncInProgress then return end
+    if self.autoSyncInProgress then
+        return
+    end
     local lastTwoWeekNumber = Utils.weekNumber - 2
     local entries = {};
 
@@ -197,7 +215,7 @@ end
 function DKP:ProcessSquish(entry)
     PDKP:PrintD("ProcessSquish Called");
 
-    PDKP.CORE:Print("Processing Phase DKP Entry Consolidation");
+    PDKP.CORE:Print("Processing DKP Entry Consolidation");
     local newer_entries = {}
     local olderEntryCounter = 0;
 
@@ -217,8 +235,8 @@ function DKP:ProcessSquish(entry)
         PDKP:PrintD("Overwriting dkp db after squish");
         MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
 
-        for _, encoded_entry in pairs(newer_entries) do
-            local entryAdler = CommsManager:_Adler(encoded_entry)
+        for _, encoded_entry in Utils:PairByKeys(newer_entries) do
+            local entryAdler = CommsManager:_Adler(encoded_entry);
             self:ImportEntry2(encoded_entry, entryAdler, 'Small');
         end
 
@@ -301,7 +319,7 @@ function DKP:_ShouldRollBackEntries(importId)
                 shouldCalibrate = true;
             end
         elseif entryId < importId then
-            break;
+            break ;
         end
     end
     PDKP:PrintD("Should Roll Back Entries", shouldRollBack, 'shouldCalibrate', shouldCalibrate);
@@ -310,7 +328,9 @@ end
 
 -- Import Types: Small, Large, Ad?
 function DKP:ImportEntry2(entryDetails, entryAdler, importType)
-    if entryDetails == nil then return nil end
+    if entryDetails == nil then
+        return nil
+    end
     local importEntry = DKP_Entry:new(entryDetails)
 
     if not self:_ShouldImportNewEntry(importEntry.id) then
@@ -372,7 +392,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         self:RollBackEntries(importEntry);
     end
 
-    importEntry.formattedNames = importEntry:_GetFormattedNames()
+    importEntry.formattedNames = importEntry:_GetFormattedNames();
 
     importEntry:ApplyEntry();
 
@@ -385,7 +405,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     if importType ~= 'Large' then
         self:_StartRecompressTimer();
-end
+    end
 
     if #self.rolledBackEntries > 0 then
         self:RollForwardEntries();
@@ -399,6 +419,13 @@ end
         tinsert(phaseDB, importEntry.id);
         --Utils:WatchVar(importEntry, 'phase');
         MODULES.Database:MarkPhaseStart()
+        importEntry:_UpdateSnapshots();
+        if importType ~= "Large" then
+            self:ProcessSquish(importEntry);
+        end
+    end
+
+    if importEntry.reason == "Consolidation" then
         importEntry:_UpdateSnapshots();
         if importType ~= "Large" then
             self:ProcessSquish(importEntry);
@@ -503,15 +530,15 @@ function DKP:ImportBulkEntries(message, sender, decoded)
         for _, encoded_entry in Utils:PairByKeys(entries) do
             local entryAdler = CommsManager:_Adler(encoded_entry)
             local importEntry = self:ImportEntry2(encoded_entry, entryAdler, 'Large');
-            if importEntry ~= nil and importEntry.reason == "Phase" and importEntry.isNewPhaseEntry then
+            if importEntry ~= nil and ((importEntry.reason == "Phase" and importEntry.isNewPhaseEntry) or importEntry.reason == 'Consolidation') then
                 PDKP:PrintD("New Phase Entry Found", importEntry.id);
                 self.syncStatuses[sender] = nil;
-                self:AddToCache({['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
+                self:AddToCache({ ['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
                 self.consolidationEntry = importEntry;
             end
 
             processCount = processCount + 1;
-            if processCount >= (maxProcessCount -1) and processCount % (maxProcessCount -1) == 0 then
+            if processCount >= (maxProcessCount - 1) and processCount % (maxProcessCount - 1) == 0 then
                 coroutine_yield()
             end
         end
@@ -550,7 +577,7 @@ function DKP:RecalibrateDKP()
         self.calibratedTotals[member.name] = Utils:ShallowCopy(member:GetDKP());
     end
 
-    self:RollBackEntries({ ['id']  = 0 } );
+    self:RollBackEntries({ ['id'] = 0 });
 
     for _, member in pairs(members) do
         member.dkp['total'] = member.dkp['snapshot']
@@ -568,7 +595,7 @@ function DKP:RecalibrateDKP()
         local memberDKP = member:GetDKP();
         if memberDKP ~= self.calibratedTotals[member.name] then
             table.insert(calibratedMembers, member);
-            PDKP:PrintD(member.name, memberDKP, self.calibratedTotals[member.name]);
+            --PDKP:PrintD(member.name, memberDKP, self.calibratedTotals[member.name]);
         end
     end
 
@@ -603,7 +630,7 @@ function DKP:RollBackEntriesBulk(sender)
 
     rollBackProcessing:SetScript('OnUpdate', function()
         self:UpdateSyncProgress(sender, '3/4', processCount, total);
-        local ongoing  = coroutine_resume(rollBackCo)
+        local ongoing = coroutine_resume(rollBackCo)
         if not ongoing then
             rollBackProcessing:SetScript('OnUpdate', nil)
             local members = MODULES.GuildManager.members
@@ -625,7 +652,7 @@ function DKP:RollForwardEntriesBulk(sender)
     local processing = CreateFrame('Frame')
     local processCount = 0;
     local co = coroutine_create(function()
-        for i=#self.rolledBackEntries, 1, -1 do
+        for i = #self.rolledBackEntries, 1, -1 do
             local entry = self.rolledBackEntries[i]
 
             if entry.reason == 'Decay' or entry.reason == 'Phase' then
@@ -643,7 +670,7 @@ function DKP:RollForwardEntriesBulk(sender)
 
     processing:SetScript('OnUpdate', function()
         self:UpdateSyncProgress(sender, '4/4', processCount, total);
-        local ongoing  = coroutine_resume(co)
+        local ongoing = coroutine_resume(co)
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
             C_Timer.NewTicker(1, function()
@@ -675,7 +702,7 @@ function DKP:RollForwardEntries()
     --- Since they are sorted in reverse, just start at the oldest entry (end)
     --- and work you way to the newest entry (start).
 
-    for i=#self.rolledBackEntries, 1, -1 do
+    for i = #self.rolledBackEntries, 1, -1 do
         local entry = self.rolledBackEntries[i]
         if entry.reason == 'Decay' or entry.reason == 'Phase' then
             local refresh = entry.reason == "Decay";
@@ -749,7 +776,9 @@ function DKP:_CreateBatches(entries, total)
 end
 
 function DKP:_ProcessEntryBatch(batch, sender)
-    if type(batch) ~= "table" then return end
+    if type(batch) ~= "table" then
+        return
+    end
 
     for key, encoded_entry in Utils:PairByKeys(batch) do
         local shouldContinue = true;
@@ -850,7 +879,7 @@ function DKP:AwardBossKill(boss_name)
 
     if #memberNames > 30 then
         PDKP:PrintError("Too many members were selected for this boss kill, please award DKP manually for ", boss_name);
-        return;
+        return ;
     end
 
     local entry = PDKP.MODULES.DKPEntry:new(dummy_entry)
@@ -990,7 +1019,7 @@ function DKP:GetTheoreticalCap()
         if newCap > previousCap then
             previousCap = newCap
         else
-            break;
+            break ;
         end
 
         if weekCount >= 666 then
@@ -1002,6 +1031,7 @@ function DKP:GetTheoreticalCap()
 end
 
 function DKP:CheckForNegatives()
+    PDKP:PrintD("Checking for Negatives");
     local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
     if shouldCalibrate then
         self:RecalibrateDKP();
@@ -1013,8 +1043,12 @@ end
 -----------------------------
 
 function DKP:UpdateSyncProgress(sender, stage, processed, total)
-    if processed == 0 then processed = 1 end
-    if total == 0 then total = 1 end
+    if processed == 0 then
+        processed = 1
+    end
+    if total == 0 then
+        total = 1
+    end
     self.syncStatuses[sender] = { ['stage'] = stage, ['progress'] = floor((processed / total) * 100) }
 
     if self.syncFrame == nil then
