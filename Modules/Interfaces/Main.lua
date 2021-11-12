@@ -3,6 +3,7 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local GUtils = PDKP.GUtils;
 local Utils = PDKP.Utils;
+local GUI = PDKP.GUI;
 
 local Main = {}
 
@@ -90,6 +91,18 @@ function Main:Initialize()
     f.addon_version = addon_version
 
     pdkp_frame = f
+
+    pdkp_frame:SetScript("OnShow", function()
+        if PDKP.memberTable ~= nil and PDKP.memberTable._initialized and PDKP.memberTable.refreshPending then
+            PDKP.memberTable:DataChanged()
+        end
+        if GUI.HistoryGUI ~= nil and GUI.HistoryGUI._initialized and PDKP.memberTable.refreshPending then
+            GUI.HistoryGUI:RefreshData()
+        end
+        if GUI.HistoryGUI ~= nil and GUI.LootGUI._initialized and PDKP.memberTable.refreshPending then
+            GUI.LootGUI:RefreshData()
+        end
+    end)
 
     f:Hide()
 

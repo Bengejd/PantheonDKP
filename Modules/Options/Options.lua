@@ -388,13 +388,16 @@ function Options:_InitializeDBDefaults()
         ['autoSync'] = { ['default'] = false, },
         ['processingChunkSize'] = { ['default'] = 2, },
         ['decompressChunkSize'] = { ['default'] = 4, },
-        ['autoBackup'] = { ['default'] = false },
-        ['syncInCombat'] = { ['default'] = true, },
+        ['autoBackup'] = { ['default'] = true },
+        ['syncInCombat'] = { ['default'] = false, },
     }
 
     for key, obj in pairs(syncTableKeys) do
         self.db['sync'][key] = Utils:ternaryAssign(self.db['sync'][key] ~= nil, self.db['sync'][key], obj['default']);
     end
+
+    -- Set this as the default for now.
+    self.db['sync']['autoBackup'] = true;
 
     -- Disable this until it's tested to be stable.
     if self.db['sync']['autoSync'] ~= nil then

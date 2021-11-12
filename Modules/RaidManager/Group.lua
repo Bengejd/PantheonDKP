@@ -12,10 +12,17 @@ local tinsert = table.insert
 local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterInfo
 local UnitIsGroupLeader = UnitIsGroupLeader
 local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
-local strtrim = strtrim
+local strtrim, strsplit = strtrim, strsplit
 local wipe = wipe
 local C_Timer = C_Timer
 local LoggingCombat = LoggingCombat
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local select = select
+local tonumber = tonumber
+local setmetatable = setmetatable
+
+local HYDROSS_COMBAT_ID = 21216
+local HYDROSS_BOSS_ID = 623
 
 function Group:Initialize()
     setmetatable(self, Group) -- Set the metatable so we used Group's __index
@@ -47,7 +54,7 @@ function Group:Initialize()
         dkpOfficer = nil,
         leader = nil,
     }
-
+    self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
     self._initialized = true;
 
     self:RegisterEvents()
@@ -82,6 +89,10 @@ function Group:Reinitialize()
         self.eventFrame:SetScript("OnEvent", nil);
         self.eventFrame = nil;
     end
+    if self.HydrossEventFrame ~= nil then
+        self.HydrossEventFrame:SetScript("OnEvent", nil);
+        self.HydrossEventFrame = nil;
+    end
     self:Initialize();
 end
 
@@ -99,6 +110,24 @@ function Group:RegisterEvents()
         end
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
+    self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
+
+    self.HydrossEventFrame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED');
+    self.HydrossEventFrame:SetScript("OnEvent", function(...)
+        self:CheckForHydross(CombatLogGetCurrentEventInfo());
+    end)
+end
+
+function Group:CheckForHydross(...)
+    local subEvent = select(2, ...)
+    if subEvent == "UNIT_DIED" then
+        local GUID = select(8, ...);
+        local npcID = select(6, strsplit("-", GUID));
+        if tonumber(npcID) == HYDROSS_COMBAT_ID then
+            self:_HandleEvent('BOSS_KILL', HYDROSS_BOSS_ID, 'Hydross the Unstable');
+            self.HydrossEventFrame:SetScript("OnEvent", nil);
+        end
+    end
 end
 
 function Group:WatchLogging()
@@ -110,7 +139,6 @@ function Group:_HandleEvent(event, arg1, ...)
     if not self:IsInRaid() then
         return
     end
-
     if event == 'ZONE_CHANGED_NEW_AREA' then
         return C_Timer.After(2, function()
             if self:IsInInstance() and self:IsInRaid() and not self.combatLoggingEnabled then

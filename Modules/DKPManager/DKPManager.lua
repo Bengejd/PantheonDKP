@@ -65,6 +65,26 @@ function DKP:Initialize()
     self.entrySyncTimer = nil
     self.processedCacheEntries = {}
 
+    self.calibrationEnabled = true;
+    self.calibrationPending = false;
+
+    self.combatFrame = CreateFrame("Frame", nil, UIParent)
+    local COMBAT_EVENTS = { 'PLAYER_REGEN_DISABLED', 'PLAYER_REGEN_ENABLED' };
+    for _, eventName in pairs(COMBAT_EVENTS) do
+        self.combatFrame:RegisterEvent(eventName)
+    end
+
+    self.combatFrame:SetScript("OnEvent", function(_, event, ...)
+        if event == 'PLAYER_REGEN_DISABLED' then
+            self.calibrationEnabled = false;
+        elseif event == 'PLAYER_REGEN_ENABLED' then
+            self.calibrationEnabled = true;
+            if self.calibrationPending then
+                self:RecalibrateDKP();
+            end
+        end
+    end)
+
     self.consolidationEntry = nil;
 
     self.rolledBackEntries = {}
@@ -427,6 +447,8 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     if importEntry.reason == "Consolidation" then
         importEntry:_UpdateSnapshots();
+        local consolidationDB = MODULES.Database:Consolidations();
+        table.insert(consolidationDB, importEntry.id);
         if importType ~= "Large" then
             self:ProcessSquish(importEntry);
         end
@@ -570,6 +592,13 @@ function DKP:GetPreviousDecayEntry(entry)
 end
 
 function DKP:RecalibrateDKP()
+    if not self.calibrationEnabled then
+        self.calibrationPending = true;
+        return;
+    end
+
+    self.calibrationPending = false;
+
     PDKP:PrintD("Recalibrating DKP");
 
     local members = MODULES.GuildManager.members
@@ -808,6 +837,13 @@ function DKP:_ProcessEntryBatch(batch, sender)
 end
 
 function DKP:_UpdateTables()
+    if not pdkp_frame:IsVisible() then
+        PDKP.memberTable.refreshPending = true;
+        PDKP.HistoryGUI.refreshPending = true;
+        PDKP.LootGUI.refreshPending = true;
+        return;
+    end
+
     if PDKP.memberTable ~= nil and PDKP.memberTable._initialized then
         PDKP.memberTable:DataChanged()
     end
@@ -1133,6 +1169,13 @@ function DKP:_ShouldImportNewEntry(id)
     for _, p in Utils:PairByKeys(MODULES.Database:Phases()) do
         if p > id then
             shouldImport = false;
+        end
+    end
+    if shouldImport then
+        for _, p in Utils:PairByKeys(MODULES.Database:Consolidations()) do
+            if p > id then
+                shouldImport = false;
+            end
         end
     end
     return shouldImport;

@@ -209,6 +209,7 @@ end
 -- Refreshes the data that we are utilizing.
 function ScrollTable:RefreshData()
     PDKP.Wago:IncrementCounter(self.name .. 'RefreshData');
+    self.refreshPending = false;
     self.data = self.retrieveDataFunc();
     self.displayData = {};
 
@@ -278,6 +279,7 @@ function ScrollTable:Reinitialize()
 end
 
 function ScrollTable:DataChanged()
+    self.refreshPending = false;
     PDKP.Wago:IncrementCounter(self.name .. 'DataChanged');
 
     local processCount = 0;
@@ -436,6 +438,8 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     self.RefreshDataFrame = CreateFrame("Frame");
     self.DataChangedFrame = CreateFrame("Frame");
+
+    self.refreshPending = false;
 
     self.ROW_HEIGHT = row_settings['height'] or 20
     self.ROW_WIDTH = row_settings['width'] or 300

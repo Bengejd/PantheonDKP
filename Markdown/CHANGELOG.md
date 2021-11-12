@@ -1,4 +1,15 @@
 # PDKP Change Log
+## v4.7.0
+### Features
+- Republishing v4.6.5 Features.
+- DKP Consolidation Entry added to reduce entry load.
+- Prevent DKP Recalibration from occurring when in combat.
+- Enabled DB Backup on Overwrite by default.
+
+### Bug Fixes
+- Republishing v4.6.5 fixes.
+- Fixed DKP Award Popup for Hydross
+- Fixed a bug where GUI tables were being updated when PDKP was closed. They will now update on next open.
 
 ## v4.6.5
 ### Features
