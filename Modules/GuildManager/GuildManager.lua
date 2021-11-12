@@ -127,16 +127,18 @@ function GuildManager:GetMemberByName(name)
 end
 
 function GuildManager:AllowMemberUpdate()
-    local currentTime = GetServerTime();
-    local seconds, minutes = Utils:SubtractTime(self.lastMembersUpdate, currentTime);
-    local hasMembers, hasOnline = next(self.members) ~= nil, next(self.online) ~= nil;
-
-    PDKP:PrintD("Time since Member update request, minutes",minutes, "seconds", seconds);
-
-    if hasMembers or hasOnline then
-        return minutes >= 1;
-    end
     return true;
+
+    --local currentTime = GetServerTime();
+    --local seconds, minutes = Utils:SubtractTime(self.lastMembersUpdate, currentTime);
+    --local hasMembers, hasOnline = next(self.members) ~= nil, next(self.online) ~= nil;
+    --
+    --PDKP:PrintD("Time since Member update request, minutes",minutes, "seconds", seconds);
+    --
+    --if hasMembers or hasOnline then
+    --    return minutes >= 1;
+    --end
+    --return true;
 end
 
 function GuildManager:IsMemberOfficer(name)
