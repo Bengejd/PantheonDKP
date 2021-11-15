@@ -1,4 +1,5 @@
 # PDKP Change Log
+
 ## v4.7.0
 ### Features
 - Republishing v4.6.5 Features.
@@ -8,7 +9,7 @@
 
 ### Bug Fixes
 - Republishing v4.6.5 fixes.
-- Fixed DKP Award Popup for Hydross the Unstable
+- Fixed DKP Award Popup for Hydross the Unstable.
 - Fixed a bug where GUI tables were being updated when PDKP was closed. They will now update on next open.
 
 ## v4.6.5

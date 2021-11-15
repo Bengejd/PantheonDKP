@@ -837,21 +837,26 @@ function DKP:_ProcessEntryBatch(batch, sender)
 end
 
 function DKP:_UpdateTables()
-    if not pdkp_frame:IsVisible() then
-        PDKP.memberTable.refreshPending = true;
-        PDKP.HistoryGUI.refreshPending = true;
-        PDKP.LootGUI.refreshPending = true;
-        return;
-    end
-
     if PDKP.memberTable ~= nil and PDKP.memberTable._initialized then
-        PDKP.memberTable:DataChanged()
+        if not pdkp_frame:IsVisible() then
+            PDKP.memberTable.refreshPending = true;
+        else
+            PDKP.memberTable:DataChanged()
+        end
     end
     if GUI.HistoryGUI ~= nil and GUI.HistoryGUI._initialized then
-        GUI.HistoryGUI:RefreshData()
+        if not pdkp_frame:IsVisible() then
+            GUI.HistoryGUI.refreshPending = true;
+        else
+            GUI.HistoryGUI:RefreshData()
+        end
     end
     if GUI.HistoryGUI ~= nil and GUI.LootGUI._initialized then
-        GUI.LootGUI:RefreshData()
+        if not pdkp_frame:IsVisible() then
+            GUI.LootGUI.refreshPending = true;
+        else
+            GUI.LootGUI:RefreshData()
+        end
     end
 end
 
