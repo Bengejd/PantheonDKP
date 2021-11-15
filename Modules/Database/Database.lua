@@ -194,7 +194,10 @@ end
 
 function DB:GetSyncInCombat()
     local settings = self:Settings()
-    return settings['sync']['syncInCombat'] == true
+    if settings and settings['sync'] then
+        return settings['sync']['syncInCombat'] == true
+    end
+    return false;
 end
 
 MODULES.Database = DB
