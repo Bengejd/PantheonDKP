@@ -111,6 +111,16 @@ function DB:Dev()
 end
 --@end-do-not-package@
 
+function DB:CheckForDKPMigrations()
+    local global = self:Global();
+
+    if global['migratedDKP'] == nil then
+        PDKP:PrintD("FixingDKP");
+        global['migratedDKP'] = true
+        MODULES.CommsManager:FixDKPDB();
+    end
+end
+
 function DB:CreateSnapshot()
     PDKP.CORE:Print("Creating Database Backup");
     PDKP_DB[self.server_faction_guild]['snapshot'] = {
@@ -120,7 +130,15 @@ function DB:CreateSnapshot()
         ['decay'] = Utils:DeepCopy(self:Decay()),
         ['ledger'] = Utils:DeepCopy(self:Ledger()),
         ['sync'] = Utils:DeepCopy(self:Sync()),
+        ['consolidations'] = Utils:DeepCopy(self:Consolidations()),
     }
+end
+
+function DB:TestDKP()
+    if PDKP_DB['TESTDKP'] == nil then
+        PDKP_DB['TESTDKP'] = {};
+    end
+    return PDKP_DB['TESTDKP']
 end
 
 function DB:ApplySnapshot()
@@ -132,6 +150,7 @@ function DB:ApplySnapshot()
     PDKP_DB[self.server_faction_guild]['decay'] = Utils:DeepCopy(snap['decay'])
     PDKP_DB[self.server_faction_guild]['Ledger'] = Utils:DeepCopy(snap['Ledger'])
     PDKP_DB[self.server_faction_guild]['sync'] = Utils:DeepCopy(snap['sync'])
+    PDKP_DB[self.server_faction_guild]['consolidations'] = Utils:DeepCopy(snap['consolidations'])
 end
 
 function DB:ResetSnapshot()

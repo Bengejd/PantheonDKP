@@ -295,18 +295,7 @@ end
 
 function Comms:DatabaseEncoder(data, save)
     local serialized = self:_Serialize(data)
-    local compressed = self:_Compress(serialized)
-
-    if save then
-        local db = MODULES.Database:Decay();
-        db['original'] = data
-        db['serialized'] = serialized;
-        db['compressed'] = compressed;
-        db['adler_serialized'] = self:_Adler(serialized)
-        db['adler_compressed'] = self:_Adler(compressed);
-    end
-
-    return compressed
+    return serialized
 end
 
 function Comms:DatabaseDecoder(data, save)
@@ -316,6 +305,26 @@ function Comms:DatabaseDecoder(data, save)
         return self:_Deserialize(data) -- Return the regular deserialized messge
     end
     return self:_Deserialize(decompressed)
+end
+
+function Comms:FixDKPDB()
+    local DKP_DB = MODULES.Database:DKP();
+    local encoded_entries = {};
+    local decoded_entries = {};
+    for index, entry in pairs(DKP_DB) do
+        encoded_entries[index] = entry;
+        local decoded_entry = MODULES.DKPEntry:new(entry)
+        local sd = decoded_entry:GetSaveDetails();
+        decoded_entries[index] = sd;
+    end
+
+    for index, entry in pairs(decoded_entries) do
+        DKP_DB[index] = self:_Serialize(entry);
+    end
+end
+
+function Comms:TestCompress()
+
 end
 
 MODULES.CommsManager = Comms

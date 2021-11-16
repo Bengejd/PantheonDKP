@@ -90,6 +90,8 @@ function DKP:Initialize()
     self.rolledBackEntries = {}
     self.calibratedTotals = {}
 
+    MODULES.Database:CheckForDKPMigrations();
+
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 
@@ -132,8 +134,12 @@ function DKP:LoadPrevFourWeeks()
         if weekNumber >= self.currentLoadedWeek then
             local entry = MODULES.DKPEntry:new(encoded_entry)
 
-            if entry.id == 1633479988 then
-                Utils:WatchVar(entry, 'Bad Entry');
+            if entry.id == 1633497650 then
+                Utils:WatchVar(entry, 'Bad Entry 1');
+            end
+
+            if entry.id == 1633585180 then
+                Utils:WatchVar(entry, 'Bad Entry 2');
             end
 
             if entry ~= nil then
@@ -216,6 +222,7 @@ function DKP:PrepareOverwriteExport()
         ['lockouts'] = MODULES.Database:Lockouts(),
         ['guild'] = MODULES.Database:Guild(),
         ['phases'] = MODULES.Database:Phases(),
+        ['consolidations'] = MODULES.Database:Consolidations(),
     }
     return exportDetails;
 end
@@ -360,6 +367,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if entryAdler == nil and type(entryDetails == "string") then
         entryAdler = importEntry.adler;
         if entryAdler == nil then
+            PDKP:PrintD("Could not find adler, returning");
             return nil
         end
     end
@@ -368,7 +376,6 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
 
     if entryExists then
         if adlerMatches then
-            PDKP:PrintD("Entry Adler Exists already, returning");
             return nil
         end
         PDKP:PrintD("Entry Exists, but Adler does not match", importEntry.id);
