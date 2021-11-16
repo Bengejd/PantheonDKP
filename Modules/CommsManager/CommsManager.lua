@@ -309,10 +309,8 @@ end
 
 function Comms:FixDKPDB()
     local DKP_DB = MODULES.Database:DKP();
-    local encoded_entries = {};
     local decoded_entries = {};
     for index, entry in pairs(DKP_DB) do
-        encoded_entries[index] = entry;
         local decoded_entry = MODULES.DKPEntry:new(entry)
         local sd = decoded_entry:GetSaveDetails();
         decoded_entries[index] = sd;
