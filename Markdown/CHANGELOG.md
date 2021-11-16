@@ -1,6 +1,6 @@
 # PDKP Change Log
 
-## v4.7.0
+## v4.7.2
 ### Features
 - Republishing v4.6.5 Features.
 - DKP Consolidation Entry added to reduce entry load.
