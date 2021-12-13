@@ -13,6 +13,10 @@ local CreateFrame = CreateFrame
 local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
 local tinsert, _ = tinsert, tremove
 
+local coroutine_create = coroutine.create
+local coroutine_resume = coroutine.resume
+local coroutine_yield = coroutine.yield
+
 local tabName = 'view_loot_button';
 
 local EXPAND_ALL, COLLAPSE_ALL
@@ -58,6 +62,8 @@ function LootTable:Initialize()
     self.frame.title:SetPoint("TOPLEFT", 14, -15)
     self.frame.title:SetPoint("TOPRIGHT", -14, -15)
 
+    self.refreshPending = false;
+
     local scroll = SimpleScrollFrame:new(self.frame.content)
     local scrollFrame = scroll.scrollFrame
     local scrollContent = scrollFrame.content;
@@ -87,6 +93,12 @@ function LootTable:Initialize()
 
     self.frame.content:SetScript("OnShow", function()
         toggleSB()
+        if self.refreshPending then
+            self:RefreshData(true)
+            self:HistoryUpdated(true)
+            self:CollapseAllRows(self.collapsed)
+            self.refreshPending = false;
+        end
     end)
 
     self.scrollContent = scrollContent;
@@ -101,11 +113,11 @@ function LootTable:Initialize()
     self.table_init = false;
     self.collapsed_raids = {};
 
-    self.title_text = 'PantheonDKP History'
+    self.RefreshDataFrame = CreateFrame("Frame");
+    self.RefreshDisplayFrame = CreateFrame("Frame");
 
-    --self.appliedFilters['raid'] = Settings.current_raid
+    self.title_text = 'PantheonDKP Loot';
 
-    --self.previous_raid = Settings.current_raid;
     for i = 1, #MODULES.Constants.RAID_NAMES do
         local raid_name = MODULES.Constants.RAID_NAMES[i]
         self.collapsed_raids[raid_name] = true
@@ -127,13 +139,6 @@ function LootTable:Initialize()
     self.collapse_all = collapse_all;
 
     self.frame:SetScript("OnShow", function()
-        if self.updateNextOpen then
-            --- hmmmm. Table size isn't being updated properly. self:_OnLoad()
-            self:RefreshData(true)
-            self:HistoryUpdated(true)
-            self:CollapseAllRows(self.collapsed)
-            self.updateNextOpen = false
-        end
         if not self.collapse_init then
             self.collapse_all:Click()
             self.collapse_init = true
@@ -174,47 +179,81 @@ function LootTable:ToggleRows()
 end
 
 function LootTable:RefreshData(justData)
-    self.scrollContent:WipeChildren(self.scrollContent)
+    if self.scrollContent == nil then return end
+    PDKP:PrintD("Refreshing Loot Table Data");
 
+    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+    local processCount = 0;
+
+    self.scrollContent:WipeChildren(self.scrollContent)
     wipe(self.entry_keys)
     wipe(self.entries)
-
     self.entry_keys = DKPManager:GetEntryKeys(true, { 'Boss Kill', 'Other', 'Decay', 'Phase', 'Consolidation' });
 
-    for i = 1, #self.entry_keys do
-        self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])
-    end
+    local refreshCallback = coroutine_create(function()
+        for i = 1, #self.entry_keys do
+            processCount = processCount + 1;
+            self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]);
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
 
-    if justData == nil then
-        self:RefreshTable()
-    end
+    self.RefreshDataFrame:SetScript("OnUpdate", function()
+        local ongoing = coroutine_resume(refreshCallback);
+        if not ongoing then
+            self.RefreshDataFrame:SetScript("OnUpdate", nil);
+            if justData == nil or justData == false then
+                self:RefreshTable();
+            end
 
-    if #self.entry_keys == 0 then
-        self:_NoEntriesFound()
-    else
-        self:_EntriesFound()
-    end
+            if #self.entry_keys == 0 then
+                self:_NoEntriesFound()
+            else
+                self:_EntriesFound()
+            end
+        end
+    end)
 end
 
 function LootTable:RefreshTable()
+    PDKP:PrintD("Refreshing Loot Table Display");
+
+    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+    local processCount = 0;
+
     wipe(self.displayedRows)
-    for i = 1, #self.entry_keys do
-        local row = self.rows[i]
-        row:Hide()
-        row:ClearAllPoints()
 
-        row:UpdateRowValues(self.entries[i])
+    local refreshCallback = coroutine_create(function()
+        for i = 1, #self.entry_keys do
+            processCount = processCount + 1;
 
-        if not row:ApplyFilters() then
-            tinsert(self.displayedRows, row)
-            row:Show()
-            row.display_index = #self.displayedRows
+            local row = self.rows[i]
+            row:Hide()
+            row:ClearAllPoints()
+
+            row:UpdateRowValues(self.entries[i])
+
+            if not row:ApplyFilters() then
+                tinsert(self.displayedRows, row)
+                row:Show()
+                row.display_index = #self.displayedRows
+            end
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
         end
-    end
+    end)
 
-    self.scrollContent:AddBulkChildren(self.displayedRows)
-
-    self:CollapseAllRows(self.collapsed)
+    self.RefreshDisplayFrame:SetScript("OnUpdate", function()
+        local ongoing = coroutine_resume(refreshCallback);
+        if not ongoing then
+            self.RefreshDisplayFrame:SetScript("OnUpdate", nil);
+            self.scrollContent:AddBulkChildren(self.displayedRows)
+            self:CollapseAllRows(self.collapsed)
+        end
+    end)
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -224,9 +263,6 @@ function LootTable:HistoryUpdated(selectedUpdate)
     if self.table_init and not selectedUpdate then
         return
     end
-    --if self.previous_raid == Settings.current_raid and self.table_init and not selectedUpdate then return end
-
-    --self.appliedFilters['raid']=Settings.current_raid
 
     local selected = PDKP.memberTable.selected;
     if #selected > 0 then
@@ -237,8 +273,6 @@ function LootTable:HistoryUpdated(selectedUpdate)
     self:UpdateTitleText(selected)
 
     local collapse_rows = false
-    --if self.collapsed ~= self.collapsed_raids[Settings.current_raid] then collapse_rows = true end
-    --self.collapsed = self.collapsed_raids[Settings.current_raid];
     if collapse_rows then
         self:CollapseAllRows(self.collapsed)
     end
@@ -250,7 +284,6 @@ function LootTable:HistoryUpdated(selectedUpdate)
     if not self.table_init then
         self.table_init = true
     end
-    --self.previous_raid = Settings.current_raid
 end
 
 function LootTable:UpdateTitleText(selected)

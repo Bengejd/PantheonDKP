@@ -20,7 +20,7 @@ local coroutine_create = coroutine.create
 local coroutine_resume = coroutine.resume
 local coroutine_yield = coroutine.yield
 
-local maxProcessCount = 2;
+local maxProcessCount = 5;
 
 local IsControlKeyDown, IsShiftKeyDown = IsControlKeyDown, IsShiftKeyDown
 local HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar = HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar
@@ -206,19 +206,34 @@ end
 
 ----- REFRESH FUNCTIONS -----
 
--- Refreshes the data that we are utilizing.
-function ScrollTable:RefreshData()
-    PDKP.Wago:IncrementCounter(self.name .. 'RefreshData');
+function ScrollTable:LagglessUpdate(isRefresh)
+    isRefresh = isRefresh or false;
+
+    if isRefresh then
+        PDKP:PrintD("Processing Laggless update for member table");
+    end
+
     self.refreshPending = false;
-    self.data = self.retrieveDataFunc();
-    self.displayData = {};
+
+    local dataToIterate = self.displayData
+
+    if isRefresh then
+        self.data = self.retrieveDataFunc();
+        self.displayData = {};
+        dataToIterate = self.data;
+    end
 
     local processCount = 0;
 
     local refreshCallback = coroutine_create(function()
-        for i = 1, #self.data do
+        for i = 1, #dataToIterate do
             processCount = processCount + 1;
-            self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+            if isRefresh then
+                self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+            else
+                self.rows[i]:UpdateRowValues();
+            end
+
             if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
                 coroutine_yield()
             end
@@ -226,12 +241,28 @@ function ScrollTable:RefreshData()
     end)
 
     self.RefreshDataFrame:SetScript("OnUpdate", function()
-        local ongoing  = coroutine_resume(refreshCallback)
+        local ongoing = coroutine_resume(refreshCallback);
         if not ongoing then
-            self.RefreshDataFrame:SetScript('OnUpdate', nil)
+            self.RefreshDataFrame:SetScript("OnUpdate", nil);
+            if not isRefresh then
+                if self.sortCol then
+                    -- resort the column
+                    self.sortCol:Click()
+                    self.sortCol:Click()
+                end
+                self:ApplyFilter('Select_All', false)
+            end
         end
     end)
+end
 
+-- Refreshes the data that we are utilizing.
+function ScrollTable:RefreshData()
+    self:LagglessUpdate(true)
+end
+
+function ScrollTable:DataChanged()
+    self:LagglessUpdate(false)
 end
 
 function ScrollTable:GetDisplayRows()
@@ -276,37 +307,6 @@ function ScrollTable:Reinitialize()
     self:RefreshData();
     self:DataChanged();
     self:RefreshLayout();
-end
-
-function ScrollTable:DataChanged()
-    self.refreshPending = false;
-    PDKP.Wago:IncrementCounter(self.name .. 'DataChanged');
-
-    local processCount = 0;
-
-    local dataChangedCallback = coroutine_create(function()
-        for i = 1, #self.displayData do
-            processCount = processCount + 1;
-            self.rows[i]:UpdateRowValues();
-            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
-                coroutine_yield()
-            end
-        end
-    end)
-
-    self.DataChangedFrame:SetScript("OnUpdate", function()
-        local ongoing  = coroutine_resume(dataChangedCallback)
-        if not ongoing then
-            self.DataChangedFrame:SetScript('OnUpdate', nil)
-            if self.sortCol then
-                -- resort the column
-                self.sortCol:Click()
-                self.sortCol:Click()
-            end
-
-            self:ApplyFilter('Select_All', false)
-        end
-    end)
 end
 
 function ScrollTable:RefreshTableSize()
@@ -436,6 +436,10 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
         ['rel_point_y'] = 0
     }
 
+    maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+
+    PDKP:PrintD("Max Processing Speed: ", maxProcessCount);
+
     self.RefreshDataFrame = CreateFrame("Frame");
     self.DataChangedFrame = CreateFrame("Frame");
 
@@ -543,6 +547,9 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
                 self.cols[self.firstSort]:Click()
             end
             self.firstSortRan = true
+        end
+        if self.refreshPending then
+            self:LagglessUpdate();
         end
     end)
 

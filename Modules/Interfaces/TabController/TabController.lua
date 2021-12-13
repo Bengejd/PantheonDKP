@@ -102,11 +102,6 @@ function Tab:Initialize()
         Tab.tab_names[name] = b
         Tab.tabs[i] = b
         Tab.tab_btns[i] = b
-
-        if name == 'view_options_button' then
-            b:SetEnabled(false)
-        end
-
     end
 
     Tab.tab_btns[1]:Click()

@@ -1,5 +1,15 @@
 # PDKP Change Log
 
+## v4.7.5
+### Features
+- Added in interface option to control how fast PDKP updates the display.
+- Optimized some display updates for when the addon is open.
+
+### Bug Fixes
+- Fixed CombatLogging automation.
+- Fixed Slow display updates that were received when the addon was closed.
+- Fixed the Hydross workaround to only run when in SSC.
+
 ## v4.7.2
 ### Features
 - Republishing v4.6.5 Features.

@@ -135,7 +135,7 @@ function Member:_InitializeDKP()
     end
 
     if Utils:tEmpty(guildDB[self.name]) then
-        PDKP:PrintD("Initializing Default DKP For", self.name);
+        --PDKP:PrintD("Initializing Default DKP For", self.name);
         self:_DefaultDKP()
     else
         self:_LoadDatabaseData()

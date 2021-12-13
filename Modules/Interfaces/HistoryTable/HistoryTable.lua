@@ -13,6 +13,10 @@ local CreateFrame = CreateFrame
 local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
 local tinsert, _ = tinsert, tremove
 
+local coroutine_create = coroutine.create
+local coroutine_resume = coroutine.resume
+local coroutine_yield = coroutine.yield
+
 local tabName = 'view_history_button';
 
 local EXPAND_ALL, COLLAPSE_ALL
@@ -65,6 +69,8 @@ function HistoryTable:Initialize()
     sb:SetText("Load More")
     sb:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 4, -22)
 
+    self.refreshPending = false;
+
     local function toggleSB()
         local numLeft = DKPManager:GetNumEncoded()
         if numLeft <= 0 then
@@ -82,6 +88,12 @@ function HistoryTable:Initialize()
 
     self.frame.content:SetScript("OnShow", function()
         toggleSB()
+        if self.refreshPending then
+            self:RefreshData(true)
+            self:HistoryUpdated(true)
+            self:CollapseAllRows(self.collapsed)
+            self.refreshPending = false;
+        end
     end)
 
     local scroll = SimpleScrollFrame:new(self.frame.content)
@@ -102,6 +114,9 @@ function HistoryTable:Initialize()
     self.collapsed = false;
     self.table_init = false;
     self.collapsed_raids = {};
+
+    self.RefreshDataFrame = CreateFrame("Frame");
+    self.RefreshDisplayFrame = CreateFrame("Frame");
 
     self.title_text = 'PantheonDKP History'
 
@@ -126,12 +141,6 @@ function HistoryTable:Initialize()
     self.collapse_all = collapse_all;
 
     self.frame:SetScript("OnShow", function()
-        if self.updateNextOpen then
-            self:RefreshData(true)
-            self:HistoryUpdated(true)
-            self:CollapseAllRows(self.collapsed)
-            self.updateNextOpen = false
-        end
         if not self.collapse_init then
             self.collapse_all:Click()
             self.collapse_init = true
@@ -179,46 +188,80 @@ end
 
 function HistoryTable:RefreshData(justData)
     if self.scrollContent == nil then return end
+    PDKP:PrintD("Refreshing History Table Data");
+
+    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+    local processCount = 0;
 
     self.scrollContent:WipeChildren(self.scrollContent)
-
     wipe(self.entry_keys)
     wipe(self.entries)
-
     self.entry_keys = DKPManager:GetEntryKeys(true, { 'Item Win' });
-    for i = 1, #self.entry_keys do
-        self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i])
-    end
 
-    if justData == nil then
-        self:RefreshTable()
-    end
+    local refreshCallback = coroutine_create(function()
+        for i = 1, #self.entry_keys do
+           processCount = processCount + 1;
+            self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]);
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
+        end
+    end)
 
-    if #self.entry_keys == 0 then
-        self:_NoEntriesFound()
-    else
-        self:_EntriesFound()
-    end
+    self.RefreshDataFrame:SetScript("OnUpdate", function()
+        local ongoing = coroutine_resume(refreshCallback);
+        if not ongoing then
+            self.RefreshDataFrame:SetScript("OnUpdate", nil);
+            if justData == nil or justData == false then
+                self:RefreshTable();
+            end
+
+            if #self.entry_keys == 0 then
+                self:_NoEntriesFound()
+            else
+                self:_EntriesFound()
+            end
+        end
+    end)
 end
 
 function HistoryTable:RefreshTable()
+    PDKP:PrintD("Refreshing History Table Display");
+
+    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+    local processCount = 0;
+
     wipe(self.displayedRows)
-    for i = 1, #self.entry_keys do
-        local row = self.rows[i]
-        row:Hide()
-        row:ClearAllPoints()
 
-        row:UpdateRowValues(self.entries[i])
+    local refreshCallback = coroutine_create(function()
+        for i = 1, #self.entry_keys do
+            processCount = processCount + 1;
 
-        if not row:ApplyFilters() then
-            tinsert(self.displayedRows, row)
-            row:Show()
-            row.display_index = #self.displayedRows
+            local row = self.rows[i]
+            row:Hide()
+            row:ClearAllPoints()
+
+            row:UpdateRowValues(self.entries[i])
+
+            if not row:ApplyFilters() then
+                tinsert(self.displayedRows, row)
+                row:Show()
+                row.display_index = #self.displayedRows
+            end
+            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                coroutine_yield()
+            end
         end
-    end
-    self.scrollContent:AddBulkChildren(self.displayedRows)
+    end)
 
-    self:CollapseAllRows(self.collapsed)
+    self.RefreshDisplayFrame:SetScript("OnUpdate", function()
+        local ongoing = coroutine_resume(refreshCallback);
+        if not ongoing then
+            self.RefreshDisplayFrame:SetScript("OnUpdate", nil);
+            self.scrollContent:AddBulkChildren(self.displayedRows)
+            self:CollapseAllRows(self.collapsed)
+        end
+    end)
 end
 
 -- Refresh the data, resize the table, re-add the children?

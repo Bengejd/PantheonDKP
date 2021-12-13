@@ -104,10 +104,6 @@ function DKP:Initialize()
         end
         self:_UpdateTables();
     end)
-
-    --C_Timer.After(5, function()
-    --self:_StartRecompressTimer();
-    --end)
 end
 
 -----------------------------
@@ -349,7 +345,7 @@ function DKP:_ShouldRollBackEntries(importId)
             break ;
         end
     end
-    PDKP:PrintD("Should Roll Back Entries", shouldRollBack, 'shouldCalibrate', shouldCalibrate);
+    --PDKP:PrintD("Should Roll Back Entries", shouldRollBack, 'shouldCalibrate', shouldCalibrate);
     return shouldRollBack, shouldCalibrate;
 end
 
@@ -844,25 +840,25 @@ function DKP:_ProcessEntryBatch(batch, sender)
 end
 
 function DKP:_UpdateTables()
-    if PDKP.memberTable ~= nil and PDKP.memberTable._initialized then
-        if not pdkp_frame:IsVisible() then
-            PDKP.memberTable.refreshPending = true;
-        else
-            PDKP.memberTable:DataChanged()
-        end
-    end
-    if GUI.HistoryGUI ~= nil and GUI.HistoryGUI._initialized then
-        if not pdkp_frame:IsVisible() then
-            GUI.HistoryGUI.refreshPending = true;
-        else
-            GUI.HistoryGUI:RefreshData()
-        end
-    end
-    if GUI.HistoryGUI ~= nil and GUI.LootGUI._initialized then
-        if not pdkp_frame:IsVisible() then
-            GUI.LootGUI.refreshPending = true;
-        else
-            GUI.LootGUI:RefreshData()
+    local tables = {
+        ['history'] = GUI.HistoryGUI,
+        ['loot'] = GUI.LootGUI,
+        ['member'] = PDKP.memberTable,
+    }
+    for name, tbl in pairs(tables) do
+        if tbl ~= nil and tbl._initialized then
+            if not pdkp_frame:IsVisible() then
+                tbl.refreshPending = true;
+                PDKP:PrintD("Display Update queued for table", name);
+            else
+                if tbl['LagglessUpdate'] ~= nil then
+                    PDKP:PrintD("Processing laggless update for", name);
+                    tbl:LagglessUpdate(true);
+                else
+                    PDKP:PrintD("Refreshing data for", name);
+                    tbl:RefreshData();
+                end
+            end
         end
     end
 end

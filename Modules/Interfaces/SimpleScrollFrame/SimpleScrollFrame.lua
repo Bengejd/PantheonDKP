@@ -2,7 +2,13 @@ local _, PDKP = ...
 
 PDKP.SimpleScrollFrame = {}
 
-local SimpleScrollFrame = PDKP.SimpleScrollFrame
+local MODULES = PDKP.MODULES;
+
+local SimpleScrollFrame = PDKP.SimpleScrollFrame;
+
+local coroutine_create = coroutine.create
+local coroutine_resume = coroutine.resume
+local coroutine_yield = coroutine.yield
 
 SimpleScrollFrame.__index = SimpleScrollFrame; -- Set the __index parameter to reference
 
@@ -160,11 +166,6 @@ function SimpleScrollFrame:new(parent)
     local sbg = sb:CreateTexture(nil, "BACKGROUND")
     sbg:SetAllPoints(sb)
     sbg:SetColorTexture(0, 0, 0, 0.4)
-    --sb:SetBackdrop({
-    --    bgFile = TRANSPARENT_BACKGROUND,
-    --    edgeFile = SHROUD_BORDER, tile = true, tileSize = 4, edgeSize = 4,
-    --    insets = { left = 5, right = 5, top = 5, bottom = 5 }
-    --})
 
     sf.scrollBar.bg = sbg
 
@@ -175,6 +176,13 @@ function SimpleScrollFrame:new(parent)
 
     sc:Show()
     sc.children = {}
+
+    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
+    self.simpleWipeFrame = CreateFrame("Frame");
+    self.simpleAddFrame = CreateFrame("Frame");
+    self.simpleResizeFrame = CreateFrame("Frame");
+
+    self.childWipeInProgress = false;
 
     sc.AddChild = function(content, frame)
         local childCount = #content.children;
@@ -191,6 +199,9 @@ function SimpleScrollFrame:new(parent)
     end
 
     sc.WipeChildren = function(content)
+        content:Hide();
+
+        self.childWipeInProgress = true;
         local children_height = 0
         local childCount = #content.children;
         for i = 1, childCount do
@@ -199,30 +210,50 @@ function SimpleScrollFrame:new(parent)
             children_height = children_height + child:GetHeight()
             child = nil;
         end
+        self.simpleWipeFrame:SetScript("OnUpdate", nil);
         sc:SetHeight(sc:GetHeight() - children_height)
         content.children = {} -- wipe the children.
+        self.childWipeInProgress = false;
+        content:Show();
     end
 
     sc.AddBulkChildren = function(content, frames)
-        content:WipeChildren(content) -- Wipe the children first, before doing a mass add.
+        content:Hide();
 
+        content:WipeChildren(content) -- Wipe the children first, before doing a mass add.
         local children_height = 0
-        for i = 1, #frames do
-            local child = frames[i]
-            local childCount = #content.children;
-            if childCount == 0 then
-                child:SetPoint("TOPLEFT", 0, 0)
-                child:SetPoint("TOPRIGHT", 0, 0)
-            else
-                local previous_frame = content.children[i - 1]
-                child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
-                child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
+
+        local processCount = 0;
+        local refreshCallback = coroutine_create(function()
+            for i = 1, #frames do
+                processCount = processCount + 1;
+                local child = frames[i]
+                local childCount = #content.children;
+                if childCount == 0 then
+                    child:SetPoint("TOPLEFT", 0, 0)
+                    child:SetPoint("TOPRIGHT", 0, 0)
+                else
+                    local previous_frame = content.children[i - 1]
+                    child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
+                    child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
+                end
+                child:Show()
+                children_height = children_height + child:GetHeight()
+                tinsert(content.children, child)
+                if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                    coroutine_yield()
+                end
             end
-            child:Show()
-            children_height = children_height + child:GetHeight()
-            tinsert(content.children, child)
-        end
-        sc:SetHeight(sc:GetHeight() + children_height)
+        end)
+
+        self.simpleAddFrame:SetScript("OnUpdate", function()
+            local ongoing = coroutine_resume(refreshCallback);
+            if not ongoing then
+                self.simpleAddFrame:SetScript("OnUpdate", nil);
+                sc:SetHeight(sc:GetHeight() + children_height)
+                content:Show();
+            end
+        end)
     end
 
     sc:SetScript("OnSizeChanged", function(_, value)
@@ -249,6 +280,7 @@ function SimpleScrollFrame:new(parent)
         offsetX2 = offsetX2 or -15
 
         local temp_children = {}
+
         for i = 1, #sc.children do
             local child_frame = sc.children[i]
             if child_frame:IsVisible() then

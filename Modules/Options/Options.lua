@@ -178,6 +178,34 @@ function Options:SetupLDB()
                         width = 1,
                         order = 8,
                     },
+                    spacer4 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 7,
+                    },
+                    displayProcessingSpeed = {
+                        type = "select",
+                        name = "Display Processing Speed",
+                        values = {
+                            [2] = "2x",
+                            [4] = "4x",
+                            [8] = "8x",
+                            [16] = "16x",
+                            [32] = "32x",
+                            [64] = "64x",
+                        },
+                        desc = "The amount of items you want to visually update in one frame update.",
+                        get = function(info)
+                            return self.db['sync']['displayProcessingChunkSize'] or 2
+                        end,
+                        set = function(info, val)
+                            self.db['sync']['displayProcessingChunkSize'] = val
+                        end,
+                        style = "dropdown",
+                        width = 1,
+                        order = 5,
+                    },
                 },
             },
             tab2 = {
@@ -390,6 +418,7 @@ function Options:_InitializeDBDefaults()
         ['decompressChunkSize'] = { ['default'] = 4, },
         ['autoBackup'] = { ['default'] = true },
         ['syncInCombat'] = { ['default'] = false, },
+        ['displayProcessingChunkSize'] = { ['default'] = 4 }
     }
 
     for key, obj in pairs(syncTableKeys) do
@@ -436,6 +465,10 @@ end
 
 function Options:processingChunkSize()
     return self.db['sync']['processingChunkSize'] or 2
+end
+
+function Options:displayProcessingChunkSize()
+    return self.db['sync']['displayProcessingChunkSize'] or 4;
 end
 
 function Options:decompressChunkSize()

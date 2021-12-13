@@ -24,6 +24,9 @@ local setmetatable = setmetatable
 local HYDROSS_COMBAT_ID = 21216
 local HYDROSS_BOSS_ID = 623
 
+-- InstanceID's of all raids in TBC Classic
+local MAPS_TO_LOG = {532, 534, 544, 548, 550, 564, 565, 580, }
+
 function Group:Initialize()
     setmetatable(self, Group) -- Set the metatable so we used Group's __index
 
@@ -55,11 +58,14 @@ function Group:Initialize()
         leader = nil,
     }
     self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
+    self.LoggingFrame = CreateFrame("Frame", nil, nil);
     self._initialized = true;
 
     self:RegisterEvents()
 
     self:Refresh()
+
+    self:_ToggleLogging();
 end
 
 function Group:InvitePlayer(name)
@@ -85,14 +91,16 @@ function Group:CanInvite(name)
 end
 
 function Group:Reinitialize()
-    if self.eventFrame ~= nil then
-        self.eventFrame:SetScript("OnEvent", nil);
-        self.eventFrame = nil;
+    for _, frame in pairs(self.eventFrame, self.HydrossEventFrame, self.loggingFrame) do
+        if frame ~= nil then
+            frame:SetScript("OnEvent", nil);
+        end
     end
-    if self.HydrossEventFrame ~= nil then
-        self.HydrossEventFrame:SetScript("OnEvent", nil);
-        self.HydrossEventFrame = nil;
-    end
+
+    self.eventFrame = nil;
+    self.HydrossEventFrame = nil;
+    self.LoggingFrame = nil;
+
     self:Initialize();
 end
 
@@ -116,6 +124,8 @@ function Group:RegisterEvents()
     self.HydrossEventFrame:SetScript("OnEvent", function(...)
         self:CheckForHydross(CombatLogGetCurrentEventInfo());
     end)
+
+    self:WatchLogging();
 end
 
 function Group:CheckForHydross(...)
@@ -127,29 +137,53 @@ function Group:CheckForHydross(...)
             self:_HandleEvent('BOSS_KILL', HYDROSS_BOSS_ID, 'Hydross the Unstable');
             self.HydrossEventFrame:SetScript("OnEvent", nil);
         end
+
+        if self:IsInInstance() then
+            local _, _, _, _, _, _, _, instanceMapId, _ = GetInstanceInfo()
+            if instanceMapId ~= 548 and instanceMapId ~= 780 and self:IsInRaid() then
+                -- Disable Hydross checking, if we aren't in SSC.
+                self.HydrossEventFrame:SetScript("OnEvent", nil);
+            end
+        end
     end
 end
 
 function Group:WatchLogging()
-    --local f = CreateFrame("Frame", nil, nil);
-    --f:RegisterEvents('ZONE_CHANGED_NEW_AREA')
+    local combatLoggingEvents = {'LOADING_SCREEN_DISABLED', 'ZONE_CHANGED_NEW_AREA', 'PLAYER_ENTERING_WORLD'};
+    for _, event in pairs(combatLoggingEvents) do
+        self.LoggingFrame:RegisterEvent(event);
+    end
+    self.LoggingFrame:SetScript("OnEvent", function(event, arg1, ...)
+        self:_ToggleLogging();
+    end)
+end
+
+function Group:_ToggleLogging()
+    local prevState = self.combatLoggingEnabled and true;
+    self.combatLoggingEnabled = LoggingCombat(self:_ShouldLoggingBeEnabled());
+    if self.combatLoggingEnabled ~= prevState then
+        if self.combatLoggingEnabled then
+            PDKP.CORE:Print("Combat Logging has been enabled");
+        else
+            PDKP.CORE:Print("Combat Logging has been disabled");
+        end
+    end
+end
+
+function Group:_ShouldLoggingBeEnabled()
+    local _, _, _, _, _, _, _, instanceMapId, _ = GetInstanceInfo()
+    if tContains(MAPS_TO_LOG, instanceMapId) then
+        return true
+    elseif self:IsInRaid() and self:IsInInstance() then
+        return true
+    end
+    return false
 end
 
 function Group:_HandleEvent(event, arg1, ...)
     if not self:IsInRaid() then
         return
     end
-    if event == 'ZONE_CHANGED_NEW_AREA' then
-        return C_Timer.After(2, function()
-            if self:IsInInstance() and self:IsInRaid() and not self.combatLoggingEnabled then
-                LoggingCombat(true);
-                PDKP.CORE:Print("Combat Logging has been enabled");
-                self.eventFrame:UnregisterEvent("ZONE_CHANGED_NEW_AREA");
-                self.combatLoggingEnabled = true;
-            end
-        end);
-    end
-
     self:Refresh()
     if not self.available then
         return C_Timer.After(1.5, self:_HandleEvent(event, arg1, ...))
@@ -232,6 +266,7 @@ end
 --    Get/Set Functions    --
 -----------------------------
 
+-- Returns if the user is in a raid GROUP.
 function Group:IsInRaid()
     return IsInRaid() and GetNumGroupMembers() >= 1
 end

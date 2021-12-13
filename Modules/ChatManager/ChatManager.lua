@@ -10,7 +10,7 @@ local contains = tContains
 local C_Timer = C_Timer
 
 local chatCache = {};
-local invite_commands = nil;
+local invite_commands;
 local dkp_commands = { '!bid', '!dkp', '!cap' }
 
 local CMD_COLOR = '|cffffaeae'
@@ -110,7 +110,7 @@ function Chat:_HandleDKPMsg(msg)
     local memberDKP = member:GetDKP();
     local bidCap = MODULES.DKPManager:GetMaxBid()
 
-    local chatMessage = nil;
+    local chatMessage;
 
     if cmd == '!bid' then
         if not MODULES.AuctionManager:IsAuctionInProgress() then
