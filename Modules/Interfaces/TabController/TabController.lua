@@ -37,15 +37,15 @@ function Tab:Initialize()
         ['view_loot_button'] = {
             ['text'] = 'Loot',
         },
-        ['view_lockouts_button'] = {
-            ['text'] = 'Lockouts',
-        },
+        --['view_lockouts_button'] = {
+        --    ['text'] = 'Lockouts',
+        --},
         ['view_options_button'] = {
             ['text'] = 'Options',
         },
     }
 
-    local tab_names = { 'view_history_button', 'view_loot_button', 'view_lockouts_button', 'view_options_button' }
+    local tab_names = { 'view_history_button', 'view_loot_button', 'view_options_button' }
     if PDKP.canEdit then
         tab_names = { 'view_adjust_button', unpack(tab_names) }
     end
@@ -88,6 +88,11 @@ function Tab:Initialize()
             end
 
             b:SetAlpha(1)
+            if b:GetName() == 'view_options_button' then
+                InterfaceOptionsFrame_Show()
+                InterfaceOptionsFrame_OpenToCategory("PantheonDKP")
+                return;
+            end
             b.frame:Show()
         end)
 
