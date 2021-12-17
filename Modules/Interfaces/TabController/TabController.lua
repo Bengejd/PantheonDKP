@@ -88,9 +88,11 @@ function Tab:Initialize()
             end
 
             b:SetAlpha(1)
-            if b:GetName() == 'view_options_button' then
+
+            if Tab.activeTab == 'pdkp_frameRightFrame_view_options_button' then
                 InterfaceOptionsFrame_Show()
                 InterfaceOptionsFrame_OpenToCategory("PantheonDKP")
+                pdkp_frame:Hide();
                 return;
             end
             b.frame:Show()
