@@ -223,37 +223,22 @@ function ScrollTable:LagglessUpdate(isRefresh)
         dataToIterate = self.data;
     end
 
-    local processCount = 0;
-
-    local refreshCallback = coroutine_create(function()
-        for i = 1, #dataToIterate do
-            processCount = processCount + 1;
-            if isRefresh then
-                self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
-            else
-                self.rows[i]:UpdateRowValues();
-            end
-
-            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
-                coroutine_yield()
-            end
+    for i=1, #dataToIterate do
+        if isRefresh then
+            self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+        else
+            self.rows[i]:UpdateRowValues();
         end
-    end)
+    end
 
-    self.RefreshDataFrame:SetScript("OnUpdate", function()
-        local ongoing = coroutine_resume(refreshCallback);
-        if not ongoing then
-            self.RefreshDataFrame:SetScript("OnUpdate", nil);
-            if not isRefresh then
-                if self.sortCol then
-                    -- resort the column
-                    self.sortCol:Click()
-                    self.sortCol:Click()
-                end
-                self:ApplyFilter('Select_All', false)
-            end
+    if not isRefresh then
+        if self.sortCol then
+            -- resort the column
+            self.sortCol:Click()
+            self.sortCol:Click()
         end
-    end)
+        self:ApplyFilter('Select_All', false)
+    end
 end
 
 -- Refreshes the data that we are utilizing.
