@@ -190,39 +190,24 @@ function HistoryTable:RefreshData(justData)
     if self.scrollContent == nil then return end
     PDKP:PrintD("Refreshing History Table Data");
 
-    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
-    local processCount = 0;
-
     self.scrollContent:WipeChildren(self.scrollContent)
     wipe(self.entry_keys)
     wipe(self.entries)
     self.entry_keys = DKPManager:GetEntryKeys(true, { 'Item Win' });
 
-    local refreshCallback = coroutine_create(function()
-        for i = 1, #self.entry_keys do
-           processCount = processCount + 1;
-            self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]);
-            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
-                coroutine_yield()
-            end
-        end
-    end)
+    for i = 1, #self.entry_keys do
+        self.entries[i] = DKPManager:GetEntryByID(self.entry_keys[i]);
+    end
 
-    self.RefreshDataFrame:SetScript("OnUpdate", function()
-        local ongoing = coroutine_resume(refreshCallback);
-        if not ongoing then
-            self.RefreshDataFrame:SetScript("OnUpdate", nil);
-            if justData == nil or justData == false then
-                self:RefreshTable();
-            end
+    if justData == nil or justData == false then
+        self:RefreshTable();
+    end
 
-            if #self.entry_keys == 0 then
-                self:_NoEntriesFound()
-            else
-                self:_EntriesFound()
-            end
-        end
-    end)
+    if #self.entry_keys == 0 then
+        self:_NoEntriesFound()
+    else
+        self:_EntriesFound()
+    end
 end
 
 function HistoryTable:RefreshTable()
