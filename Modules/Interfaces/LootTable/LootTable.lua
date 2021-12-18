@@ -180,7 +180,7 @@ end
 
 function LootTable:RefreshData(justData)
     if self.scrollContent == nil then return end
-    PDKP:PrintD("Refreshing Loot Table Data");
+    --PDKP:PrintD("Refreshing Loot Table Data");
 
     self.scrollContent:WipeChildren(self.scrollContent)
     wipe(self.entry_keys)
@@ -203,42 +203,27 @@ function LootTable:RefreshData(justData)
 end
 
 function LootTable:RefreshTable()
-    PDKP:PrintD("Refreshing Loot Table Display");
-
-    local maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
-    local processCount = 0;
+    --PDKP:PrintD("Refreshing Loot Table Display");
 
     wipe(self.displayedRows)
 
-    local refreshCallback = coroutine_create(function()
-        for i = 1, #self.entry_keys do
-            processCount = processCount + 1;
+    for i = 1, #self.entry_keys do
 
-            local row = self.rows[i]
-            row:Hide()
-            row:ClearAllPoints()
+        local row = self.rows[i]
+        row:Hide()
+        row:ClearAllPoints()
 
-            row:UpdateRowValues(self.entries[i])
+        row:UpdateRowValues(self.entries[i])
 
-            if not row:ApplyFilters() then
-                tinsert(self.displayedRows, row)
-                row:Show()
-                row.display_index = #self.displayedRows
-            end
-            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
-                coroutine_yield()
-            end
+        if not row:ApplyFilters() then
+            tinsert(self.displayedRows, row)
+            row:Show()
+            row.display_index = #self.displayedRows
         end
-    end)
+    end
 
-    self.RefreshDisplayFrame:SetScript("OnUpdate", function()
-        local ongoing = coroutine_resume(refreshCallback);
-        if not ongoing then
-            self.RefreshDisplayFrame:SetScript("OnUpdate", nil);
-            self.scrollContent:AddBulkChildren(self.displayedRows)
-            self:CollapseAllRows(self.collapsed)
-        end
-    end)
+    self.scrollContent:AddBulkChildren(self.displayedRows)
+    self:CollapseAllRows(self.collapsed)
 end
 
 -- Refresh the data, resize the table, re-add the children?
@@ -527,7 +512,7 @@ function PDKP_Loot_OnClick(frame, buttonType)
     local dataObj = frame:GetParent()['dataObj']
 
     if dataObj['deleted'] then
-        PDKP:PrintD("Entry has already been deleted")
+        --PDKP:PrintD("Entry has already been deleted")
         return
     end
 

@@ -210,7 +210,7 @@ function ScrollTable:LagglessUpdate(isRefresh)
     isRefresh = isRefresh or false;
 
     if isRefresh then
-        PDKP:PrintD("Processing Laggless update for member table");
+        --PDKP:PrintD("Processing Laggless update for member table");
     end
 
     self.refreshPending = false;
@@ -438,7 +438,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
 
     maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
 
-    PDKP:PrintD("Max Processing Speed: ", maxProcessCount);
+    --PDKP:PrintD("Max Processing Speed: ", maxProcessCount);
 
     self.RefreshDataFrame = CreateFrame("Frame");
     self.DataChangedFrame = CreateFrame("Frame");
