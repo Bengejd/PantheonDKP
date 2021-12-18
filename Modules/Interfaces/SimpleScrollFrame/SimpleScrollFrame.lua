@@ -223,24 +223,37 @@ function SimpleScrollFrame:new(parent)
         content:WipeChildren(content) -- Wipe the children first, before doing a mass add.
         local children_height = 0
 
-        for i = 1, #frames do
-            local child = frames[i]
-            local childCount = #content.children;
-            if childCount == 0 then
-                child:SetPoint("TOPLEFT", 0, 0)
-                child:SetPoint("TOPRIGHT", 0, 0)
-            else
-                local previous_frame = content.children[i - 1]
-                child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
-                child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
+        local processCount = 0;
+        local refreshCallback = coroutine_create(function()
+            for i = 1, #frames do
+                processCount = processCount + 1;
+                local child = frames[i]
+                local childCount = #content.children;
+                if childCount == 0 then
+                    child:SetPoint("TOPLEFT", 0, 0)
+                    child:SetPoint("TOPRIGHT", 0, 0)
+                else
+                    local previous_frame = content.children[i - 1]
+                    child:SetPoint("TOPLEFT", previous_frame, "BOTTOMLEFT", 0, 0)
+                    child:SetPoint("TOPRIGHT", previous_frame, "BOTTOMRIGHT", 0, 0)
+                end
+                child:Show()
+                children_height = children_height + child:GetHeight()
+                tinsert(content.children, child)
+                if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                    coroutine_yield()
+                end
             end
-            child:Show()
-            children_height = children_height + child:GetHeight()
-            tinsert(content.children, child)
-        end
-        
-        sc:SetHeight(sc:GetHeight() + children_height)
-        content:Show();
+        end)
+
+        self.simpleAddFrame:SetScript("OnUpdate", function()
+            local ongoing = coroutine_resume(refreshCallback);
+            if not ongoing then
+                self.simpleAddFrame:SetScript("OnUpdate", nil);
+                sc:SetHeight(sc:GetHeight() + children_height)
+                content:Show();
+            end
+        end)
     end
 
     sc:SetScript("OnSizeChanged", function(_, value)
