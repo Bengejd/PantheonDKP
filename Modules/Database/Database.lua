@@ -115,7 +115,7 @@ function DB:CheckForDKPMigrations()
     local global = self:Global();
 
     if global['migratedDKP'] == nil then
-        PDKP:PrintD("FixingDKP");
+       -- PDKP:PrintD("FixingDKP");
         global['migratedDKP'] = true
         MODULES.CommsManager:FixDKPDB();
     end

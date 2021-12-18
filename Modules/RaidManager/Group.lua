@@ -190,7 +190,7 @@ function Group:_HandleEvent(event, arg1, ...)
     end
 
     if event == 'BOSS_KILL' and PDKP.canEdit then
-        PDKP:PrintD('BOSS KILL DETECTED', event, arg1, ...)
+        --PDKP:PrintD('BOSS KILL DETECTED', event, arg1, ...)
 
         local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
         local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
@@ -329,7 +329,7 @@ function Group:SetDKPOfficer(data)
 end
 
 function Group:RequestDKPOfficer()
-    PDKP:PrintD('Requesting DKP officer');
+    --PDKP:PrintD('Requesting DKP officer');
     if self.requestedDKPOfficer or self:HasDKPOfficer() then
         return
     end
@@ -360,7 +360,7 @@ end
 
 function Group:IsInInstance()
     local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
-    PDKP:PrintD("IsInInstance type:", type)
+    --PDKP:PrintD("IsInInstance type:", type)
     return type ~= "none" and type ~= nil
 end
 

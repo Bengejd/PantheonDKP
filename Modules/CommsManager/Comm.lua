@@ -54,7 +54,7 @@ function Comm:new(opts)
         end
         self:RegisterComm()
     else
-        PDKP:PrintD('Comm is not valid', self.ogPrefix)
+        --PDKP:PrintD('Comm is not valid', self.ogPrefix)
     end
 
     return self
@@ -82,7 +82,7 @@ function Comm:VerifyCommSender(message, sender)
 
     if not self.allowed_in_combat and not self.open then
         if #self.cache == 0 then
-            PDKP:PrintD("Message received, waiting for combat to drop to process it.")
+            --PDKP:PrintD("Message received, waiting for combat to drop to process it.")
         end
 
         tinsert(self.cache, { ['message'] = message, ['sender'] = sender })
@@ -199,7 +199,7 @@ function Comm:_InitializeCache()
 end
 
 function Comm:_ProcessCache(frameCache)
-    PDKP:PrintD('Processing', #self.cache, 'cached messages')
+    --PDKP:PrintD('Processing', #self.cache, 'cached messages')
 
     for i = #self.cache, 1, -1 do
         local transmission = self.cache[i]
@@ -221,9 +221,9 @@ function PDKP_Comms_OnEvent(eventsFrame, event, _, ...)
     elseif event == 'PLAYER_REGEN_ENABLED' then
         comm.open = true
         if #comm.cache > 0 then
-            PDKP:PrintD("Start Cached message', #comm.cache")
+            --PDKP:PrintD("Start Cached message', #comm.cache")
             comm:_ProcessCache(comm.cache)
-            PDKP:PrintD('End Cached message', #comm.cache)
+            --PDKP:PrintD('End Cached message', #comm.cache)
         end
     end
 end
@@ -234,7 +234,7 @@ function PDKP_OnComm_SetDKPOfficer(_, message, _)
 end
 
 function PDKP_OnComm_GetDKPOfficer(_, message, sender)
-    PDKP:PrintD(sender, "RequestingDKP Officer")
+    --PDKP:PrintD(sender, "RequestingDKP Officer")
 
     local data = CommsManager:DataDecoder(message)
     if data == 'request' and PDKP.canEdit and GroupManager:HasDKPOfficer() then
@@ -247,7 +247,7 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
     local pfx = self.ogPrefix
     if pfx == Utils:GetMyName() then
         local options = MODULES.Options
-        PDKP:PrintD("Processing Sync Request from:", sender)
+        --PDKP:PrintD("Processing Sync Request from:", sender)
         local shouldContinue = true
 
         self.timeSinceLastRequest = options:GetLastSyncSent()
@@ -258,7 +258,7 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
             local timeSinceSync = Utils:SubtractTime(self.timeSinceLastRequest, server_time)
             if timeSinceSync <= Utils:GetSecondsInFiveMinutes() then
                 shouldContinue = false;
-                PDKP:PrintD("TimeSinceSync", timeSinceSync);
+                --PDKP:PrintD("TimeSinceSync", timeSinceSync);
             end
         end
 
@@ -266,7 +266,7 @@ function PDKP_OnComm_OfficerSync(comm, message, sender)
             shouldContinue = false;
         end
 
-        PDKP:PrintD("Should Continue:", shouldContinue)
+        --PDKP:PrintD("Should Continue:", shouldContinue)
 
         if shouldContinue == true then
             options:SetLastSyncSent()
@@ -389,7 +389,7 @@ function PDKP_SyncLockout(_, sent, total)
     local DKP = DKPManager
     local percentage = floor( (sent / total) * 100)
 
-    PDKP:PrintD("Sync Percentage: ", percentage);
+    --PDKP:PrintD("Sync Percentage: ", percentage);
 
     if percentage < 100 then
         DKP.autoSyncInProgress = true

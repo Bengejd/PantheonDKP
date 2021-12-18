@@ -118,7 +118,7 @@ end
 
 function Member:UpdateSnapshot(previousTotal)
     if previousTotal == nil then
-        PDKP:PrintD(self.name, "PreviousTotal was nil still");
+        --PDKP:PrintD(self.name, "PreviousTotal was nil still");
         return;
     end;
 
@@ -254,7 +254,7 @@ function Member:IsSyncReady()
         else
             local timeSinceSync = Utils:SubtractTime(lastSync, server_time)
 
-            PDKP:PrintD("timeSinceSync", self.name, timeSinceSync);
+            --PDKP:PrintD("timeSinceSync", self.name, timeSinceSync);
 
             return timeSinceSync > Utils:GetSecondsInDay()
         end

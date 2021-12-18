@@ -27,7 +27,7 @@ function PDKP_OnCommsReceived(prefix, message, _, sender)
     if channel then
         return channel:VerifyCommSender(message, sender)
     else
-        PDKP:PrintD("Could not find comm channel", prefix)
+        --PDKP:PrintD("Could not find comm channel", prefix)
     end
 end
 
@@ -126,7 +126,7 @@ function Comms:RegisterOfficerAdComms()
             comm:HandleOfficerCommStatus(member, myName, syncStatus)
 
             if comm.registered and name ~= myName then
-                PDKP:PrintD("Sending Officer Comms message", member.name)
+                --PDKP:PrintD("Sending Officer Comms message", member.name)
                 self:SendCommsMessage(name, self.autoSyncData, true);
             end
         end
@@ -162,10 +162,10 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         end
         return PDKP.CORE:SendCommMessage(comm.prefix, transmitData, unpack(params))
     else
-        PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
+        --PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
     end
 
-    PDKP:PrintD('Could not complete comm request ', prefix)
+    --PDKP:PrintD('Could not complete comm request ', prefix)
 end
 
 -----------------------------
@@ -236,7 +236,7 @@ function Comms:ChunkedEncoder(data)
 
     local processing = CreateFrame("Frame");
     processing:SetScript("OnUpdate", function()
-        PDKP:PrintD('Compression Progress', total / bytes);
+        --PDKP:PrintD('Compression Progress', total / bytes);
         local ongoing, compressed_data;
 
         if type(Wow_compress_co) ~= "string" then
@@ -250,7 +250,7 @@ function Comms:ChunkedEncoder(data)
 
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
-            PDKP:PrintD("Chunked Encoding Finished")
+            --PDKP:PrintD("Chunked Encoding Finished")
             local encoded = self:_Encode(compressed_data);
             return encoded;
         end
@@ -286,7 +286,7 @@ function Comms:ChunkedDecoder(data, sender)
         MODULES.DKPManager:UpdateSyncProgress(sender, '1/4', total, bytes);
         if not ongoing then
             processing:SetScript('OnUpdate', nil)
-            PDKP:PrintD("Chunk Processing finished", sender);
+            --PDKP:PrintD("Chunk Processing finished", sender);
             local deserialized = self:_Deserialize(WoW_decompressed)
             return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
         end

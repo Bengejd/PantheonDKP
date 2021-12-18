@@ -66,7 +66,7 @@ end
 
 function GuildManager:GetMembers()
     if not self:AllowMemberUpdate() then
-        PDKP:PrintD("Stopping Member Update Request");
+        --PDKP:PrintD("Stopping Member Update Request");
         return self.online, self.members
     end;
 

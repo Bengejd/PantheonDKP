@@ -69,13 +69,13 @@ end
 function Ledger:CheckRequestKeys(message, sender)
     local isOfficer = Guild:IsMemberOfficer(sender)
     if self.syncLocked and not isOfficer then
-        PDKP:PrintD('Sync is locked, returning')
+        --PDKP:PrintD('Sync is locked, returning')
         return
     end
     if not isOfficer then
         self.syncLocked = true
         self:_StartSyncUnlockTimer()
-        PDKP:PrintD('Locking sync responses for 3 minutes')
+        --PDKP:PrintD('Locking sync responses for 3 minutes')
     end
     local requestData = CommsManager:DataDecoder(message)
 
@@ -127,8 +127,8 @@ function Ledger:CheckRequestKeys(message, sender)
         missing_keys = self:GetLastFourWeekEntryIds()
     end
 
-    PDKP:PrintD('requestHasKeys', requestHasKeys)
-    PDKP:PrintD('missing_keys Empty', Utils:tEmpty(missing_keys))
+    --PDKP:PrintD('requestHasKeys', requestHasKeys)
+    --PDKP:PrintD('missing_keys Empty', Utils:tEmpty(missing_keys))
 
     local entries = {}
     for _, entry_id in pairs(missing_keys) do
@@ -138,12 +138,12 @@ function Ledger:CheckRequestKeys(message, sender)
             local save_details = entry:GetSaveDetails()
             entries[entry_id] = save_details
         else
-            PDKP:PrintD('Could not find entry', entry_id)
+            --PDKP:PrintD('Could not find entry', entry_id)
         end
     end
 
     if Utils:tEmpty(entries) then
-        PDKP:PrintD('Entries were empty, returning')
+        --PDKP:PrintD('Entries were empty, returning')
         return
     end
     if PDKP.canEdit then
@@ -214,7 +214,7 @@ function Ledger:ImportEntry(entry)
 
     if tContains(LEDGER[weekNumber][officer], entry.id) then
         entryShouldBeImported = false
-        PDKP:PrintD("Entry already exists in ledger");
+        --PDKP:PrintD("Entry already exists in ledger");
     else
         table.insert(LEDGER[weekNumber][officer], entry.id)
         table.sort(LEDGER[weekNumber][officer], function(a, b)

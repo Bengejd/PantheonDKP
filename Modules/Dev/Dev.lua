@@ -32,7 +32,7 @@ function Dev:ToggleSetting(settingName, val)
         self.db[settingName] = val
         PDKP[settingName] = val;
     else
-        PDKP:PrintD("ToggleSetting: Could not find settingName for ", settingName)
+        --PDKP:PrintD("ToggleSetting: Could not find settingName for ", settingName)
     end
 end
 
@@ -63,7 +63,7 @@ function Dev:HandleSlashCommands(msg)
         if self.frameRateTimer ~= nil then
             self.frameRateTimer:Cancel()
             self.frameRateTimer = nil
-            PDKP:PrintD("Canceling Framerate Watcher");
+            --PDKP:PrintD("Canceling Framerate Watcher");
             return
         end
         PDKP:PrintD("Starting Framerate Watcher");

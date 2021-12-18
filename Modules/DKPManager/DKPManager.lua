@@ -116,7 +116,7 @@ function DKP:_LoadEncodedDatabase()
         self.numOfEncoded = self.numOfEncoded + 1
     end
 
-    PDKP:PrintD('Loaded', self.numOfEncoded, 'Encoded entries')
+    --PDKP:PrintD('Loaded', self.numOfEncoded, 'Encoded entries')
 end
 
 function DKP:LoadPrevFourWeeks()
@@ -198,7 +198,7 @@ function DKP:PrepareAdRequest()
             if not tContains(phaseDB, index) then
                 entries[index] = entry;
             else
-                PDKP:PrintD("Skipping that bad import, boss");
+                --PDKP:PrintD("Skipping that bad import, boss");
             end
         end
     end
@@ -236,7 +236,7 @@ function DKP:ProcessOverwriteSync(message, sender)
 end
 
 function DKP:ProcessSquish(entry)
-    PDKP:PrintD("ProcessSquish Called");
+    --PDKP:PrintD("ProcessSquish Called");
 
     PDKP.CORE:Print("Processing DKP Entry Consolidation");
     local newer_entries = {}
@@ -255,7 +255,7 @@ function DKP:ProcessSquish(entry)
     self.consolidationEntry = nil;
 
     if olderEntryCounter >= 1 then
-        PDKP:PrintD("Overwriting dkp db after squish");
+        --PDKP:PrintD("Overwriting dkp db after squish");
         MODULES.Database:ProcessDBOverwrite('dkp', newer_entries)
 
         for _, encoded_entry in Utils:PairByKeys(newer_entries) do
@@ -302,7 +302,7 @@ function DKP:_FindAdlerDifference(importEntry, dbEntry)
         local dbVal = dbEntrySD[v];
         if type(v) ~= "table" then
             if importVal ~= dbVal then
-                PDKP:PrintD("Entry mismatch found, skipping import for safety reasons");
+                --PDKP:PrintD("Entry mismatch found, skipping import for safety reasons");
                 return false;
             end
         end
@@ -363,7 +363,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     if entryAdler == nil and type(entryDetails == "string") then
         entryAdler = importEntry.adler;
         if entryAdler == nil then
-            PDKP:PrintD("Could not find adler, returning");
+            --PDKP:PrintD("Could not find adler, returning");
             return nil
         end
     end
@@ -374,7 +374,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         if adlerMatches then
             return nil
         end
-        PDKP:PrintD("Entry Exists, but Adler does not match", importEntry.id);
+        --PDKP:PrintD("Entry Exists, but Adler does not match", importEntry.id);
 
         local dbEntry = DKP_Entry:new(DKP_DB[importEntry.id]);
         local shouldContinue = self:_FindAdlerDifference(importEntry, dbEntry);
@@ -391,7 +391,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
         -- There are no valid members, then do not import the entry
         if not Lockouts:VerifyMemberLockouts(importEntry) then
             self:_UpdateTables();
-            PDKP:PrintD("Entry does not have valid members for this boss lockout");
+            --PDKP:PrintD("Entry does not have valid members for this boss lockout");
             return nil
         end
     end
@@ -401,7 +401,7 @@ function DKP:ImportEntry2(entryDetails, entryAdler, importType)
     local entryMembers, _ = importEntry:GetMembers();
 
     if #entryMembers == 0 then
-        PDKP:PrintD('No members found for:', importEntry.reason, ' Skipping import')
+        --PDKP:PrintD('No members found for:', importEntry.reason, ' Skipping import')
         DKP:_UpdateTables()
         return nil
     end
@@ -485,10 +485,10 @@ function DKP:DeleteEntry(entry, sender, isImport)
 
     if self:GetEntryByID(entry.id) ~= nil then
         if importEntry['deleted'] and sender ~= importEntry['deletedBy'] then
-            PDKP:PrintD(entry['id'], "Entry has previously been deleted, skipping delete sequence")
+            --PDKP:PrintD(entry['id'], "Entry has previously been deleted, skipping delete sequence")
             return
         else
-            PDKP:PrintD("Entry was found during delete")
+            --PDKP:PrintD("Entry was found during delete")
             importEntry:MarkAsDeleted(sender)
             Lockouts:DeleteMemberFromLockout(entry)
             local import_sd = importEntry:GetSaveDetails()
@@ -497,7 +497,7 @@ function DKP:DeleteEntry(entry, sender, isImport)
         end
     else
         if entry.reason ~= "Decay" and entry.reason ~= "Phase" then
-            PDKP:PrintD(entry['id'], "Entry was not found during delete, importing it first...");
+            --PDKP:PrintD(entry['id'], "Entry was not found during delete, importing it first...");
             local encoded_entry = CommsManager:DatabaseEncoder(entry);
             self:ImportEntry2(entry, CommsManager:_Adler(encoded_entry), 'Large');
             return self:DeleteEntry(entry, sender, true);
@@ -507,7 +507,7 @@ function DKP:DeleteEntry(entry, sender, isImport)
     end
 
     if PDKP.canEdit and sender == Utils:GetMyName() then
-        PDKP:PrintD("Saving corrected Entry");
+        --PDKP:PrintD("Saving corrected Entry");
         local corrected_entry = MODULES.DKPEntry:new(temp_entry)
         corrected_entry:Save(true)
     end
@@ -556,7 +556,7 @@ function DKP:ImportBulkEntries(message, sender, decoded)
             local entryAdler = CommsManager:_Adler(encoded_entry)
             local importEntry = self:ImportEntry2(encoded_entry, entryAdler, 'Large');
             if importEntry ~= nil and ((importEntry.reason == "Phase" and importEntry.isNewPhaseEntry) or importEntry.reason == 'Consolidation') then
-                PDKP:PrintD("New Phase Entry Found", importEntry.id);
+                --PDKP:PrintD("New Phase Entry Found", importEntry.id);
                 self.syncStatuses[sender] = nil;
                 self:AddToCache({ ['total'] = total, ['entries'] = Utils:DeepCopy(entries) }, sender, true);
                 self.consolidationEntry = importEntry;
@@ -602,7 +602,7 @@ function DKP:RecalibrateDKP()
 
     self.calibrationPending = false;
 
-    PDKP:PrintD("Recalibrating DKP");
+    --PDKP:PrintD("Recalibrating DKP");
 
     local members = MODULES.GuildManager.members
     for _, member in pairs(members) do
@@ -747,7 +747,7 @@ function DKP:RollForwardEntries()
 end
 
 function DKP:ProcessCache()
-    PDKP:PrintD("Processing Cache: ", #self.syncCache)
+    --PDKP:PrintD("Processing Cache: ", #self.syncCache)
     if #self.syncCache > 0 then
         local d = self.syncCache[1];
         self:ImportBulkEntries(d['message'], d['sender'], d['decoded'])
@@ -770,7 +770,7 @@ function DKP:AddToCache(message, sender, decoded)
 
         table.insert(self.syncCache, { ['message'] = message, ['sender'] = sender, ['decoded'] = decoded });
     else
-        PDKP:PrintD("Skipping cache for", sender);
+        --PDKP:PrintD("Skipping cache for", sender);
     end
 end
 
@@ -823,7 +823,7 @@ function DKP:_ProcessEntryBatch(batch, sender)
             end
 
             if shouldContinue then
-                PDKP:PrintD("ProcessEntryBatch", encoded_entry)
+                --PDKP:PrintD("ProcessEntryBatch", encoded_entry)
                 local entry = CommsManager:DatabaseDecoder(encoded_entry)
 
                 if entry['deleted'] then
@@ -833,7 +833,7 @@ function DKP:_ProcessEntryBatch(batch, sender)
                 end
             end
         else
-            PDKP:PrintD("Encoded entry was nil", key);
+            --PDKP:PrintD("Encoded entry was nil", key);
         end
     end
     return true;
@@ -849,13 +849,13 @@ function DKP:_UpdateTables()
         if tbl ~= nil and tbl._initialized then
             if not pdkp_frame:IsVisible() then
                 tbl.refreshPending = true;
-                PDKP:PrintD("Display Update queued for table", name);
+                --PDKP:PrintD("Display Update queued for table", name);
             else
                 if tbl['LagglessUpdate'] ~= nil then
-                    PDKP:PrintD("Processing laggless update for", name);
+                    --PDKP:PrintD("Processing laggless update for", name);
                     tbl:LagglessUpdate(true);
                 else
-                    PDKP:PrintD("Refreshing data for", name);
+                    --PDKP:PrintD("Refreshing data for", name);
                     tbl:RefreshData();
                 end
             end
@@ -1075,7 +1075,7 @@ function DKP:GetTheoreticalCap()
 end
 
 function DKP:CheckForNegatives()
-    PDKP:PrintD("Checking for Negatives");
+    --PDKP:PrintD("Checking for Negatives");
     local shouldCalibrate = MODULES.GuildManager:CheckForNegatives()
     if shouldCalibrate then
         self:RecalibrateDKP();

@@ -77,7 +77,7 @@ function Chat:Initialize()
 end
 
 function Chat:HandleChatEvent(author)
-    PDKP:PrintD("Handling Chat Event from", author);
+    --PDKP:PrintD("Handling Chat Event from", author);
     for index, message in pairs(chatCache[author]["messages"]) do
         if message['type'] == 'Invite' then
             Chat:_HandleInviteMsg(author);

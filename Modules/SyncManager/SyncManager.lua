@@ -47,7 +47,7 @@ end
 function Sync:GetSyncData(type)
     local syncData = {};
     if type == 'Overwrite' then
-        PDKP:PrintD("Preparing Overwrite data");
+        --PDKP:PrintD("Preparing Overwrite data");
         syncData = MODULES.DKPManager:PrepareOverwriteExport();
     elseif type == 'Merge' then
         local DKP = MODULES.DKPManager
