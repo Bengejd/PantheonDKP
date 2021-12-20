@@ -197,7 +197,7 @@ function Options:SetupLDB()
                         },
                         desc = "The amount of items you want to visually update in one frame update.",
                         get = function(info)
-                            return self.db['sync']['displayProcessingChunkSize'] or 2
+                            return self.db['sync']['displayProcessingChunkSize'] or 16
                         end,
                         set = function(info, val)
                             self.db['sync']['displayProcessingChunkSize'] = val
@@ -418,7 +418,7 @@ function Options:_InitializeDBDefaults()
         ['decompressChunkSize'] = { ['default'] = 4, },
         ['autoBackup'] = { ['default'] = true },
         ['syncInCombat'] = { ['default'] = false, },
-        ['displayProcessingChunkSize'] = { ['default'] = 4 }
+        ['displayProcessingChunkSize'] = { ['default'] = 16 }
     }
 
     for key, obj in pairs(syncTableKeys) do
@@ -468,7 +468,7 @@ function Options:processingChunkSize()
 end
 
 function Options:displayProcessingChunkSize()
-    return self.db['sync']['displayProcessingChunkSize'] or 4;
+    return self.db['sync']['displayProcessingChunkSize'] or 16;
 end
 
 function Options:decompressChunkSize()

@@ -247,7 +247,7 @@ function MemberTable:Filters()
         { -- Row 1
             { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -20, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'In Raid', ['filterOn'] = 'raid', ['enabled'] = false },
-            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Pug', ['filterOn'] = 'isPug', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Selected', ['filterOn'] = 'selected', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Select All', ['filterOn'] = 'Select_All', ['enabled'] = false },
         },
         { -- Row 2

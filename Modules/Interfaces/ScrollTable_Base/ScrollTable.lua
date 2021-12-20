@@ -20,7 +20,7 @@ local coroutine_create = coroutine.create
 local coroutine_resume = coroutine.resume
 local coroutine_yield = coroutine.yield
 
-local maxProcessCount = 5;
+local maxProcessCount = 16;
 
 local IsControlKeyDown, IsShiftKeyDown = IsControlKeyDown, IsShiftKeyDown
 local HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar = HybridScrollFrame_Update, HybridScrollFrame_GetOffset, HybridScrollFrame_SetDoNotHideScrollBar
@@ -201,41 +201,36 @@ function ScrollTable:SelectNames(names)
             end
         end
     end
+    _G['pdkp_filter_selected']:SetChecked(true);
+    self:ApplyFilter('selected', true);
     self:RefreshLayout()
 end
 
 ----- REFRESH FUNCTIONS -----
 
-function ScrollTable:LagglessUpdate(isRefresh)
-    isRefresh = isRefresh or false;
-
-    if isRefresh then
-        --PDKP:PrintD("Processing Laggless update for member table");
-    end
-
+function ScrollTable:LagglessUpdate()
     self.refreshPending = false;
 
-    local dataToIterate = self.displayData
+    self.data = self.retrieveDataFunc();
+    wipe(self.displayData);
+    self.displayData = {};
 
-    if isRefresh then
-        self.data = self.retrieveDataFunc();
-        self.displayData = {};
-        dataToIterate = self.data;
-    end
-
-    local processCount = 0;
+    local dataToIterate = { self.data, self.displayData }
 
     local refreshCallback = coroutine_create(function()
-        for i = 1, #dataToIterate do
-            processCount = processCount + 1;
-            if isRefresh then
-                self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
-            else
-                self.rows[i]:UpdateRowValues();
-            end
+        for index, dataObj in pairs(dataToIterate) do
+            local processCount = 0;
+            for i=1, #dataObj do
+                processCount = processCount + 1;
+                if index == 1 then
+                    self.displayData[i] = self:retrieveDisplayDataFunc(self.data[i]);
+                elseif index == 2 then
+                    self.rows[i]:UpdateRowValues();
+                end
 
-            if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
-                coroutine_yield()
+                if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
+                    coroutine_yield()
+                end
             end
         end
     end)
@@ -244,25 +239,23 @@ function ScrollTable:LagglessUpdate(isRefresh)
         local ongoing = coroutine_resume(refreshCallback);
         if not ongoing then
             self.RefreshDataFrame:SetScript("OnUpdate", nil);
-            if not isRefresh then
-                if self.sortCol then
-                    -- resort the column
-                    self.sortCol:Click()
-                    self.sortCol:Click()
-                end
-                self:ApplyFilter('Select_All', false)
+            if self.sortCol then
+                -- resort the column
+                self.sortCol:Click()
+                self.sortCol:Click()
             end
+            self:ApplyFilter('Select_All', false)
         end
     end)
 end
 
 -- Refreshes the data that we are utilizing.
 function ScrollTable:RefreshData()
-    self:LagglessUpdate(true)
+    self:LagglessUpdate()
 end
 
 function ScrollTable:DataChanged()
-    self:LagglessUpdate(false)
+    self:LagglessUpdate()
 end
 
 function ScrollTable:GetDisplayRows()
@@ -365,8 +358,6 @@ end
 ----- FILTER FUNCTIONS -----
 
 function ScrollTable:ApplyFilter(filterOn, checkedStatus)
-    --Utils:WatchVar(self.appliedFilters, 'PDKP_Table_Filters')
-
     if filterOn == 'Class_All' then
         -- Reset all class filters if this gets checked.
         for _, class in pairs(MODULES.Constants.CLASSES) do
@@ -436,9 +427,7 @@ function ScrollTable:newHybrid(table_settings, col_settings, row_settings)
         ['rel_point_y'] = 0
     }
 
-    maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 4;
-
-    --PDKP:PrintD("Max Processing Speed: ", maxProcessCount);
+    maxProcessCount = MODULES.Options:displayProcessingChunkSize() or 16;
 
     self.RefreshDataFrame = CreateFrame("Frame");
     self.DataChangedFrame = CreateFrame("Frame");

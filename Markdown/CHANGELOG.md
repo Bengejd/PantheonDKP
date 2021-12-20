@@ -1,5 +1,16 @@
 # PDKP Change Log
 
+## v4.7.7
+### Features
+- Options tab now closes PDKP and opens the interface options properly.
+- Added in Selected filter for the member table.
+- Removed PUG filter.
+- Removed lockouts tab.
+
+### Bug Fixes
+- Implemented a patch for the crashing bug that happened on certain hardware
+- Changed some internal code defaults with Display Update interface option.
+
 ## v4.7.5
 ### Features
 - Added in interface option to control how fast PDKP updates the display.

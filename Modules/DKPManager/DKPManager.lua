@@ -841,21 +841,19 @@ end
 
 function DKP:_UpdateTables()
     local tables = {
+        ['member'] = PDKP.memberTable,
         ['history'] = GUI.HistoryGUI,
         ['loot'] = GUI.LootGUI,
-        ['member'] = PDKP.memberTable,
     }
-    for name, tbl in pairs(tables) do
+    for tblName, tbl in pairs(tables) do
         if tbl ~= nil and tbl._initialized then
-            if not pdkp_frame:IsVisible() then
+            if not pdkp_frame:IsVisible() or not tbl.frame:IsVisible() then
                 tbl.refreshPending = true;
-                --PDKP:PrintD("Display Update queued for table", name);
+                PDKP:PrintD("Update queued for ", tblName)
             else
                 if tbl['LagglessUpdate'] ~= nil then
-                    --PDKP:PrintD("Processing laggless update for", name);
-                    tbl:LagglessUpdate(true);
+                    tbl:LagglessUpdate();
                 else
-                    --PDKP:PrintD("Refreshing data for", name);
                     tbl:RefreshData();
                 end
             end
