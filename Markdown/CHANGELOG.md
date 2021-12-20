@@ -10,6 +10,7 @@
 ### Bug Fixes
 - Implemented a patch for the crashing bug that happened on certain hardware
 - Changed some internal code defaults with Display Update interface option.
+- Fixed some lag when selecting everyone in the guild.
 
 ## v4.7.5
 ### Features
