@@ -303,6 +303,11 @@ function Utils:RemoveNonAlphaNumerics(str)
     return str:gsub("[^a-zA-Z]", "")
 end
 
+function Utils:RemoveColors(str)
+    local initial = str:gsub("([\|a-z]{10})", "");
+    return initial:gsub("([|]+[r])", "");
+end
+
 function Utils:GetMyName()
     return UnitName("PLAYER")
 end

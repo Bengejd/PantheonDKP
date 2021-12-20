@@ -163,7 +163,6 @@ function Adjust:_CreateEntryPreview(tf)
     f:SetSize(340, 250);
 
     local PREVIEW_HEADERS = { 'Officer', 'Reason', 'Amount', 'Members' }
-
     local padding = 20
 
     for i = 1, #PREVIEW_HEADERS do
@@ -174,7 +173,28 @@ function Adjust:_CreateEntryPreview(tf)
             if value == nil or value == '' then
                 return label:resetVal()
             end
-            label:SetText(head .. ': ' .. value)
+
+            local combinedText = head .. ': ' .. value;
+            local maxLines = label:GetMaxLines();
+
+            -- Helps prevent lag when selecting everyone in the guild. Due to only around 50 people being displayed anyway.
+            if (head == 'Members') then
+
+                local combinedWidth = string.len(combinedText)
+                local labelWidth = label:GetWidth();
+
+                if (maxLines > 2) then
+                    labelWidth = labelWidth * maxLines -2;
+                end
+
+                if (combinedWidth > labelWidth) then
+                    local oneThird = math.ceil(string.len(combinedText)/3);
+                    combinedText = string.sub(combinedText, 0, oneThird);
+                end
+
+                return label:SetText(combinedText)
+            end
+            label:SetText(combinedText)
         end
         label.resetVal = function()
             label:SetText(head .. ': ' .. 'None')
