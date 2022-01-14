@@ -242,7 +242,7 @@ function Utils:FormatTextColor(text, color_hex)
         return text
     end
     if not color_hex then
-        PDKP:Print("No Default Color given")
+        PDKP:PrintD("No Default Color given")
         color_hex = 'ff0000'
     end
     return "|cff" .. color_hex .. text .. "|r"

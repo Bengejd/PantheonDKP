@@ -18,7 +18,7 @@ function MemberTable:Initialize()
         local sortDir = st.sortDir;
         local sortBy = st.sortBy;
         -- Set the data object explicitly here
-        -- Since this is pointing to a row
+        -- Since this is pointing to a row object originally.
         -- Not a member object.
         a = a.dataObj;
         b = b.dataObj;

@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.7.8
+### Bug Fixes
+- Forgot to give them the D in PrintD...
+
 ## v4.7.7
 ### Features
 - Options tab now closes PDKP and opens the interface options properly.
