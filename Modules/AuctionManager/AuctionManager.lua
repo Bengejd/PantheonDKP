@@ -22,7 +22,10 @@ local function HandleModifiedTooltipClick()
         local _, itemLink = GameTooltip:GetItem()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
-            local commsData = { iLink, iName, iTexture }
+
+            local isTier, classTier = self:IsTierGear(iName);
+
+            local commsData = { iLink, iName, iTexture, isTier, classTier }
             MODULES.CommsManager:SendCommsMessage('StartBids', commsData)
         end
     elseif Auction:IsAuctionInProgress() then
@@ -89,58 +92,10 @@ function Auction:HookIntoLootBag()
     end
 end
 
-function Auction:IsTierGear()
-    --[Chestguard of the Fallen Champion]
-    -- Fallen Defender
-    -- Fallen Hero
-    -- [Pauldrons of the Fallen Champion]
-    -- [Leggings of the Fallen Champion]
-    -- [Gloves of the Vanquished Champion]
-    -- Defender
-    -- Hero
-    -- [Leggings of the Vanquished Champion]
-    -- [Helm of the Vanquished Champion]
-    -- [Pauldrons of the Vanquished Champion]
-    -- [Chestguard of the Vanquished Champion]
-
-    -- [Gloves of the Forgotten Conqueror]
-    -- [Gloves of the Forgotten Protector]
-    -- [Gloves of the Forgotten Vanquisher]
-    --[Helm of the Forgotten Conqueror]
-    -- [Pauldrons of the Forgotten Conqueror]
-    -- [Leggings of the Forgotten Conqueror]
-    -- [Chestguard of the Forgotten Conqueror]
-
-    -- [Bracers of the Forgotten Conqueror]
-    -- [Belt of the Forgotten Conqueror]
-    -- [Boots of the Forgotten Conqueror]
-
-    --local items = { 34851, 29754, 40, 28774, 34334 }
-    --
-    --for _, itemID in pairs(items) do
-    --    GetItemInfoInstant(itemID);
-    --
-    --    local itemName, _, itemQuality, _, itemMinLevel, itemType, itemSubType, itemStackCount,
-    --    itemEquipLoc, itemTexture, sellPrice, classID, subclassID, _, _, _, _
-    --    = GetItemInfo(itemID)
-    --
-    --    -- minLevel 70, type Miscellaneous, subType Junk, equipLoc string.len(itemEquipLoc) == 0,
-    --    -- classID 15, subClassID 0 (Check to see if consumes are considered this as well), sellPrice 50000.
-    --
-    --    -- Also have to check to see if there are multiple of the same token that has dropped.
-    --
-    --    print('Name', itemName, 'quality', itemQuality, 'minLevel', itemMinLevel, 'type', itemType, 'subType', itemSubType,
-    --            'stackCount', itemStackCount, 'equipLoc', itemEquipLoc, 'texture', itemTexture, 'sellPrice', sellPrice, 'classId', classID, 'subClassId', subclassID,);
-    --
-    --    print(string.len(itemEquipLoc) == 0);
-    --end
-
-
-
-
-    --print(itemName, itemLink, itemQuality, itemLevel, itemType, itemSubType, classID, subclassID, bindType, setID);
-    --
-    --print(self.CurrentAuctionInfo['itemName'], self.CurrentAuctionInfo['itemLink']);
+function Auction:IsTierGear(iName)
+    local isTier = MODULES.Constants.TIER_GEAR[iName] ~= nil;
+    local classTier = MODULES.Constants.TIER_GEAR[iName] or {};
+    return isTier, classTier;
 end
 
 function Auction:EndAuction(manualStop, sender)
@@ -206,8 +161,6 @@ function Auction:HandleTimerFinished(manualEnd)
 end
 
 function Auction:_GetWinnerInfo(itemLink)
-    --self:IsTierGear();
-
     table.sort(self.CURRENT_BIDDERS, function(a, b)
         return a['bid'] > b['bid']
     end)

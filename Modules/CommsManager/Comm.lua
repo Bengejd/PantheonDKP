@@ -320,7 +320,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     local AuctionGUI = GUI.AuctionGUI
 
     if self.ogPrefix == 'StartBids' then
-        local itemLink, itemName, iTexture = unpack(data)
+        local itemLink, itemName, iTexture, isTier, classTier = unpack(data)
         Auction.auctionInProgress = true
         AuctionGUI:StartAuction(itemLink, itemName, iTexture, sender)
         PDKP.AuctionTimer.startTimer()
@@ -333,7 +333,22 @@ function PDKP_OnComm_BidSync(comm, message, sender)
             if GroupManager:IsAssist() or GroupManager:IsLeader() then
                 channel = "RAID_WARNING"
             end
-            local text = string.format("Starting bids for %s", itemLink)
+
+            local text = '';
+
+            if isTier then
+                local classSpecific = '';
+                for i, class in pairs(classTier) do
+                    classSpecific = classSpecific .. class
+                    if i ~= #classTier then
+                        classSpecific = classSpecific .. ', ';
+                    end
+                end
+                text = string.format("Starting bids for %s (%s)", itemLink, classSpecific);
+            else
+                text = string.format("Starting bids for %s", itemLink)
+            end
+
             SendChatMessage(text, channel, nil, nil)
         end
 
