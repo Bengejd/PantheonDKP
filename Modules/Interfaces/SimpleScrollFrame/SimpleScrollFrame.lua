@@ -2,13 +2,7 @@ local _, PDKP = ...
 
 PDKP.SimpleScrollFrame = {}
 
-local MODULES = PDKP.MODULES;
-
 local SimpleScrollFrame = PDKP.SimpleScrollFrame;
-
-local coroutine_create = coroutine.create
-local coroutine_resume = coroutine.resume
-local coroutine_yield = coroutine.yield
 
 SimpleScrollFrame.__index = SimpleScrollFrame; -- Set the __index parameter to reference
 

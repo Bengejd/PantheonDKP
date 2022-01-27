@@ -13,10 +13,6 @@ local CreateFrame = CreateFrame
 local _, _, _, _, _, _ = type, math.floor, strupper, math.pi, string.match, string.gsub
 local tinsert, _ = tinsert, tremove
 
-local coroutine_create = coroutine.create
-local coroutine_resume = coroutine.resume
-local coroutine_yield = coroutine.yield
-
 local tabName = 'view_loot_button';
 
 local EXPAND_ALL, COLLAPSE_ALL

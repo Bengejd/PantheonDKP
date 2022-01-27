@@ -304,7 +304,7 @@ function Utils:RemoveNonAlphaNumerics(str)
 end
 
 function Utils:RemoveColors(str)
-    local initial = str:gsub("([\|a-z]{10})", "");
+    local initial = str:gsub("([\\|a-z]{10})", "");
     return initial:gsub("([|]+[r])", "");
 end
 
