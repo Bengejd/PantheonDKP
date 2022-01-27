@@ -23,9 +23,9 @@ local function HandleModifiedTooltipClick()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
 
-            local isTier, classTier = self:IsTierGear(iName);
+            --local isTier, classTier = self:IsTierGear(iName);
 
-            local commsData = { iLink, iName, iTexture, isTier, classTier }
+            local commsData = { iLink, iName, iTexture }
             MODULES.CommsManager:SendCommsMessage('StartBids', commsData)
         end
     elseif Auction:IsAuctionInProgress() then
@@ -187,6 +187,20 @@ function Auction:_GetWinnerInfo(itemLink)
                 tinsert(winners, bidder)
             else
                 break
+            end
+        end
+
+        if numBidders > 0 then
+            local biddersText = string.format("[%s] BIDS: ", itemLink);
+            for i = 1, #self.CURRENT_BIDDERS do
+                local bidder = self.CURRENT_BIDDERS[i]
+                biddersText = biddersText .. string.format("%s - %d", bidder['name'], bidder['bid']);
+                if i ~= #self.CURRENT_BIDDERS then
+                    biddersText = biddersText .. ", "
+                end
+            end
+            if PDKP.canEdit then
+                SendChatMessage(biddersText, "OFFICER", nil, nil)
             end
         end
 
