@@ -1,5 +1,11 @@
 # PDKP Change Log
 
+## v4.8.0
+### Features
+- Version released for Phase 3
+- Completed auctions are now temporarily saved (until reload) for later reference if necessary. This only affects Officers.
+- Experimental: Announce Tier Token Classes when starting bids (Not turned on).
+
 ## v4.7.8
 ### Bug Fixes
 - Forgot to give them the D in PrintD...
