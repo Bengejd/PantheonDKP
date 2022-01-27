@@ -230,13 +230,11 @@ function Comms:ChunkedEncoder(data)
     local serialized = self:_Serialize(data);
     local chunkSize = 1024 * MODULES.Options:decompressChunkSize();
     local total = 0;
-    local bytes = ((string.len(serialized) + 17 ) * 10 * 10) * 2.3;
 
     local Wow_compress_co = PDKP.LibDeflate:CompressDeflate(serialized, {chunksMode=true, yieldOnChunkSize=chunkSize })
 
     local processing = CreateFrame("Frame");
     processing:SetScript("OnUpdate", function()
-        --PDKP:PrintD('Compression Progress', total / bytes);
         local ongoing, compressed_data;
 
         if type(Wow_compress_co) ~= "string" then

@@ -334,7 +334,7 @@ function PDKP_OnComm_BidSync(comm, message, sender)
                 channel = "RAID_WARNING"
             end
 
-            local text = '';
+            local text;
 
             if isTier then
                 local classSpecific = '';
