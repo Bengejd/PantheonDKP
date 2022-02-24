@@ -192,6 +192,8 @@ function SimpleScrollFrame:new(parent)
     end
 
     sc.WipeChildren = function(content)
+        if (content == nil) then return end
+
         content:Hide();
 
         self.childWipeInProgress = true;

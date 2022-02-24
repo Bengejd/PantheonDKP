@@ -1,5 +1,15 @@
 # PDKP Change Log
 
+## v4.9.1
+### Features
+- Experimental: Announce Tier Token Classes when starting bids on an item
+- Added setting to turn off Boss Kill Popup when you're the Master Looter (on by default).
+
+### Bug Fixes
+- Fixed "Ghost" bids from carrying over when starting a new auction.
+- Turned off Hydross death check function (no longer relevant).
+- Fixed a "Reinitialization" error when receiving a DKP overwrite.
+
 ## v4.8.0
 ### Features
 - Version released for Phase 3

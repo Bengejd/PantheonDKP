@@ -57,7 +57,7 @@ function Group:Initialize()
         dkpOfficer = nil,
         leader = nil,
     }
-    self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
+    --self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
     self.LoggingFrame = CreateFrame("Frame", nil, nil);
     self._initialized = true;
 
@@ -91,14 +91,14 @@ function Group:CanInvite(name)
 end
 
 function Group:Reinitialize()
-    for _, frame in pairs(self.eventFrame, self.HydrossEventFrame, self.loggingFrame) do
+    for _, frame in pairs(self.eventFrame, self.loggingFrame) do
         if frame ~= nil then
-            frame:SetScript("OnEvent", nil);
+            pcall(frame:SetScript("OnEvent", nil));
         end
     end
 
     self.eventFrame = nil;
-    self.HydrossEventFrame = nil;
+    --self.HydrossEventFrame = nil;
     self.LoggingFrame = nil;
 
     self:Initialize();
@@ -118,12 +118,12 @@ function Group:RegisterEvents()
         end
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
-    self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
-
-    self.HydrossEventFrame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED');
-    self.HydrossEventFrame:SetScript("OnEvent", function(...)
-        self:CheckForHydross(CombatLogGetCurrentEventInfo());
-    end)
+    --self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
+    --
+    --self.HydrossEventFrame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED');
+    --self.HydrossEventFrame:SetScript("OnEvent", function(...)
+    --    self:CheckForHydross(CombatLogGetCurrentEventInfo());
+    --end)
 
     self:WatchLogging();
 end

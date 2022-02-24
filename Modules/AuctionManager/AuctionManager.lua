@@ -22,9 +22,6 @@ local function HandleModifiedTooltipClick()
         local _, itemLink = GameTooltip:GetItem()
         if itemLink then
             local iLink, iName, iTexture = GetItemCommInfo(itemLink)
-
-            --local isTier, classTier = self:IsTierGear(iName);
-
             local commsData = { iLink, iName, iTexture }
             MODULES.CommsManager:SendCommsMessage('StartBids', commsData)
         end
@@ -96,6 +93,15 @@ function Auction:IsTierGear(iName)
     local isTier = MODULES.Constants.TIER_GEAR[iName] ~= nil;
     local classTier = MODULES.Constants.TIER_GEAR[iName] or {};
     return isTier, classTier;
+end
+
+function Auction:ResetBeforeStart()
+    wipe(self.CURRENT_BIDDERS);
+    local gui_bid_frame = GUI.AuctionGUI.current_bidders_frame;
+    local scrollContent = gui_bid_frame.scrollContent;
+    if (scrollContent ~= nil and scrollContent.con) then
+        scrollContent.WipeChildren();
+    end
 end
 
 function Auction:EndAuction(manualStop, sender)

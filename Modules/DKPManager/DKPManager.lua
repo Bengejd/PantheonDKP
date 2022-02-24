@@ -866,7 +866,7 @@ end
 -----------------------------
 
 function DKP:BossKillDetected(originalBossId, bossName)
-    if not PDKP.canEdit then
+    if not PDKP.canEdit or not MODULES.Options:GetBossKillPopup() then
         return
     end
     local bossId = originalBossId;

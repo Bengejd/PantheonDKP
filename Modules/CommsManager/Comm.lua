@@ -320,7 +320,8 @@ function PDKP_OnComm_BidSync(comm, message, sender)
     local AuctionGUI = GUI.AuctionGUI
 
     if self.ogPrefix == 'StartBids' then
-        local itemLink, itemName, iTexture, isTier, classTier = unpack(data)
+        Auction:ResetBeforeStart();
+        local itemLink, itemName, iTexture = unpack(data)
         Auction.auctionInProgress = true
         AuctionGUI:StartAuction(itemLink, itemName, iTexture, sender)
         PDKP.AuctionTimer.startTimer()
@@ -335,6 +336,8 @@ function PDKP_OnComm_BidSync(comm, message, sender)
             end
 
             local text;
+
+            local isTier, classTier = Auction:IsTierGear(itemName);
 
             if isTier then
                 local classSpecific = '';

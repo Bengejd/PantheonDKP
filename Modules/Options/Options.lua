@@ -54,11 +54,24 @@ function Options:SetupLDB()
                 width = 2.5,
                 order = 2,
             },
+            bossKillPopup = {
+                type = "toggle",
+                name = "Boss Kill Popup",
+                desc = "Shows the boss kill popup if you are DKP Officer / Master Looter",
+                get = function(info)
+                    return self.db['boss_kill_popup']
+                end,
+                set = function(info, val)
+                    self.db['boss_kill_popup'] = val
+                end,
+                width = 2.5,
+                order = 2,
+            },
             tab1 = {
                 type = "group",
                 name = "Syncing",
                 width = "full",
-                order = 3,
+                order = 4,
                 args = {
                     spacer1 = {
                         type = "description",
@@ -212,7 +225,7 @@ function Options:SetupLDB()
                 type = "group",
                 name = "Database",
                 width = "full",
-                order = 4,
+                order = 5,
                 args = {
                     spacer0Tab2 = {
                         type = "description",
@@ -402,6 +415,7 @@ function Options:_InitializeDBDefaults()
         ['minimap'] = { ['value'] = self.db['minimap'], ['default'] = { ['pos'] = 207, ['hide'] = false }, },
         ['sync'] = { ['value'] = self.db['sync'], ['default'] = {}, },
         ['ignore_pugs'] = { ['value'] = self.db['ignore_pugs'], ['default'] = true, },
+        ['boss_kill_popup'] = {['value'] = self.db['boss_kill_popup'], ['default'] = true},
         ['invite_commands'] = { ['value'] = self.db['invite_commands'], ['default'] = { 'inv', 'invite' }, },
     }
 
@@ -436,6 +450,10 @@ end
 
 function Options:GetLastSyncSent()
     return self.db['sync']['lastSyncSent']
+end
+
+function Options:GetBossKillPopup()
+    return self.db['boss_kill_popup'];
 end
 
 function Options:SetLastSyncSent()
