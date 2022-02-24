@@ -16,7 +16,6 @@ local strtrim, strsplit = strtrim, strsplit
 local wipe = wipe
 local C_Timer = C_Timer
 local LoggingCombat = LoggingCombat
-local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local select = select
 local tonumber = tonumber
 local setmetatable = setmetatable
@@ -153,12 +152,22 @@ function Group:WatchLogging()
     for _, event in pairs(combatLoggingEvents) do
         self.LoggingFrame:RegisterEvent(event);
     end
+
     self.LoggingFrame:SetScript("OnEvent", function(event, arg1, ...)
         self:_ToggleLogging();
     end)
 end
 
 function Group:_ToggleLogging()
+    local optionsLoggingVal = MODULES.Options:GetCombatLogging()
+
+    if optionsLoggingVal == nil then
+        return;
+    else if optionsLoggingVal == false then
+        self.LoggingFrame:SetScript("OnEvent", nil);
+        return;
+    end
+
     local prevState = self.combatLoggingEnabled and true;
     self.combatLoggingEnabled = LoggingCombat(self:_ShouldLoggingBeEnabled());
     if self.combatLoggingEnabled ~= prevState then
@@ -360,7 +369,6 @@ end
 
 function Group:IsInInstance()
     local _, type, _, _, _, _, _, _, _ = GetInstanceInfo()
-    --PDKP:PrintD("IsInInstance type:", type)
     return type ~= "none" and type ~= nil
 end
 

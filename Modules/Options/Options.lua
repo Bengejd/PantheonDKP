@@ -65,13 +65,26 @@ function Options:SetupLDB()
                     self.db['boss_kill_popup'] = val
                 end,
                 width = 2.5,
-                order = 2,
+                order = 3,
+            },
+            autoCombatLog = {
+                type = "toggle",
+                name = "Automatic Combat Logging",
+                desc = "Automatically Enables / Disables combat logging when in a raid",
+                get = function(info)
+                    return self.db['auto_combat_log']
+                end,
+                set = function(info, val)
+                    self.db['auto_combat_log'] = val
+                end,
+                width = 2.5,
+                order = 3,
             },
             tab1 = {
                 type = "group",
                 name = "Syncing",
                 width = "full",
-                order = 4,
+                order = 5,
                 args = {
                     spacer1 = {
                         type = "description",
@@ -225,7 +238,7 @@ function Options:SetupLDB()
                 type = "group",
                 name = "Database",
                 width = "full",
-                order = 5,
+                order = 6,
                 args = {
                     spacer0Tab2 = {
                         type = "description",
@@ -416,6 +429,7 @@ function Options:_InitializeDBDefaults()
         ['sync'] = { ['value'] = self.db['sync'], ['default'] = {}, },
         ['ignore_pugs'] = { ['value'] = self.db['ignore_pugs'], ['default'] = true, },
         ['boss_kill_popup'] = {['value'] = self.db['boss_kill_popup'], ['default'] = true},
+        ['auto_combat_log'] = {['value'] = self.db['auto_combat_log'], ['default'] = true},
         ['invite_commands'] = { ['value'] = self.db['invite_commands'], ['default'] = { 'inv', 'invite' }, },
     }
 
@@ -454,6 +468,14 @@ end
 
 function Options:GetBossKillPopup()
     return self.db['boss_kill_popup'];
+end
+
+function Options:GetCombatLogging()
+    if self.db == nil then
+        return nil
+    else
+        return self.db['auto_combat_log']
+    end
 end
 
 function Options:SetLastSyncSent()

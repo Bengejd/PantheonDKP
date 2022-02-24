@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.9.2
+### Features
+- Added setting to turn off automatic combat logging.
+
 ## v4.9.1
 ### Features
 - Experimental: Announce Tier Token Classes when starting bids on an item
