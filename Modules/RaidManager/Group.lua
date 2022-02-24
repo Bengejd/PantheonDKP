@@ -163,7 +163,7 @@ function Group:_ToggleLogging()
 
     if optionsLoggingVal == nil then
         return;
-    else if optionsLoggingVal == false then
+    elseif optionsLoggingVal == false then
         self.LoggingFrame:SetScript("OnEvent", nil);
         return;
     end
