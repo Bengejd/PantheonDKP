@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.9.3
+### Features
+- Version bump for next phase
+
 ## v4.9.2
 ### Features
 - Added setting to turn off automatic combat logging.
