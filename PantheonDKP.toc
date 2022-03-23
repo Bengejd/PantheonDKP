@@ -10,7 +10,7 @@
 ## LoadOnDemand: 0
 ## X-Interface: 20504
 ## X-Curse-Project-ID: 367232
-## X-Phase: 4
+## X-Phase: 3
 
 # Libraries
 #@no-lib-strip@
