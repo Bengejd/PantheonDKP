@@ -1,5 +1,12 @@
 # PDKP Change Log
 
+## v4.9.4
+### Features
+- Added setting to start the bid window as minimized
+- Added setting to only show the bid window when you can use the item that is being bid on
+- Made it so that the bid window will remember its position between sessions (reloading, logging in, etc)
+- Same thing for the PDKP window.
+
 ## v4.9.3
 ### Features
 - Version bump for next phase
