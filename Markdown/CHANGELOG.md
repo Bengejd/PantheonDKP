@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.9.6
+### Bug Fixes
+- Fixed a bug with member object being nil when accessing the shame tab.
+
 ## v4.9.5
 ### Features
 - Added Mini-Game leaderboard (can only view if you're participating).

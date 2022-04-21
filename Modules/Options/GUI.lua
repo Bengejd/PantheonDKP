@@ -162,14 +162,22 @@ function opts:RefreshData()
 
             local member = MODULES.GuildManager:GetMemberByName(name);
 
-            tinsert(listPlayers, {
-                ['name'] = member.formattedName,
+            local details = {
+                ['name'] = name,
                 ['active'] = player.active,
                 ['lastShame'] = lastShame,
                 ['id'] = now,
                 ['breakdown'] = Utils:GetTimeSinceFormat(timeSince),
                 ['count'] = random(5),
-            });
+            }
+
+            if member ~= nil and member.formattedName ~= nil then
+                details['name'] = member.formattedName;
+            else
+                PDKP:PrintD("Player " .. name .. " not found in guild");
+            end
+
+            tinsert(listPlayers, details);
         end
     end
 
