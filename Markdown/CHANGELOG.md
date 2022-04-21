@@ -2,7 +2,7 @@
 
 ## v4.9.6
 ### Bug Fixes
-- Fixed a bug with member object being nil when accessing the shame tab.
+- Fixed a bug with non raid-ready alts being counted in the shame tab that caused a nil member error.
 
 ## v4.9.5
 ### Features
