@@ -50,6 +50,8 @@ globals = {
     "PDKP_History_EntryDeleted",
     "pdkp_HistoryTableMixin",
     "PDKP_Loot_OnClick",
+    "PDKP_OnComm_SyncShame",
+    "PDKP_OnComm_SyncShame",
     "PDKP_Loot_EntryDeleted",
     "pdkp_LootTableMixin",
     "PDKP_RaidTools_TextValidFunc",

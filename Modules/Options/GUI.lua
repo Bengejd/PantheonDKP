@@ -14,7 +14,7 @@ local tinsert = table.insert;
 
 local opts = {};
 
-local SimpleScrollFrame, db;
+local db;
 
 opts.__index = opts; -- Set the __index parameter to reference
 
@@ -44,8 +44,6 @@ function opts:Initialize()
 end
 
 function opts:CreateInterface()
-
-    SimpleScrollFrame = PDKP.SimpleScrollFrame
 
     self.parentFrame = GUI.TabController.tab_names[tabName].frame;
 

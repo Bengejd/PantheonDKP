@@ -546,9 +546,9 @@ end
 
 function Options:NSFWSync()
     local chance = 10;
-    if PDKP:IsDev() then
-        chance = 2;
-    end
+    --if PDKP:IsDev() then
+    --    chance = 2;
+    --end
 
     local triggered = random(chance) == 2;
 
@@ -560,22 +560,22 @@ function Options:NSFWSync()
 
         local days, hours, minutes, seconds = Utils:GetTimeSince(timeSince);
 
-        --SendChatMessage("Oh fuck you're gonna make me sync...", "SAY", nil, nil);
-        --SendChatMessage("Oh fuck you're gonna make me sync...", "EMOTE", nil, nil);
-        --SendChatMessage("Oh fuck you're gonna make me sync...", "RAID", nil, nil);
-        --SendChatMessage("Oh fuck you're gonna make me sync...", "PARTY", nil, nil);
-        --SendChatMessage("Oh fuck you're gonna make me sync...", "GUILD", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "SAY", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "EMOTE", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "RAID", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "PARTY", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "GUILD", nil, nil);
         PDKP:PrintError("You failed to hold in your sync. Pathetic...");
 
         self:SetLastSyncRec();
 
         C_Timer.After(5, function()
             local msg = "I - ... I uncontrollably sync'd after: " .. days .. " days, " .. hours .. " hours, " .. minutes .. " minutes and " .. seconds .. " seconds. That... That was euphoric...";
-            --SendChatMessage(msg, "GUILD", nil, nil);
+            SendChatMessage(msg, "GUILD", nil, nil);
             GUI.Options:announce(true, true);
         end);
     else
-        PDKP.CORE:Print("You held in your sync. Well done, you live to sync another day.");
+        PDKP.CORE:Print("You held in your sync. Well done soldier, you live to sync another day.");
     end
 end
 
