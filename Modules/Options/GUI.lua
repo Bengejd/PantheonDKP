@@ -9,7 +9,7 @@ local GUtils = PDKP.GUtils
 
 local GetServerTime = GetServerTime;
 local sort = table.sort;
-local random = math.random;
+--local random = math.random;
 local tinsert = table.insert;
 
 local opts = {};
