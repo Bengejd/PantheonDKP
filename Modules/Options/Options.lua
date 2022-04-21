@@ -8,6 +8,7 @@ local Options = {}
 
 local strlower = string.lower
 local GetServerTime = GetServerTime
+local random = math.random
 
 function Options:Initialize()
     self.db = MODULES.Database:Settings() or {};
@@ -86,25 +87,25 @@ function Options:SetupLDB()
                 width = "full",
                 order = 5,
                 args = {
-                    spacer1 = {
-                        type = "description",
-                        name = "Once per day, per officer, your addon will automatically sync the last two weeks worth of data. Auto sync will not work while in a dungeon, raid, battleground or arena.",
-                        width = "full",
-                        order = 1,
-                    },
-                    autoSync = {
-                        type = "toggle",
-                        name = "Auto Sync",
-                        desc = "Synchronize DKP entries with officers automatically, once per day.",
-                        get = function(info)
-                            return self.db['sync']['autoSync']
-                        end,
-                        set = function(info, val)
-                            self.db['sync']['autoSync'] = val
-                        end,
-                        width = 2.5,
-                        order = 2,
-                    },
+                    --spacer1 = {
+                    --    type = "description",
+                    --    name = "Once per day, per officer, your addon will automatically sync the last two weeks worth of data. Auto sync will not work while in a dungeon, raid, battleground or arena.",
+                    --    width = "full",
+                    --    order = 1,
+                    --},
+                    --autoSync = {
+                    --    type = "toggle",
+                    --    name = "Auto Sync",
+                    --    desc = "Synchronize DKP entries with officers automatically, once per day.",
+                    --    get = function(info)
+                    --        return self.db['sync']['autoSync']
+                    --    end,
+                    --    set = function(info, val)
+                    --        self.db['sync']['autoSync'] = val
+                    --    end,
+                    --    width = 2.5,
+                    --    order = 2,
+                    --},
                     autoDBBackup = {
                         type = "toggle",
                         name = "Automatic Database Backup",
@@ -231,6 +232,28 @@ function Options:SetupLDB()
                         style = "dropdown",
                         width = 1,
                         order = 5,
+                    },
+                    spacer5 = {
+                        type = "description",
+                        name = " ",
+                        width = "full",
+                        order = 7,
+                    },
+                    nsfwSync = {
+                        type = "toggle",
+                        name = "Sync Shame Mini-game",
+                        desc = "A mini game within PantheonDKP. Once enabled, you will be able to compete with other Sync Shame users for the title of Master Sync",
+                        get = function(info)
+                            return self.db['sync']['nsfwSync']
+                        end,
+                        set = function(info, val)
+                            self.db['sync']['nsfwSync'] = val
+                            if val == true then
+                                PDKP.CORE:Print("Your participation in Sync Shame game is appreciated. Hold in yer sync!");
+                            end
+                        end,
+                        width = 2.5,
+                        order = 4,
                     },
                 },
             },
@@ -442,6 +465,8 @@ function Options:_InitializeDBDefaults()
         ['officerSyncs'] = { ['default'] = {}, },
         ['totalEntries'] = { ['default'] = 0, },
         ['autoSync'] = { ['default'] = false, },
+        ['nsfwSync'] = { ['default'] = false, },
+        ['lastSyncRec'] = {['default'] = nil},
         ['processingChunkSize'] = { ['default'] = 2, },
         ['decompressChunkSize'] = { ['default'] = 4, },
         ['autoBackup'] = { ['default'] = true },
@@ -456,6 +481,10 @@ function Options:_InitializeDBDefaults()
     -- Set this as the default for now.
     self.db['sync']['autoBackup'] = true;
 
+    if self.db['sync']['lastSyncRec'] == nil then
+        self.db['sync']['lastSyncRec'] = self:SetLastSyncRec();
+    end
+
     -- Disable this until it's tested to be stable.
     if self.db['sync']['autoSync'] ~= nil then
         self.db['sync']['autoSync'] = false;
@@ -464,6 +493,10 @@ end
 
 function Options:GetLastSyncSent()
     return self.db['sync']['lastSyncSent']
+end
+
+function Options:GetLastSyncRec()
+    return self.db['sync']['lastSyncRec'] or GetServerTime();
 end
 
 function Options:GetBossKillPopup()
@@ -480,6 +513,10 @@ end
 
 function Options:SetLastSyncSent()
     self.db['sync']['lastSyncSent'] = GetServerTime()
+end
+
+function Options:SetLastSyncRec()
+    self.db['sync']['lastSyncRec'] = GetServerTime()
 end
 
 function Options:GetAutoSyncStatus()
@@ -503,6 +540,37 @@ function Options:IsPlayerIgnored(playerName)
     return false
 end
 
+function Options:NSFWSync()
+    local triggered = random(5);
+
+    if triggered == 3 then
+        local lastSyncTimestamp = self:GetLastSyncRec();
+        local currentTimestamp = GetServerTime();
+
+        local timeSince = currentTimestamp - lastSyncTimestamp;
+
+        local days = floor(timeSince / 86400);
+        local hours = floor((timeSince - (days * 86400)) / 3600);
+        local minutes = floor((timeSince - (days * 86400) - (hours * 3600)) / 60);
+        local seconds = floor(timeSince - (days * 86400) - (hours * 3600) - (minutes * 60));
+
+        SendChatMessage("Oh fuck you're gonna make me sync...", "SAY", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "EMOTE", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "RAID", nil, nil);
+        SendChatMessage("Oh fuck you're gonna make me sync...", "GUILD", nil, nil);
+        PDKP:PrintError("You failed to hold in your sync. Pathetic...");
+
+        self:SetLastSyncRec();
+
+        C_Timer.After(5, function()
+            local msg = "I uncontrollably sync'd after: " .. days .. " days, " .. hours .. " hours, " .. minutes .. " minutes and " .. seconds .. " seconds.";
+            SendChatMessage(msg, "GUILD", nil, nil);
+        end);
+    else
+        PDKP.CORE:Print("You held in your sync. Well done, you live to sync another day.");
+    end
+end
+
 function Options:processingChunkSize()
     return self.db['sync']['processingChunkSize'] or 2
 end
@@ -517,6 +585,10 @@ end
 
 function Options:GetInviteCommands()
     return self.db['invite_cmds'] or { 'inv', 'invite' }
+end
+
+function Options:GetNSFWSync()
+    return self.db['sync']['nsfwSync'] or false
 end
 
 MODULES.Options = Options

@@ -251,6 +251,7 @@ function Chat:_HandleSlashCommands(msg)
         ['testDKPCap'] = true, ['forceOfficerComms'] = true,
         ['GetTheoreticalCap'] = true, ['TestRoster'] = true,
         ['FixWrongfulDecay'] = true, ['testPet'] = true,
+        ['TestNSFWSync'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then
         return MODULES.Dev:HandleSlashCommands(msg)

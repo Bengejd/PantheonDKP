@@ -258,13 +258,21 @@ end
 function Comms:ChunkedDecoder(data, sender)
     local detransmit = self:_Decode(data)
     local chunkSize = 1024 * MODULES.Options:decompressChunkSize();
+    local nsfwSync = MODULES.Options:GetNSFWSync();
 
     local total = 0;
     local bytes = (string.len(detransmit) + 17) * 10 * 10;
 
     local WoW_decompress_co = PDKP.LibDeflate:DecompressDeflate(detransmit, {chunksMode=true, yieldOnChunkSize=chunkSize })
     local processing = CreateFrame('Frame')
-    PDKP.CORE:Print("Processing large import from", sender .. "...")
+
+    if nsfwSync then
+        PDKP.CORE:Print("Processing throbbing import from", sender .. "...")
+        MODULES.Options:NSFWSync();
+    else
+        PDKP.CORE:Print("Processing large import from", sender .. "...")
+    end
+
     processing:SetScript('OnUpdate', function()
         local ongoing, WoW_decompressed;
 

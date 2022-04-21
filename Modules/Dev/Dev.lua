@@ -96,6 +96,8 @@ function Dev:HandleSlashCommands(msg)
         self:TestRoster()
     elseif cmd == 'FixWrongfulDecay' then
         self:FixWrongfulDecay();
+    elseif cmd == 'TestNSFWSync' then
+        MODULES.Options:NSFWSync();
     elseif cmd == 'testPet' then
         local happiness, damagePercentage, loyaltyRate = GetPetHappiness();
         local currXP, nextXP = GetPetExperience();
