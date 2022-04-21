@@ -168,6 +168,10 @@ function Comm:_Setup()
         ['WhoIsDKP'] = { 'RAID', nil, 'ALERT', nil, PDKP_OnComm_GetDKPOfficer },
 
         ['SentInv'] = { 'WHISPER', nil, 'NORMAL', nil, PDKP_OnComm_SentInv },
+
+        -- Sync Shame
+        ['SyncShame'] = { 'GUILD', nil, 'ALERT', nil, PDKP_OnComm_SyncShame },
+        ['SyncShameSync'] = { 'GUILD', nil, 'ALERT', nil, PDKP_OnComm_SyncShame },
     }
 
     if self.isOfficerComm == true then
@@ -401,6 +405,32 @@ function PDKP_OnComm_SentInv(comm, message, sender)
             StaticPopup_Hide("PARTY_INVITE")
         end
     end, 5)
+end
+
+function PDKP_OnComm_SyncShame(comm, message, sender)
+    local self = comm
+    local pfx = self.ogPrefix
+    local data = CommsManager:DataDecoder(message)
+
+    local db = MODULES.Database:Shame();
+
+    if pfx == 'SyncShame' then
+        db[sender] = data
+    elseif pfx == 'SyncShameSync' then
+        for name, player in pairs(data) do
+            local dbPlayer = db[name];
+            if dbPlayer then
+                if dbPlayer.lastShame < player.lastShame then
+                    dbPlayer.lastShame = player.lastShame
+                    dbPlayer.active = player.active
+                    dbPlayer.count = player.count
+                end
+                dbPlayer['id'] = player.id
+            else
+                db[name] = player
+            end
+        end
+    end
 end
 
 function PDKP_SyncLockout(_, sent, total)

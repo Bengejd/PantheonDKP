@@ -16,7 +16,6 @@ function Comms:Initialize()
         ['tickInterval'] = 5,
         ['onEventFunc'] = function()
             MODULES.GuildManager:GetMembers()
-            self:RegisterOfficerAdComms()
         end,
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
@@ -133,6 +132,35 @@ function Comms:RegisterOfficerAdComms()
     end
 end
 
+function Comms:RegisterSyncShame()
+    local participating = MODULES.Options:GetNSFWSync()
+    if participating then
+        local opts = {
+            ['combat'] = true,
+            ['self'] = true,
+            ['requireCheck'] = false,
+            ['prefix'] = 'SyncShame',
+            ['officerComm'] = false,
+            ['isSelfComm'] = false,
+        }
+
+        local optsSync = {
+            ['combat'] = true,
+            ['self'] = false,
+            ['requireCheck'] = true,
+            ['prefix'] = 'SyncShameSync',
+            ['officerComm'] = false,
+            ['isSelfComm'] = false,
+        }
+
+        local comm = MODULES.Comm:new(opts)
+        self.channels[comm.prefix] = comm
+
+        local commSync = MODULES.Comm:new(optsSync)
+        self.channels[commSync.prefix] = commSync
+    end
+end
+
 function Comms:UnregisterComms()
     PDKP.CORE:UnregisterAllComm()
 end
@@ -164,8 +192,6 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
     else
         --PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
     end
-
-    --PDKP:PrintD('Could not complete comm request ', prefix)
 end
 
 -----------------------------

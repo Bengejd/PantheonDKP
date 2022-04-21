@@ -37,9 +37,9 @@ function Tab:Initialize()
         ['view_loot_button'] = {
             ['text'] = 'Loot',
         },
-        --['view_lockouts_button'] = {
-        --    ['text'] = 'Lockouts',
-        --},
+        ['view_shame_leaderboard_button'] = {
+            ['text'] = 'Shame',
+        },
         ['view_options_button'] = {
             ['text'] = 'Options',
         },
@@ -48,6 +48,10 @@ function Tab:Initialize()
     local tab_names = { 'view_history_button', 'view_loot_button', 'view_options_button' }
     if PDKP.canEdit then
         tab_names = { 'view_adjust_button', unpack(tab_names) }
+    end
+
+    if MODULES.Options:GetNSFWSync() then
+        table.insert(tab_names, 'view_shame_leaderboard_button');
     end
 
     local btn_pad = 35
@@ -112,6 +116,7 @@ function Tab:Initialize()
     end
 
     Tab.tab_btns[1]:Click()
+    --pdkp_frame:Show();
 
     self._initialized = true
 end

@@ -1,5 +1,15 @@
 # PDKP Change Log
 
+## v4.9.5
+### Features
+- Added Mini-Game leaderboard (can only view if you're participating).
+- Decreased chance of being shamed.
+
+### Bug Fixes
+- Removed unnecessary comm registrations.
+- Removed unnecessary timed events related to auto-sync.
+- Removed unnecessary negative DKP checks.
+
 ## v4.9.4
 ### Features
 - Added a mini-game to PDKP. Enabled in the PDKP settings under the sync tab. Off by default. 

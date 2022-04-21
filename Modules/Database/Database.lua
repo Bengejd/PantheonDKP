@@ -5,7 +5,7 @@ local Utils = PDKP.Utils;
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phases', 'snapshot', 'cache', 'consolidations' }
+local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phases', 'snapshot', 'cache', 'consolidations', 'shame' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -100,6 +100,10 @@ end
 
 function DB:Cache()
     return PDKP_DB[self.server_faction_guild]['cache']
+end
+
+function DB:Shame()
+    return PDKP_DB[self.server_faction_guild]['shame']
 end
 
 --@do-not-package@

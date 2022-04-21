@@ -253,9 +253,6 @@ function Member:IsSyncReady()
             return true
         else
             local timeSinceSync = Utils:SubtractTime(lastSync, server_time)
-
-            --PDKP:PrintD("timeSinceSync", self.name, timeSinceSync);
-
             return timeSinceSync > Utils:GetSecondsInDay()
         end
     end

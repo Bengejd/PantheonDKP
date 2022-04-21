@@ -248,9 +248,11 @@ function Options:SetupLDB()
                         end,
                         set = function(info, val)
                             self.db['sync']['nsfwSync'] = val
+                            self:SetLastSyncRec()
                             if val == true then
                                 PDKP.CORE:Print("Your participation in Sync Shame game is appreciated. Hold in yer sync!");
                             end
+                            GUI.Options:announce(val, true)
                         end,
                         width = 2.5,
                         order = 4,
@@ -516,7 +518,9 @@ function Options:SetLastSyncSent()
 end
 
 function Options:SetLastSyncRec()
+    print("Setting new last sync rec");
     self.db['sync']['lastSyncRec'] = GetServerTime()
+    return self.db['sync']['lastSyncRec'];
 end
 
 function Options:GetAutoSyncStatus()
@@ -541,30 +545,34 @@ function Options:IsPlayerIgnored(playerName)
 end
 
 function Options:NSFWSync()
-    local triggered = random(5);
+    local chance = 10;
+    if PDKP:IsDev() then
+        chance = 2;
+    end
 
-    if triggered == 3 then
+    local triggered = random(chance) == 2;
+
+    if triggered then
         local lastSyncTimestamp = self:GetLastSyncRec();
         local currentTimestamp = GetServerTime();
 
         local timeSince = currentTimestamp - lastSyncTimestamp;
 
-        local days = floor(timeSince / 86400);
-        local hours = floor((timeSince - (days * 86400)) / 3600);
-        local minutes = floor((timeSince - (days * 86400) - (hours * 3600)) / 60);
-        local seconds = floor(timeSince - (days * 86400) - (hours * 3600) - (minutes * 60));
+        local days, hours, minutes, seconds = Utils:GetTimeSince(timeSince);
 
-        SendChatMessage("Oh fuck you're gonna make me sync...", "SAY", nil, nil);
-        SendChatMessage("Oh fuck you're gonna make me sync...", "EMOTE", nil, nil);
-        SendChatMessage("Oh fuck you're gonna make me sync...", "RAID", nil, nil);
-        SendChatMessage("Oh fuck you're gonna make me sync...", "GUILD", nil, nil);
+        --SendChatMessage("Oh fuck you're gonna make me sync...", "SAY", nil, nil);
+        --SendChatMessage("Oh fuck you're gonna make me sync...", "EMOTE", nil, nil);
+        --SendChatMessage("Oh fuck you're gonna make me sync...", "RAID", nil, nil);
+        --SendChatMessage("Oh fuck you're gonna make me sync...", "PARTY", nil, nil);
+        --SendChatMessage("Oh fuck you're gonna make me sync...", "GUILD", nil, nil);
         PDKP:PrintError("You failed to hold in your sync. Pathetic...");
 
         self:SetLastSyncRec();
 
         C_Timer.After(5, function()
-            local msg = "I uncontrollably sync'd after: " .. days .. " days, " .. hours .. " hours, " .. minutes .. " minutes and " .. seconds .. " seconds.";
-            SendChatMessage(msg, "GUILD", nil, nil);
+            local msg = "I - ... I uncontrollably sync'd after: " .. days .. " days, " .. hours .. " hours, " .. minutes .. " minutes and " .. seconds .. " seconds. That... That was euphoric...";
+            --SendChatMessage(msg, "GUILD", nil, nil);
+            GUI.Options:announce(true, true);
         end);
     else
         PDKP.CORE:Print("You held in your sync. Well done, you live to sync another day.");

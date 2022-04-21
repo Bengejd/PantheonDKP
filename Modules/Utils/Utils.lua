@@ -107,6 +107,33 @@ function Utils:GetResetInfo()
     Utils.weekNumber = Utils:GetWeekNumber(server_time)
 end
 
+function Utils:GetTimeSince(time)
+    local days = floor(time / 86400);
+    local hours = floor(fmod(time, 86400) / 3600);
+    local minutes = floor(fmod(time, 3600) / 60);
+    local seconds = floor(fmod(time, 60));
+    return days,hours,minutes,seconds
+end
+
+function Utils:GetTimeSinceFormat(time)
+    local days = floor(time / 86400);
+    local hours = floor(fmod(time, 86400) / 3600);
+    local minutes = floor(fmod(time, 3600) / 60);
+    local seconds = floor(fmod(time, 60));
+
+    if days > 0 then
+        return format("%d Days, %02d Hours", days, hours);
+    elseif hours > 0 then
+        return format("%02d Hours, %02d Minutes", hours, minutes);
+    elseif minutes > 0 then
+        return format("%02d Minutes", minutes);
+    else
+        return format("%02d Seconds", seconds);
+    end
+
+    --return format("%d Days %02d Hrs",days,hours,minutes)
+end
+
 function Utils:GetWeekInfo()
     return Utils.weekNumber, Utils.wday, Utils.yday
 end

@@ -95,7 +95,7 @@ function DKP:Initialize()
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 
-    self:CheckForNegatives()
+    --self:CheckForNegatives()
 
     C_Timer.After(3, function()
         PDKP.CORE:Print(tostring(self.numOfEntries) .. ' entries have been loaded')

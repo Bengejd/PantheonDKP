@@ -47,7 +47,6 @@ end
 function Sync:GetSyncData(type)
     local syncData = {};
     if type == 'Overwrite' then
-        --PDKP:PrintD("Preparing Overwrite data");
         syncData = MODULES.DKPManager:PrepareOverwriteExport();
     elseif type == 'Merge' then
         local DKP = MODULES.DKPManager
@@ -57,7 +56,17 @@ function Sync:GetSyncData(type)
     return syncData;
 end
 
+function Sync:SendShameSync()
+    local syncData = MODULES.Database:Shame();
+    return MODULES.CommsManager:SendCommsMessage("SyncShameSync", syncData);
+end
+
 function Sync:SendSync()
+
+    if MODULES.Options:GetNSFWSync() then
+        self:SendShameSync();
+    end
+
     local syncType = self.settings['type']
     local syncGroup = self.settings['group']
     local syncData = self:GetSyncData(syncType);
