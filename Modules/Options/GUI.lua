@@ -157,27 +157,24 @@ function opts:RefreshData()
 
     for name, player in pairs(players) do
         if player.active then
-            local lastShame = player.lastShame --floor(random(now - 86400, now));
-            local timeSince = now - lastShame;
-
             local member = MODULES.GuildManager:GetMemberByName(name);
+            if member ~= nil then
+                local lastShame = player.lastShame --floor(random(now - 86400, now));
+                local timeSince = now - lastShame;
 
-            local details = {
-                ['name'] = name,
-                ['active'] = player.active,
-                ['lastShame'] = lastShame,
-                ['id'] = now,
-                ['breakdown'] = Utils:GetTimeSinceFormat(timeSince),
-                ['count'] = random(5),
-            }
+                local details = {
+                    ['name'] = member.formattedName,
+                    ['active'] = player.active,
+                    ['lastShame'] = lastShame,
+                    ['id'] = now,
+                    ['breakdown'] = Utils:GetTimeSinceFormat(timeSince),
+                    ['count'] = 0,
+                }
 
-            if member ~= nil and member.formattedName ~= nil then
-                details['name'] = member.formattedName;
+                tinsert(listPlayers, details);
             else
                 PDKP:PrintD("Player " .. name .. " not found in guild");
             end
-
-            tinsert(listPlayers, details);
         end
     end
 
