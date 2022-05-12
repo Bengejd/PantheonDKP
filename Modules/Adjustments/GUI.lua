@@ -271,6 +271,7 @@ function Adjust:DropdownChanged()
     local children = Adjust.entry_details.children
 
     local mainDD = children[1]
+    local raidDD = children[2]
     local amount_box = children[3]
 
     local amt = tonumber(amount_box:getValue())

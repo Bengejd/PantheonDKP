@@ -1,5 +1,10 @@
 # PDKP Change Log
 
+## v4.9.7
+### Features
+- Added 90% DKP max bid text to the minimap icon tooltip
+- Version bumped for phase 5
+
 ## v4.9.6
 ### Bug Fixes
 - Fixed a bug with non raid-ready alts being counted in the shame tab that caused a nil member error.

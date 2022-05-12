@@ -1,7 +1,7 @@
-## Interface: 20504
-## Interface-BCC: 20504
+## Interface: 20505
+## Interface-BCC: 20505
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 4.9.6
+## Version: 4.9.7
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
@@ -10,7 +10,7 @@
 ## LoadOnDemand: 0
 ## X-Interface: 20504
 ## X-Curse-Project-ID: 367232
-## X-Phase: 3
+## X-Phase: 5
 
 # Libraries
 #@no-lib-strip@
