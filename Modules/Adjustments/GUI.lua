@@ -276,7 +276,7 @@ function Adjust:DropdownChanged()
 
     local amt = tonumber(amount_box:getValue())
 
-    if (mainDD.selectedValue == 'Boss Kill' and amt ~= 10) then
+    if (mainDD.selectedValue == 'Boss Kill' and (amt ~= 10 or amt ~= 20)) then
         amount_box:SetEnabled(false)
         amount_box:SetText(10)
     else

@@ -878,6 +878,10 @@ function DKP:BossKillDetected(originalBossId, bossName)
     local foundBossName = MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil;
     local foundEncounterName = MODULES.Constants.ID_TO_BOSS_NAME[bossId] ~= nil;
 
+    if foundBossName == "The Sunwell" then
+        dkpAwardAmount = 20;
+    end
+
     if foundBossName then
         GUI.Dialogs:Show('PDKP_RAID_BOSS_KILL', { bossName, dkpAwardAmount }, bossName)
     elseif foundEncounterName then
