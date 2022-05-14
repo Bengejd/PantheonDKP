@@ -56,7 +56,6 @@ function Group:Initialize()
         dkpOfficer = nil,
         leader = nil,
     }
-    --self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
     self.LoggingFrame = CreateFrame("Frame", nil, nil);
     self._initialized = true;
 
@@ -97,7 +96,6 @@ function Group:Reinitialize()
     end
 
     self.eventFrame = nil;
-    --self.HydrossEventFrame = nil;
     self.LoggingFrame = nil;
 
     self:Initialize();
@@ -117,34 +115,8 @@ function Group:RegisterEvents()
         end
     }
     self.eventFrame = GUtils:createThrottledEventFrame(opts)
-    --self.HydrossEventFrame = CreateFrame("Frame", nil, nil);
-    --
-    --self.HydrossEventFrame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED');
-    --self.HydrossEventFrame:SetScript("OnEvent", function(...)
-    --    self:CheckForHydross(CombatLogGetCurrentEventInfo());
-    --end)
 
     self:WatchLogging();
-end
-
-function Group:CheckForHydross(...)
-    local subEvent = select(2, ...)
-    if subEvent == "UNIT_DIED" then
-        local GUID = select(8, ...);
-        local npcID = select(6, strsplit("-", GUID));
-        if tonumber(npcID) == HYDROSS_COMBAT_ID then
-            self:_HandleEvent('BOSS_KILL', HYDROSS_BOSS_ID, 'Hydross the Unstable');
-            self.HydrossEventFrame:SetScript("OnEvent", nil);
-        end
-
-        if self:IsInInstance() then
-            local _, _, _, _, _, _, _, instanceMapId, _ = GetInstanceInfo()
-            if instanceMapId ~= 548 and instanceMapId ~= 780 and self:IsInRaid() then
-                -- Disable Hydross checking, if we aren't in SSC.
-                self.HydrossEventFrame:SetScript("OnEvent", nil);
-            end
-        end
-    end
 end
 
 function Group:WatchLogging()
@@ -199,8 +171,6 @@ function Group:_HandleEvent(event, arg1, ...)
     end
 
     if event == 'BOSS_KILL' and PDKP.canEdit then
-        --PDKP:PrintD('BOSS KILL DETECTED', event, arg1, ...)
-
         local isDKP = self:HasDKPOfficer() and self:IsDKPOfficer()
         local isMLNoDKP = not self:HasDKPOfficer() and self:IsMasterLoot()
         if isDKP or isMLNoDKP then
