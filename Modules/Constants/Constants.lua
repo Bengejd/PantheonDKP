@@ -62,7 +62,7 @@ Constants.RAIDS = {
         [732] = "High Astromancer Solarian",
         [733] = "Kael'thas Sunstrider",
     },
-    ["The Battle for Mount Hyjal"] = {
+    ["Battle for Mount Hyjal"] = {
         ["phase"] = 3,
         ['index'] = 5,
         [618] = "Rage Winterchill",
@@ -84,7 +84,7 @@ Constants.RAIDS = {
         [608] = "The Illidari Council",
         [609] = "Illidan Stormrage",
     },
-    ["The Sunwell"] = {
+    ["Sunwell Plateau"] = {
         ["phase"] = 5,
         ['index'] = 7,
         [724] = "Kalecgos",

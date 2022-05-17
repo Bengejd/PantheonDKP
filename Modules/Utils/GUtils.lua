@@ -280,6 +280,7 @@ end
 function GUtils:createNestedDropdown(opts)
     local dropdown_name = '$parent_' .. opts['name'] .. '_dropdown'
     local menu_items = opts['items'] or {}
+    local sorted_items = opts['sortedPairs'] or nil
     local title_text = opts['title'] or ''
     local default_val = opts['defaultVal'] or ''
     local hide = opts['hide'] or false
@@ -358,16 +359,31 @@ function GUtils:createNestedDropdown(opts)
         level = level or 1;
 
         if level == 1 then
-            for key, _ in pairs(menu_items) do
-                local info = UIDropDownMenu_CreateInfo();
-                info.hasArrow = true; -- creates submenu
-                info.notCheckable = true;
-                info.keepShownOnClick = false;
-                info.text = key;
-                info.value = {
-                    ["Level1_Key"] = key;
-                };
-                UIDropDownMenu_AddButton(info, level);
+
+            if sorted_items ~= nil then
+                for _, key in pairs(sorted_items) do
+                    local info = UIDropDownMenu_CreateInfo();
+                    info.hasArrow = true; -- creates submenu
+                    info.notCheckable = true;
+                    info.keepShownOnClick = false;
+                    info.text = key;
+                    info.value = {
+                        ["Level1_Key"] = key;
+                    };
+                    UIDropDownMenu_AddButton(info, level);
+                end
+            else
+                for key, _ in pairs(menu_items) do
+                    local info = UIDropDownMenu_CreateInfo();
+                    info.hasArrow = true; -- creates submenu
+                    info.notCheckable = true;
+                    info.keepShownOnClick = false;
+                    info.text = key;
+                    info.value = {
+                        ["Level1_Key"] = key;
+                    };
+                    UIDropDownMenu_AddButton(info, level);
+                end
             end
         end
 

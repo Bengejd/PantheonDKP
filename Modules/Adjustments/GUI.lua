@@ -59,6 +59,11 @@ function Adjust:Initialize()
     tinsert(entry_details.children, mainDD)
 
     local raid_items = {}
+    local sortedPairs = {
+        "Gruul's Lair", "Magtheridon's Lair", "Serpentshrine Cavern", "Tempest Keep", "Battle for Mount Hyjal",
+        "Black Temple", "Sunwell Plateau"
+    };
+
     for raid_name, raid_table in pairs(MODULES.Constants.RAID_BOSSES) do
         raid_items[raid_name] = raid_table['boss_names']
     end
@@ -72,7 +77,8 @@ function Adjust:Initialize()
         ['dropdownTable'] = mainDD,
         ['showOnValue'] = 'Boss Kill',
         ['changeFunc'] = self.DropdownChanged,
-        ['items'] = raid_items
+        ['items'] = raid_items,
+        ['sortedPairs'] = sortedPairs,
     }
 
     raidDD = GUtils:createNestedDropdown(raid_opts)
@@ -276,9 +282,16 @@ function Adjust:DropdownChanged()
 
     local amt = tonumber(amount_box:getValue())
 
-    if (mainDD.selectedValue == 'Boss Kill' and (amt ~= 10 or amt ~= 20)) then
+    -- TODO: Sunwell boss DKP, raidDD hass boss_names in it.
+
+    if (mainDD.selectedValue == 'Boss Kill') then
         amount_box:SetEnabled(false)
-        amount_box:SetText(10)
+        local isSunwellBoss = MODULES.Constants.BOSS_TO_RAID[raidDD.selectedValue] == "Sunwell Plateau"
+        if isSunwellBoss and amt ~= 20 then
+            amount_box:SetText(20);
+        elseif not isSunwellBoss and amt ~= 10 then
+            amount_box:SetText(10)
+        end
     else
         amount_box:SetEnabled(true)
     end

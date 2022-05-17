@@ -1,5 +1,12 @@
 # PDKP Change Log
 
+##v4.9.8
+### Features
+- Added support for Sunwell Plateau bosses receiving 20 dkp per kill.
+
+### Bug Fixes
+- Made the boss dropdown raid menu be sorted by phase instead of default sorting.
+
 ## v4.9.7
 ### Features
 - Added 90% DKP max bid text to the minimap icon tooltip
