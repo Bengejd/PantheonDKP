@@ -12,16 +12,11 @@ local tinsert = table.insert
 local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterInfo
 local UnitIsGroupLeader = UnitIsGroupLeader
 local ConvertToRaid, InviteUnit = ConvertToRaid, InviteUnit
-local strtrim, strsplit = strtrim, strsplit
+local strtrim = strtrim
 local wipe = wipe
 local C_Timer = C_Timer
 local LoggingCombat = LoggingCombat
-local select = select
-local tonumber = tonumber
 local setmetatable = setmetatable
-
-local HYDROSS_COMBAT_ID = 21216
-local HYDROSS_BOSS_ID = 623
 
 -- InstanceID's of all raids in TBC Classic
 local MAPS_TO_LOG = {532, 534, 544, 548, 550, 564, 565, 580, }

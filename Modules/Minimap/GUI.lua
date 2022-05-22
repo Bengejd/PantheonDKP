@@ -80,7 +80,6 @@ function map:_GetToolTipTexts()
     tinsert(texts, lineBreak)
 
     local guildCapPercent = MODULES.DKPManager:GetMaxBid();
-    local guildCap = MODULES.DKPManager:GetCaps();
 
     local dkpCap = "[90% Bid Cap]: " .. tostring(guildCapPercent) .. " DKP";
 
