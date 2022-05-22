@@ -1,14 +1,14 @@
 ## Interface: 20505
 ## Interface-BCC: 20505
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 4.9.7
+## Version: 4.9.8
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
 ## SavedVariables: PDKP_DB
 ## OptionalDependencies: WagoAnalytics
 ## LoadOnDemand: 0
-## X-Interface: 20504
+## X-Interface: 20505
 ## X-Curse-Project-ID: 367232
 ## X-Phase: 5
 
