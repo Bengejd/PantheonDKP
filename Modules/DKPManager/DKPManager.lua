@@ -875,10 +875,11 @@ function DKP:BossKillDetected(originalBossId, bossName)
     end
     local dkpAwardAmount = 10
 
-    local foundBossName = MODULES.Constants.BOSS_TO_RAID[bossName] ~= nil;
+    local raidName = MODULES.Constants.BOSS_TO_RAID[bossName];
+    local foundBossName = raidName ~= nil;
     local foundEncounterName = MODULES.Constants.ID_TO_BOSS_NAME[bossId] ~= nil;
 
-    if foundBossName == "Sunwell Plateau" then
+    if raidName == "Sunwell Plateau" then
         dkpAwardAmount = 20;
     end
 

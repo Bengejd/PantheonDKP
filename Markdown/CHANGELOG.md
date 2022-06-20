@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+##v4.9.9
+### Bug Fixes
+- Fixed a bug where DKP award popup was not giving the correct amount of DKP for Sunwell Plateau bosses.
+
 ##v4.9.8
 ### Features
 - Added support for Sunwell Plateau bosses receiving 20 dkp per kill.
