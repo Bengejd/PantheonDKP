@@ -18,6 +18,7 @@ Constants.PHASE = tonumber(GetAddOnMetadata('PantheonDKP', 'X-Phase'))
 
 Constants.SUCCESS = '22bb33'
 Constants.WARNING = 'E71D36'
+Constants.INFO = 'F4A460'
 
 -- The WOTLK classic classes
 Constants.CLASSES = { 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior', 'Death Knight' }

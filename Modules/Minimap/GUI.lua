@@ -3,20 +3,19 @@ local _, PDKP = ...
 local MODULES = PDKP.MODULES
 local GUI = PDKP.GUI
 local Utils = PDKP.Utils;
+local CONSTANTS = MODULES.Constants;
+
+local map = {}
 
 local LibStub = LibStub
 local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 local unpack, tinsert = unpack, table.insert
 
-local map = {}
-
-local info = 'F4A460'
-
+local info = CONSTANTS.INFO;
 local clickText = Utils:FormatTextColor('Click', info) .. ' to open PDKP. '
 local shiftRightClickText = Utils:FormatTextColor('Shift-Right-Click', info) .. ' to open Officer push'
 local rightClickText = Utils:FormatTextColor('Right-Click', info) .. ' to open settings'
 local resetDatabaseText = Utils:FormatTextColor('Ctrl-Alt-Shift-Right-Click', info) .. ' to purge database'
---local hideMiniMapText = Utils:FormatTextColor('Alt-Right-Click', info) .. ' to hide the map icon'
 
 function map:Initialize()
     local settingsDB = MODULES.Database:Settings();
@@ -83,7 +82,7 @@ function map:_GetToolTipTexts()
 
     local dkpCap = "[90% Bid Cap]: " .. tostring(guildCapPercent) .. " DKP";
 
-    tinsert(texts, {dkpCap, 1, 1, 1})
+    tinsert(texts, { dkpCap, 1, 1, 1 })
 
     return texts
 end
