@@ -914,6 +914,12 @@ function DKP:AwardBossKill(boss_name)
         ['pugNames'] = {},
     }
 
+    local raidName = MODULES.Constants.BOSS_TO_RAID[boss_name];
+
+    if raidName == "Sunwell Plateau" then
+        dummy_entry["dkp_change"] = 20;
+    end
+
     for i = 1, #memberNames do
         local memberName = memberNames[i]
         local member = GuildManager:GetMemberByName(memberName)
