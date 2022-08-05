@@ -21,7 +21,7 @@ Constants.WARNING = 'E71D36'
 Constants.INFO = 'F4A460'
 
 -- The WOTLK classic classes
-Constants.CLASSES = { 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior', 'Death Knight' }
+Constants.CLASSES = { 'Death Knight', 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior' }
 -- The WOTLK Classic Class colors
 Constants.CLASS_COLORS = {
     ["Druid"] = "FF7C0A", ["Hunter"] = "AAD372", ["Mage"] = "3FC7EB", ["Paladin"] = "F48CBA",
