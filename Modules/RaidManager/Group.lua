@@ -184,11 +184,11 @@ function Group:Refresh()
     for i = 1, numGroupMembers do
         local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
 
-        if role == 'MAINTANK' then
-            tinsert(self.classes['Tank'], name)
-        else
-            tinsert(self.classes[class], name)
-        end
+        --if role == 'MAINTANK' then
+        --    tinsert(self.classes['Tank'], name)
+        --else
+        --    tinsert(self.classes[class], name)
+        --end
 
         tinsert(self.memberNames, name)
 

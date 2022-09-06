@@ -102,9 +102,7 @@ function Dev:HandleSlashCommands(msg)
         local happiness, damagePercentage, loyaltyRate = GetPetHappiness();
         local currXP, nextXP = GetPetExperience();
         local remaining = GetPetTimeRemaining();
-
         print('Hapiness', happiness, 'LoyaltyRate', loyaltyRate, 'currXP', currXP, 'nextXP', nextXP, 'Remaining', remaining);
-
         Utils:WatchVar(_G, 'Global');
 
     end
