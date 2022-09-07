@@ -331,8 +331,10 @@ function Utils:RemoveNonAlphaNumerics(str)
 end
 
 function Utils:RemoveColors(str)
-    local initial = str:gsub("([\\|a-z]{10})", "");
-    return initial:gsub("([|]+[r])", "");
+    str = string.gsub( str, "|c%x%x%x%x%x%x%x%x", "" )
+    str = string.gsub( str, "|c%x%x %x%x%x%x%x", "" ) -- the trading parts colour has a space instead of a zero for some weird reason
+    str = string.gsub( str, "|r", "" )
+    return str
 end
 
 function Utils:GetMyName()

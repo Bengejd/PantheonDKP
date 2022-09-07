@@ -98,7 +98,6 @@ Constants.RAIDS = {
     },
 }
 
-
 -- Setup RAID_NAMES, RAID_INDEXES, BOSS_NAMES, BOSS_IDS
 do
     for raid, raid_table in pairs(Constants.RAIDS) do

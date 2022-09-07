@@ -306,19 +306,8 @@ function RaidTools:Initialize()
     end)
     open_roster:Hide();
 
-    --f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button
     f.GROUPS = GROUPS;
-
-    --f.updateClassGroups = function()
-    --    local classGroups = f.class_groups.class_icons
-    --    for className, classGroup in pairs(classGroups) do
-    --        local numClass = MODULES.GroupManager:GetNumClass(className)
-    --        classGroup.label:SetText(tostring(numClass))
-    --    end
-    --end
-
-    f:SetScript("OnShow", f.updateClassGroups)
 
     PDKP.raid_frame = f
 

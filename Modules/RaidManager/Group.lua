@@ -84,10 +84,17 @@ function Group:CanInvite(name)
 end
 
 function Group:Reinitialize()
-    for _, frame in pairs(self.eventFrame, self.loggingFrame) do
-        if frame ~= nil then
-            pcall(frame:SetScript("OnEvent", nil));
-        end
+
+    function pdkp_clearFrameEvents(frame)
+        frame:SetScript("OnEvent", nil);
+    end
+
+    if self.eventFrame ~= nil then
+        pcall(pdkp_clearFrameEvents, self.eventFrame);
+    end
+
+    if self.loggingFrame ~= nil then
+        pcall(pdkp_clearFrameEvents, self.loggingFrame);
     end
 
     self.eventFrame = nil;
@@ -212,10 +219,6 @@ function Group:Refresh()
         end
     end
 
-    if PDKP.raid_frame ~= nil then
-        PDKP.raid_frame:updateClassGroups()
-    end
-
     if self:IsInRaid() and not self:HasDKPOfficer() and not self.requestedDKPOfficer then
         self:RequestDKPOfficer()
     elseif not self:IsInRaid() then
@@ -290,8 +293,6 @@ function Group:SetDKPOfficer(data)
     self.classes['DKP'] = { charName }
 
     self.isDKP = Utils:GetMyName() == self.leadership.dkpOfficer
-
-    PDKP.raid_frame:updateClassGroups()
 
     if self:HasDKPOfficer() then
         self.requestedDKPOfficer = true
@@ -428,6 +429,9 @@ function Group:InitializePortrait()
     local dropdownList = _G['DropDownList1']
     dropdownList:HookScript('OnShow', function()
         local charName = strtrim(_G['DropDownList1Button1']:GetText())
+
+        charName = Utils:RemoveColors(charName);
+
         local member = GuildManager:GetMemberByName(charName)
 
         if not (member and self:IsMemberInRaid(charName) and member.canEdit) then
