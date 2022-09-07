@@ -1,9 +1,5 @@
 # PDKP Change Log
 
-## 5.0.0
-### Features
-- WOTLK overhaul
-
 ##v4.9.12
 ### Features
 - Added death knights to the list of classes that PDKP supports
