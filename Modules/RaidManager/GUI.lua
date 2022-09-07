@@ -387,74 +387,75 @@ function RaidTools:_CreateGroupIcons(class_group)
         ICON_PATHS[Constants.CLASSES[i]] = classTexture
     end
 
-    for key, class in pairs(ICONS) do
-        local i_frame = GUtils:createIcon(class_group.content, "0")
-        i_frame.class = class
-
-        i_frame.icon:SetTexture(ICON_PATHS[class])
-
-        -- Set up the text coords for the class icons
-        if key > 3 then
-            i_frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[strupper(class)]))
-        end
-
-        -- Set up the previous frames.
-        local previous_frame;
-        if key > 1 then
-            local prev_key = Utils:ternaryAssign(key <= 8, 1, 6)
-            previous_frame = class_group.class_icons[ICONS[key - prev_key]]
-        end
-
-        local BASE_POINTS = {
-            [key == 1] = { { "TOP", 0, 0 }, { "CENTER", 0, 0 } }, -- DKP
-            [key == 2] = { "RIGHT", class_group.class_icons[ICONS[1]], "LEFT", -10, 0 }, -- Total
-            [key == 3] = { "LEFT", class_group.class_icons[ICONS[1]], "RIGHT", 10, 0 }, -- Tanks
-            [key == 4] = { "TOPRIGHT", class_group.class_icons[ICONS[2]], "BOTTOMLEFT", 9, -15 },
-            [key > 4 and key <= 7] = { "LEFT", previous_frame, "RIGHT", 10, 0 },
-            [key == 8] = { "TOPLEFT", class_group.class_icons[ICONS[key - 4]], "BOTTOMLEFT", -20, -15 },
-            [key > 8] = { "LEFT", class_group.class_icons[ICONS[key - 1]], "RIGHT", 10, 0 }
-        }
-
-        local points = BASE_POINTS[true]
-
-        if points then
-            for i = 1, #points do
-                if type(points[1]) == "table" then
-                    i_frame:SetPoint(unpack(points[i]))
-                else
-                    i_frame:SetPoint(unpack(points))
-                end
-            end
-        end
-
-        if key == 3 then
-            --i_frame:Hide()
-        end
-
-        if class ~= 'Total' then
-            i_frame:SetScript("OnEnter", function(_)
-                GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
-                GameTooltip:ClearLines()
-                local tip_text = ''
-                local names = MODULES.RaidManager:GetClassMemberNames(class)
-                for name_key, name in pairs({ unpack(names) }) do
-                    tip_text = tip_text .. Utils:ternaryAssign(name_key < #names, name .. '\n', name)
-                end
-
-                i_frame.label:SetText(tostring(#names))
-
-                GameTooltip:AddLine(tip_text)
-                GameTooltip:Show()
-            end)
-
-            i_frame:SetScript("OnLeave", function()
-                GameTooltip:ClearLines()
-                GameTooltip:Hide()
-            end)
-        end
-
-        class_group.class_icons[class] = i_frame
-    end
+    -- TODO: Fix this to work with the new class icons.
+    --for key, class in pairs(ICONS) do
+    --    local i_frame = GUtils:createIcon(class_group.content, "0")
+    --    i_frame.class = class
+    --
+    --    i_frame.icon:SetTexture(ICON_PATHS[class])
+    --
+    --    -- Set up the text coords for the class icons
+    --    if key > 3 then
+    --        i_frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[strupper(class)]))
+    --    end
+    --
+    --    -- Set up the previous frames.
+    --    local previous_frame;
+    --    if key > 1 then
+    --        local prev_key = Utils:ternaryAssign(key <= 8, 1, 6)
+    --        previous_frame = class_group.class_icons[ICONS[key - prev_key]]
+    --    end
+    --
+    --    local BASE_POINTS = {
+    --        [key == 1] = { { "TOP", 0, 0 }, { "CENTER", 0, 0 } }, -- DKP
+    --        [key == 2] = { "RIGHT", class_group.class_icons[ICONS[1]], "LEFT", -10, 0 }, -- Total
+    --        [key == 3] = { "LEFT", class_group.class_icons[ICONS[1]], "RIGHT", 10, 0 }, -- Tanks
+    --        [key == 4] = { "TOPRIGHT", class_group.class_icons[ICONS[2]], "BOTTOMLEFT", 9, -15 },
+    --        [key > 4 and key <= 7] = { "LEFT", previous_frame, "RIGHT", 10, 0 },
+    --        [key == 8] = { "TOPLEFT", class_group.class_icons[ICONS[key - 4]], "BOTTOMLEFT", -20, -15 },
+    --        [key > 8] = { "LEFT", class_group.class_icons[ICONS[key - 1]], "RIGHT", 10, 0 }
+    --    }
+    --
+    --    local points = BASE_POINTS[true]
+    --
+    --    if points then
+    --        for i = 1, #points do
+    --            if type(points[1]) == "table" then
+    --                i_frame:SetPoint(unpack(points[i]))
+    --            else
+    --                i_frame:SetPoint(unpack(points))
+    --            end
+    --        end
+    --    end
+    --
+    --    if key == 3 then
+    --        --i_frame:Hide()
+    --    end
+    --
+    --    if class ~= 'Total' then
+    --        i_frame:SetScript("OnEnter", function(_)
+    --            GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
+    --            GameTooltip:ClearLines()
+    --            local tip_text = ''
+    --            local names = MODULES.RaidManager:GetClassMemberNames(class)
+    --            for name_key, name in pairs({ unpack(names) }) do
+    --                tip_text = tip_text .. Utils:ternaryAssign(name_key < #names, name .. '\n', name)
+    --            end
+    --
+    --            i_frame.label:SetText(tostring(#names))
+    --
+    --            GameTooltip:AddLine(tip_text)
+    --            GameTooltip:Show()
+    --        end)
+    --
+    --        i_frame:SetScript("OnLeave", function()
+    --            GameTooltip:ClearLines()
+    --            GameTooltip:Hide()
+    --        end)
+    --    end
+    --
+    --    class_group.class_icons[class] = i_frame
+    --end
 end
 
 GUI.RaidTools = RaidTools

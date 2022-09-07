@@ -18,13 +18,15 @@ Constants.PHASE = tonumber(GetAddOnMetadata('PantheonDKP', 'X-Phase'))
 
 Constants.SUCCESS = '22bb33'
 Constants.WARNING = 'E71D36'
+Constants.INFO = 'F4A460'
 
--- The TBC classic classes
-Constants.CLASSES = { 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior' }
--- The TBC Classic Class colors
+-- The WOTLK classic classes
+Constants.CLASSES = { 'Death Knight', 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior' }
+-- The WOTLK Classic Class colors
 Constants.CLASS_COLORS = {
     ["Druid"] = "FF7C0A", ["Hunter"] = "AAD372", ["Mage"] = "3FC7EB", ["Paladin"] = "F48CBA",
-    ["Priest"] = "FFFFFF", ["Rogue"] = "FFF468", ["Shaman"] = "0070DD", ["Warlock"] = "8788EE", ["Warrior"] = "C69B6D"
+    ["Priest"] = "FFFFFF", ["Rogue"] = "FFF468", ["Shaman"] = "0070DD", ["Warlock"] = "8788EE", ["Warrior"] = "C69B6D",
+    ['Death Knight'] = 'C41E3A'
 }
 
 Constants.RAID_NAMES = {} -- 'Gruul's Lair', 'Tempest Keep', ...
@@ -33,66 +35,102 @@ Constants.RAID_BOSSES = {} -- ['Gruul's Lair'] = { ['id_to_name'] = ..., ['name_
 Constants.BOSS_TO_RAID = {} -- ['High King Maulgar'] = 'Gruul's Lair'
 Constants.ID_TO_BOSS_NAME = {};
 Constants.RAIDS = {
-    ["Gruul's Lair"] = {
+    ["Vault of Archavon"] = {
         ["phase"] = 1,
         ['index'] = 1,
-        [649] = "High King Maulgar",
-        [650] = "Gruul the Dragonkiller",
+        [1126] = "Archavon the Stone Watcher",
+        [1127] = "Emalon the Storm Watcher",
+        [1128] = "Toravon the Ice Watcher",
+        [1129] = "Koralon the Flame Watcher",
     },
-    ["Magtheridon's Lair"] = {
+    ["Naxxramas"] = {
         ["phase"] = 1,
         ['index'] = 2,
-        [651] = "Magtheridon",
+        [1107] = "Anub'Rekhan",
+        [1108] = "Gluth",
+        [1109] = "Gothik the Harvester",
+        [1110] = "Grand Widow Faerlina",
+        [1111] = "Grobbulus",
+        [1112] = "Heigan the Unclean",
+        [1113] = "Instructor Razuvious",
+        [1114] = "Kel'Thuzad",
+        [1115] = "Loatheb",
+        [1116] = "Maexxna",
+        [1117] = "Noth the Plaguebringer",
+        [1118] = "Patchwerk",
+        [1119] = "Sapphiron",
+        [1120] = "Thaddius",
+        [1121] = "The Four Horsemen",
     },
-    ["Serpentshrine Cavern"] = {
-        ["phase"] = 2,
+    ["The Obsidian Sanctum"] = {
+        ["phase"] = 1,
         ['index'] = 3,
-        [623] = "Hydross the Unstable",
-        [624] = "The Lurker Below",
-        [625] = "Leotheras the Blind",
-        [626] = "Fathom-Lord Karathress",
-        [627] = "Morogrim Tidewalker",
-        [628] = "Lady Vashj",
+        [1090] = "Sartharion",
+        [1091] = "Shadron",
+        [1092] = "Tenebron",
+        [1093] = "Vesperon",
     },
-    ["Tempest Keep"] = {
-        ["phase"] = 2,
+    ["The Eye of Eternity"] = {
+        ["phase"] = 1,
         ['index'] = 4,
-        [730] = "Al'ar",
-        [731] = "Void Reaver",
-        [732] = "High Astromancer Solarian",
-        [733] = "Kael'thas Sunstrider",
+        [1094] = "Malygos",
     },
-    ["Battle for Mount Hyjal"] = {
-        ["phase"] = 3,
+    ["Ulduar"] = {
+        ["phase"] = 2,
         ['index'] = 5,
-        [618] = "Rage Winterchill",
-        [619] = "Anetheron",
-        [620] = "Kaz'rogal",
-        [621] = "Azgalor",
-        [622] = "Archimonde",
+        [1130] = "Algalon the Observer",
+        [1131] = "Auriaya",
+        [1132] = "Flame Leviathan",
+        [1133] = "Freya",
+        [1134] = "General Vezax",
+        [1135] = "Hodir",
+        [1136] = "Ignis the Furnace Master",
+        [1137] = "Kologarn",
+        [1138] = "Mimiron",
+        [1139] = "Razorscale",
+        [1140] = "The Assembly of Iron",
+        [1141] = "Thorim",
+        [1142] = "XT-002 Deconstructor",
+        [1143] = "Yogg-Saron",
     },
-    ["Black Temple"] = {
+    ["Trial of the Crusader"] = {
         ["phase"] = 3,
         ['index'] = 6,
-        [601] = "High Warlord Naj'entus",
-        [602] = "Supremus",
-        [603] = "Shade of Akama",
-        [604] = "Teron Gorefiend",
-        [605] = "Gurtogg Bloodboil",
-        [606] = "Reliquary of Souls",
-        [607] = "Mother Shahraz",
-        [608] = "The Illidari Council",
-        [609] = "Illidan Stormrage",
+        [1085] = "Anub'arak",
+        [1086] = "Faction Champions",
+        [1087] = "Lord Jaraxxus",
+        [1088] = "Northrend Beasts",
+        [1089] = "Val'kyr Twins",
     },
-    ["Sunwell Plateau"] = {
-        ["phase"] = 5,
+    ["Onyxia's Lair"] = {
+        ["phase"] = 4,
         ['index'] = 7,
-        [724] = "Kalecgos",
-        [725] = "Brutallus",
-        [726] = "Felmyst",
-        [727] = "Eredar Twins",
-        [728] = "M'uru",
-        [729] = "Kil'jaeden",
+        [1084] = "Onyxia",
+        [1086] = "Faction Champions",
+    },
+    ["Icecrown Citadel"] = {
+        ["phase"] = 5,
+        ['index'] = 8,
+        [1095] = "Blood Council",
+        [1096] = "Deathbringer Saurfang",
+        [1097] = "Festergut",
+        [1098] = "Valithria Dreamwalker",
+        [1099] = "Icecrown Gunship Battle",
+        [1100] = "Lady Deathwhisper",
+        [1101] = "Lord Marrowgar",
+        [1102] = "Professor Putricide",
+        [1103] = "Queen Lana'thel",
+        [1104] = "Rotface",
+        [1105] = "Sindragosa",
+        [1106] = "The Lich King",
+    },
+    ["The Ruby Sanctum"] = {
+        ["phase"] = 6,
+        ['index'] = 9,
+        [1147] = "Baltharus the Warborn",
+        [1148] = "General Zarithrian",
+        [1149] = "Saviana Ragefire",
+        [1150] = "Halion",
     },
 }
 

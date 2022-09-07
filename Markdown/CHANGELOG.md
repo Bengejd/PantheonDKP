@@ -1,6 +1,11 @@
 # PDKP Change Log
 
+## 5.0.0
+### Features
+- WOTLK overhaul
+
 ##v4.9.10
+### Bug Fixes
 - Fixed the award popup DKP amount...again.
 
 ##v4.9.9

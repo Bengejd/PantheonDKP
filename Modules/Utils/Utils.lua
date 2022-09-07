@@ -22,7 +22,7 @@ local secondsInHour = 60 * 60
 local minutesInDay = 60 * 24
 local secondsInDay = 60 * 60 * 24
 
-Utils.CommPrefixNumber = "5"
+Utils.CommPrefixNumber = "6"
 
 function Utils:Initialize()
     self:GetResetInfo()
