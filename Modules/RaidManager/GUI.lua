@@ -60,9 +60,9 @@ function RaidTools:Initialize()
 
     -- Create all of the Backdrop groups.
     local GROUP_OPTS = {
-        {
-            ['name'] = 'class_group', ['title'] = 'Raid Breakdown', ['height'] = 170,
-        },
+        --{
+        --    ['name'] = 'class_group', ['title'] = 'Raid Breakdown', ['height'] = 170,
+        --},
         {
             ['name'] = 'promote_group', ['title'] = 'Raid Control', ['height'] = 100,
             ['description'] = "This will give all Officers & Class Leaders in the raid the 'Assist' role.",
@@ -88,7 +88,7 @@ function RaidTools:Initialize()
         GROUPS[opts['name']] = frame
     end
 
-    self:_CreateGroupIcons(GROUPS['class_group'])
+    --self:_CreateGroupIcons(GROUPS['class_group'])
 
     local BUTTON_OPTS = {
         {
@@ -293,7 +293,7 @@ function RaidTools:Initialize()
         RaidManager:ProcessRosterEditBox(roster_edit_box:GetText())
     end)
 
-    local open_roster = CreateFrame("Button", nil, GROUPS['class_group'].content, 'UIPanelButtonTemplate')
+    local open_roster = CreateFrame("Button", nil, GROUPS['promote_group'].content, 'UIPanelButtonTemplate')
     open_roster:SetPoint("TOPRIGHT", 8, 8)
     open_roster:SetNormalTexture(Media.EXPAND_OUT)
     open_roster:SetSize(25, 25);
@@ -306,17 +306,17 @@ function RaidTools:Initialize()
     end)
     open_roster:Hide();
 
-    f.class_groups = GROUPS['class_group']
+    --f.class_groups = GROUPS['class_group']
     f.spam_button = spam_button
     f.GROUPS = GROUPS;
 
-    f.updateClassGroups = function()
-        local classGroups = f.class_groups.class_icons
-        for className, classGroup in pairs(classGroups) do
-            local numClass = MODULES.GroupManager:GetNumClass(className)
-            classGroup.label:SetText(tostring(numClass))
-        end
-    end
+    --f.updateClassGroups = function()
+    --    local classGroups = f.class_groups.class_icons
+    --    for className, classGroup in pairs(classGroups) do
+    --        local numClass = MODULES.GroupManager:GetNumClass(className)
+    --        classGroup.label:SetText(tostring(numClass))
+    --    end
+    --end
 
     f:SetScript("OnShow", f.updateClassGroups)
 
