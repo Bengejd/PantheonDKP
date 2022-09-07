@@ -99,7 +99,6 @@ function Comm:RegisterComm()
 end
 
 function Comm:UnregisterComm()
-    --PDKP:PrintD("Unregistering Comm", self.ogPrefix);
     self.registered = false;
     PDKP.CORE:UnregisterComm(self.prefix);
 end
@@ -287,7 +286,7 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     local pfx = self.ogPrefix
     local data
 
-    if pfx == 'SyncSmall' or pfx == 'SyncDelete' then
+    if pfx == 'SyncSmall' or pfx == 'SyncDelete' or pfx == 'RaidMerge' then
         data = CommsManager:DataDecoder(message)
     end
 
@@ -298,11 +297,9 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
     elseif pfx == 'SyncLarge' or pfx == 'RaidMerge' then
         return MODULES.CommsManager:ChunkedDecoder(message, sender)
     elseif pfx == 'SyncOver' or pfx == 'RaidOver' then
-
         if MODULES.Database:HasAutoBackupEnabled() then
             MODULES.Database:CreateSnapshot();
         end
-
         data = CommsManager:DataDecoder(message)
         local group = MODULES.GroupManager;
         if PDKP.canEdit and group:IsInRaid() and group:HasDKPOfficer() then
@@ -310,7 +307,6 @@ function PDKP_OnComm_EntrySync(comm, message, sender)
                return GUI.Dialogs:Show('PDKP_OFFICER_OVERWRITE_CONFIRM', nil, {['data'] = data, ['sender'] = sender})
             end
         end
-
         DKPManager:ProcessOverwriteSync(data, sender)
         self:UnregisterComm()
     end

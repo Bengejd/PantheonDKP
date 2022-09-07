@@ -88,8 +88,6 @@ function RaidTools:Initialize()
         GROUPS[opts['name']] = frame
     end
 
-    --self:_CreateGroupIcons(GROUPS['class_group'])
-
     local BUTTON_OPTS = {
         {
             ['parent'] = GROUPS['promote_group'],
@@ -266,46 +264,6 @@ function RaidTools:Initialize()
     disallow_edit:SetScript("OnSizeChanged", editBoxResized)
     invite_spam_box:SetScript("OnSizeChanged", editBoxResized)
 
-    local roster_frame = GUtils:createBackdropFrame('raid_roster', f, 'Roster', nil);
-    roster_frame:SetPoint("TOPLEFT", f, "TOPRIGHT");
-    roster_frame:SetPoint("BOTTOMLEFT", f, "BOTTOMRIGHT");
-    roster_frame:SetWidth(200);
-    roster_frame:Hide();
-
-    local roster_opts = {
-        ['name'] = 'Roster_Edit_Box',
-        ['parent'] = roster_frame,
-        ['title'] = '',
-        ['multi'] = true,
-        ['max_chars'] = 1000,
-    }
-    local roster_edit_box = GUtils:createEditBox(roster_opts)
-    roster_edit_box:SetPoint("TOPLEFT", roster_frame.content, "TOPLEFT", 0, 0)
-    roster_edit_box:SetPoint("TOPRIGHT", roster_frame.content, "TOPRIGHT", 0, 0);
-    roster_edit_box.frame:SetFrameLevel(roster_edit_box:GetFrameLevel() -2);
-    roster_edit_box:SetHeight(200);
-
-    local process_btn = CreateFrame("Button", nil, roster_edit_box.frame, "UIPanelButtonTemplate")
-    process_btn:SetPoint("TOPRIGHT", roster_edit_box.frame, "BOTTOMRIGHT", 0, 0);
-    process_btn:SetWidth(100);
-    process_btn:SetText("Process Roster");
-    process_btn:SetScript("OnClick", function()
-        RaidManager:ProcessRosterEditBox(roster_edit_box:GetText())
-    end)
-
-    local open_roster = CreateFrame("Button", nil, GROUPS['promote_group'].content, 'UIPanelButtonTemplate')
-    open_roster:SetPoint("TOPRIGHT", 8, 8)
-    open_roster:SetNormalTexture(Media.EXPAND_OUT)
-    open_roster:SetSize(25, 25);
-    open_roster:SetScript("OnClick", function()
-        if roster_frame:IsVisible() then
-            roster_frame:Hide()
-        else
-            roster_frame:Show();
-        end
-    end)
-    open_roster:Hide();
-
     f.spam_button = spam_button
     f.GROUPS = GROUPS;
 
@@ -346,105 +304,6 @@ function PDKP_RaidTools_TextValidFunc(box)
     if box_funcs[boxID] then
         return box_funcs[boxID]()
     end
-
-    --local box_funcs = {
-    --    ['invite_spam'] = function()
-    --        --RaidTools.invite_control['text'] = bt
-    --    end,
-    --    ['disallow_invite'] = function()
-    --        --local text_arr = Util:SplitString(bt, ',')
-    --        --RaidTools.invite_control['ignore_from'] = text_arr
-    --        --Settings:UpdateIgnoreFrom(text_arr)
-    --    end,
-    --    ['invite_commands'] = function()
-    --        --local text_arr = Util:SplitString(bt, ',')
-    --        --RaidTools.invite_control['commands'] = text_arr
-    --    end,
-    --}
-end
-
-function RaidTools:_CreateGroupIcons(class_group)
-    class_group.class_icons = {}
-
-    local classTexture = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
-
-    local CLASS_ICON_TCOORDS = CLASS_ICON_TCOORDS
-
-    local ICONS = { 'DKP', 'Total', 'Tank', unpack(Constants.CLASSES) }
-    local ICON_PATHS = { ['Total'] = Media.TOTAL_ICON, ['Tank'] = Media.TANK_ICON, ['DKP'] = Media.DKP_OFFICER_ICON }
-    for i = 1, #Constants.CLASSES do
-        ICON_PATHS[Constants.CLASSES[i]] = classTexture
-    end
-
-    -- TODO: Fix this to work with the new class icons.
-    --for key, class in pairs(ICONS) do
-    --    local i_frame = GUtils:createIcon(class_group.content, "0")
-    --    i_frame.class = class
-    --
-    --    i_frame.icon:SetTexture(ICON_PATHS[class])
-    --
-    --    -- Set up the text coords for the class icons
-    --    if key > 3 then
-    --        i_frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[strupper(class)]))
-    --    end
-    --
-    --    -- Set up the previous frames.
-    --    local previous_frame;
-    --    if key > 1 then
-    --        local prev_key = Utils:ternaryAssign(key <= 8, 1, 6)
-    --        previous_frame = class_group.class_icons[ICONS[key - prev_key]]
-    --    end
-    --
-    --    local BASE_POINTS = {
-    --        [key == 1] = { { "TOP", 0, 0 }, { "CENTER", 0, 0 } }, -- DKP
-    --        [key == 2] = { "RIGHT", class_group.class_icons[ICONS[1]], "LEFT", -10, 0 }, -- Total
-    --        [key == 3] = { "LEFT", class_group.class_icons[ICONS[1]], "RIGHT", 10, 0 }, -- Tanks
-    --        [key == 4] = { "TOPRIGHT", class_group.class_icons[ICONS[2]], "BOTTOMLEFT", 9, -15 },
-    --        [key > 4 and key <= 7] = { "LEFT", previous_frame, "RIGHT", 10, 0 },
-    --        [key == 8] = { "TOPLEFT", class_group.class_icons[ICONS[key - 4]], "BOTTOMLEFT", -20, -15 },
-    --        [key > 8] = { "LEFT", class_group.class_icons[ICONS[key - 1]], "RIGHT", 10, 0 }
-    --    }
-    --
-    --    local points = BASE_POINTS[true]
-    --
-    --    if points then
-    --        for i = 1, #points do
-    --            if type(points[1]) == "table" then
-    --                i_frame:SetPoint(unpack(points[i]))
-    --            else
-    --                i_frame:SetPoint(unpack(points))
-    --            end
-    --        end
-    --    end
-    --
-    --    if key == 3 then
-    --        --i_frame:Hide()
-    --    end
-    --
-    --    if class ~= 'Total' then
-    --        i_frame:SetScript("OnEnter", function(_)
-    --            GameTooltip:SetOwner(i_frame, "ANCHOR_BOTTOM")
-    --            GameTooltip:ClearLines()
-    --            local tip_text = ''
-    --            local names = MODULES.RaidManager:GetClassMemberNames(class)
-    --            for name_key, name in pairs({ unpack(names) }) do
-    --                tip_text = tip_text .. Utils:ternaryAssign(name_key < #names, name .. '\n', name)
-    --            end
-    --
-    --            i_frame.label:SetText(tostring(#names))
-    --
-    --            GameTooltip:AddLine(tip_text)
-    --            GameTooltip:Show()
-    --        end)
-    --
-    --        i_frame:SetScript("OnLeave", function()
-    --            GameTooltip:ClearLines()
-    --            GameTooltip:Hide()
-    --        end)
-    --    end
-    --
-    --    class_group.class_icons[class] = i_frame
-    --end
 end
 
 GUI.RaidTools = RaidTools

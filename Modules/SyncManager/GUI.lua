@@ -64,21 +64,9 @@ function SyncGUI:Initialize()
           ['checkChildren'] = {
               {
                   ['group'] = 'sync_group_group',
-                  ['siblings'] = { 'PDKP_OfficerSyncGuild'},
-                  --['siblings'] = { 'PDKP_OfficerSyncGuild', 'PDKP_OfficerSyncWhisper' },
-                  ['name'] = 'Raid',
-              },
-              {
-                  ['group'] = 'sync_group_group',
-                  --['siblings'] = { 'PDKP_OfficerSyncRaid', 'PDKP_OfficerSyncWhisper' },
                   ['siblings'] = { 'PDKP_OfficerSyncRaid', },
                   ['name'] = 'Guild',
               },
-              --{
-              --    ['group'] = 'sync_group_group',
-              --    ['siblings'] = { 'PDKP_OfficerSyncRaid', 'PDKP_OfficerSyncGuild' },
-              --    ['name'] = 'Whisper',
-              --}
           },
         },
     }
@@ -118,7 +106,9 @@ function SyncGUI:Initialize()
             cb:SetScript("OnClick", function()
                 for _, bName in pairs(checkSiblings) do
                     local b = _G['pdkp_filter_' .. bName];
-                    b:SetChecked(false);
+                    if (b ~= nil) then
+                        b:SetChecked(false);
+                    end
                 end
                 cb:SetChecked(true);
                 MODULES.SyncManager:AdjustSettings(frame.syncSetting, cb.uniqueValue);

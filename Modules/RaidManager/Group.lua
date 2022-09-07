@@ -85,7 +85,7 @@ end
 
 function Group:Reinitialize()
 
-    function pdkp_clearFrameEvents(frame)
+    local function pdkp_clearFrameEvents(frame)
         frame:SetScript("OnEvent", nil);
     end
 
@@ -189,13 +189,7 @@ function Group:Refresh()
     self:_RefreshMembers()
 
     for i = 1, numGroupMembers do
-        local name, rank, _, _, class, _, _, _, _, role, isML, _ = GetRaidRosterInfo(i);
-
-        --if role == 'MAINTANK' then
-        --    tinsert(self.classes['Tank'], name)
-        --else
-        --    tinsert(self.classes[class], name)
-        --end
+        local name, rank, _, _, _, _, _, _, _, _, isML, _ = GetRaidRosterInfo(i);
 
         tinsert(self.memberNames, name)
 
@@ -304,7 +298,6 @@ function Group:SetDKPOfficer(data)
 end
 
 function Group:RequestDKPOfficer()
-    --PDKP:PrintD('Requesting DKP officer');
     if self.requestedDKPOfficer or self:HasDKPOfficer() then
         return
     end

@@ -518,7 +518,7 @@ function Options:SetLastSyncSent()
 end
 
 function Options:SetLastSyncRec()
-    print("Setting new last sync rec");
+    --print("Setting new last sync rec");
     self.db['sync']['lastSyncRec'] = GetServerTime()
     return self.db['sync']['lastSyncRec'];
 end

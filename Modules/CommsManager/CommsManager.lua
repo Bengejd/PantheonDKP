@@ -56,8 +56,8 @@ function Comms:RegisterComms()
         ['SyncLarge'] = { ['combat'] = false, },
         ['SyncOver'] = { ['combat'] = false, },
 
-        ['RaidOver'] = { ['combat'] = true, ['channel'] = 'RAID' },
-        ['RaidMerge'] = { ['combat'] = true, ['channel'] = 'RAID' },
+        ['RaidOver'] = { ['combat'] = true, ['channel'] = 'RAID', ['self'] = true, },
+        ['RaidMerge'] = { ['combat'] = true, ['channel'] = 'RAID', ['self'] = true, },
 
         --- RAID COMMS
         ['DkpOfficer'] = { ['self'] = true, ['channel'] = 'RAID',  },
@@ -188,6 +188,7 @@ function Comms:SendCommsMessage(prefix, data, skipEncoding)
         if prefix == 'SentInv' then
             params[2] = data
         end
+
         return PDKP.CORE:SendCommMessage(comm.prefix, transmitData, unpack(params))
     else
         --PDKP:PrintD(comm.ogPrefix, comm ~= nil, comm:IsValid())
@@ -320,6 +321,9 @@ function Comms:ChunkedDecoder(data, sender)
             processing:SetScript('OnUpdate', nil)
             --PDKP:PrintD("Chunk Processing finished", sender);
             local deserialized = self:_Deserialize(WoW_decompressed)
+
+
+
             return MODULES.DKPManager:ImportBulkEntries(deserialized, sender, true);
         end
     end)

@@ -69,8 +69,10 @@ function Sync:SendSync()
 
     local syncType = self.settings['type']
     local syncGroup = self.settings['group']
+
     local syncData = self:GetSyncData(syncType);
     local commsChannel = self:GetSyncCommChannel(syncGroup, syncType);
+
     if syncData ~= nil and commsChannel ~= nil then
         MODULES.CommsManager:SendCommsMessage(commsChannel, syncData)
         self:Reset();

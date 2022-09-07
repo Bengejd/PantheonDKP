@@ -249,7 +249,7 @@ function Chat:_HandleSlashCommands(msg)
         ['watchFramerate'] = true,
         ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
         ['testDKPCap'] = true, ['forceOfficerComms'] = true,
-        ['GetTheoreticalCap'] = true, ['TestRoster'] = true,
+        ['GetTheoreticalCap'] = true,
         ['FixWrongfulDecay'] = true, ['testPet'] = true,
         ['TestNSFWSync'] = true,
     }
