@@ -7,17 +7,15 @@ local Utils = PDKP.Utils;
 
 local RaidTools = { _initialized = false }
 
-local RaidManager, Media, Constants;
+local RaidManager;
 
 local RaidFrame = RaidFrame
-local CreateFrame, unpack, GameTooltip = CreateFrame, unpack, GameTooltip
+local CreateFrame, unpack, _ = CreateFrame, unpack, GameTooltip
 local floor, _ = math.floor, math.fmod
-local strupper, strlower = string.upper, string.lower
+local _, strlower = string.upper, string.lower
 
 function RaidTools:Initialize()
     RaidManager = MODULES.RaidManager
-    Media = MODULES.Media
-    Constants = MODULES.Constants
 
     RaidTools.SpamRunning = false
     RaidTools.isDKPRaid = false;
