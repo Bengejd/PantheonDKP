@@ -5,11 +5,11 @@ local Utils = PDKP.Utils;
 
 local GetServerTime = GetServerTime
 local _, _, pairs = table.insert, table.sort, pairs
-local strfind = string.find
 
 local _, Guild, CommsManager, LEDGER;
 
 local Ledger = { _initialized = false }
+
 
 function Ledger:Initialize()
     CommsManager = MODULES.CommsManager;
