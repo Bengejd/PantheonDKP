@@ -245,7 +245,7 @@ function MemberTable:Filters()
 
     local rows = { -- Our filter rows
         { -- Row 1
-            { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -20, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
+            { ['point'] = 'TOPLEFT', ['x'] = 15, ['y'] = -10, ['displayText'] = 'Online', ['filterOn'] = 'online', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'In Raid', ['filterOn'] = 'raid', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Selected', ['filterOn'] = 'selected', ['enabled'] = false },
             { ['point'] = 'TOPLEFT', ['x'] = 30, ['y'] = 0, ['displayText'] = 'Select All', ['filterOn'] = 'Select_All', ['enabled'] = false },
@@ -266,7 +266,7 @@ function MemberTable:Filters()
 
     for key, class in pairs(CLASSES) do
         local classBtn = {
-            ['point'] = 'TOPLEFT', ['x'] = 80, ['y'] = 70, ['displayText'] = class,
+            ['point'] = 'TOPLEFT', ['x'] = 60, ['y'] = 70, ['displayText'] = class,
             ['filterOn'] = 'Class_' .. class, ['center'] = true, ['enabled'] = true
         }
         if key >= 4 and key <= 6 then
@@ -312,10 +312,10 @@ function MemberTable:Filters()
             end
 
             if rowKey == 2 then
-                cb:SetPoint("LEFT", self.FilterButtons[#self.FilterButtons - 4], "LEFT", 0, -30);
+                cb:SetPoint("LEFT", self.FilterButtons[#self.FilterButtons - 4], "LEFT", 0, -25);
             elseif rowKey == 3 then
                 if fKey == 1 then
-                    cb:SetPoint("LEFT", self.FilterButtons[#self.FilterButtons - 1], "LEFT", 0, -30);
+                    cb:SetPoint("LEFT", self.FilterButtons[#self.FilterButtons - 1], "LEFT", 0, -25);
                 else
                     cb:SetPoint("TOPRIGHT", self.FilterButtons[#self.FilterButtons - 1], "TOPRIGHT", filter['x'], 0);
                 end

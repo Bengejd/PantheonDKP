@@ -4,6 +4,17 @@
 ### Features
 - WOTLK overhaul
 
+##v4.9.12
+### Features
+- Added death knights to the list of classes that PDKP supports
+
+### Bug Fixes
+- Fixed a bug where the addon would not initialize quick enough for the minimap to be rolled up.
+- Fixed a bug where you could not set DKP Officer
+- Fixed a bug where you could not open PDKP
+- Fixed a bug where you could not receive syncs
+- Fixed a bug where Death Knights were not showing up properly in the display
+
 ##v4.9.10
 ### Bug Fixes
 - Fixed the award popup DKP amount...again.
