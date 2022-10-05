@@ -90,8 +90,6 @@ function DKP:Initialize()
     self.rolledBackEntries = {}
     self.calibratedTotals = {}
 
-    MODULES.Database:CheckForDKPMigrations();
-
     self:_LoadEncodedDatabase()
     self:LoadPrevFourWeeks()
 
@@ -763,12 +761,16 @@ function DKP:AddToCache(message, sender, decoded)
 
         if decoded then
             for key, entry in pairs(message['entries']) do
-
                 self.syncCacheEntries[key] = entry;
             end
         end
 
-        table.insert(self.syncCache, { ['message'] = message, ['sender'] = sender, ['decoded'] = decoded });
+        table.insert(self.syncCache, {
+            ['message'] = message,
+            ['sender'] = sender,
+            ['decoded'] = decoded,
+            ['timestamp'] = GetServerTime(),
+        });
     else
         --PDKP:PrintD("Skipping cache for", sender);
     end

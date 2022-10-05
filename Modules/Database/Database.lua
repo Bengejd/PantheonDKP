@@ -2,10 +2,11 @@ local _, PDKP = ...
 
 local MODULES = PDKP.MODULES
 local Utils = PDKP.Utils;
+local GetServerTime = GetServerTime
 
 local DB = {}
 
-local database_names = { 'personal', 'guild', 'dkp', 'pug', 'settings', 'lockouts', 'ledger', 'decayTracker', 'sync', 'phases', 'snapshot', 'cache', 'consolidations', 'shame' }
+local database_names = { 'guild', 'dkp', 'pug', 'lockouts', 'ledger', 'sync', 'phases', 'snapshot', 'cache', 'consolidations', 'shame' }
 
 local function UpdateGuild()
     DB.server_faction_guild = string.lower(UnitFactionGroup("player") .. " " .. GetNormalizedRealmName() .. " " .. (GetGuildInfo("player") or "unguilded"))
@@ -16,6 +17,8 @@ function DB:Initialize()
     UpdateGuild()
 
     local dbRef = self.server_faction_guild;
+
+    self:_WrathReset();
 
     if type(PDKP_DB[dbRef]) ~= "table" then
         PDKP_DB[dbRef] = {}
@@ -28,17 +31,48 @@ function DB:Initialize()
         end
     end
 
-    self:Personal()[UnitName("PLAYER")] = true
-
     self:_Migrations()
+end
+
+function DB:_WrathReset()
+    local globalDB = self:Global();
+
+    local db = PDKP_DB[self.server_faction_guild];
+    local oldSettings = {};
+
+    if db ~= nil then
+        oldSettings = db['settings'];
+        if (oldSettings == nil) then
+            oldSettings = {};
+        end
+    end
+
+    if globalDB["wrathReset"] == nil then
+        if type(oldSettings) == "table" then
+            local settingsDBCopy = Utils:DeepCopy(oldSettings);
+            PDKP_DB = {
+                ["global"] = {
+                    ["settings"] = settingsDBCopy,
+                    ["wrathReset"] = true,
+                }
+            }
+        end
+    end
 end
 
 function DB:_Migrations()
 
-    -- Remove incorrect ledger
-    local db = self:Server()
-    if db['Ledger'] and db['ledger'] then
-        db['Ledger'] = nil;
+    local globalDB = self:Global();
+
+    if (globalDB["wrathReset"] == true) then
+        -- Cleanup Cache Entries that are outdated.
+        local cacheDB = self:Cache();
+
+        for key, entry in pairs(cacheDB) do
+            if (entry["timestamp"] == nil or entry["timestamp"] < (GetServerTime() - 604800)) then
+                cacheDB[key] = nil;
+            end
+        end
     end
 end
 
@@ -48,10 +82,6 @@ end
 
 function DB:Server()
     return PDKP_DB[self.server_faction_guild]
-end
-
-function DB:Personal()
-    return PDKP_DB[self.server_faction_guild]['personal']
 end
 
 function DB:Guild()
@@ -67,11 +97,11 @@ function DB:Pug()
 end
 
 function DB:Settings()
-    return PDKP_DB[self.server_faction_guild]['settings']
+    return self:Global()['settings']
 end
 
 function DB:Sync()
-    return PDKP_DB[self.server_faction_guild]['settings']['sync']
+    return self:Settings()['sync']
 end
 
 function DB:Lockouts()
@@ -114,16 +144,6 @@ function DB:Dev()
     return PDKP_DB[self.server_faction_guild]['dev']
 end
 --@end-do-not-package@
-
-function DB:CheckForDKPMigrations()
-    local global = self:Global();
-
-    if global['migratedDKP'] == nil then
-       -- PDKP:PrintD("FixingDKP");
-        global['migratedDKP'] = true
-        MODULES.CommsManager:FixDKPDB();
-    end
-end
 
 function DB:CreateSnapshot()
     PDKP.CORE:Print("Creating Database Backup");
@@ -192,11 +212,11 @@ end
 
 function DB:UpdateSetting(settingName, value)
     if settingName == 'disallow_invite' then
-        PDKP_DB[self.server_faction_guild]['settings']['ignore_from'] = value
+        self:Settings()['ignore_from'] = value
     elseif settingName == 'invite_commands' then
-        PDKP_DB[self.server_faction_guild]['settings']['invite_commands'] = value
+        self:Settings()['invite_commands'] = value
     elseif settingName == 'ignore_pugs' then
-        PDKP_DB[self.server_faction_guild]['settings']['ignore_pugs'] = value
+        self:Settings()['ignore_pugs'] = value
     end
 end
 

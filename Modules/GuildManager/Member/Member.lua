@@ -58,14 +58,14 @@ function Member:Save()
 end
 
 function Member:IsRaidReady()
-    return self.lvl >= 68 or self.canEdit or self.isOfficer
+    return self.lvl >= MODULES.Constants.MAX_LEVEL or self.canEdit or self.isOfficer
 end
 
 function Member:IsStrictRaidReady()
     if PDKP:IsDev() then
         return self.canEdit or self.isOfficer;
     end
-    return self.lvl >= 70 and (self.canEdit or self.isOfficer)
+    return self.lvl >= MODULES.Constants.MAX_LEVEL and (self.canEdit or self.isOfficer)
 end
 
 function Member:CanEdit()

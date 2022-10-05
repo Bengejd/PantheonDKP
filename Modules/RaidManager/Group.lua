@@ -316,6 +316,11 @@ end
 
 function Group:GetRaidMemberObjects()
     local memberNames, members = {}, {}
+
+    if self.memberNames == nil then
+        return memberNames, members;
+    end
+
     for i = 1, #self.memberNames do
         local member = GuildManager:GetMemberByName(self.memberNames[i])
         if member then

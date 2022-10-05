@@ -59,10 +59,7 @@ function Adjust:Initialize()
     tinsert(entry_details.children, mainDD)
 
     local raid_items = {}
-    local sortedPairs = {
-        "Gruul's Lair", "Magtheridon's Lair", "Serpentshrine Cavern", "Tempest Keep", "Battle for Mount Hyjal",
-        "Black Temple", "Sunwell Plateau"
-    };
+    local sortedPairs = MODULES.Constants.SORTED_RAID_PAIRS
 
     for raid_name, raid_table in pairs(MODULES.Constants.RAID_BOSSES) do
         raid_items[raid_name] = raid_table['boss_names']

@@ -39,11 +39,7 @@ end
 local function Initialize_SavedVariables()
     if type(PDKP_DB) ~= "table" then
         PDKP_DB = {
-            global = {
-                version = Initialize_Default_Version(),
-                previous = Initialize_Default_Version(),
-                locked = false
-            }
+            global = {}
         }
     end
 
@@ -59,6 +55,10 @@ local function Initialize_SavedVariables()
 end
 
 local function IsNewVersion(old, new)
+    if (type(old) ~= "table" or type(new) ~= "table") then
+        return false
+    end
+
     if old.major < new.major then
         return true
     elseif old.minor < new.minor then
@@ -75,13 +75,13 @@ local function Initialize_Versioning()
     local old = PDKP_DB.global.version
     local new = Initialize_Default_Version({ major, minor, patch, changeset })
 
-    if IsNewVersion(old, new) then
-        PDKP_DB.global.isLocked = true
-        PDKP_DB.global.newVersionDetected = true
-    end
+    --if IsNewVersion(old, new) then
+    --    PDKP_DB.global.isLocked = true
+    --    PDKP_DB.global.newVersionDetected = true
+    --end
 
     -- set new version
-    PDKP_DB.global.version = new
+    --PDKP_DB.global.version = new
     -- update string
     changeset = new.changeset
 

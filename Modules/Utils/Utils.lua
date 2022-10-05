@@ -22,7 +22,7 @@ local secondsInHour = 60 * 60
 local minutesInDay = 60 * 24
 local secondsInDay = 60 * 60 * 24
 
-Utils.CommPrefixNumber = "6"
+Utils.CommPrefixNumber = "1"
 
 function Utils:Initialize()
     self:GetResetInfo()
@@ -225,7 +225,6 @@ function Utils:GetInstanceStatus()
     local arena = instance_type == 'arena';
 
     return isInInstance, { ['dungeon'] = dungeon, ['raid'] = raid, ['battlegrounds'] = bg, ['arena'] = arena }
-
 end
 
 -----------------------------
