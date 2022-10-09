@@ -1,5 +1,11 @@
 # PDKP Change Log
 
+##v4.10.0
+### Features
+- Added WOTLK bosses & raids
+- Changed DKP awardment back to 10 dkp
+- reset DKP back to initial values (30) for everyone.
+
 ##v4.9.12
 ### Features
 - Added death knights to the list of classes that PDKP supports
