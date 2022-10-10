@@ -48,37 +48,6 @@ function map:Initialize()
     end
 end
 
-function map:Initialize()
-    --local settingsDB = MODULES.Database:Settings();
-    --local miniDB = settingsDB['minimap'];
-    --
-    --self.LDB = LibStub("LibDataBroker-1.1")
-    --self.broker = self.LDB:NewDataObject('PantheonDKP', {
-    --    type = "launcher",
-    --    text = 'PantheonDKP',
-    --    icon = MODULES.Media.PDKP_ADDON_ICON,
-    --    OnTooltipShow = function(tooltip)
-    --        local texts = map:_GetToolTipTexts()
-    --        for i = 1, #texts do
-    --            tooltip:AddLine(unpack(texts[i]))
-    --        end
-    --        tooltip:Show()
-    --    end,
-    --    OnClick = function(_, button)
-    --        map:HandleIconClicks(button)
-    --    end
-    --});
-    --
-    --self.icon = LibStub("LibDBIcon-1.0")
-    --self.icon:Register('PantheonDKP', self.broker, miniDB)
-    --
-    --if miniDB['hide'] then
-    --    self:Hide();
-    --else
-    --    self:Show()
-    --end
-end
-
 function map:Show()
     self.icon:Show("PantheonDKP")
     self.icon:Show("PantheonDKP")
