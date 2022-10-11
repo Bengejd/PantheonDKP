@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+##v4.10.1
+### Bug Fixes
+- Fixed the missing minimap button.
+
 ##v4.10.0
 ### Features
 - Added WOTLK bosses & raids
