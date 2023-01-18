@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.10.2
+### Bug Fixes
+- Fixed an issue with CreateFontString's parameters
+
 ## v4.10.1
 ### Bug Fixes
 - Fixed the missing minimap button.
