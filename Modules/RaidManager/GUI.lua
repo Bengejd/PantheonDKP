@@ -238,7 +238,7 @@ function RaidTools:Initialize()
     spam_button:SetPoint("TOPLEFT", invite_spam_box.desc, "BOTTOMLEFT", 0, -8)
     spam_button:SetPoint("TOPRIGHT", invite_spam_box.desc, "BOTTOMRIGHT", 0, 8)
 
-    spam_button_desc = spam_button:CreateFontString(spam_button, "OVERLAY", "GameFontHighlightSmall")
+    spam_button_desc = spam_button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     spam_button_desc:SetPoint("TOPLEFT", spam_button, "BOTTOMLEFT", 0, -8)
     spam_button_desc:SetPoint("TOPRIGHT", spam_button, "BOTTOMRIGHT", 0, 8)
     spam_button_desc:SetText("This will send your message to Guild chat every 90 seconds for 15 minutes or until the raid is full. Click again to stop the message spam.")

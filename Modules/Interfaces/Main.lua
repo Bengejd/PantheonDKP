@@ -68,21 +68,21 @@ function Main:Initialize()
     b:SetSize(22, 25) -- width, height
     b:SetPoint("TOPRIGHT", -2, -10)
 
-    local addon_title = f:CreateFontString(f, "Overlay", "BossEmoteNormalHuge")
+    local addon_title = f:CreateFontString(nil, "OVERLAY", "BossEmoteNormalHuge")
     addon_title:SetText(Utils:FormatTextColor('PantheonDKP', MODULES.Constants.ADDON_HEX))
     addon_title:SetSize(200, 25)
     addon_title:SetPoint("CENTER", f, "TOP", 0, -28)
     addon_title:SetScale(0.9)
 
     --- Addon Version
-    local addon_version = f:CreateFontString(f, "Overlay", "GameFontNormalSmall")
+    local addon_version = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     addon_version:SetHeight(14)
     addon_version:SetText(MODULES.Constants.COLORED_ADDON_VERSION)
     addon_version:SetWidth(addon_version:GetStringWidth() + 10)
     addon_version:SetPoint("RIGHT", b, "LEFT", 0, -3)
 
     --- Addon Author
-    local addon_author = f:CreateFontString(f, "Overlay", "Game11Font")
+    local addon_author = f:CreateFontString(nil, "OVERLAY", "Game11Font")
     addon_author:SetSize(200, 20)
     addon_author:SetText("Author: Neekio-Blaumeux")
     addon_author:SetPoint("TOPLEFT", f, "TOPLEFT", 40, -15)

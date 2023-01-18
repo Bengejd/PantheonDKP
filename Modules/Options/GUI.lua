@@ -94,8 +94,8 @@ function opts:CreatePlayerList()
     local createPlayerFrame = function()
         local f = CreateFrame("Frame", nil, scrollContent, nil)
         f:SetSize(scrollWidth, 18)
-        f.name = f:CreateFontString(f, "OVERLAY", "GameFontHighlightLeft")
-        f.breakdown = f:CreateFontString(f, 'OVERLAY', 'GameFontHighlightRight')
+        f.name = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLeft")
+        f.breakdown = f:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightRight')
         f.name:SetHeight(18)
         f.breakdown:SetHeight(18)
         f.name:SetPoint("LEFT")
@@ -105,7 +105,7 @@ function opts:CreatePlayerList()
 
     local masterFrame = CreateFrame("Frame", nil, scrollContent, nil);
     masterFrame:SetSize(scrollWidth, 18);
-    masterFrame.name = masterFrame:CreateFontString(masterFrame, "OVERLAY", "GameFontNormalLeft")
+    masterFrame.name = masterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
     masterFrame.name:SetHeight(18);
     masterFrame.name:SetPoint("LEFT");
     masterFrame.name:SetText("Master Syncer");
@@ -125,11 +125,11 @@ function opts:CreatePlayerList()
 
     local shamedSyncs = CreateFrame("Frame", nil, scrollContent, nil);
     shamedSyncs:SetSize(scrollWidth, 18);
-    shamedSyncs.name = shamedSyncs:CreateFontString(shamedSyncs, "OVERLAY", "GameFontNormalLeft")
+    shamedSyncs.name = shamedSyncs:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
     shamedSyncs.name:SetHeight(18);
     shamedSyncs.name:SetPoint("LEFT");
     shamedSyncs.name:SetText("Shamed Syncs");
-    shamedSyncs.breakdown = shamedSyncs:CreateFontString(shamedSyncs, "OVERLAY", "GameFontNormalLeft")
+    shamedSyncs.breakdown = shamedSyncs:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
     shamedSyncs.breakdown:SetHeight(18);
     shamedSyncs.breakdown:SetPoint("RIGHT");
     shamedSyncs.breakdown:SetText("Last Shamed");

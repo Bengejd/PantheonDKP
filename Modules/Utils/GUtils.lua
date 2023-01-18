@@ -71,7 +71,7 @@ function GUtils:createCheckButton(opts)
 
     cb:SetChecked(enabled)
 
-    local cbd = cb:CreateFontString(cb, "OVERLAY", "GameFontHighlightSmall")
+    local cbd = cb:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     cbd:SetText(desc)
     cbd:SetPoint("TOPLEFT", cb, "BOTTOMLEFT", 2, 0)
     cbd:SetWidth(100)
@@ -116,7 +116,7 @@ function GUtils:createBackdropFrame(name, parent, title, ignoreBorder)
     content:SetPoint("TOPLEFT", 10, -10)
     content:SetPoint("BOTTOMRIGHT", -10, 10)
 
-    local content_desc = content:CreateFontString(content, "OVERLAY", "GameFontHighlightSmall")
+    local content_desc = content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     content_desc:SetPoint("BOTTOMLEFT")
     content_desc:SetPoint("BOTTOMRIGHT")
     content_desc:SetJustifyH("LEFT")
@@ -178,7 +178,7 @@ function GUtils:createDropdown(opts)
     end
 
     local dropdown = CreateFrame("Frame", dropdown_name, opts['parent'], 'UIDropDownMenuTemplate')
-    local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
+    local dd_title = dropdown:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOPLEFT", 20, 10)
 
     dropdown.uniqueID = opts['name']
@@ -298,7 +298,7 @@ function GUtils:createNestedDropdown(opts)
         dropdown:Hide()
     end
 
-    local dd_title = dropdown:CreateFontString(dropdown, 'OVERLAY', 'GameFontNormal')
+    local dd_title = dropdown:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOPLEFT", 20, 10)
 
     dropdown.uniqueID = opts['name']
@@ -527,12 +527,12 @@ function GUtils:createEditBox(opts)
     end
 
     -- label
-    local el = box:CreateFontString(box_frame, "OVERLAY", title_font)
+    local el = box:CreateFontString(nil, "OVERLAY", title_font)
     el:SetText(box_label_text)
     el:SetPoint("TOPLEFT", box_frame, "TOPLEFT", 5, 10)
 
     -- Description below the edit box.
-    local ed = box:CreateFontString(box_frame, "OVERLAY", "GameFontHighlightSmall")
+    local ed = box:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     ed:SetText(desc)
     ed:SetPoint("TOPLEFT", box_frame, "BOTTOMLEFT", 2, 0)
     ed:SetPoint("TOPRIGHT", box_frame, "BOTTOMRIGHT", 0, 0)
@@ -549,7 +549,7 @@ end
 --- Opts
 ---     parent (Frame) - This relies on the caller to set the item in SetItemLink()
 function GUtils:createItemLink(parent)
-    local fs = parent:CreateFontString(parent, 'OVERLAY', 'GameFontNormalSmall')
+    local fs = parent:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     fs:SetNonSpaceWrap(false)
     fs:SetWordWrap(false)
     fs:SetJustifyH('LEFT')

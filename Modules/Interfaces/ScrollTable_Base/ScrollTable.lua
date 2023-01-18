@@ -705,7 +705,7 @@ function ScrollTable:_OnLoad()
             col:SetPoint("TOPLEFT", self.cols[i - 1], "TOPRIGHT", 20, 0)
         end
 
-        local fs = col:CreateFontString(col, "OVERLAY", font)
+        local fs = col:CreateFontString(nil, "OVERLAY", font)
         fs:SetText(strupper(label))
         fs:SetPoint("CENTER")
 

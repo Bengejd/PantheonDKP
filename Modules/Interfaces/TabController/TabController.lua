@@ -102,7 +102,7 @@ function Tab:Initialize()
             b.frame:Show()
         end)
 
-        local b_text = b:CreateFontString(b, "OVERLAY", "GameFontNormalLeft")
+        local b_text = b:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
         b_text:SetPoint("CENTER", 0, -5)
         b_text:SetText(tab_opt['text'])
         b:SetWidth(b_text:GetWidth() + btn_pad)

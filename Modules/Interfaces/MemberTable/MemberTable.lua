@@ -132,7 +132,7 @@ function MemberTable:Initialize()
     --
     ---- Entries label
     ---- 0 Entries shown | 0 selected
-    local label = st.searchFrame:CreateFontString(st.searchFrame, 'OVERLAY', 'GameFontNormalLeftYellow')
+    local label = st.searchFrame:CreateFontString(nil, 'OVERLAY', 'GameFontNormalLeftYellow')
     label:SetSize(200, 15)
     label:SetPoint("LEFT", st.searchFrame.clearButton, "LEFT", 60, -1)
     label:SetText("0 Players shown | 0 selected")
@@ -161,7 +161,7 @@ function MemberTable:TableSearch()
     ef:SetPoint('BOTTOMLEFT', pdkp_frame, "BOTTOMLEFT", 10, 10)
 
     -- search label
-    local sl = ef:CreateFontString(ef, 'OVERLAY', 'GameFontNormalSmall')
+    local sl = ef:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     sl:SetText("Search:")
     sl:SetPoint("LEFT", ef, "LEFT", -12, 0)
     sl:SetWidth(80)
