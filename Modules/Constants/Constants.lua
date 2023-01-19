@@ -67,9 +67,6 @@ Constants.RAIDS = {
         ["phase"] = 1,
         ['index'] = 3,
         [1090] = "Sartharion",
-        [1091] = "Shadron",
-        [1092] = "Tenebron",
-        [1093] = "Vesperon",
     },
     ["The Eye of Eternity"] = {
         ["phase"] = 1,
@@ -136,8 +133,8 @@ Constants.RAIDS = {
 }
 
 Constants.SORTED_RAID_PAIRS = {
-    "Naxxramas", "The Eye of Eternity", "The Obsidian Sanctum", "Vault of Archavon",
-    --"Ulduar", "Onyxia's Lair", "Trial of the Crusader", "Icecrown Citadel", "The Ruby Sanctum",
+    "Naxxramas", "The Eye of Eternity", "The Obsidian Sanctum", "Vault of Archavon", "Ulduar",
+    -- "Onyxia's Lair", "Trial of the Crusader", "Icecrown Citadel", "The Ruby Sanctum",
 }
 
 -- Setup RAID_NAMES, RAID_INDEXES, BOSS_NAMES, BOSS_IDS
