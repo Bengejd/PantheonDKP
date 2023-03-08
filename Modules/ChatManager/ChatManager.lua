@@ -243,14 +243,18 @@ function Chat:_HandleSlashCommands(msg)
     --@do-not-package@
     -- Dev Handlers
     local DEV_SLASH_COMMANDS = {
-        ['whoTest'] = true, ['databasePopulate'] = true,
+        ['whoTest'] = true,
+        ['databasePopulate'] = true,
         ['largeDataSync'] = true,
         ['bossKillTest'] = true,
         ['watchFramerate'] = true,
-        ['unregisterCommTest'] = true, ['TestAutomaticEntries'] = true,
-        ['testDKPCap'] = true, ['forceOfficerComms'] = true,
+        ['unregisterCommTest'] = true,
+        ['TestAutomaticEntries'] = true,
+        ['testDKPCap'] = true,
+        ['forceOfficerComms'] = true,
         ['GetTheoreticalCap'] = true,
-        ['FixWrongfulDecay'] = true, ['testPet'] = true,
+        ['FixWrongfulDecay'] = true,
+        ['testPet'] = true,
         ['TestNSFWSync'] = true,
     }
     if DEV_SLASH_COMMANDS[command] and PDKP:IsDev() then

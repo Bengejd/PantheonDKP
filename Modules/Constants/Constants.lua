@@ -247,5 +247,7 @@ Constants.TIER_GEAR = {
     ['Vanquisher\'s Mark of Sanctification'] = {"Death Knight", "Druid", "Mage", "Rogue"},
 };
 
+Constants.ActiveWeekNumber = 0;
+
 -- Publish API
 MODULES.Constants = Constants

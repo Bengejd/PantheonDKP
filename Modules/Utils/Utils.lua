@@ -142,6 +142,10 @@ function Utils:GetYDay(unixtimestamp)
     return date("*t", unixtimestamp).yday
 end
 
+function Utils:GetYWeek(unixtimestamp)
+    return tonumber(date("%U", unixtimestamp));
+end
+
 function Utils:GetWDay(unixtimestamp)
     return date("*t", unixtimestamp).wday
 end
@@ -465,6 +469,14 @@ function Utils:tEmpty(t)
         return true
     end
     return next(t) == nil;
+end
+
+function Utils:tLength(t)
+    local count = 0;
+    for _ in pairs(t) do
+        count = count + 1
+    end
+    return count;
 end
 
 local waitTable = {};

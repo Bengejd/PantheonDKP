@@ -221,6 +221,14 @@ function dbEntry:ApplyEntry()
 
             self.decayAmounts[member.name] = dkp_change;
         end
+
+        local newTotal = member:GetUpdatedDKPTotal(dkp_change);
+
+        if (newTotal < 0) then
+            dkp_change = dkp_change + (newTotal * -1)
+            PDKP:PrintD("Fixing negative DKP for " .. member.name .. " On entryID " .. self.id)
+        end
+
         member:UpdateDKP(dkp_change);
         member:Save();
     end
