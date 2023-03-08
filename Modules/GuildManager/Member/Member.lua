@@ -7,7 +7,7 @@ local GetGuildRosterInfo, GetGuildRosterLastOnline = GetGuildRosterInfo, GetGuil
 local setmetatable = setmetatable
 local strsplit, strlower = strsplit, strlower
 local tinsert, tremove, unpack = table.insert, table.remove, unpack
-local floor = math.floor;
+local floor, max, abs = math.floor, math.max, math.abs;
 local GetServerTime = GetServerTime
 
 local Member = {}
@@ -18,7 +18,7 @@ local playerName = UnitName("PLAYER")
 
 Member.__index = Member; -- Set the __index parameter to reference Member
 
-function Member:new(guildIndex, server_time, leadershipRanks)
+function Member:new(guildIndex, server_time, leadershipRanks, numEntriesToBeActive)
     local self = {};
     setmetatable(self, Member); -- Set the metatable so we used Members's __index
 
@@ -26,19 +26,25 @@ function Member:new(guildIndex, server_time, leadershipRanks)
 
     self.guildIndex = guildIndex
     self.server_time = server_time
+    self.numEntriesToBeActive = numEntriesToBeActive
 
     self.officerRank, self.classLeadRank = unpack(leadershipRanks)
 
     self:_GetMemberData(guildIndex)
 
-    if self:IsRaidReady() then
+    if self:IsStrictRaidReady() then
         self:_InitializeDKP()
         self:Save()
+    end
+
+    if self.name == "Snaildaddy" then
+        PDKP:PrintD(self:_GetAverageEntryDistance())
     end
 
     if strlower(self.name) == strlower(playerName) then
         PDKP.char = self;
     end
+
     return self
 end
 
@@ -58,14 +64,54 @@ function Member:Save()
 end
 
 function Member:IsRaidReady()
-    return self.lvl >= MODULES.Constants.MAX_LEVEL or self.canEdit or self.isOfficer
+    local isOfficer = self.canEdit or self.isOfficer;
+    local isMaxLevel = self.lvl >= MODULES.Constants.MAX_LEVEL;
+    return (isOfficer or isMaxLevel);
+end
+
+function Member:IsInactive()
+    local years = self.lastOnline["years"];
+    local months = self.lastOnline["months"];
+
+    if years ~= nil and years > 0 then
+        return true
+    elseif months ~= nil and months >= 1 then
+        return true
+    end
+
+    return false
+end
+
+function Member:IsActiveRaider()
+    local dkp = self:GetDKP('Decimal');
+
+    -- Their DKP has been updated at least once.
+    if dkp ~= 30 then
+        return true
+    end
+
+    local numOfEntries = self:GetNumEntries();
+
+    -- In case it is a new member
+    if numOfEntries == 0 then
+        return true
+    end
+
+    -- Check their activity as well, incase they are currently online.
+    if self.lastOnline["months"] == nil then
+        return true
+    end
+
+    -- Has the minimum amount of entries required
+    if numOfEntries > self.numEntriesToBeActive then
+        return true
+    end
+
+    return self:_GetAverageEntryDistance() < 1
 end
 
 function Member:IsStrictRaidReady()
-    if PDKP:IsDev() then
-        return self.canEdit or self.isOfficer;
-    end
-    return self.lvl >= MODULES.Constants.MAX_LEVEL and (self.canEdit or self.isOfficer)
+    return self:IsRaidReady() and not self:IsInactive() and self:IsActiveRaider()
 end
 
 function Member:CanEdit()
@@ -93,6 +139,13 @@ function Member:HasEntries()
     return self.dkp['entries'] ~= nil and #self.dkp['entries'] > 0;
 end
 
+function Member:GetNumEntries()
+    if self.dkp['entries'] ~= nil then
+        return #self.dkp['entries']
+    end
+    return 0
+end
+
 function Member:AddEntry(entryId)
     local memberEntries = self.dkp['entries']
     local _, entryIndex = Utils:tfind(memberEntries, entryId);
@@ -112,8 +165,12 @@ function Member:RemoveEntry(entryId)
 end
 
 function Member:UpdateDKP(dkpChange)
-    self.dkp['total'] = self:GetDKP('Decimal') + dkpChange;
+    self.dkp['total'] = self:GetUpdatedDKPTotal(dkpChange);
     self:Save();
+end
+
+function Member:GetUpdatedDKPTotal(dkpChange)
+    return self:GetDKP('Decimal') + dkpChange
 end
 
 function Member:UpdateSnapshot(previousTotal)
@@ -196,11 +253,12 @@ function Member:_GetMemberData(index)
     self.isBank = self.name == MODULES.Constants.BANK_NAME
 
     --@do-not-package@
-    if (self.name == 'Lariese' or self.name == 'Karenbaskins' or self.name == 'Pdkp') and PDKP:IsDev() then
+    if (self.name == 'Lariese' or self.name == 'Karenbaskins' or self.name == 'Testio' or self.name == 'Rachelmae') and PDKP:IsDev() then
         self.canEdit = true
         self.isOfficer = true
         self.isInLeadership = true
     end
+
     --@end-do-not-package@
 
     self.visible = true
@@ -209,18 +267,25 @@ function Member:_GetMemberData(index)
     self.lockouts = {}
 end
 
-function Member:RecentlyPlayed()
-    local years = self.lastOnline['years']
-    local months = self.lastOnline['months']
-    local days = self.lastOnline['days']
-    if years ~= nil and years > 0 then
-        return false;
-    elseif months ~= nil and months > 0 then
-        return false
-    elseif days ~= nil and days > 21 then
-        return false
+function Member:_GetAverageEntryDistance()
+    if not self:HasEntries() then
+        return nil
     end
-    return true
+
+    local count = #self.dkp['entries']
+    local lastThree = {}
+    for i = count, max(count - 2, 1), -1 do
+        tinsert(lastThree, self.dkp['entries'][i])
+    end
+
+    local totalWeeks = 0
+    for i = 1, #lastThree - 1 do
+        local week1 = Utils:GetWeekNumber(lastThree[i])
+        local week2 = Utils:GetWeekNumber(lastThree[i + 1])
+        totalWeeks = totalWeeks + math.abs(week1 - week2)
+    end
+    local averageWeekDistance = totalWeeks / (#lastThree - 1);
+    return averageWeekDistance;
 end
 
 function Member:HasSub30DKP()

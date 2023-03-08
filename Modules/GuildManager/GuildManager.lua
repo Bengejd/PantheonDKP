@@ -23,6 +23,7 @@ function GuildManager:Initialize()
     self.members = {}
     self.memberNames = {}
     self.guildies = {}
+    self.inactive = {}
     self.guildFrameOpened = false;
     self.numOfMembers, self.numOnlineMembers = 0, 0
 
@@ -37,6 +38,7 @@ function GuildManager:Initialize()
 
     Member = MODULES.Member
     self.GuildDB = MODULES.Database:Guild()
+    self.DKPDB = MODULES.Database:DKP()
 
     if PDKP:IsDev() then
         --Utils:WatchVar(self.members, 'Guild Members');
@@ -81,8 +83,15 @@ function GuildManager:GetMembers()
     local server_time = GetServerTime()
     self.lastMembersUpdate = server_time;
 
+    local numEntriesToBeActive = Utils:GetYWeek(server_time);
+    if self.DKPDB == nil or (self.DKPDB ~= nil and Utils:tLength(self.DKPDB) < numEntriesToBeActive) then
+        numEntriesToBeActive = 0;
+    end
+
+    PDKP:PrintD("GuildManager:GetMembers()");
+
     for i = 1, self.numOfMembers do
-        local member = Member:new(i, server_time, { self.officerRank, self.classLeadRank })
+        local member = Member:new(i, server_time, { self.officerRank, self.classLeadRank }, numEntriesToBeActive)
         local isNew = self:IsNewMemberObject(member.name)
 
         if member.name ~= nil then
@@ -93,7 +102,7 @@ function GuildManager:GetMembers()
             PDKP.canEdit = member.canEdit
         end
 
-        if member:IsRaidReady() then
+        if member:IsStrictRaidReady() then
             if member.name == nil then
                 member.name = ''
             end
@@ -114,6 +123,8 @@ function GuildManager:GetMembers()
             elseif self.online[member.name] ~= nil then
                 self.online[member.name] = nil
             end
+        elseif member:IsActiveRaider() then
+            self.inactive[member.name] = member;
         end
     end
     return self.online, self.members -- Always return, even if it's empty for edge cases.
@@ -178,6 +189,10 @@ function GuildManager:CheckForNegatives()
         end
     end
     return false;
+end
+
+function GuildManager:ClearInactiveMember()
+
 end
 
 function GuildManager:GetOfficers()
