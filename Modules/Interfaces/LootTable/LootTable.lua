@@ -458,6 +458,10 @@ function LootTable:_OnLoad()
             local c_sep = ' | '
             local c_text = c_officer .. c_sep .. c_name .. c_sep .. c_hist
 
+            if PDKP:IsDev() and PDKP.showHistoryIds then
+                row_title:SetText(row.dataObj['id']);
+            end
+
             collapse_text:SetText(c_text)
             if collapse_text:GetStringWidth() > 325 then
                 collapse_text:SetWidth(315)
