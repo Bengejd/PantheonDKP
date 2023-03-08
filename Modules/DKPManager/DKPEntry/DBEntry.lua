@@ -11,7 +11,7 @@ local core_details = { 'reason', 'dkp_change', 'officer', 'names' }
 local GetServerTime = GetServerTime
 local tsort, tonumber, pairs, type, tinsert = table.sort, tonumber, pairs, type, tinsert
 local tContains = tContains
-local ceil = math.ceil
+local ceil, floor = math.ceil, math.floor
 
 local _BOSS_KILL = 'Boss Kill'
 local _ITEM_WIN = 'Item Win'
@@ -224,9 +224,11 @@ function dbEntry:ApplyEntry()
 
         local newTotal = member:GetUpdatedDKPTotal(dkp_change);
 
-        if (newTotal < 0) then
-            dkp_change = dkp_change + (newTotal * -1)
-            PDKP:PrintD("Fixing negative DKP for " .. member.name .. " On entryID " .. self.id)
+        if (newTotal < 0 and dkp_change < 0) and self['deleted'] ~= true then
+            local old_change = dkp_change;
+            dkp_change = dkp_change + (newTotal * -1);
+            self.dkp_change = dkp_change;
+            PDKP:PrintD("Fixing negative DKP for " .. member.name .. " On entryID " .. self.id, "from: ", old_change, "to", dkp_change);
         end
 
         member:UpdateDKP(dkp_change);
@@ -436,7 +438,7 @@ function dbEntry:_GetChangeText()
     elseif self.reason == _CONSOLIDATION then
 
     else
-        return Utils:FormatTextColor(self.dkp_change .. ' DKP', color)
+        return Utils:FormatTextColor(floor(self.dkp_change) .. ' DKP', color)
     end
 end
 

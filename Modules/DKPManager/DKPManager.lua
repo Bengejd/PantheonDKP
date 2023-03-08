@@ -691,6 +691,7 @@ function DKP:RollForwardEntriesBulk(sender)
                 entry:GetDecayAmounts(refresh);
             end
             entry:ApplyEntry();
+            entry:Save();
             processCount = processCount + 1;
             if processCount >= maxProcessCount and processCount % maxProcessCount == 0 then
                 coroutine_yield()
@@ -740,6 +741,7 @@ function DKP:RollForwardEntries()
             entry:GetDecayAmounts(refresh);
         end
         entry:ApplyEntry();
+        entry:Save();
     end
     wipe(self.rolledBackEntries)
 end
