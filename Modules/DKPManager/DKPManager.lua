@@ -1046,7 +1046,7 @@ end
 function DKP:GetMaxBid()
     local guildCap, _ = self:GetCaps()
 
-    if self:_HasPhaseEntries() then
+    if self:_HasPhaseEntries() or true then
         return math.floor(guildCap * 0.9);
     else
         return guildCap
