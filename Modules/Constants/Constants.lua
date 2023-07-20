@@ -101,13 +101,13 @@ Constants.RAIDS = {
         [1089] = "Val'kyr Twins",
     },
     ["Onyxia's Lair"] = {
-        ["phase"] = 4,
+        ["phase"] = 3,
         ['index'] = 7,
         [1084] = "Onyxia",
         [1086] = "Faction Champions",
     },
     ["Icecrown Citadel"] = {
-        ["phase"] = 5,
+        ["phase"] = 4,
         ['index'] = 8,
         [1095] = "Blood Council",
         [1096] = "Deathbringer Saurfang",
@@ -123,7 +123,7 @@ Constants.RAIDS = {
         [1106] = "The Lich King",
     },
     ["The Ruby Sanctum"] = {
-        ["phase"] = 6,
+        ["phase"] = 5,
         ['index'] = 9,
         [1147] = "Baltharus the Warborn",
         [1148] = "General Zarithrian",
@@ -133,8 +133,8 @@ Constants.RAIDS = {
 }
 
 Constants.SORTED_RAID_PAIRS = {
-    "Naxxramas", "The Eye of Eternity", "The Obsidian Sanctum", "Vault of Archavon", "Ulduar",
-    -- "Onyxia's Lair", "Trial of the Crusader", "Icecrown Citadel", "The Ruby Sanctum",
+    "Naxxramas", "The Eye of Eternity", "The Obsidian Sanctum", "Vault of Archavon", "Ulduar", "Onyxia's Lair", "Trial of the Crusader",
+    -- "Icecrown Citadel", "The Ruby Sanctum",
 }
 
 -- Setup RAID_NAMES, RAID_INDEXES, BOSS_NAMES, BOSS_IDS
