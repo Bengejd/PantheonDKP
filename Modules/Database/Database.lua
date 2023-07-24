@@ -16,7 +16,7 @@ function DB:Initialize()
     -- Below API requires delay after loading to work after variables loaded event
     UpdateGuild()
 
-    local dbRef = self.server_faction_guild;
+    local dbRef = self:GetActiveGuildDBName();
 
     self:_WrathReset();
 
@@ -144,6 +144,29 @@ function DB:Dev()
     return PDKP_DB[self.server_faction_guild]['dev']
 end
 --@end-do-not-package@
+
+-- NON DATABASE TABLE RELATED FUNCTIONS
+
+function DB:GetActiveGuildDBName()
+    PDKP:PrintD("Returning Active DB Guild Name(s)")
+    local db = self:Global()
+    local activeGuild = db['active guild'];
+    if activeGuild == nil then
+        db['active guild'] = self.server_faction_guild;
+        return self.server_faction_guild;
+    end
+    return activeGuild;
+end
+
+function DB:_GetAvailableGuildNames()
+    local activeGuildNames = {};
+    for name, _ in pairs(PDKP_DB) do
+        if name ~= "global" then
+            tinsert(activeGuildNames, name);
+            PDKP:PrintD("Database Name " .. name);
+        end
+    end
+end
 
 function DB:CreateSnapshot()
     PDKP.CORE:Print("Creating Database Backup");

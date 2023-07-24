@@ -93,16 +93,11 @@ function Dev:HandleSlashCommands(msg)
     elseif cmd == 'GetTheoreticalCap' then
         MODULES.DKPManager:GetTheoreticalCap()
     elseif cmd == 'FixWrongfulDecay' then
-        self:FixWrongfulDecay();
+        MODULES.DKPManager:RecalibrateDKPBulk("self")
     elseif cmd == 'TestNSFWSync' then
         MODULES.Options:NSFWSync();
-    elseif cmd == 'testPet' then
-        local happiness, damagePercentage, loyaltyRate = GetPetHappiness();
-        local currXP, nextXP = GetPetExperience();
-        local remaining = GetPetTimeRemaining();
-        print('Hapiness', happiness, 'LoyaltyRate', loyaltyRate, 'currXP', currXP, 'nextXP', nextXP, 'Remaining', remaining);
-        Utils:WatchVar(_G, 'Global');
-
+    elseif cmd == 'testPugs' then
+        self:GetPugs();
     end
 end
 
@@ -632,6 +627,13 @@ function Dev:BossKillTest()
     local boss_id = raid_info['encounterIds'][random_boss_index];
 
     MODULES.DKPManager:BossKillDetected(boss_id, boss_name);
+end
+
+function Dev:GetPugs()
+    PDKP:PrintD("Getting Pugs");
+    local dbModule = MODULES.Database;
+    dbModule:GetActiveGuildDBName();
+    dbModule:_GetAvailableGuildNames();
 end
 
 -- Publish API

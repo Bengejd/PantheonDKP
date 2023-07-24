@@ -173,7 +173,7 @@ function opts:RefreshData()
 
                 tinsert(listPlayers, details);
             else
-                PDKP:PrintD("Player " .. name .. " not found in guild");
+                --PDKP:PrintD("Player " .. name .. " not found in guild");
             end
         end
     end

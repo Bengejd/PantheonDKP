@@ -1,5 +1,9 @@
 # PDKP Change Log
 
+## v4.12.0
+### Features
+- Bumped version for WOTLK Phase 3 compatibility. 
+
 ## v4.10.2
 ### Bug Fixes
 - Fixed an issue with CreateFontString's parameters
