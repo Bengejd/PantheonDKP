@@ -1,7 +1,7 @@
 ## Interface: 30400
 ## Interface-WOTLK: 30400
 ## Author: Neekio - Blaumeux (Bengejd)
-## Version: 4.12.0
+## Version: 4.13.0
 ## Title: |cff33ff99PantheonDKP|r
 ## Notes: Blind Bid based DKP Addon
 ## DefaultState: Enabled
@@ -10,7 +10,7 @@
 ## LoadOnDemand: 0
 ## X-Interface: 30400
 ## X-Curse-Project-ID: 367232
-## X-Phase: 3
+## X-Phase: 4
 
 # Libraries
 #@no-lib-strip@

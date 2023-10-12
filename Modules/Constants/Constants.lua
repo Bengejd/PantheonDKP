@@ -134,7 +134,8 @@ Constants.RAIDS = {
 
 Constants.SORTED_RAID_PAIRS = {
     "Naxxramas", "The Eye of Eternity", "The Obsidian Sanctum", "Vault of Archavon", "Ulduar", "Onyxia's Lair", "Trial of the Crusader",
-    -- "Icecrown Citadel", "The Ruby Sanctum",
+    "Icecrown Citadel",
+    -- "The Ruby Sanctum",
 }
 
 -- Setup RAID_NAMES, RAID_INDEXES, BOSS_NAMES, BOSS_IDS
